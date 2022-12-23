@@ -9,7 +9,6 @@ function MusicalList(props: any) {
       {items?.map((musical: any) => (
         <MusicalItem
           key={musical.id}
-          id={musical.id}
           title={musical.title}
           location={musical.location}
           date={musical.date}

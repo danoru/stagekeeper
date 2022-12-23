@@ -1,8 +1,8 @@
-import Head from "next/head";
 import { Fragment } from "react";
+import Head from "next/head";
 
-import MusicalList from "../../src/components/events/musical-list";
 import { getFeaturedMusicals } from "../../src/data/2022-review";
+import MusicalList from "../../src/components/events/musical-list";
 
 function ReviewPage(props: any) {
   const { musicals } = props;
@@ -27,7 +27,7 @@ export async function getStaticProps() {
 
   return {
     props: {
-      events: featuredMusicals,
+      musicals: featuredMusicals,
     },
     revalidate: 1800,
   };

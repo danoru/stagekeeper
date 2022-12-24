@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 import classes from "./musical-item.module.css";
 
 function MusicalItem(props: any) {
@@ -11,6 +13,7 @@ function MusicalItem(props: any) {
 
   return (
     <li className={classes.item}>
+      <Image src={"/" + image} alt={title} width={250} height={160} />
       <div className={classes.content}>
         <div className={classes.summary}>
           <h2>{title}</h2>

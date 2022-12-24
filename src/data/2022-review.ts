@@ -26,7 +26,7 @@ const MUSICAL_LIST = [
     date: "2022-02-27",
     location: "Los Angeles, CA",
     playhouse: "East West Players",
-    image: "",
+    image: "images/playbills/assassins.jpg",
     groupAttended: true,
   },
   {
@@ -56,7 +56,7 @@ const MUSICAL_LIST = [
     date: "2022-08-14",
     location: "Costa Mesa, CA",
     playhouse: "Segerstrom Center for the Performing Arts",
-    image: "",
+    image: "images/playbills/hadestown.jpg",
     groupAttended: true,
   },
   {
@@ -66,7 +66,7 @@ const MUSICAL_LIST = [
     date: "2022-06-17",
     location: "La Mirada, CA",
     playhouse: " La Mirada Theatre",
-    image: "",
+    image: "images/playbills/intheheights.jpg",
     groupAttended: true,
   },
   {
@@ -76,7 +76,7 @@ const MUSICAL_LIST = [
     date: "2022-07-31",
     location: "Los Angeles, CA",
     playhouse: "Pantages Theatre",
-    image: "",
+    image: "images/playbills/moulinrouge.jpg",
     groupAttended: true,
   },
   {
@@ -96,7 +96,7 @@ const MUSICAL_LIST = [
     date: "2022-04-23",
     location: "Escondido, CA",
     playhouse: "California Center for the Arts, Escondido",
-    image: "",
+    image: "images/playbills/once.jpg",
     groupAttended: true,
   },
   {
@@ -106,7 +106,7 @@ const MUSICAL_LIST = [
     date: "2022-07-16",
     location: "Escondido, CA",
     playhouse: "Patio Playhouse",
-    image: "",
+    image: "images/playbills/rent.jpg",
     groupAttended: true,
   },
   {
@@ -116,7 +116,7 @@ const MUSICAL_LIST = [
     date: "2022-02-12",
     location: "Thousand Oaks, CA",
     playhouse: "Fred Kavli Theatre",
-    image: "",
+    image: "images/playbills/somethingrotten.jpg",
     groupAttended: true,
   },
   {
@@ -136,7 +136,7 @@ const MUSICAL_LIST = [
     date: "2022-02-24",
     location: "Costa Mesa, CA",
     playhouse: "Segerstrom Center of Perfoming Arts",
-    image: "",
+    image: "images/playbills/wicked.jpg",
     groupAttended: true,
   },
   {
@@ -146,7 +146,7 @@ const MUSICAL_LIST = [
     date: "2022-09-25",
     location: "La Mirada, CA",
     playhouse: "La Mirada Theatre",
-    image: "",
+    image: "images/playbills/youngfrankenstein.jpg",
     groupAttended: true,
   },
 ];

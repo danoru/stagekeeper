@@ -4,6 +4,8 @@ import Head from "next/head";
 import { getFeaturedMusicals } from "../../src/data/2022-review";
 import MusicalList from "../../src/components/events/musical-list";
 
+import classes from "../../src/styles/review.module.css";
+
 function ReviewPage(props: any) {
   const { musicals } = props;
 
@@ -16,7 +18,6 @@ function ReviewPage(props: any) {
           content="See what your year in review looks like!"
         />
       </Head>
-      <h1>Hi.</h1>
       <MusicalList items={musicals} />
     </Fragment>
   );

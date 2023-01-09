@@ -2,12 +2,11 @@ import { Fragment } from "react";
 import Head from "next/head";
 
 import { getFeaturedMusicals } from "../../src/data/2022-review";
-import MusicalList from "../../src/components/events/musical-list";
-
-import classes from "../../src/styles/review.module.css";
+import Carousel from "../../src/components/review/carousel";
 
 function ReviewPage(props: any) {
   const { musicals } = props;
+  const musicalCount = musicals.length;
 
   return (
     <Fragment>
@@ -18,7 +17,10 @@ function ReviewPage(props: any) {
           content="See what your year in review looks like!"
         />
       </Head>
-      <MusicalList items={musicals} />
+      <h1>Musicals & Mayhem</h1>
+      <Carousel items={musicals} />
+      <p>You saw {musicalCount} musicals as a group in 2022.</p>
+      <p>You saw this.</p>
     </Fragment>
   );
 }

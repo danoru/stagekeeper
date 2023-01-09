@@ -1,3 +1,5 @@
+import { count } from "console";
+
 const MUSICAL_LIST = [
   {
     title: "A Little Night Music",

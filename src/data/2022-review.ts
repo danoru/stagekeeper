@@ -1,5 +1,3 @@
-import { count } from "console";
-
 const MUSICAL_LIST = [
   {
     title: "A Little Night Music",
@@ -29,6 +27,7 @@ const MUSICAL_LIST = [
     location: "Los Angeles, CA",
     playhouse: "East West Players",
     image: "images/playbills/assassins.jpg",
+    duration: 110,
     groupAttended: true,
   },
   {
@@ -57,8 +56,9 @@ const MUSICAL_LIST = [
     genre: "Drama",
     date: "2022-08-14",
     location: "Costa Mesa, CA",
-    playhouse: "Segerstrom Center for the Performing Arts",
+    playhouse: "Segerstrom Center for the Arts",
     image: "images/playbills/hadestown.jpg",
+    duration: 150,
     groupAttended: true,
   },
   {
@@ -69,6 +69,7 @@ const MUSICAL_LIST = [
     location: "La Mirada, CA",
     playhouse: " La Mirada Theatre",
     image: "images/playbills/intheheights.jpg",
+    duration: 155,
     groupAttended: true,
   },
   {
@@ -79,6 +80,7 @@ const MUSICAL_LIST = [
     location: "Los Angeles, CA",
     playhouse: "Pantages Theatre",
     image: "images/playbills/moulinrouge.jpg",
+    duration: 155,
     groupAttended: true,
   },
   {
@@ -99,6 +101,7 @@ const MUSICAL_LIST = [
     location: "Escondido, CA",
     playhouse: "California Center for the Arts, Escondido",
     image: "images/playbills/once.jpg",
+    duration: 150,
     groupAttended: true,
   },
   {
@@ -109,6 +112,7 @@ const MUSICAL_LIST = [
     location: "Escondido, CA",
     playhouse: "Patio Playhouse",
     image: "images/playbills/rent.jpg",
+    duration: 150,
     groupAttended: true,
   },
   {
@@ -119,6 +123,7 @@ const MUSICAL_LIST = [
     location: "Thousand Oaks, CA",
     playhouse: "Fred Kavli Theatre",
     image: "images/playbills/somethingrotten.jpg",
+    duration: 155,
     groupAttended: true,
   },
   {
@@ -137,8 +142,9 @@ const MUSICAL_LIST = [
     genre: "Drama",
     date: "2022-02-24",
     location: "Costa Mesa, CA",
-    playhouse: "Segerstrom Center of Perfoming Arts",
+    playhouse: "Segerstrom Center for the Arts",
     image: "images/playbills/wicked.jpg",
+    duration: 165,
     groupAttended: true,
   },
   {
@@ -149,6 +155,7 @@ const MUSICAL_LIST = [
     location: "La Mirada, CA",
     playhouse: "La Mirada Theatre",
     image: "images/playbills/youngfrankenstein.jpg",
+    duration: 140,
     groupAttended: true,
   },
 ];

@@ -10,12 +10,13 @@ function Cards(props: any) {
   const { items } = props;
 
   return (
-    <Carousel sx={{ maxWidth: 500 }}>
+    <Carousel sx={{ maxWidth: 500, margin: "auto" }}>
       {items.map((item: any, i: any) => (
         <CarouselItem
           key={i}
           title={item.title}
           location={item.location}
+          duration={item.duration}
           playhouse={item.playhouse}
           date={item.date}
           image={item.image}

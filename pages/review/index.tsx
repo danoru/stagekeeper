@@ -3,6 +3,11 @@ import Head from "next/head";
 
 import { getFeaturedMusicals } from "../../src/data/2022-review";
 import Carousel from "../../src/components/review/carousel";
+import Highlights from "../../src/components/review/highlights";
+import ReviewHeader from "../../src/components/review/review-header";
+import Statistics from "../../src/components/review/statistics";
+
+import styles from "../../src/styles/review.module.css";
 
 function ReviewPage(props: any) {
   const { musicals } = props;
@@ -11,16 +16,18 @@ function ReviewPage(props: any) {
   return (
     <Fragment>
       <Head>
-        <title>StageKeeper: Your Past Events</title>
+        <title>StageKeeper: Year in Review</title>
         <meta
           name="description"
-          content="See what your year in review looks like!"
+          content="See what your Year in Review looks like!"
         />
       </Head>
-      <h1>Musicals & Mayhem</h1>
-      <Carousel items={musicals} />
-      <p>You saw {musicalCount} musicals as a group in 2022.</p>
-      <p>You saw this.</p>
+      <div className={styles.container}>
+        <ReviewHeader />
+        <Carousel items={musicals} />
+        <Highlights highlights={musicals} />
+        <Statistics stats={musicals} />
+      </div>
     </Fragment>
   );
 }

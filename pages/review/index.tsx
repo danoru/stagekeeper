@@ -22,7 +22,7 @@ function ReviewPage(props: any) {
           content="See what your Year in Review looks like!"
         />
       </Head>
-      <div className={styles.container}>
+      <div>
         <ReviewHeader />
         <Carousel items={musicals} />
         <Highlights highlights={musicals} />

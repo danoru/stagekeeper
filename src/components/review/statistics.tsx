@@ -33,7 +33,7 @@ function Statistics(props: any) {
             alt="costa mesa"
           />
           <h1>Your spent the most time in ... Costa Mesa!</h1>
-          <p> Stuff about the places you've been. </p>
+          <p> Stuff about the places you have been. </p>
         </Card>
         <Card>
           <Image

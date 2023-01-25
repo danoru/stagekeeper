@@ -7,8 +7,6 @@ import Highlights from "../../src/components/review/highlights";
 import ReviewHeader from "../../src/components/review/review-header";
 import Statistics from "../../src/components/review/statistics";
 
-import styles from "../../src/styles/review.module.css";
-
 function ReviewPage(props: any) {
   const { musicals } = props;
   const musicalCount = musicals.length;

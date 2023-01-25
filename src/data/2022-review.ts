@@ -1,4 +1,6 @@
-const MUSICAL_LIST = [
+import { MUSICAL_LIST_TYPE } from "../types";
+
+const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
   {
     title: "A Little Night Music",
     premiere: "1973-02-25",
@@ -7,6 +9,7 @@ const MUSICAL_LIST = [
     location: "Los Angeles, CA",
     playhouse: "Greenway Court Theatre",
     image: "",
+    duration: 0,
     groupAttended: false,
   },
   {
@@ -17,6 +20,7 @@ const MUSICAL_LIST = [
     location: "Los Angeles, CA",
     playhouse: "Dolby Theatre",
     image: "",
+    duration: 0,
     groupAttended: false,
   },
   {
@@ -38,6 +42,7 @@ const MUSICAL_LIST = [
     location: "Los Angeles, CA",
     playhouse: "The Bourbon Room",
     image: "",
+    duration: 0,
     groupAttended: false,
   },
   {
@@ -48,6 +53,7 @@ const MUSICAL_LIST = [
     location: "Pasadena, CA",
     playhouse: "Pasadena Playhouse",
     image: "",
+    duration: 0,
     groupAttended: false,
   },
   {
@@ -67,7 +73,7 @@ const MUSICAL_LIST = [
     genre: "Drama",
     date: "2022-06-17",
     location: "La Mirada, CA",
-    playhouse: " La Mirada Theatre",
+    playhouse: "La Mirada Theatre",
     image: "images/playbills/intheheights.jpg",
     duration: 155,
     groupAttended: true,
@@ -91,6 +97,7 @@ const MUSICAL_LIST = [
     location: "Madison, WS",
     playhouse: "Capital City Theatre",
     image: "",
+    duration: 0,
     groupAttended: false,
   },
   {
@@ -134,6 +141,7 @@ const MUSICAL_LIST = [
     location: "Los Angeles, CA",
     playhouse: "Pantages Theatre",
     image: "",
+    duration: 0,
     groupAttended: false,
   },
   {

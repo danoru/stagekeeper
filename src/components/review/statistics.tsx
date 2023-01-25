@@ -13,6 +13,10 @@ function Statistics(props: any) {
             alt="costa mesa"
           />
           <h1>First Musical of the Year ... Something Rotten!</h1>
+          <p>
+            You watched Something Rotten! at the Fred Kavli Theatre in Thousand
+            Oaks, CA on February 12, 2022!
+          </p>
         </Card>
         <Card>
           <Image
@@ -22,6 +26,10 @@ function Statistics(props: any) {
             alt="costa mesa"
           />
           <h1>Last Musical of the Year ... Young Frankenstein!</h1>
+          <p>
+            You watched Young Frankenstein at the La Mirada Theatre in La
+            Mirada, CA on September 25th, 2022!
+          </p>
         </Card>
       </section>
       <section>

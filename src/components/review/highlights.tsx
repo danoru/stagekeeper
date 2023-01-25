@@ -20,6 +20,14 @@ function Highlights(props: Props) {
     0
   );
 
+  function convertTime(num: number) {
+    let hours = Math.floor(num / 60);
+    let minutes = num % 60;
+    return hours + " Hours & " + minutes + " Minutes";
+  }
+
+  const convertedDuration = convertTime(totalDuration);
+
   const locationStorage: Record<string, number> = {};
   let locationCount = 0;
 
@@ -43,7 +51,7 @@ function Highlights(props: Props) {
   return (
     <div className={styles.stuff}>
       <h1>{musicalCount} Musicals</h1>
-      <h1>{totalDuration} Minutes</h1>
+      <h1>{convertedDuration}</h1>
       <h1>{locationCount} Locations</h1>
       <h1>{stageCount} Stages</h1>
     </div>

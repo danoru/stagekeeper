@@ -30,7 +30,7 @@ const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     date: "2022-02-27",
     location: "Los Angeles, CA",
     playhouse: "East West Players",
-    image: "images/playbills/assassins.jpg",
+    image: "/images/playbills/assassins.jpg",
     duration: 110,
     groupAttended: true,
   },
@@ -63,7 +63,7 @@ const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     date: "2022-08-14",
     location: "Costa Mesa, CA",
     playhouse: "Segerstrom Center for the Arts",
-    image: "images/playbills/hadestown.jpg",
+    image: "/images/playbills/hadestown.jpg",
     duration: 150,
     groupAttended: true,
   },
@@ -74,7 +74,7 @@ const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     date: "2022-06-17",
     location: "La Mirada, CA",
     playhouse: "La Mirada Theatre",
-    image: "images/playbills/intheheights.jpg",
+    image: "/images/playbills/intheheights.jpg",
     duration: 155,
     groupAttended: true,
   },
@@ -85,7 +85,7 @@ const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     date: "2022-07-31",
     location: "Los Angeles, CA",
     playhouse: "Pantages Theatre",
-    image: "images/playbills/moulinrouge.jpg",
+    image: "/images/playbills/moulinrouge.jpg",
     duration: 155,
     groupAttended: true,
   },
@@ -107,7 +107,7 @@ const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     date: "2022-04-23",
     location: "Escondido, CA",
     playhouse: "California Center for the Arts, Escondido",
-    image: "images/playbills/once.jpg",
+    image: "/images/playbills/once.jpg",
     duration: 150,
     groupAttended: true,
   },
@@ -118,7 +118,7 @@ const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     date: "2022-07-16",
     location: "Escondido, CA",
     playhouse: "Patio Playhouse",
-    image: "images/playbills/rent.jpg",
+    image: "/images/playbills/rent.jpg",
     duration: 150,
     groupAttended: true,
   },
@@ -129,7 +129,7 @@ const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     date: "2022-02-12",
     location: "Thousand Oaks, CA",
     playhouse: "Fred Kavli Theatre",
-    image: "images/playbills/somethingrotten.jpg",
+    image: "/images/playbills/somethingrotten.jpg",
     duration: 155,
     groupAttended: true,
   },
@@ -151,7 +151,7 @@ const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     date: "2022-02-24",
     location: "Costa Mesa, CA",
     playhouse: "Segerstrom Center for the Arts",
-    image: "images/playbills/wicked.jpg",
+    image: "/images/playbills/wicked.jpg",
     duration: 165,
     groupAttended: true,
   },
@@ -162,7 +162,7 @@ const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     date: "2022-09-25",
     location: "La Mirada, CA",
     playhouse: "La Mirada Theatre",
-    image: "images/playbills/youngfrankenstein.jpg",
+    image: "/images/playbills/youngfrankenstein.jpg",
     duration: 140,
     groupAttended: true,
   },
@@ -176,15 +176,15 @@ export function getAllMusicals() {
   return MUSICAL_LIST;
 }
 
-export function getFilteredMusicals(dateFilter: any) {
-  const { year, month } = dateFilter;
+// export function getFilteredMusicals(dateFilter: any) {
+//   const { year, month } = dateFilter;
 
-  let filteredMusicals = MUSICAL_LIST.filter((musical) => {
-    const musicalDate = new Date(musical.date);
-    return (
-      musicalDate.getFullYear() === year && musicalDate.getMonth() === month - 1
-    );
-  });
+//   let filteredMusicals = MUSICAL_LIST.filter((musical) => {
+//     const musicalDate = new Date(musical.date);
+//     return (
+//       musicalDate.getFullYear() === year && musicalDate.getMonth() === month - 1
+//     );
+//   });
 
-  return filteredMusicals;
-}
+//   return filteredMusicals;
+// }

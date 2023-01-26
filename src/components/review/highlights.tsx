@@ -8,12 +8,14 @@ interface Props {
 
 function Highlights(props: Props) {
   const { highlights } = props;
-  const musicalCount = highlights.length;
-  const filteredHighlights = highlights.filter(
+
+  const filteredMusicals = highlights.filter(
     (highlight: MUSICAL_LIST_TYPE) => highlight.groupAttended
   );
 
-  const totalDuration = filteredHighlights.reduce(
+  const musicalCount = highlights.length;
+
+  const totalDuration = filteredMusicals.reduce(
     (accumulator: number, highlight: MUSICAL_LIST_TYPE): number => {
       return accumulator + highlight.duration;
     },
@@ -31,7 +33,7 @@ function Highlights(props: Props) {
   const locationStorage: Record<string, number> = {};
   let locationCount = 0;
 
-  filteredHighlights.forEach((highlight: MUSICAL_LIST_TYPE) => {
+  filteredMusicals.forEach((highlight: MUSICAL_LIST_TYPE) => {
     if (!locationStorage[highlight.location]) {
       locationStorage[highlight.location] = 1;
       locationCount++;
@@ -41,7 +43,7 @@ function Highlights(props: Props) {
   const stageStorage: Record<string, number> = {};
   let stageCount = 0;
 
-  filteredHighlights.forEach((highlight: MUSICAL_LIST_TYPE) => {
+  filteredMusicals.forEach((highlight: MUSICAL_LIST_TYPE) => {
     if (!stageStorage[highlight.playhouse]) {
       stageStorage[highlight.playhouse] = 1;
       stageCount++;
@@ -50,10 +52,25 @@ function Highlights(props: Props) {
 
   return (
     <div className={styles.stuff}>
-      <h1>{musicalCount} Musicals</h1>
-      <h1>{convertedDuration}</h1>
-      <h1>{locationCount} Locations</h1>
-      <h1>{stageCount} Stages</h1>
+      <div className={styles.hr}></div>
+      <div className={styles.info}>
+        <div>
+          <h1>{musicalCount} Musicals</h1>
+        </div>
+        <div className={styles.dot}></div>
+        <div>
+          <h1>{convertedDuration}</h1>
+        </div>
+        <div className={styles.dot}></div>
+        <div>
+          <h1>{locationCount} Locations</h1>
+        </div>
+        <div className={styles.dot}></div>
+        <div>
+          <h1>{stageCount} Stages</h1>
+        </div>
+      </div>
+      <div className={styles.hr}></div>
     </div>
   );
 }

@@ -6,7 +6,13 @@ import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
 
-function Cards(props: any) {
+import { MUSICAL_LIST_TYPE } from "../../types";
+
+interface Props {
+  items: MUSICAL_LIST_TYPE[];
+}
+
+function Cards(props: Props) {
   const { items } = props;
 
   return (

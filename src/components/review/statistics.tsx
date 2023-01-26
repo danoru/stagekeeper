@@ -1,34 +1,54 @@
+import { MUSICAL_LIST_TYPE } from "../../types";
+
 import Card from "@mui/material/Card";
 import Image from "next/image";
 
-function Statistics(props: any) {
+interface Props {
+  stats: MUSICAL_LIST_TYPE[];
+}
+
+function Statistics(props: Props) {
+  const { stats } = props;
+
+  const filteredMusicals = stats.filter(
+    (stats: MUSICAL_LIST_TYPE) => stats.groupAttended
+  );
+
+  const firstMusical = filteredMusicals.reduce((a, b) =>
+    a.date < b.date ? a : b
+  );
+
+  const latestMusical = filteredMusicals.reduce((a, b) =>
+    a.date > b.date ? a : b
+  );
+
   return (
     <div>
       <section>
         <Card>
           <Image
-            src="/images/playbills/somethingrotten.jpg"
+            src={firstMusical.image}
             width="100"
             height="100"
             alt="costa mesa"
           />
-          <h1>First Musical of the Year ... Something Rotten!</h1>
+          <h1>First Musical of the Year ... {firstMusical.title}!</h1>
           <p>
-            You watched Something Rotten! at the Fred Kavli Theatre in Thousand
-            Oaks, CA on February 12, 2022!
+            You watched {firstMusical.title} at the {firstMusical.playhouse} in{" "}
+            {firstMusical.location} on {firstMusical.date}!
           </p>
         </Card>
         <Card>
           <Image
-            src="/images/playbills/youngfrankenstein.jpg"
+            src={latestMusical.image}
             width="100"
             height="100"
             alt="costa mesa"
           />
-          <h1>Last Musical of the Year ... Young Frankenstein!</h1>
+          <h1>Last Musical of the Year ... {latestMusical.title}!</h1>
           <p>
-            You watched Young Frankenstein at the La Mirada Theatre in La
-            Mirada, CA on September 25th, 2022!
+            You watched {latestMusical.title} at the {latestMusical.playhouse}{" "}
+            in {latestMusical.location} on {latestMusical.date}!
           </p>
         </Card>
       </section>

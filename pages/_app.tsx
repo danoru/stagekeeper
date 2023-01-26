@@ -15,7 +15,7 @@ const clientSideEmotionCache = createEmotionCache();
 
 const lightTheme = createTheme(lightThemeOptions);
 
-const MyApp: React.FunctionComponent<MyAppProps> = (props) => {
+const MyApp: React.FunctionComponent<MyAppProps> = (props: any) => {
   const { Component, emotionCache = clientSideEmotionCache, pageProps } = props;
 
   return (

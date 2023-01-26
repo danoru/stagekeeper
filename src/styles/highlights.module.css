@@ -1,4 +1,28 @@
 .stuff {
+  font-weight: 300;
+  font-size: 12px;
+  text-transform: uppercase;
+  line-height: 1;
+  letter-spacing: 2px;
+  padding-bottom: 100px;
+  box-sizing: border-box;
+}
+
+.hr {
+  background: linear-gradient(90deg,#0CB5E9 0%,#BFAD4A 32.29%,#FFCC42 67.19%,#FD0507 100%);
+  height: 1px;
+  width: 100%;
+}
+
+.info {
   display: flex;
-  justify-content: space-around;
+  justify-content: center;
+  align-items: center;
+}
+
+.dot {
+  background: linear-gradient(90deg,#0CB5E9 0%,#BFAD4A 32.29%,#FFCC42 67.19%,#FD0507 100%);
+  height: 8px;
+  width: 8px;
+  border-radius: 50%;
 }

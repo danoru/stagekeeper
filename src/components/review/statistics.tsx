@@ -22,6 +22,14 @@ function Statistics(props: Props) {
     a.date > b.date ? a : b
   );
 
+  const oldestMusical = filteredMusicals.reduce((a, b) =>
+    a.premiere < b.premiere ? a : b
+  );
+
+  const newestMusical = filteredMusicals.reduce((a, b) =>
+    a.premiere > b.premiere ? a : b
+  );
+
   return (
     <div>
       <section>
@@ -30,7 +38,7 @@ function Statistics(props: Props) {
             src={firstMusical.image}
             width="100"
             height="100"
-            alt="costa mesa"
+            alt={firstMusical.title}
           />
           <h1>First Musical of the Year ... {firstMusical.title}!</h1>
           <p>
@@ -43,7 +51,7 @@ function Statistics(props: Props) {
             src={latestMusical.image}
             width="100"
             height="100"
-            alt="costa mesa"
+            alt={latestMusical.title}
           />
           <h1>Last Musical of the Year ... {latestMusical.title}!</h1>
           <p>
@@ -79,27 +87,27 @@ function Statistics(props: Props) {
       <section>
         <Card>
           <Image
-            src="/images/playbills/rent.jpg"
+            src={oldestMusical.image}
             width="100"
             height="100"
-            alt="costa mesa"
+            alt={oldestMusical.title}
           />
-          <h1>The oldest musical you saw was ... Rent!</h1>
+          <h1>The oldest musical you saw was ... {oldestMusical.title}</h1>
           <p>Stuff about the playhouses you went to.</p>
         </Card>
         <Card>
           <Image
-            src="/images/playbills/moulinrouge.jpg"
+            src={newestMusical.image}
             width="100"
             height="100"
-            alt="costa mesa"
+            alt={newestMusical.title}
           />
         </Card>
-        <h1>The newest musical you saw was ... Moulin Rouge!</h1>
+        <h1>The newest musical you saw was ... {newestMusical.title}</h1>
         <p>Stuff about the playhouses you went to.</p>
         <Card>
           <Image
-            src="/images/playbills/rent.jpg"
+            src={newestMusical.image}
             width="100"
             height="100"
             alt="costa mesa"

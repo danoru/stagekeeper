@@ -1,3 +1,16 @@
+/* COLOR PALETTE */
+
+/* 
+silver = #d6d6d6
+yellow = #ffee32
+gold = #ffd100
+midnight = #202020
+black = #333533
+red = #ef233c
+scarlet = #d80032
+*/
+
+
 .stuff {
   font-weight: 300;
   font-size: 12px;
@@ -9,19 +22,19 @@
 }
 
 .hr {
-  background: linear-gradient(90deg,#0CB5E9 0%,#BFAD4A 32.29%,#FFCC42 67.19%,#FD0507 100%);
+  background: linear-gradient(90deg, #d6d6d6 0%, #ffee32 32.29%, #ffd100 67.19%, #d80032 100%);
   height: 1px;
   width: 100%;
 }
 
 .info {
   display: flex;
-  justify-content: center;
+  justify-content: space-around;
   align-items: center;
 }
 
 .dot {
-  background: linear-gradient(90deg,#0CB5E9 0%,#BFAD4A 32.29%,#FFCC42 67.19%,#FD0507 100%);
+  background: linear-gradient(90deg, #d6d6d6 0%, #ffee32 32.29%, #ffd100 67.19%, #d80032 100%);
   height: 8px;
   width: 8px;
   border-radius: 50%;

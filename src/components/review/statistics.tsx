@@ -33,7 +33,7 @@ function Statistics(props: Props) {
   return (
     <div>
       <section>
-        <Card>
+        <Card style={{ display: "inline-block" }}>
           <Image
             src={firstMusical.image}
             width="100"
@@ -46,7 +46,7 @@ function Statistics(props: Props) {
             {firstMusical.location} on {firstMusical.date}!
           </p>
         </Card>
-        <Card>
+        <Card style={{ display: "inline-block" }}>
           <Image
             src={latestMusical.image}
             width="100"
@@ -61,7 +61,7 @@ function Statistics(props: Props) {
         </Card>
       </section>
       <section>
-        <Card>
+        <Card style={{ display: "inline-block" }}>
           <Image
             src="/images/places/costamesa.jpg"
             width="100"
@@ -71,7 +71,7 @@ function Statistics(props: Props) {
           <h1>Your spent the most time in ... Costa Mesa!</h1>
           <p> Stuff about the places you have been. </p>
         </Card>
-        <Card>
+        <Card style={{ display: "inline-block" }}>
           <Image
             src="/images/places/segerstrom.jpg"
             width="100"
@@ -85,7 +85,7 @@ function Statistics(props: Props) {
         </Card>
       </section>
       <section>
-        <Card>
+        <Card style={{ display: "inline-block" }}>
           <Image
             src={oldestMusical.image}
             width="100"
@@ -95,17 +95,17 @@ function Statistics(props: Props) {
           <h1>The oldest musical you saw was ... {oldestMusical.title}</h1>
           <p>Stuff about the playhouses you went to.</p>
         </Card>
-        <Card>
+        <Card style={{ display: "inline-block" }}>
           <Image
             src={newestMusical.image}
             width="100"
             height="100"
             alt={newestMusical.title}
           />
+          <h1>The newest musical you saw was ... {newestMusical.title}</h1>
+          <p>Stuff about the playhouses you went to.</p>
         </Card>
-        <h1>The newest musical you saw was ... {newestMusical.title}</h1>
-        <p>Stuff about the playhouses you went to.</p>
-        <Card>
+        <Card style={{ display: "inline-block" }}>
           <Image
             src={newestMusical.image}
             width="100"

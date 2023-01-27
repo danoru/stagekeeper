@@ -1,6 +1,6 @@
 import { MUSICAL_LIST_TYPE } from "../types";
 
-const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
+const MUSICAL_LIST_2022: MUSICAL_LIST_TYPE[] = [
   {
     title: "A Little Night Music",
     premiere: "1973-02-25",
@@ -169,11 +169,11 @@ const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
 ];
 
 export function getFeaturedMusicals() {
-  return MUSICAL_LIST.filter((musical) => musical.groupAttended);
+  return MUSICAL_LIST_2022.filter((musical) => musical.groupAttended);
 }
 
 export function getAllMusicals() {
-  return MUSICAL_LIST;
+  return MUSICAL_LIST_2022;
 }
 
 // export function getFilteredMusicals(dateFilter: any) {

@@ -3,7 +3,8 @@ export interface MUSICAL_LIST_TYPE {
   duration: number;
   genre: string;
   groupAttended: boolean;
-  image: string;
+  playbill: string;
+  banner: string;
   location: string;
   playhouse: string;
   premiere: string;

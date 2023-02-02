@@ -25,7 +25,7 @@ function Cards(props: Props) {
           duration={item.duration}
           playhouse={item.playhouse}
           date={item.date}
-          image={item.image}
+          playbill={item.playbill}
         />
       ))}
     </Carousel>

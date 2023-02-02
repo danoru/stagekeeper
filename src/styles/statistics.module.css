@@ -1,0 +1,42 @@
+.container {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  margin-bottom: 3%;
+  position: relative;
+}
+
+.infoboxRight {
+  grid-column: 1 / span 6;
+  grid-row: 1;
+  padding-top: 15%;
+}
+
+.playbillRight {
+  grid-column: 7 / span 2;
+  grid-row: 1;
+  padding-top: 20%;
+  z-index: 1;
+}
+
+.bannerRight {
+  grid-column: 8 / -1;
+  grid-row: 1;
+}
+
+.infoboxLeft {
+  grid-column: 7 / span 6;
+  grid-row: 1;
+  padding-top: 15%;
+}
+
+.playbillLeft {
+  grid-column: 5 / span 2;
+  grid-row: 1;
+  padding-top: 20%;
+  z-index: 1;
+}
+
+.bannerLeft {
+  grid-column: 1 / span 7;
+  grid-row: 1;
+}

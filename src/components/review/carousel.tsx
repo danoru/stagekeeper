@@ -1,4 +1,5 @@
 import React from "react";
+import moment from "moment";
 import Typography from "@mui/material/Typography";
 import Carousel from "react-material-ui-carousel";
 
@@ -33,12 +34,14 @@ function Cards(props: Props) {
 }
 
 function CarouselItem(props: any) {
+  const humanReadableDate = moment(props.date).format("MMMM Do, YYYY");
+
   return (
     <Card variant="outlined">
       <CardContent>
         <CardMedia
           component="img"
-          image={props.image}
+          image={props.playbill}
           title={props.title}
           height="194"
         />
@@ -52,7 +55,7 @@ function CarouselItem(props: any) {
           {props.location}
         </Typography>
         <Typography variant="h5" color="inherit" component="h3">
-          {props.date}
+          {humanReadableDate}
         </Typography>
       </CardContent>
     </Card>

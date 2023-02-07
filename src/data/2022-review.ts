@@ -191,16 +191,3 @@ export function getFeaturedMusicals() {
 export function getAllMusicals() {
   return MUSICAL_LIST_2022;
 }
-
-// export function getFilteredMusicals(dateFilter: any) {
-//   const { year, month } = dateFilter;
-
-//   let filteredMusicals = MUSICAL_LIST.filter((musical) => {
-//     const musicalDate = new Date(musical.date);
-//     return (
-//       musicalDate.getFullYear() === year && musicalDate.getMonth() === month - 1
-//     );
-//   });
-
-//   return filteredMusicals;
-// }

@@ -2,6 +2,7 @@ import { MUSICAL_LIST_TYPE } from "../../types";
 
 import Card from "@mui/material/Card";
 import Image from "next/image";
+import moment from "moment";
 
 import styles from "../../styles/statistics.module.css";
 
@@ -40,7 +41,8 @@ function Statistics(props: Props) {
             <h1>First Musical of the Year ... {firstMusical.title}!</h1>
             <p>
               You watched {firstMusical.title} at the {firstMusical.playhouse}{" "}
-              in {firstMusical.location} on {firstMusical.date}!
+              in {firstMusical.location} on{" "}
+              {moment(firstMusical.date).format("MMMM Do, YYYY")}!
             </p>
           </div>
           <div className={styles.playbillRight}>
@@ -73,7 +75,8 @@ function Statistics(props: Props) {
             <h1>Last Musical of the Year ... {latestMusical.title}!</h1>
             <p>
               You watched {latestMusical.title} at the {latestMusical.playhouse}{" "}
-              in {latestMusical.location} on {latestMusical.date}!
+              in {latestMusical.location} on{" "}
+              {moment(latestMusical.date).format("MMMM Do, YYYY")}!
             </p>
           </div>
           <div className={styles.playbillLeft}>
@@ -108,7 +111,8 @@ function Statistics(props: Props) {
             <h1>Last Musical of the Year ... {oldestMusical.title}!</h1>
             <p>
               You watched {oldestMusical.title} at the {oldestMusical.playhouse}{" "}
-              in {oldestMusical.location} on {oldestMusical.date}!
+              in {oldestMusical.location} on{" "}
+              {moment(oldestMusical.date).format("MMMM Do, YYYY")}!
             </p>
           </div>
           <div className={styles.playbillRight}>
@@ -137,11 +141,12 @@ function Statistics(props: Props) {
           </div>
         </div>
         <div className={styles.container}>
-          <div className={styles.infoBoxLeft}>
+          <div className={styles.infoboxLeft}>
             <h1>Last Musical of the Year ... {newestMusical.title}!</h1>
             <p>
               You watched {newestMusical.title} at the {newestMusical.playhouse}{" "}
-              in {newestMusical.location} on {newestMusical.date}!
+              in {newestMusical.location} on{" "}
+              {moment(newestMusical.date).format("MMMM Do, YYYY")}!
             </p>
           </div>
           <div className={styles.playbillLeft}>

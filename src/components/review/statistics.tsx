@@ -1,9 +1,9 @@
 import { MUSICAL_LIST_TYPE } from "../../types";
 
-import Card from "@mui/material/Card";
 import Image from "next/image";
 import moment from "moment";
 
+import MonthlyAttendanceChart from "./monthly-attendance";
 import styles from "../../styles/statistics.module.css";
 
 interface Props {
@@ -174,16 +174,11 @@ function Statistics(props: Props) {
             />
           </div>
         </div>
-        <Card sx={{ display: "inline-block" }}>
-          <Image
-            src={newestMusical.playbill}
-            width="100"
-            height="100"
-            alt="costa mesa"
-          />
+        <div>
+          <MonthlyAttendanceChart stats={stats} />
           <h1>Your musical taste is primarily ... New School!</h1>
           <p>Stuff about the playhouses you went to.</p>
-        </Card>
+        </div>
       </section>
     </div>
   );

@@ -1,6 +1,6 @@
 import { MUSICAL_LIST_TYPE } from "../types";
 
-const MUSICAL_LIST_2022: MUSICAL_LIST_TYPE[] = [
+export const MUSICAL_LIST_2022: MUSICAL_LIST_TYPE[] = [
   {
     title: "A Little Night Music",
     premiere: "1973-02-25",
@@ -10,7 +10,6 @@ const MUSICAL_LIST_2022: MUSICAL_LIST_TYPE[] = [
     playhouse: "Greenway Court Theatre",
     playbill: "",
     banner: "",
-
     duration: 0,
     groupAttended: false,
   },

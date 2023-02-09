@@ -34,7 +34,7 @@ export const options = {
     },
     title: {
       display: true,
-      text: "Musicals by Year",
+      text: "Musicals by Premiere",
     },
   },
 };
@@ -73,7 +73,7 @@ function MusicalByPremiereChart(props: Props) {
 
   return (
     <div style={{ width: 700 }}>
-      <Bar data={premiereData} />
+      <Bar data={premiereData} options={options} />
     </div>
   );
 }

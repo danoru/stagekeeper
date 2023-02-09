@@ -6,6 +6,7 @@ import moment from "moment";
 import MusicalByPremiereChart from "./musical-by-premiere";
 import MonthlyAttendanceChart from "./monthly-attendance";
 import styles from "../../styles/statistics.module.css";
+import LocationsChart from "./locations-chart";
 
 interface Props {
   stats: MUSICAL_LIST_TYPE[];
@@ -182,11 +183,11 @@ function Statistics(props: Props) {
         </div>
       </section>
       <section>
-        {/* <div>
+        <div>
           <LocationsChart stats={stats} />
           <h1>You visited the theatre the most during ... February!</h1>
           <p>Stuff about when you went throughout the year.</p>
-        </div> */}
+        </div>
         <div>
           <MonthlyAttendanceChart stats={stats} />
           <h1>You visited the theatre the most during ... February!</h1>

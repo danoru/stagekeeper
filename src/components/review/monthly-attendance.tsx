@@ -88,7 +88,7 @@ function MonthlyAttendanceChart(props: Props) {
 
   return (
     <div style={{ width: 700 }}>
-      <Bar data={monthlyData} />
+      <Bar data={monthlyData} options={options} />
     </div>
   );
 }

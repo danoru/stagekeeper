@@ -3,6 +3,7 @@ import { MUSICAL_LIST_TYPE } from "../../types";
 import Image from "next/image";
 import moment from "moment";
 
+import MusicalByPremiereChart from "./musical-by-premiere";
 import MonthlyAttendanceChart from "./monthly-attendance";
 import styles from "../../styles/statistics.module.css";
 
@@ -175,9 +176,21 @@ function Statistics(props: Props) {
           </div>
         </div>
         <div>
-          <MonthlyAttendanceChart stats={stats} />
+          <MusicalByPremiereChart stats={stats} />
           <h1>Your musical taste is primarily ... New School!</h1>
-          <p>Stuff about the playhouses you went to.</p>
+          <p>Stuff about the musicals you listen to.</p>
+        </div>
+      </section>
+      <section>
+        {/* <div>
+          <LocationsChart stats={stats} />
+          <h1>You visited the theatre the most during ... February!</h1>
+          <p>Stuff about when you went throughout the year.</p>
+        </div> */}
+        <div>
+          <MonthlyAttendanceChart stats={stats} />
+          <h1>You visited the theatre the most during ... February!</h1>
+          <p>Stuff about when you went throughout the year.</p>
         </div>
       </section>
     </div>

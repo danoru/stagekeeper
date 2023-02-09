@@ -34,63 +34,48 @@ export const options = {
     },
     title: {
       display: true,
-      text: "Musicals by Month",
+      text: "Musicals by Year",
     },
   },
 };
 
-function MonthlyAttendanceChart(props: Props) {
+function MusicalByPremiereChart(props: Props) {
   const { stats } = props;
-
-  const labels = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ];
 
   const filteredMusicals = stats.filter(
     (stat: MUSICAL_LIST_TYPE) => stat.groupAttended
   );
 
-  const musicalMonths = filteredMusicals.map((data) =>
-    moment(data.date).format("MMMM")
+  const musicalPremieres = filteredMusicals.map((data) =>
+    moment(data.premiere).format("YYYY")
   );
 
-  const monthlyOccurence: Record<string, number> = {};
+  const yearlyOccurence: Record<string, number> = {};
 
-  musicalMonths.forEach((month) => {
-    if (!monthlyOccurence[month]) {
-      monthlyOccurence[month] = 1;
+  musicalPremieres.forEach((year) => {
+    if (!yearlyOccurence[year]) {
+      yearlyOccurence[year] = 1;
     } else {
-      monthlyOccurence[month]++;
+      yearlyOccurence[year]++;
     }
   });
 
-  const monthlyData = {
-    labels,
+  const premiereData = {
+    labels: [],
     datasets: [
       {
         label: "# of Musicals Seen",
-        data: monthlyOccurence,
-        backgroundColor: "rgba(216, 0, 50, 0.7)",
+        data: yearlyOccurence,
+        backgroundColor: "rgba(255, 209, 0, 0.7)",
       },
     ],
   };
 
   return (
     <div style={{ width: 700 }}>
-      <Bar data={monthlyData} />
+      <Bar data={premiereData} />
     </div>
   );
 }
 
-export default MonthlyAttendanceChart;
+export default MusicalByPremiereChart;

@@ -17,9 +17,8 @@ const Home: NextPage = () => {
         <h1 className={styles.title}>Welcome to StageKeeper!</h1>
 
         <p className={styles.description}>
-          Get started by checking out our{" "}
-          <a href="http://localhost:3000/review">Year in Review</a> and our{" "}
-          <a href="http://localhost:3000/upcoming">Upcoming</a> pages!
+          Get started by checking out our <a href="/review">Year in Review</a>{" "}
+          and our <a href="/upcoming">Upcoming</a> pages!
         </p>
 
         <div className={styles.grid}>

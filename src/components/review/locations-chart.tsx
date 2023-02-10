@@ -30,44 +30,54 @@ function LocationsChart(props: Props) {
     (stat: MUSICAL_LIST_TYPE) => stat.groupAttended
   );
 
-  const locationOccurence: Record<string, number> = {};
+  // const locationOccurence: Record<string, number> = {};
+
+  // filteredMusicals.forEach((stats: MUSICAL_LIST_TYPE) => {
+  //   if (!locationOccurence[stats.location]) {
+  //     locationOccurence[stats.location] = 1;
+  //   } else {
+  //     locationOccurence[stats.location]++;
+  //   }
+  // });
+
+  const playhouseOccurence: Record<string, number> = {};
 
   filteredMusicals.forEach((stats: MUSICAL_LIST_TYPE) => {
-    if (!locationOccurence[stats.location]) {
-      locationOccurence[stats.location] = 1;
+    if (!playhouseOccurence[stats.playhouse]) {
+      playhouseOccurence[stats.playhouse] = 1;
     } else {
-      locationOccurence[stats.location]++;
+      playhouseOccurence[stats.playhouse]++;
     }
   });
 
   const locationData = {
-    labels: Object.keys(locationOccurence),
+    labels: Object.keys(playhouseOccurence),
     datasets: [
       {
         label: "# of Times Attended",
-        data: Object.values(locationOccurence),
+        data: Object.values(playhouseOccurence),
         backgroundColor: [
-          "rgba(255, 99, 132, 0.2)",
-          "rgba(54, 162, 235, 0.2)",
-          "rgba(255, 206, 86, 0.2)",
-          "rgba(75, 192, 192, 0.2)",
-          "rgba(153, 102, 255, 0.2)",
-          "rgba(255, 159, 64, 0.2)",
+          "rgba(216, 0, 50, 0.4)",
+          "rgba(251, 133, 0, 0.4)",
+          "rgba(230, 57, 70, 0.4)",
+          "rgba(239, 35, 60, 0.4)",
+          "rgba(255, 238, 50, 0.4)",
+          "rgba(255, 209, 0, 0.4)",
+          "rgba(214, 214, 214, 0.4)",
         ],
         borderColor: [
-          "rgba(255, 99, 132, 1)",
-          "rgba(54, 162, 235, 1)",
-          "rgba(255, 206, 86, 1)",
-          "rgba(75, 192, 192, 1)",
-          "rgba(153, 102, 255, 1)",
-          "rgba(255, 159, 64, 1)",
+          "rgba(216, 0, 50, 1)",
+          "rgba(251, 133, 0, 1)",
+          "rgba(230, 57, 70, 1)",
+          "rgba(239, 35, 60, 1)",
+          "rgba(255, 238, 50, 1)",
+          "rgba(255, 209, 0, 1)",
+          "rgba(214, 214, 214, 1)",
         ],
         borderWidth: 1,
       },
     ],
   };
-
-  // console.log(locationOccurence);
 
   return (
     <div style={{ width: 500 }}>

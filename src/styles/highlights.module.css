@@ -1,13 +1,17 @@
 /* COLOR PALETTE */
 
-/* 
-silver = #d6d6d6
-yellow = #ffee32
-gold = #ffd100
-midnight = #202020
-black = #333533
-red = #ef233c
-scarlet = #d80032
+  /* 
+  
+midnight = #202020 = rgba(32, 32, 32, 1)
+black = #333533 = rgba(51, 53, 51, 1)
+silver = #d6d6d6 = rgba(214, 214, 214, 1)
+yellow = #ffee32 = rgba(255, 238, 50, 1)
+gold = #ffd100 = rgba(255, 209, 0, 1)
+red = #ef233c = rgba(239, 35, 60, 1)
+scarlet = #d80032 = rgba(216, 0, 50, 1)
+orange = #fb8500 = rgba(251, 133, 0, 1)
+rouge = #e63946 = rgba(230, 57, 70, 1)
+
 */
 
 

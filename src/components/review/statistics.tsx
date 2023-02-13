@@ -176,19 +176,19 @@ function Statistics(props: Props) {
             />
           </div>
         </div>
-        <div>
+        <div className={styles.centeredContent}>
           <MusicalByPremiereChart stats={stats} />
           <h1>Your musical taste is primarily ... New School!</h1>
           <p>Stuff about the musicals you listen to.</p>
         </div>
       </section>
       <section>
-        <div>
+        <div className={styles.centeredContent}>
           <LocationsChart stats={stats} />
           <h1>You visited the theatre the most during ... February!</h1>
           <p>Stuff about when you went throughout the year.</p>
         </div>
-        <div>
+        <div className={styles.centeredContent}>
           <MonthlyAttendanceChart stats={stats} />
           <h1>You visited the theatre the most during ... February!</h1>
           <p>Stuff about when you went throughout the year.</p>

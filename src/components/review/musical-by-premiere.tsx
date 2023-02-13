@@ -72,7 +72,7 @@ function MusicalByPremiereChart(props: Props) {
   };
 
   return (
-    <div style={{ width: 700 }}>
+    <div>
       <Bar data={premiereData} options={options} />
     </div>
   );

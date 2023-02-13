@@ -14,7 +14,7 @@ export const options = {
   responsive: true,
   plugins: {
     legend: {
-      position: "top" as const,
+      position: "right" as const,
     },
     title: {
       display: true,
@@ -80,7 +80,7 @@ function LocationsChart(props: Props) {
   };
 
   return (
-    <div style={{ width: 500 }}>
+    <div>
       <Doughnut data={locationData} options={options} />
     </div>
   );

@@ -42,6 +42,8 @@
   grid-row: 1;
 }
 
-.centered {
-  
+.centeredContent canvas {
+  margin: 0 auto;
+  width: 31.25em;
+  height: 15.625em;
 }

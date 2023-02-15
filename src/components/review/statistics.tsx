@@ -1,12 +1,12 @@
-import { MUSICAL_LIST_TYPE } from "../../types";
-
 import Image from "next/image";
 import moment from "moment";
 
 import MusicalByPremiereChart from "./musical-by-premiere";
 import MonthlyAttendanceChart from "./monthly-attendance";
-import styles from "../../styles/statistics.module.css";
 import LocationsChart from "./locations-chart";
+
+import { MUSICAL_LIST_TYPE } from "../../types";
+import styles from "../../styles/statistics.module.css";
 
 interface Props {
   stats: MUSICAL_LIST_TYPE[];
@@ -50,24 +50,22 @@ function Statistics(props: Props) {
           <div className={styles.playbillRight}>
             <Image
               src={firstMusical.playbill}
-              width="187"
-              height="300"
+              fill
               alt={firstMusical.title}
               style={{
                 borderRadius: "5%",
-                display: "block",
+                objectFit: "contain",
               }}
             />
           </div>
           <div className={styles.bannerRight}>
             <Image
               src={firstMusical.banner}
-              width="600"
-              height="400"
               alt={firstMusical.title}
+              fill
               style={{
                 borderRadius: "5%",
-                display: "block",
+                objectFit: "contain",
               }}
             />
           </div>
@@ -84,24 +82,22 @@ function Statistics(props: Props) {
           <div className={styles.playbillLeft}>
             <Image
               src={latestMusical.playbill}
-              width="187"
-              height="300"
+              fill
               alt={latestMusical.title}
               style={{
                 borderRadius: "5%",
-                display: "block",
+                objectFit: "contain",
               }}
             />
           </div>
           <div className={styles.bannerLeft}>
             <Image
               src={latestMusical.banner}
-              width="600"
-              height="400"
+              fill
               alt={latestMusical.title}
               style={{
                 borderRadius: "5%",
-                display: "block",
+                objectFit: "contain",
               }}
             />
           </div>
@@ -120,24 +116,22 @@ function Statistics(props: Props) {
           <div className={styles.playbillRight}>
             <Image
               src={oldestMusical.playbill}
-              width="187"
-              height="300"
+              fill
               alt={oldestMusical.title}
               style={{
                 borderRadius: "5%",
-                display: "block",
+                objectFit: "contain",
               }}
             />
           </div>
           <div className={styles.bannerRight}>
             <Image
               src={oldestMusical.banner}
-              width="600"
-              height="400"
+              fill
               alt={oldestMusical.title}
               style={{
                 borderRadius: "5%",
-                display: "block",
+                objectFit: "contain",
               }}
             />
           </div>
@@ -154,24 +148,22 @@ function Statistics(props: Props) {
           <div className={styles.playbillLeft}>
             <Image
               src={newestMusical.playbill}
-              width="187"
-              height="300"
+              fill
               alt={newestMusical.title}
               style={{
                 borderRadius: "5%",
-                display: "block",
+                objectFit: "contain",
               }}
             />
           </div>
           <div className={styles.bannerLeft}>
             <Image
               src={newestMusical.banner}
-              width="600"
-              height="400"
+              fill
               alt={newestMusical.title}
               style={{
                 borderRadius: "5%",
-                display: "block",
+                objectFit: "contain",
               }}
             />
           </div>

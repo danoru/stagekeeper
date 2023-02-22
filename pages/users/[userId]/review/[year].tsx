@@ -1,7 +1,8 @@
 import { Fragment } from "react";
 import Head from "next/head";
 
-import { getFeaturedMusicals } from "../../../../src/data/2022-review";
+import { getFeaturedMusicals } from "../../../../src/data/review";
+
 import Carousel from "../../../../src/components/review/carousel";
 import Highlights from "../../../../src/components/review/highlights";
 import ReviewHeader from "../../../../src/components/review/review-header";
@@ -43,8 +44,10 @@ export async function getStaticPaths() {
 }
 
 export async function getStaticProps(context: any) {
+  const userId = context.params.userId;
   const year = context.params.year;
-  const featuredMusicals = await getFeaturedMusicals();
+
+  let featuredMusicals = getFeaturedMusicals(year, userId);
 
   return {
     props: {

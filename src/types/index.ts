@@ -9,4 +9,5 @@ export interface MUSICAL_LIST_TYPE {
   playhouse: string;
   premiere: string;
   title: string;
+  year: string;
 }

@@ -9,13 +9,9 @@ interface Props {
 function Highlights(props: Props) {
   const { highlights } = props;
 
-  const filteredMusicals = highlights.filter(
-    (highlight: MUSICAL_LIST_TYPE) => highlight.groupAttended
-  );
-
   const musicalCount = highlights.length;
 
-  const totalDuration = filteredMusicals.reduce(
+  const totalDuration = highlights.reduce(
     (accumulator: number, highlight: MUSICAL_LIST_TYPE): number => {
       return accumulator + highlight.duration;
     },
@@ -33,7 +29,7 @@ function Highlights(props: Props) {
   const locationStorage: Record<string, number> = {};
   let locationCount = 0;
 
-  filteredMusicals.forEach((highlight: MUSICAL_LIST_TYPE) => {
+  highlights.forEach((highlight: MUSICAL_LIST_TYPE) => {
     if (!locationStorage[highlight.location]) {
       locationStorage[highlight.location] = 1;
       locationCount++;
@@ -43,7 +39,7 @@ function Highlights(props: Props) {
   const stageStorage: Record<string, number> = {};
   let stageCount = 0;
 
-  filteredMusicals.forEach((highlight: MUSICAL_LIST_TYPE) => {
+  highlights.forEach((highlight: MUSICAL_LIST_TYPE) => {
     if (!stageStorage[highlight.playhouse]) {
       stageStorage[highlight.playhouse] = 1;
       stageCount++;

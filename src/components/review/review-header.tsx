@@ -9,6 +9,8 @@ function ReviewHeader(context: any) {
       return "Musicals and Mayhem";
     } else if (userId === "all") {
       return "All Musicals";
+    } else {
+      return userId;
     }
   };
 

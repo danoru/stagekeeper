@@ -15,23 +15,15 @@ interface Props {
 function Statistics(props: Props) {
   const { stats } = props;
 
-  const filteredMusicals = stats.filter(
-    (stats: MUSICAL_LIST_TYPE) => stats.groupAttended
-  );
+  const firstMusical = stats.reduce((a, b) => (a.date < b.date ? a : b));
 
-  const firstMusical = filteredMusicals.reduce((a, b) =>
-    a.date < b.date ? a : b
-  );
+  const latestMusical = stats.reduce((a, b) => (a.date > b.date ? a : b));
 
-  const latestMusical = filteredMusicals.reduce((a, b) =>
-    a.date > b.date ? a : b
-  );
-
-  const oldestMusical = filteredMusicals.reduce((a, b) =>
+  const oldestMusical = stats.reduce((a, b) =>
     a.premiere < b.premiere ? a : b
   );
 
-  const newestMusical = filteredMusicals.reduce((a, b) =>
+  const newestMusical = stats.reduce((a, b) =>
     a.premiere > b.premiere ? a : b
   );
 
@@ -54,7 +46,7 @@ function Statistics(props: Props) {
               alt={firstMusical.title}
               style={{
                 borderRadius: "5%",
-                objectFit: "contain",
+                objectFit: "cover",
               }}
             />
           </div>
@@ -106,7 +98,7 @@ function Statistics(props: Props) {
       <section>
         <div className={styles.container}>
           <div className={styles.infoboxRight}>
-            <h1>Last Musical of the Year ... {oldestMusical.title}!</h1>
+            <h1>Oldest Musical of the Year ... {oldestMusical.title}!</h1>
             <p>
               You watched {oldestMusical.title} at the {oldestMusical.playhouse}{" "}
               in {oldestMusical.location} on{" "}
@@ -138,7 +130,7 @@ function Statistics(props: Props) {
         </div>
         <div className={styles.container}>
           <div className={styles.infoboxLeft}>
-            <h1>Last Musical of the Year ... {newestMusical.title}!</h1>
+            <h1>Newest Musical of the Year ... {newestMusical.title}!</h1>
             <p>
               You watched {newestMusical.title} at the {newestMusical.playhouse}{" "}
               in {newestMusical.location} on{" "}

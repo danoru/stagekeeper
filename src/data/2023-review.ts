@@ -12,6 +12,7 @@ const MUSICAL_LIST_2023: MUSICAL_LIST_TYPE[] = [
     banner: "/images/banners/greatcomet.jpg",
     duration: 120,
     groupAttended: true,
+    year: "2023",
   },
   {
     title: "Sunday in the Park with George",
@@ -24,5 +25,14 @@ const MUSICAL_LIST_2023: MUSICAL_LIST_TYPE[] = [
     banner: "/images/banners/sundayintheparkwithgeorge.jpg",
     duration: 155,
     groupAttended: true,
+    year: "2023",
   },
 ];
+
+export function getFeaturedMusicals() {
+  return MUSICAL_LIST_2023.filter((musical) => musical.groupAttended);
+}
+
+export function getAllMusicals() {
+  return MUSICAL_LIST_2023;
+}

@@ -1,6 +1,6 @@
 import { MUSICAL_LIST_TYPE } from "../types";
 
-export const MUSICAL_LIST_2022: MUSICAL_LIST_TYPE[] = [
+export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
   {
     title: "A Little Night Music",
     premiere: "1973-02-25",
@@ -196,12 +196,50 @@ export const MUSICAL_LIST_2022: MUSICAL_LIST_TYPE[] = [
     groupAttended: true,
     year: "2022",
   },
+  {
+    title: "Natasha, Pierre & the Great Comet of 1812",
+    premiere: "2016-11-14",
+    genre: "Drama",
+    date: "2023-01-13",
+    location: "Berkeley, CA",
+    playhouse: "Shotgun Players",
+    playbill: "/images/playbills/greatcomet.jpg",
+    banner: "/images/banners/greatcomet.jpg",
+    duration: 120,
+    groupAttended: true,
+    year: "2023",
+  },
+  {
+    title: "Sunday in the Park with George",
+    premiere: "1984-05-02",
+    genre: "Drama",
+    date: "2023-02-17",
+    location: "Pasadena, CA",
+    playhouse: "Pasadena Playhouse",
+    playbill: "/images/playbills/sundayintheparkwithgeorge.jpg",
+    banner: "/images/banners/sundayintheparkwithgeorge.jpg",
+    duration: 155,
+    groupAttended: true,
+    year: "2023",
+  },
 ];
 
-export function getFeaturedMusicals() {
-  return MUSICAL_LIST_2022.filter((musical) => musical.groupAttended);
-}
-
-export function getAllMusicals() {
-  return MUSICAL_LIST_2022;
+export function getFeaturedMusicals(year: string, userId: string) {
+  if (year === "2022") {
+    if (userId === "all") {
+      return MUSICAL_LIST.filter((musical) => musical.year === "2022");
+    } else if (userId === "musicalsandmayhem") {
+      return MUSICAL_LIST.filter(
+        (musical) => musical.groupAttended && musical.year === "2022"
+      );
+    }
+  } else if (year === "2023") {
+    if (userId === "all") {
+      return MUSICAL_LIST.filter((musical) => musical.year === "2023");
+    } else if (userId === "musicalsandmayhem") {
+      return MUSICAL_LIST.filter(
+        (musical) => musical.groupAttended && musical.year === "2023"
+      );
+    }
+  }
 }

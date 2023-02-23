@@ -42,11 +42,7 @@ export const options = {
 function MusicalByPremiereChart(props: Props) {
   const { stats } = props;
 
-  const filteredMusicals = stats.filter(
-    (stat: MUSICAL_LIST_TYPE) => stat.groupAttended
-  );
-
-  const musicalPremieres = filteredMusicals.map((data) =>
+  const musicalPremieres = stats.map((data) =>
     moment(data.premiere).format("YYYY")
   );
 

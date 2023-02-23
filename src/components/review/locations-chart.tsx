@@ -26,10 +26,6 @@ export const options = {
 function LocationsChart(props: Props) {
   const { stats } = props;
 
-  const filteredMusicals = stats.filter(
-    (stat: MUSICAL_LIST_TYPE) => stat.groupAttended
-  );
-
   // const locationOccurence: Record<string, number> = {};
 
   // filteredMusicals.forEach((stats: MUSICAL_LIST_TYPE) => {
@@ -42,7 +38,7 @@ function LocationsChart(props: Props) {
 
   const playhouseOccurence: Record<string, number> = {};
 
-  filteredMusicals.forEach((stats: MUSICAL_LIST_TYPE) => {
+  stats.forEach((stats: MUSICAL_LIST_TYPE) => {
     if (!playhouseOccurence[stats.playhouse]) {
       playhouseOccurence[stats.playhouse] = 1;
     } else {

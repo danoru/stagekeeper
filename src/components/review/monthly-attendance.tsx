@@ -57,13 +57,7 @@ function MonthlyAttendanceChart(props: Props) {
     "December",
   ];
 
-  const filteredMusicals = stats.filter(
-    (stat: MUSICAL_LIST_TYPE) => stat.groupAttended
-  );
-
-  const musicalMonths = filteredMusicals.map((data) =>
-    moment(data.date).format("MMMM")
-  );
+  const musicalMonths = stats.map((data) => moment(data.date).format("MMMM"));
 
   const monthlyOccurence: Record<string, number> = {};
 

@@ -42,11 +42,12 @@ function Statistics(props: Props) {
           <div className={styles.playbillRight}>
             <Image
               src={firstMusical.playbill}
-              fill
+              width="187"
+              height="300"
               alt={firstMusical.title}
               style={{
                 borderRadius: "5%",
-                objectFit: "cover",
+                display: "block",
               }}
             />
           </div>
@@ -54,10 +55,11 @@ function Statistics(props: Props) {
             <Image
               src={firstMusical.banner}
               alt={firstMusical.title}
-              fill
+              width="600"
+              height="400"
               style={{
                 borderRadius: "5%",
-                objectFit: "contain",
+                display: "block",
               }}
             />
           </div>
@@ -74,22 +76,24 @@ function Statistics(props: Props) {
           <div className={styles.playbillLeft}>
             <Image
               src={latestMusical.playbill}
-              fill
+              width="187"
+              height="300"
               alt={latestMusical.title}
               style={{
                 borderRadius: "5%",
-                objectFit: "contain",
+                display: "block",
               }}
             />
           </div>
           <div className={styles.bannerLeft}>
             <Image
               src={latestMusical.banner}
-              fill
+              width="600"
+              height="400"
               alt={latestMusical.title}
               style={{
                 borderRadius: "5%",
-                objectFit: "contain",
+                display: "block",
               }}
             />
           </div>
@@ -108,22 +112,24 @@ function Statistics(props: Props) {
           <div className={styles.playbillRight}>
             <Image
               src={oldestMusical.playbill}
-              fill
+              width="187"
+              height="300"
               alt={oldestMusical.title}
               style={{
                 borderRadius: "5%",
-                objectFit: "contain",
+                display: "block",
               }}
             />
           </div>
           <div className={styles.bannerRight}>
             <Image
               src={oldestMusical.banner}
-              fill
+              width="600"
+              height="400"
               alt={oldestMusical.title}
               style={{
                 borderRadius: "5%",
-                objectFit: "contain",
+                display: "block",
               }}
             />
           </div>
@@ -140,22 +146,24 @@ function Statistics(props: Props) {
           <div className={styles.playbillLeft}>
             <Image
               src={newestMusical.playbill}
-              fill
+              width="187"
+              height="300"
               alt={newestMusical.title}
               style={{
                 borderRadius: "5%",
-                objectFit: "contain",
+                display: "block",
               }}
             />
           </div>
           <div className={styles.bannerLeft}>
             <Image
               src={newestMusical.banner}
-              fill
+              width="600"
+              height="400"
               alt={newestMusical.title}
               style={{
                 borderRadius: "5%",
-                objectFit: "contain",
+                display: "block",
               }}
             />
           </div>

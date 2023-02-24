@@ -2,7 +2,6 @@
   display: grid;
   grid-template-columns: repeat(12, 1fr);
   margin-bottom: 3%;
-  position: relative;
 }
 
 .infoboxRight {
@@ -17,17 +16,12 @@
   padding-top: 20%;
   z-index: 1;
   border-radius: 5%;
-  position: relative;
-  width: 11.6875em;
-  height: 18.75em;
 }
 
 .bannerRight {
   grid-column: 8 / -1;
   grid-row: 1;
-  position: relative;
-  width: 37.5em;
-  height: 25em;
+  border-radius: 5%;
 
 }
 
@@ -40,19 +34,13 @@
 .playbillLeft {
   grid-column: 5 / span 2;
   grid-row: 1;
-  position: relative;
   padding-top: 20%;
   z-index: 1;
-  width: 11.6875em;
-  height: 18.75em;
 }
 
 .bannerLeft {
   grid-column: 2 / span 5;
   grid-row: 1;
-  position: relative;
-  width: 37.5em;
-  height: 25em;
 }
 
 .centeredContent canvas {

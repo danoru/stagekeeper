@@ -15,6 +15,8 @@ interface Props {
 function Statistics(props: Props) {
   const { stats } = props;
 
+  // Musical Year Comparisons
+
   const firstMusical = stats.reduce((a, b) => (a.date < b.date ? a : b));
 
   const latestMusical = stats.reduce((a, b) => (a.date > b.date ? a : b));
@@ -26,6 +28,53 @@ function Statistics(props: Props) {
   const newestMusical = stats.reduce((a, b) =>
     a.premiere > b.premiere ? a : b
   );
+
+  // Locations Visited Calculations
+
+  const locationOccurence: Record<string, number> = {};
+
+  stats.forEach((stats: MUSICAL_LIST_TYPE) => {
+    if (!locationOccurence[stats.location]) {
+      locationOccurence[stats.location] = 1;
+    } else {
+      locationOccurence[stats.location]++;
+    }
+  });
+
+  const mostVisitedLocation = Object.keys(locationOccurence).reduce((a, b) => {
+    return locationOccurence[a] > locationOccurence[b] ? a : b;
+  });
+
+  const numberOfLocations = Object.keys(locationOccurence).length;
+
+  // Musical Taste Calculations
+
+  const musicalPremieres = stats.map((data) => moment(data.premiere).year());
+  const musicalPremiereSum = musicalPremieres.reduce((a, b) => a + b, 0);
+  const musicalPremiereAverage = Math.round(
+    musicalPremiereSum / musicalPremieres.length
+  );
+
+  const currentDate = new Date();
+  let currentYear = currentDate.getFullYear();
+
+  const musicalPremiereAverageAge = currentYear - musicalPremiereAverage;
+
+  function musicalTaste() {
+    if (musicalPremiereAverageAge <= 20) {
+      return "New School";
+    } else {
+      return "Old School";
+    }
+  }
+
+  function musicalTasteDescription() {
+    if (musicalPremiereAverageAge <= 20) {
+      return "This is new school.";
+    } else {
+      return "This is old school.";
+    }
+  }
 
   return (
     <div>
@@ -170,15 +219,22 @@ function Statistics(props: Props) {
         </div>
         <div className={styles.centeredContent}>
           <MusicalByPremiereChart stats={stats} />
-          <h1>Your musical taste is primarily ... New School!</h1>
-          <p>Stuff about the musicals you listen to.</p>
+          <h1>Your musical taste is primarily ... {musicalTaste()}!</h1>
+          <p>
+            {musicalTasteDescription()} The average premiere date of the
+            musicals you have seen is {musicalPremiereAverage}. That means your
+            average musical age is {musicalPremiereAverageAge}!
+          </p>
         </div>
       </section>
       <section>
         <div className={styles.centeredContent}>
           <LocationsChart stats={stats} />
-          <h1>You visited the theatre the most during ... February!</h1>
-          <p>Stuff about when you went throughout the year.</p>
+          <h1>You visited {mostVisitedLocation} the most!</h1>
+          <p>
+            You attended {numberOfLocations} different cities during the year,
+            but visited {mostVisitedLocation} the most.{" "}
+          </p>
         </div>
         <div className={styles.centeredContent}>
           <MonthlyAttendanceChart stats={stats} />

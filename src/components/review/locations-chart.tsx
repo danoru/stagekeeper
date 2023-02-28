@@ -26,32 +26,32 @@ export const options = {
 function LocationsChart(props: Props) {
   const { stats } = props;
 
-  // const locationOccurence: Record<string, number> = {};
-
-  // filteredMusicals.forEach((stats: MUSICAL_LIST_TYPE) => {
-  //   if (!locationOccurence[stats.location]) {
-  //     locationOccurence[stats.location] = 1;
-  //   } else {
-  //     locationOccurence[stats.location]++;
-  //   }
-  // });
-
-  const playhouseOccurence: Record<string, number> = {};
+  const locationOccurence: Record<string, number> = {};
 
   stats.forEach((stats: MUSICAL_LIST_TYPE) => {
-    if (!playhouseOccurence[stats.playhouse]) {
-      playhouseOccurence[stats.playhouse] = 1;
+    if (!locationOccurence[stats.location]) {
+      locationOccurence[stats.location] = 1;
     } else {
-      playhouseOccurence[stats.playhouse]++;
+      locationOccurence[stats.location]++;
     }
   });
 
+  // const playhouseOccurence: Record<string, number> = {};
+
+  // stats.forEach((stats: MUSICAL_LIST_TYPE) => {
+  //   if (!playhouseOccurence[stats.playhouse]) {
+  //     playhouseOccurence[stats.playhouse] = 1;
+  //   } else {
+  //     playhouseOccurence[stats.playhouse]++;
+  //   }
+  // });
+
   const locationData = {
-    labels: Object.keys(playhouseOccurence),
+    labels: Object.keys(locationOccurence),
     datasets: [
       {
         label: "# of Times Attended",
-        data: Object.values(playhouseOccurence),
+        data: Object.values(locationOccurence),
         backgroundColor: [
           "rgba(216, 0, 50, 0.4)",
           "rgba(251, 133, 0, 0.4)",

@@ -76,6 +76,24 @@ function Statistics(props: Props) {
     }
   }
 
+  // Musical Visits by Month
+
+  const musicalMonths = stats.map((data) => moment(data.date).format("MMMM"));
+
+  const monthlyOccurence: Record<string, number> = {};
+
+  musicalMonths.forEach((month) => {
+    if (!monthlyOccurence[month]) {
+      monthlyOccurence[month] = 1;
+    } else {
+      monthlyOccurence[month]++;
+    }
+  });
+
+  const mostVisitsPerMonth = Object.keys(monthlyOccurence).reduce((a, b) => {
+    return monthlyOccurence[a] > monthlyOccurence[b] ? a : b;
+  });
+
   return (
     <div>
       <section>
@@ -238,7 +256,9 @@ function Statistics(props: Props) {
         </div>
         <div className={styles.centeredContent}>
           <MonthlyAttendanceChart stats={stats} />
-          <h1>You visited the theatre the most during ... February!</h1>
+          <h1>
+            You visited the theatre the most during ... {mostVisitsPerMonth}!
+          </h1>
           <p>Stuff about when you went throughout the year.</p>
         </div>
       </section>

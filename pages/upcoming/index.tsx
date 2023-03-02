@@ -1,20 +1,20 @@
-import { Fragment } from "react";
+import { Fragment, useState } from "react";
+
+import Calendar from "react-calendar";
+import "react-calendar/dist/Calendar.css";
 import Head from "next/head";
 
 function UpcomingPage() {
+  const [value, onChange] = useState(new Date());
+
   return (
     <Fragment>
       <Head>
         <title>StageKeeper: Your Upcoming Events</title>
         <meta name="description" content="See what your new year looks like!" />
       </Head>
-      <blockquote cite="https://genius.com/Jonathan-groff-lost-in-the-woods-lyrics">
-        Now I turn around and find I am lost in the woods, <br />
-        North is south, right is left, when you're gone.
-      </blockquote>
-      <p>
-        Are you lost? Let's get you back on <a href="/review">track</a>.
-      </p>
+      <h1>This page is currently in development.</h1>
+      <Calendar onChange={onChange} value={value} />
     </Fragment>
   );
 }

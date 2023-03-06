@@ -39,17 +39,37 @@ function ReviewHeader() {
     }
   };
 
+  const prevYearCheck = () => {
+    if (!previousYear || previousYear < 2022) {
+      return;
+    } else {
+      return (
+        <a href={prevYearURL}>
+          <ArrowBackIosIcon />
+        </a>
+      );
+    }
+  };
+
+  const nextYearCheck = () => {
+    if (!nextYear || nextYear > 2023) {
+      return;
+    } else {
+      return (
+        <a href={nextYearURL}>
+          <ArrowForwardIosIcon />
+        </a>
+      );
+    }
+  };
+
   return (
     <div>
       <h1 onClick={musicalScopeHandler}>{humanReadableUsername()}</h1>
       <h2>
-        <a href={prevYearURL}>
-          <ArrowBackIosIcon />
-        </a>
+        {prevYearCheck()}
         {humanReadableYear()}
-        <a href={nextYearURL}>
-          <ArrowForwardIosIcon />
-        </a>
+        {nextYearCheck()}
       </h2>
     </div>
   );

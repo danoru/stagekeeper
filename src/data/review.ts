@@ -326,6 +326,19 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     groupAttended: true,
     year: "2023",
   },
+  {
+    title: "In the Heights",
+    premiere: "2008-02-14",
+    genre: "Drama",
+    date: "2023-03-09",
+    location: "Fullerton, CA",
+    playhouse: "Fullerton College Theatre Arts",
+    playbill: "/images/playbills/intheheights.jpg",
+    banner: "/images/banners/intheheights.jpg",
+    duration: 155,
+    groupAttended: false,
+    year: "2023",
+  },
 ];
 
 export function getFeaturedMusicals(year: string, userId: string) {

@@ -11,3 +11,12 @@ export interface MUSICAL_LIST_TYPE {
   title: string;
   year: string;
 }
+
+export interface EVENT_LIST_TYPE {
+  id: number;
+  title: string;
+  playhouse: string;
+  location: string;
+  start: string;
+  end: string;
+}

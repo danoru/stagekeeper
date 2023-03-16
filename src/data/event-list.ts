@@ -8,6 +8,7 @@ export const EVENT_LIST: EVENT_LIST_TYPE[] = [
     location: "Costa Mesa, CA",
     start: "03-15-2023",
     end: "03-15-2023",
+    attending: false,
   },
   {
     id: 2,
@@ -16,6 +17,7 @@ export const EVENT_LIST: EVENT_LIST_TYPE[] = [
     location: "Costa Mesa, CA",
     start: "03-16-2023",
     end: "03-16-2023",
+    attending: false,
   },
   {
     id: 3,
@@ -24,6 +26,7 @@ export const EVENT_LIST: EVENT_LIST_TYPE[] = [
     location: "Costa Mesa, CA",
     start: "03-17-2023",
     end: "03-17-2023",
+    attending: false,
   },
   {
     id: 4,
@@ -32,6 +35,7 @@ export const EVENT_LIST: EVENT_LIST_TYPE[] = [
     location: "Costa Mesa, CA",
     start: "03-18-2023",
     end: "03-18-2023",
+    attending: false,
   },
   {
     id: 5,
@@ -40,6 +44,7 @@ export const EVENT_LIST: EVENT_LIST_TYPE[] = [
     location: "Costa Mesa, CA",
     start: "03-19-2023",
     end: "03-19-2023",
+    attending: false,
   },
   {
     id: 6,
@@ -48,6 +53,7 @@ export const EVENT_LIST: EVENT_LIST_TYPE[] = [
     location: "Pasadena, CA",
     start: "03-26-2023",
     end: "03-26-2023",
+    attending: false,
   },
   {
     id: 7,
@@ -56,6 +62,7 @@ export const EVENT_LIST: EVENT_LIST_TYPE[] = [
     location: "Pasadena, CA",
     start: "03-29-2023",
     end: "03-29-2023",
+    attending: false,
   },
   {
     id: 8,
@@ -64,6 +71,7 @@ export const EVENT_LIST: EVENT_LIST_TYPE[] = [
     location: "Pasadena, CA",
     start: "03-30-2023",
     end: "03-30-2023",
+    attending: false,
   },
   {
     id: 9,
@@ -72,5 +80,6 @@ export const EVENT_LIST: EVENT_LIST_TYPE[] = [
     location: "Pasadena, CA",
     start: "03-31-2023",
     end: "03-31-2023",
+    attending: true,
   },
 ];

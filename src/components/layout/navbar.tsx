@@ -26,7 +26,7 @@ const settings = [
   },
 ];
 
-function Topbar() {
+function Navbar() {
   const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(
     null
   );
@@ -156,4 +156,4 @@ function Topbar() {
     </AppBar>
   );
 }
-export default Topbar;
+export default Navbar;

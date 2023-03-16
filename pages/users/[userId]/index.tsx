@@ -1,4 +1,5 @@
 import { useRouter } from "next/router";
+import EventCalendar from "../../../src/components/calendar/event-calendar";
 
 function ProfilePage() {
   const humanReadableUsername = () => {
@@ -21,6 +22,7 @@ function ProfilePage() {
         This page is under construction. Know what you'd want to see here?
         Contact the administrator with your ideas!
       </p>
+      <EventCalendar />
     </div>
   );
 }

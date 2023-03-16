@@ -2,7 +2,7 @@ import * as React from "react";
 import type { AppProps } from "next/app";
 import { CacheProvider, EmotionCache } from "@emotion/react";
 import { ThemeProvider, CssBaseline, createTheme } from "@mui/material";
-import Topbar from "../src/components/layout/Topbar";
+import Navbar from "../src/components/layout/navbar";
 
 import createEmotionCache from "../src/utility/createEmotionCache";
 import lightThemeOptions from "../src/styles/theme/lightThemeOptions";
@@ -23,7 +23,7 @@ const MyApp: React.FunctionComponent<MyAppProps> = (props: any) => {
     <CacheProvider value={emotionCache}>
       <ThemeProvider theme={lightTheme}>
         <CssBaseline />
-        <Topbar />
+        <Navbar />
         <Component {...pageProps} />
       </ThemeProvider>
     </CacheProvider>

@@ -19,4 +19,5 @@ export interface EVENT_LIST_TYPE {
   location: string;
   start: string;
   end: string;
+  attending: boolean;
 }

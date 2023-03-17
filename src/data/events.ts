@@ -83,3 +83,7 @@ export const EVENT_LIST: EVENT_LIST_TYPE[] = [
     attending: true,
   },
 ];
+
+export const filteredEventList = EVENT_LIST.filter(
+  (musical) => musical.attending
+);

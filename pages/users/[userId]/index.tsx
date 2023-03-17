@@ -1,5 +1,8 @@
 import { useRouter } from "next/router";
-import EventCalendar from "../../../src/components/calendar/event-calendar";
+import { filteredEventList } from "../../../src/data/events";
+import { List, ListItem, ListItemText } from "@mui/material";
+
+import EventCalendar from "../../../src/components/schedule/event-calendar";
 
 function ProfilePage() {
   const humanReadableUsername = () => {
@@ -23,6 +26,20 @@ function ProfilePage() {
         Contact the administrator with your ideas!
       </p>
       <EventCalendar />
+      <div>
+        <h1>Upcoming Events</h1>
+        <List>
+          {filteredEventList?.map((event, i) => {
+            return (
+              <ListItem key={event.id}>
+                <ListItemText
+                  primary={`You have an upcoming event, ${event.title}, on ${event.start}, at ${event.playhouse} in ${event.location}`}
+                />
+              </ListItem>
+            );
+          })}
+        </List>
+      </div>
     </div>
   );
 }

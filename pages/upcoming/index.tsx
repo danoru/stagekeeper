@@ -1,7 +1,7 @@
 import { Fragment } from "react";
 import Head from "next/head";
 
-import EventCalendar from "../../src/components/calendar/event-calendar";
+import EventCalendar from "../../src/components/schedule/event-calendar";
 
 function UpcomingPage() {
   return (

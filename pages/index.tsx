@@ -4,7 +4,7 @@ import Image from "next/image";
 
 import styles from "../src/styles/home.module.css";
 
-const Home: NextPage = () => {
+function Home() {
   return (
     <div className={styles.container}>
       <Head>
@@ -12,16 +12,28 @@ const Home: NextPage = () => {
         <meta name="description" content="Created with NextJS" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-
       <main className={styles.main}>
-        <h1 className={styles.title}>Welcome to StageKeeper!</h1>
-
-        <p className={styles.description}>
-          Get started by checking out our{" "}
-          <a href="/users/musicalsandmayhem/review/2022">Year in Review</a> and
-          our <a href="/upcoming">Upcoming</a> pages!
-        </p>
-
+        <div>
+          <div>
+            <h1 className={styles.title}>Welcome to StageKeeper!</h1>
+          </div>
+          <div className={styles.imageContainer}>
+            <Image
+              style={{ opacity: "20%" }}
+              src="/images/broadway.jpg"
+              fill
+              alt="Broadway"
+            />
+          </div>
+        </div>
+        <div>
+          <h2>Find out what shows are on a stage near you.</h2>
+          <h2>Schedule with your friends what shows you want to see. </h2>
+          <h2>Keep track of what performances you have seen.</h2>
+          <p className={styles.description}>
+            StageKeeper is your hub for all things musical theatre.
+          </p>
+        </div>
         <div className={styles.grid}>
           <a href="https://nextjs.org/docs" className={styles.card}>
             <h2>Documentation &rarr;</h2>
@@ -55,18 +67,15 @@ const Home: NextPage = () => {
 
       <footer className={styles.footer}>
         <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
+          href="https://github.com/danoru/"
           target="_blank"
           rel="noopener noreferrer"
         >
-          Powered by{" "}
-          <span className={styles.logo}>
-            <Image src="/vercel.svg" alt="Vercel Logo" width={72} height={16} />
-          </span>
+          ⓒ 2023 StageKeeper
         </a>
       </footer>
     </div>
   );
-};
+}
 
 export default Home;

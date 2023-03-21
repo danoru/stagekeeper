@@ -5,7 +5,7 @@ import { ThemeProvider, CssBaseline, createTheme } from "@mui/material";
 import Navbar from "../src/components/layout/navbar";
 
 import createEmotionCache from "../src/utility/createEmotionCache";
-import lightThemeOptions from "../src/styles/theme/lightThemeOptions";
+import darkThemeOptions from "../src/styles/theme/darkThemeOptions";
 import "../src/styles/globals.css";
 
 interface MyAppProps extends AppProps {
@@ -14,14 +14,14 @@ interface MyAppProps extends AppProps {
 
 const clientSideEmotionCache = createEmotionCache();
 
-const lightTheme = createTheme(lightThemeOptions);
+const darkTheme = createTheme(darkThemeOptions);
 
 const MyApp: React.FunctionComponent<MyAppProps> = (props: any) => {
   const { Component, emotionCache = clientSideEmotionCache, pageProps } = props;
 
   return (
     <CacheProvider value={emotionCache}>
-      <ThemeProvider theme={lightTheme}>
+      <ThemeProvider theme={darkTheme}>
         <CssBaseline />
         <Navbar />
         <Component {...pageProps} />

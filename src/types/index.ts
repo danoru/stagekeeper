@@ -17,7 +17,7 @@ export interface EVENT_LIST_TYPE {
   title: string;
   playhouse: string;
   location: string;
-  start: string;
-  end: string;
+  start: Date;
+  end: Date;
   attending: boolean;
 }

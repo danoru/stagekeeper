@@ -5,7 +5,7 @@ import moment from "moment";
 import { EVENT_LIST, filteredEventList } from "../../data/events";
 import styles from "../../styles/event-calendar.module.css";
 import "react-big-calendar/lib/css/react-big-calendar.css";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
 const localizer = momentLocalizer(moment);
 
@@ -48,6 +48,7 @@ function EventCalendar() {
     <div className={styles.container}>
       <Calendar
         localizer={localizer}
+        onSelectEvent={onSelectEvent}
         onDoubleClickEvent={onDoubleClickEvent}
         events={calendarDisplay()}
       />

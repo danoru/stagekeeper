@@ -51,8 +51,8 @@ export const EVENT_LIST: EVENT_LIST_TYPE[] = [
     title: "Kiss of the Spider Woman",
     playhouse: "A Noise Within",
     location: "Pasadena, CA",
-    start: new Date(2023, 2, 26, 20, 0, 0),
-    end: new Date(2023, 2, 26, 23, 0, 0),
+    start: new Date(2023, 2, 26, 14, 0, 0),
+    end: new Date(2023, 2, 26, 16, 0, 0),
     attending: true,
   },
   {

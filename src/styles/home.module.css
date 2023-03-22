@@ -3,8 +3,6 @@
 }
 
 .main {
-  min-height: 100vh;
-  padding: 4rem 0;
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -18,11 +16,6 @@
   font-size: 2rem;
 }
 
-.title,
-.description {
-  text-align: center;
-}
-
 .description {
   margin: 4rem 0;
   line-height: 1.5;
@@ -33,7 +26,6 @@
   width: 100vw;
   height: 60vh;
   position: relative;
-  text-align: center;
 }
 
 .heroImage {
@@ -47,6 +39,9 @@
 
 .heroDescription {
   position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 .code {

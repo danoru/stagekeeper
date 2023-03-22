@@ -13,28 +13,26 @@ function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className={styles.main}>
-        <div>
-          <div>
-            <h1 className={styles.title}>Welcome to StageKeeper!</h1>
+        <div className={styles.heroContainer}>
+          <div className={styles.title}>
+            <h1>Welcome to StageKeeper!</h1>
           </div>
-          <div className={styles.imageContainer}>
-            <Image
-              style={{ opacity: "20%" }}
-              src="/images/broadway.jpg"
-              fill
-              alt="Broadway"
-            />
+          <Image
+            className={styles.heroImage}
+            src="/images/broadway.jpg"
+            fill
+            alt="Broadway"
+          />
+          <div className={styles.heroDescription}>
+            <h2>Find out what shows are on a stage near you.</h2>
+            <h2>Schedule with your friends what shows you want to see. </h2>
+            <h2>Keep track of what performances you have seen.</h2>
           </div>
         </div>
-        <div>
-          <h2>Find out what shows are on a stage near you.</h2>
-          <h2>Schedule with your friends what shows you want to see. </h2>
-          <h2>Keep track of what performances you have seen.</h2>
-          <p className={styles.description}>
-            StageKeeper is your hub for all things musical theatre.
-          </p>
-        </div>
-        <div className={styles.grid}>
+        <p className={styles.description}>
+          StageKeeper is your hub for all things musical theatre.
+        </p>
+        {/* <div className={styles.grid}>
           <a href="https://nextjs.org/docs" className={styles.card}>
             <h2>Documentation &rarr;</h2>
             <p>Find in-depth information about Next.js features and API.</p>
@@ -62,18 +60,8 @@ function Home() {
               Instantly deploy your Next.js site to a public URL with Vercel.
             </p>
           </a>
-        </div>
+        </div> */}
       </main>
-
-      <footer className={styles.footer}>
-        <a
-          href="https://github.com/danoru/"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          ⓒ 2023 StageKeeper
-        </a>
-      </footer>
     </div>
   );
 }

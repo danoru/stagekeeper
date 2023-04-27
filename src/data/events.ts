@@ -3,12 +3,12 @@ import { EVENT_LIST_TYPE } from "../types";
 export const EVENT_LIST: EVENT_LIST_TYPE[] = [
   {
     id: 1,
-    title: "Mean Girls",
+    title: "Hairspray",
     playhouse: "Segerstrom Center for the Arts",
     location: "Costa Mesa, CA",
-    start: new Date(2023, 2, 15, 20, 0, 0),
-    end: new Date(2023, 2, 15, 23, 0, 0),
-    attending: false,
+    start: new Date(2023, 3, 21, 19, 30, 0),
+    end: new Date(2023, 3, 21, 23, 0, 0),
+    attending: true,
   },
   {
     id: 2,

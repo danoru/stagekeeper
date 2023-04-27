@@ -339,6 +339,19 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     groupAttended: false,
     year: "2023",
   },
+  {
+    title: "Hairspray",
+    premiere: "2007-07-20",
+    genre: "Drama",
+    date: "2023-04-21",
+    location: "Costa Mesa, CA",
+    playhouse: "Segerstrom Center for the Arts",
+    playbill: "/images/playbills/hairspray.jpg",
+    banner: "/images/banners/hairspray.jpg",
+    duration: 155,
+    groupAttended: false,
+    year: "2023",
+  },
 ];
 
 export function getFeaturedMusicals(year: string, userId: string) {

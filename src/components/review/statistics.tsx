@@ -1,4 +1,3 @@
-import Image from "next/image";
 import moment from "moment";
 
 import MusicalByPremiereChart from "./musical-by-premiere";
@@ -107,10 +106,10 @@ function Statistics(props: Props) {
             </p>
           </div>
           <div className={styles.playbillRight}>
-            <Image
+            <img
               src={firstMusical.playbill}
-              width="187"
-              height="300"
+              width="58.44%"
+              height="89.29%"
               alt={firstMusical.title}
               style={{
                 borderRadius: "5%",
@@ -119,11 +118,11 @@ function Statistics(props: Props) {
             />
           </div>
           <div className={styles.bannerRight}>
-            <Image
+            <img
               src={firstMusical.banner}
               alt={firstMusical.title}
-              width="600"
-              height="400"
+              width="75%"
+              height="100%"
               style={{
                 borderRadius: "5%",
                 display: "block",
@@ -141,10 +140,10 @@ function Statistics(props: Props) {
             </p>
           </div>
           <div className={styles.playbillLeft}>
-            <Image
+            <img
               src={latestMusical.playbill}
-              width="187"
-              height="300"
+              width="58.44%"
+              height="68.81%"
               alt={latestMusical.title}
               style={{
                 borderRadius: "5%",
@@ -153,10 +152,10 @@ function Statistics(props: Props) {
             />
           </div>
           <div className={styles.bannerLeft}>
-            <Image
+            <img
               src={latestMusical.banner}
-              width="600"
-              height="400"
+              width="93.75%"
+              height="100%"
               alt={latestMusical.title}
               style={{
                 borderRadius: "5%",
@@ -177,10 +176,10 @@ function Statistics(props: Props) {
             </p>
           </div>
           <div className={styles.playbillRight}>
-            <Image
+            <img
               src={oldestMusical.playbill}
-              width="187"
-              height="300"
+              width="58.44%"
+              height="89.29%"
               alt={oldestMusical.title}
               style={{
                 borderRadius: "5%",
@@ -189,10 +188,10 @@ function Statistics(props: Props) {
             />
           </div>
           <div className={styles.bannerRight}>
-            <Image
+            <img
               src={oldestMusical.banner}
-              width="600"
-              height="400"
+              width="75%"
+              height="100%"
               alt={oldestMusical.title}
               style={{
                 borderRadius: "5%",
@@ -211,10 +210,10 @@ function Statistics(props: Props) {
             </p>
           </div>
           <div className={styles.playbillLeft}>
-            <Image
+            <img
               src={newestMusical.playbill}
-              width="187"
-              height="300"
+              width="58.44%"
+              height="68.81%"
               alt={newestMusical.title}
               style={{
                 borderRadius: "5%",
@@ -223,10 +222,10 @@ function Statistics(props: Props) {
             />
           </div>
           <div className={styles.bannerLeft}>
-            <Image
+            <img
               src={newestMusical.banner}
-              width="600"
-              height="400"
+              width="93.75%"
+              height="100%"
               alt={newestMusical.title}
               style={{
                 borderRadius: "5%",

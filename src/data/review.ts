@@ -348,7 +348,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     playhouse: "Segerstrom Center for the Arts",
     playbill: "/images/playbills/hairspray.jpg",
     banner: "/images/banners/hairspray.jpg",
-    duration: 155,
+    duration: 150,
     groupAttended: false,
     year: "2023",
   },

@@ -352,6 +352,19 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     groupAttended: false,
     year: "2023",
   },
+  {
+    title: "Chicago",
+    premiere: "1975-06-03",
+    genre: "Drama",
+    date: "2023-05-17",
+    location: "Costa Mesa, CA",
+    playhouse: "Segerstrom Center for the Arts",
+    playbill: "/images/playbills/chicago.jpg",
+    banner: "/images/banners/chicago.jpg",
+    duration: 150,
+    groupAttended: false,
+    year: "2023",
+  },
 ];
 
 export function getFeaturedMusicals(year: string, userId: string) {

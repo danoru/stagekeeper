@@ -24,7 +24,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     playbill: "/images/playbills/heathers.jpg",
     banner: "/images/banners/heathers.jpg",
     duration: 150,
-    groupAttended: false,
+    groupAttended: true,
     year: "2019",
   },
   {
@@ -50,7 +50,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     playbill: "/images/playbills/rockyhorror.jpg",
     banner: "/images/banners/rockyhorror.jpg",
     duration: 120,
-    groupAttended: false,
+    groupAttended: true,
     year: "2020",
   },
   {
@@ -154,7 +154,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     playbill: "/images/playbills/drag.jpg",
     banner: "/images/banners/drag.jpg",
     duration: 100,
-    groupAttended: false,
+    groupAttended: true,
     year: "2022",
   },
   {
@@ -336,7 +336,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     playbill: "/images/playbills/intheheights.jpg",
     banner: "/images/banners/intheheights.jpg",
     duration: 155,
-    groupAttended: false,
+    groupAttended: true,
     year: "2023",
   },
   {
@@ -349,7 +349,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     playbill: "/images/playbills/hairspray.jpg",
     banner: "/images/banners/hairspray.jpg",
     duration: 150,
-    groupAttended: false,
+    groupAttended: true,
     year: "2023",
   },
   {
@@ -362,7 +362,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     playbill: "/images/playbills/chicago.jpg",
     banner: "/images/banners/chicago.jpg",
     duration: 150,
-    groupAttended: false,
+    groupAttended: true,
     year: "2023",
   },
   {
@@ -388,7 +388,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     playbill: "/images/playbills/joseph.jpg",
     banner: "/images/banners/joseph.jpg",
     duration: 120,
-    groupAttended: false,
+    groupAttended: true,
     year: "2023",
   },
   {
@@ -401,6 +401,19 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     playbill: "/images/playbills/intothewoods.jpg",
     banner: "/images/banners/intothewoods.jpg",
     duration: 165,
+    groupAttended: true,
+    year: "2023",
+  },
+  {
+    title: "Les Misérables",
+    premiere: "1986-12-27",
+    genre: "Drama",
+    date: "2023-09-23",
+    location: "Costa Mesa, CA",
+    playhouse: "Segerstrom Center for the Arts",
+    playbill: "/images/playbills/intothewoods.jpg",
+    banner: "/images/banners/intothewoods.jpg",
+    duration: 178,
     groupAttended: true,
     year: "2023",
   },

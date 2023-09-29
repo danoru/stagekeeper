@@ -417,6 +417,19 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     groupAttended: true,
     year: "2023",
   },
+  {
+    title: "Hadestown",
+    premiere: "2019-04-17",
+    genre: "Drama",
+    date: "2023-10-04",
+    location: "Los Angeles, CA",
+    playhouse: "Ahmanson Theatres",
+    playbill: "/images/playbills/hadestown.jpg",
+    banner: "",
+    duration: 150,
+    groupAttended: true,
+    year: "2023",
+  },
 ];
 
 export function getFeaturedMusicals(year: string, userId: string) {

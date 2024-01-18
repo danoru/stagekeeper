@@ -488,6 +488,14 @@ export function getFeaturedMusicals(year: string, userId: string) {
         (musical) => musical.groupAttended && musical.year === "2023"
       );
     }
+  } else if (year === "2024") {
+    if (userId === "all") {
+      return MUSICAL_LIST.filter((musical) => musical.year === "2024");
+    } else if (userId === "musicalsandmayhem") {
+      return MUSICAL_LIST.filter(
+        (musical) => musical.groupAttended && musical.year === "2024"
+      );
+    }
   } else {
     if (userId === "all") {
       return MUSICAL_LIST;

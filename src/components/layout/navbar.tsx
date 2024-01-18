@@ -22,7 +22,7 @@ const settings = [
   {
     id: 3,
     title: "Year in Review",
-    link: "/users/musicalsandmayhem/review/2023",
+    link: "/users/musicalsandmayhem/review/2024",
   },
 ];
 

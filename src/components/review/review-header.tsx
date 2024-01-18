@@ -52,7 +52,7 @@ function ReviewHeader() {
   };
 
   const nextYearCheck = () => {
-    if (!nextYear || nextYear > 2023) {
+    if (!nextYear || nextYear > Number(year)) {
       return;
     } else {
       return (

@@ -36,8 +36,10 @@ export async function getStaticPaths() {
     paths: [
       { params: { userId: "musicalsandmayhem", year: "2022" } },
       { params: { userId: "musicalsandmayhem", year: "2023" } },
+      { params: { userId: "musicalsandmayhem", year: "2024" } },
       { params: { userId: "all", year: "2022" } },
       { params: { userId: "all", year: "2023" } },
+      { params: { userId: "all", year: "2024" } },
     ],
     fallback: false,
   };

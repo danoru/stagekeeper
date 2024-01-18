@@ -51,8 +51,11 @@ function ReviewHeader() {
     }
   };
 
+  console.log(year);
+  console.log(nextYear);
+
   const nextYearCheck = () => {
-    if (!nextYear || nextYear > Number(year)) {
+    if (!nextYear || nextYear > 2024) {
       return;
     } else {
       return (

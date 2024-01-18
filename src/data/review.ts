@@ -456,6 +456,19 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     groupAttended: false,
     year: "2023",
   },
+  {
+    title: "MJ the Musical",
+    premiere: "2022-02-01",
+    genre: "Drama",
+    date: "2024-01-11",
+    location: "Los Angeles, CA",
+    playhouse: "Pantages Theatre",
+    playbill: "https://picsum.photos/649/1024",
+    banner: "https://picsum.photos/740/520",
+    duration: 150,
+    groupAttended: true,
+    year: "2024",
+  },
 ];
 
 export function getFeaturedMusicals(year: string, userId: string) {

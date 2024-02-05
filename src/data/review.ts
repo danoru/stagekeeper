@@ -469,6 +469,19 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     groupAttended: true,
     year: "2024",
   },
+  {
+    title: "The Lion King",
+    premiere: "1997-11-13",
+    genre: "Drama",
+    date: "2024-02-01",
+    location: "Costa Mesa, CA",
+    playhouse: "Segerstrom Center for the Arts",
+    playbill: "https://picsum.photos/649/1024",
+    banner: "https://picsum.photos/740/520",
+    duration: 150,
+    groupAttended: false,
+    year: "2024",
+  },
 ];
 
 export function getFeaturedMusicals(year: string, userId: string) {

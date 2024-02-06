@@ -8,14 +8,14 @@ function ReviewHeader() {
   const userId = router.query.userId;
 
   const previousYear = Number(year) - 1;
-  const prevYearURL = "/users/musicalsandmayhem/review/" + [previousYear];
+  const prevYearURL = "/users/" + userId + "/review/" + [previousYear];
 
   const nextYear = Number(year) + 1;
-  const nextYearURL = "/users/musicalsandmayhem/review/" + [nextYear];
+  const nextYearURL = "/users/" + userId + "/review/" + [nextYear];
 
   function musicalScopeHandler() {
     if (userId === "all") {
-      return router.push("/users/musicalsandmayhem/review/" + [year]);
+      return router.push("/users/" + userId + "/review/" + [year]);
     } else {
       return router.push("/users/all/review/" + [year]);
     }

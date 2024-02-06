@@ -48,3 +48,9 @@
   width: 31.25em;
   height: 15.625em;
 }
+@media (max-width: 600px) {
+.centeredContent canvas {
+  width: 100vw
+}
+  
+}

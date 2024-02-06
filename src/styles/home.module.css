@@ -101,6 +101,14 @@
     width: 100%;
     flex-direction: column;
   }
+
+  .heroDescription {
+    font-size: .75rem;
+  }
+
+  .title {
+    font-size: 1rem;
+  }
 }
 
 @media (prefers-color-scheme: dark) {

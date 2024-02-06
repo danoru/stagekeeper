@@ -1,4 +1,3 @@
-import type { NextPage } from "next";
 import Head from "next/head";
 import Image from "next/image";
 
@@ -21,6 +20,7 @@ function Home() {
             className={styles.heroImage}
             src="/images/broadway.jpg"
             fill
+            priority
             alt="Broadway"
           />
           <div className={styles.heroDescription}>

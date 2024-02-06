@@ -117,7 +117,7 @@ function Statistics(props: Props) {
               }}
             />
           </div>
-          <div className={styles.bannerRight}>
+          {/* <div className={styles.bannerRight}>
             <img
               src={firstMusical.banner}
               alt={firstMusical.title}
@@ -128,7 +128,7 @@ function Statistics(props: Props) {
                 display: "block",
               }}
             />
-          </div>
+          </div> */}
         </div>
         <div className={styles.container}>
           <div className={styles.infoboxLeft}>
@@ -151,7 +151,7 @@ function Statistics(props: Props) {
               }}
             />
           </div>
-          <div className={styles.bannerLeft}>
+          {/* <div className={styles.bannerLeft}>
             <img
               src={latestMusical.banner}
               width="93.75%"
@@ -162,7 +162,7 @@ function Statistics(props: Props) {
                 display: "block",
               }}
             />
-          </div>
+          </div> */}
         </div>
       </section>
       <section>
@@ -187,7 +187,7 @@ function Statistics(props: Props) {
               }}
             />
           </div>
-          <div className={styles.bannerRight}>
+          {/* <div className={styles.bannerRight}>
             <img
               src={oldestMusical.banner}
               width="75%"
@@ -198,7 +198,7 @@ function Statistics(props: Props) {
                 display: "block",
               }}
             />
-          </div>
+          </div> */}
         </div>
         <div className={styles.container}>
           <div className={styles.infoboxLeft}>
@@ -221,7 +221,7 @@ function Statistics(props: Props) {
               }}
             />
           </div>
-          <div className={styles.bannerLeft}>
+          {/* <div className={styles.bannerLeft}>
             <img
               src={newestMusical.banner}
               width="93.75%"
@@ -232,7 +232,7 @@ function Statistics(props: Props) {
                 display: "block",
               }}
             />
-          </div>
+          </div> */}
         </div>
         <div className={styles.centeredContent}>
           <MusicalByPremiereChart stats={stats} />

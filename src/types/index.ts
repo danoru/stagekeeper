@@ -3,6 +3,7 @@ export interface MUSICAL_LIST_TYPE {
   duration: number;
   genre: string;
   groupAttended: boolean;
+  userAttended: USER_ATTENDANCE_TYPE;
   playbill: string;
   banner: string;
   location: string;
@@ -20,4 +21,14 @@ export interface EVENT_LIST_TYPE {
   start: Date;
   end: Date;
   attending: boolean;
+}
+
+export interface USER_ATTENDANCE_TYPE {
+  musicalsandmayhem: boolean; // Group
+  beingdaniel: boolean; // Daniel
+  annabanza: boolean; // Anna
+  bentothetop: boolean; // Ben
+  callmetommy: boolean; // Tommy
+  suddenlykelsey: boolean; // Kelsey
+  heartofsix: boolean; // Mallory
 }

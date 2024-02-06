@@ -12,6 +12,15 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     banner: "/images/banners/joseph.jpg",
     duration: 120,
     groupAttended: false,
+    userAttended: {
+      musicalsandmayhem: false,
+      beingdaniel: true,
+      annabanza: true,
+      bentothetop: false,
+      callmetommy: false,
+      suddenlykelsey: false,
+      heartofsix: false,
+    },
     year: "2019",
   },
   {
@@ -25,6 +34,15 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     banner: "/images/banners/heathers.jpg",
     duration: 150,
     groupAttended: true,
+    userAttended: {
+      musicalsandmayhem: true,
+      beingdaniel: true,
+      annabanza: true,
+      bentothetop: false,
+      callmetommy: false,
+      suddenlykelsey: false,
+      heartofsix: false,
+    },
     year: "2019",
   },
   {
@@ -38,6 +56,15 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     banner: "/images/banners/frozen.jpg",
     duration: 140,
     groupAttended: true,
+    userAttended: {
+      musicalsandmayhem: true,
+      beingdaniel: true,
+      annabanza: true,
+      bentothetop: true,
+      callmetommy: true,
+      suddenlykelsey: true,
+      heartofsix: false,
+    },
     year: "2020",
   },
   {
@@ -51,6 +78,15 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     banner: "/images/banners/rockyhorror.jpg",
     duration: 120,
     groupAttended: true,
+    userAttended: {
+      musicalsandmayhem: true,
+      beingdaniel: true,
+      annabanza: true,
+      bentothetop: false,
+      callmetommy: false,
+      suddenlykelsey: false,
+      heartofsix: false,
+    },
     year: "2020",
   },
   {
@@ -64,6 +100,15 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     banner: "/images/banners/funhome.jpg",
     duration: 95,
     groupAttended: false,
+    userAttended: {
+      musicalsandmayhem: false,
+      beingdaniel: true,
+      annabanza: true,
+      bentothetop: false,
+      callmetommy: false,
+      suddenlykelsey: false,
+      heartofsix: false,
+    },
     year: "2020",
   },
   {
@@ -77,6 +122,15 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     banner: "/images/banners/kinkyboots.jpg",
     duration: 135,
     groupAttended: false,
+    userAttended: {
+      musicalsandmayhem: false,
+      beingdaniel: true,
+      annabanza: true,
+      bentothetop: false,
+      callmetommy: false,
+      suddenlykelsey: false,
+      heartofsix: false,
+    },
     year: "2020",
   },
   {
@@ -90,6 +144,15 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     banner: "/images/banners/onceonthisisland.jpg",
     duration: 100,
     groupAttended: true,
+    userAttended: {
+      musicalsandmayhem: true,
+      beingdaniel: true,
+      annabanza: true,
+      bentothetop: false,
+      callmetommy: false,
+      suddenlykelsey: false,
+      heartofsix: false,
+    },
     year: "2021",
   },
   {
@@ -103,6 +166,15 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     banner: "/images/banners/spamalot.jpg",
     duration: 135,
     groupAttended: false,
+    userAttended: {
+      musicalsandmayhem: false,
+      beingdaniel: true,
+      annabanza: true,
+      bentothetop: false,
+      callmetommy: false,
+      suddenlykelsey: false,
+      heartofsix: false,
+    },
     year: "2021",
   },
   {
@@ -116,6 +188,15 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     banner: "/images/banners/alittlenightmusic.jpg",
     duration: 150,
     groupAttended: false,
+    userAttended: {
+      musicalsandmayhem: false,
+      beingdaniel: true,
+      annabanza: true,
+      bentothetop: false,
+      callmetommy: false,
+      suddenlykelsey: false,
+      heartofsix: false,
+    },
     year: "2022",
   },
   {
@@ -129,6 +210,15 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     banner: "/images/banners/annie.jpg",
     duration: 150,
     groupAttended: false,
+    userAttended: {
+      musicalsandmayhem: false,
+      beingdaniel: true,
+      annabanza: true,
+      bentothetop: false,
+      callmetommy: false,
+      suddenlykelsey: false,
+      heartofsix: false,
+    },
     year: "2022",
   },
   {
@@ -142,6 +232,15 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     banner: "",
     duration: 110,
     groupAttended: true,
+    userAttended: {
+      musicalsandmayhem: true,
+      beingdaniel: true,
+      annabanza: true,
+      bentothetop: false,
+      callmetommy: false,
+      suddenlykelsey: false,
+      heartofsix: false,
+    },
     year: "2022",
   },
   {
@@ -155,6 +254,15 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     banner: "/images/banners/drag.jpg",
     duration: 100,
     groupAttended: true,
+    userAttended: {
+      musicalsandmayhem: true,
+      beingdaniel: true,
+      annabanza: true,
+      bentothetop: false,
+      callmetommy: false,
+      suddenlykelsey: false,
+      heartofsix: false,
+    },
     year: "2022",
   },
   {
@@ -168,6 +276,15 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     banner: "",
     duration: 90,
     groupAttended: false,
+    userAttended: {
+      musicalsandmayhem: false,
+      beingdaniel: true,
+      annabanza: true,
+      bentothetop: false,
+      callmetommy: false,
+      suddenlykelsey: false,
+      heartofsix: false,
+    },
     year: "2022",
   },
   {
@@ -181,6 +298,15 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     banner: "",
     duration: 150,
     groupAttended: true,
+    userAttended: {
+      musicalsandmayhem: true,
+      beingdaniel: true,
+      annabanza: true,
+      bentothetop: false,
+      callmetommy: false,
+      suddenlykelsey: false,
+      heartofsix: false,
+    },
     year: "2022",
   },
   {
@@ -194,6 +320,15 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     banner: "",
     duration: 155,
     groupAttended: true,
+    userAttended: {
+      musicalsandmayhem: true,
+      beingdaniel: true,
+      annabanza: true,
+      bentothetop: false,
+      callmetommy: false,
+      suddenlykelsey: false,
+      heartofsix: false,
+    },
     year: "2022",
   },
   {
@@ -207,6 +342,15 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     banner: "/images/banners/moulinrouge.jpg",
     duration: 155,
     groupAttended: true,
+    userAttended: {
+      musicalsandmayhem: true,
+      beingdaniel: true,
+      annabanza: true,
+      bentothetop: false,
+      callmetommy: false,
+      suddenlykelsey: false,
+      heartofsix: false,
+    },
     year: "2022",
   },
   {
@@ -220,6 +364,15 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     banner: "/images/banners/greatcomet.jpg",
     duration: 120,
     groupAttended: false,
+    userAttended: {
+      musicalsandmayhem: false,
+      beingdaniel: true,
+      annabanza: true,
+      bentothetop: false,
+      callmetommy: false,
+      suddenlykelsey: false,
+      heartofsix: false,
+    },
     year: "2022",
   },
   {
@@ -233,6 +386,15 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     banner: "",
     duration: 150,
     groupAttended: true,
+    userAttended: {
+      musicalsandmayhem: true,
+      beingdaniel: true,
+      annabanza: true,
+      bentothetop: false,
+      callmetommy: false,
+      suddenlykelsey: false,
+      heartofsix: false,
+    },
     year: "2022",
   },
   {
@@ -246,6 +408,15 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     banner: "/images/banners/rent.jpg",
     duration: 150,
     groupAttended: true,
+    userAttended: {
+      musicalsandmayhem: true,
+      beingdaniel: true,
+      annabanza: true,
+      bentothetop: false,
+      callmetommy: false,
+      suddenlykelsey: false,
+      heartofsix: false,
+    },
     year: "2022",
   },
   {
@@ -259,6 +430,15 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     banner: "/images/banners/somethingrotten.jpg",
     duration: 155,
     groupAttended: true,
+    userAttended: {
+      musicalsandmayhem: true,
+      beingdaniel: true,
+      annabanza: true,
+      bentothetop: false,
+      callmetommy: false,
+      suddenlykelsey: false,
+      heartofsix: false,
+    },
     year: "2022",
   },
   {
@@ -272,6 +452,15 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     banner: "",
     duration: 155,
     groupAttended: false,
+    userAttended: {
+      musicalsandmayhem: false,
+      beingdaniel: true,
+      annabanza: true,
+      bentothetop: false,
+      callmetommy: false,
+      suddenlykelsey: false,
+      heartofsix: false,
+    },
     year: "2022",
   },
   {
@@ -285,6 +474,15 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     banner: "",
     duration: 165,
     groupAttended: true,
+    userAttended: {
+      musicalsandmayhem: true,
+      beingdaniel: true,
+      annabanza: true,
+      bentothetop: false,
+      callmetommy: false,
+      suddenlykelsey: false,
+      heartofsix: false,
+    },
     year: "2022",
   },
   {
@@ -298,6 +496,15 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     banner: "/images/banners/youngfrankenstein.jpg",
     duration: 140,
     groupAttended: true,
+    userAttended: {
+      musicalsandmayhem: true,
+      beingdaniel: true,
+      annabanza: true,
+      bentothetop: false,
+      callmetommy: false,
+      suddenlykelsey: false,
+      heartofsix: false,
+    },
     year: "2022",
   },
   {
@@ -311,6 +518,15 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     banner: "/images/banners/greatcomet.jpg",
     duration: 120,
     groupAttended: true,
+    userAttended: {
+      musicalsandmayhem: true,
+      beingdaniel: true,
+      annabanza: true,
+      bentothetop: false,
+      callmetommy: false,
+      suddenlykelsey: false,
+      heartofsix: false,
+    },
     year: "2023",
   },
   {
@@ -324,6 +540,15 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     banner: "/images/banners/sundayintheparkwithgeorge.jpg",
     duration: 155,
     groupAttended: true,
+    userAttended: {
+      musicalsandmayhem: true,
+      beingdaniel: true,
+      annabanza: true,
+      bentothetop: false,
+      callmetommy: false,
+      suddenlykelsey: false,
+      heartofsix: false,
+    },
     year: "2023",
   },
   {
@@ -337,6 +562,15 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     banner: "/images/banners/intheheights.jpg",
     duration: 155,
     groupAttended: true,
+    userAttended: {
+      musicalsandmayhem: true,
+      beingdaniel: true,
+      annabanza: true,
+      bentothetop: false,
+      callmetommy: true,
+      suddenlykelsey: false,
+      heartofsix: false,
+    },
     year: "2023",
   },
   {
@@ -350,6 +584,15 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     banner: "/images/banners/hairspray.jpg",
     duration: 150,
     groupAttended: true,
+    userAttended: {
+      musicalsandmayhem: true,
+      beingdaniel: true,
+      annabanza: true,
+      bentothetop: false,
+      callmetommy: false,
+      suddenlykelsey: false,
+      heartofsix: false,
+    },
     year: "2023",
   },
   {
@@ -363,6 +606,15 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     banner: "/images/banners/chicago.jpg",
     duration: 150,
     groupAttended: true,
+    userAttended: {
+      musicalsandmayhem: true,
+      beingdaniel: true,
+      annabanza: true,
+      bentothetop: false,
+      callmetommy: false,
+      suddenlykelsey: false,
+      heartofsix: false,
+    },
     year: "2023",
   },
   {
@@ -376,6 +628,15 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     banner: "https://picsum.photos/740/520",
     duration: 80,
     groupAttended: true,
+    userAttended: {
+      musicalsandmayhem: true,
+      beingdaniel: true,
+      annabanza: true,
+      bentothetop: false,
+      callmetommy: false,
+      suddenlykelsey: false,
+      heartofsix: true,
+    },
     year: "2023",
   },
   {
@@ -389,6 +650,15 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     banner: "/images/banners/joseph.jpg",
     duration: 120,
     groupAttended: true,
+    userAttended: {
+      musicalsandmayhem: true,
+      beingdaniel: true,
+      annabanza: true,
+      bentothetop: false,
+      callmetommy: true,
+      suddenlykelsey: false,
+      heartofsix: false,
+    },
     year: "2023",
   },
   {
@@ -402,6 +672,15 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     banner: "/images/banners/intothewoods.jpg",
     duration: 165,
     groupAttended: true,
+    userAttended: {
+      musicalsandmayhem: true,
+      beingdaniel: true,
+      annabanza: true,
+      bentothetop: false,
+      callmetommy: false,
+      suddenlykelsey: false,
+      heartofsix: false,
+    },
     year: "2023",
   },
   {
@@ -415,6 +694,15 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     banner: "https://picsum.photos/740/520",
     duration: 178,
     groupAttended: true,
+    userAttended: {
+      musicalsandmayhem: true,
+      beingdaniel: true,
+      annabanza: true,
+      bentothetop: false,
+      callmetommy: false,
+      suddenlykelsey: false,
+      heartofsix: false,
+    },
     year: "2023",
   },
   {
@@ -428,6 +716,15 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     banner: "https://picsum.photos/740/520",
     duration: 150,
     groupAttended: true,
+    userAttended: {
+      musicalsandmayhem: true,
+      beingdaniel: true,
+      annabanza: true,
+      bentothetop: false,
+      callmetommy: false,
+      suddenlykelsey: false,
+      heartofsix: false,
+    },
     year: "2023",
   },
   {
@@ -441,6 +738,15 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     banner: "https://picsum.photos/740/520",
     duration: 100,
     groupAttended: true,
+    userAttended: {
+      musicalsandmayhem: true,
+      beingdaniel: true,
+      annabanza: true,
+      bentothetop: false,
+      callmetommy: true,
+      suddenlykelsey: false,
+      heartofsix: false,
+    },
     year: "2023",
   },
   {
@@ -454,6 +760,15 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     banner: "https://picsum.photos/740/520",
     duration: 85,
     groupAttended: false,
+    userAttended: {
+      musicalsandmayhem: false,
+      beingdaniel: true,
+      annabanza: true,
+      bentothetop: false,
+      callmetommy: false,
+      suddenlykelsey: false,
+      heartofsix: false,
+    },
     year: "2023",
   },
   {
@@ -467,6 +782,15 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     banner: "https://picsum.photos/740/520",
     duration: 150,
     groupAttended: true,
+    userAttended: {
+      musicalsandmayhem: true,
+      beingdaniel: true,
+      annabanza: true,
+      bentothetop: true,
+      callmetommy: false,
+      suddenlykelsey: false,
+      heartofsix: false,
+    },
     year: "2024",
   },
   {
@@ -480,6 +804,15 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     banner: "https://picsum.photos/740/520",
     duration: 150,
     groupAttended: false,
+    userAttended: {
+      musicalsandmayhem: false,
+      beingdaniel: true,
+      annabanza: true,
+      bentothetop: false,
+      callmetommy: false,
+      suddenlykelsey: false,
+      heartofsix: false,
+    },
     year: "2024",
   },
 ];
@@ -488,6 +821,37 @@ export function getFeaturedMusicals(year: string, userId: string) {
   if (year === "2022") {
     if (userId === "all") {
       return MUSICAL_LIST.filter((musical) => musical.year === "2022");
+    }
+    if (userId === "beingdaniel") {
+      return MUSICAL_LIST.filter(
+        (musical) => musical.userAttended.beingdaniel && musical.year === "2022"
+      );
+    }
+    if (userId === "annabanza") {
+      return MUSICAL_LIST.filter(
+        (musical) => musical.userAttended.annabanza && musical.year === "2022"
+      );
+    }
+    if (userId === "callmetommy") {
+      return MUSICAL_LIST.filter(
+        (musical) => musical.userAttended.callmetommy && musical.year === "2022"
+      );
+    }
+    if (userId === "bentothetop") {
+      return MUSICAL_LIST.filter(
+        (musical) => musical.userAttended.bentothetop && musical.year === "2022"
+      );
+    }
+    if (userId === "heartofsix") {
+      return MUSICAL_LIST.filter(
+        (musical) => musical.userAttended.heartofsix && musical.year === "2022"
+      );
+    }
+    if (userId === "suddenlykelsey") {
+      return MUSICAL_LIST.filter(
+        (musical) =>
+          musical.userAttended.suddenlykelsey && musical.year === "2022"
+      );
     } else if (userId === "musicalsandmayhem") {
       return MUSICAL_LIST.filter(
         (musical) => musical.groupAttended && musical.year === "2022"
@@ -496,6 +860,37 @@ export function getFeaturedMusicals(year: string, userId: string) {
   } else if (year === "2023") {
     if (userId === "all") {
       return MUSICAL_LIST.filter((musical) => musical.year === "2023");
+    }
+    if (userId === "beingdaniel") {
+      return MUSICAL_LIST.filter(
+        (musical) => musical.userAttended.beingdaniel && musical.year === "2023"
+      );
+    }
+    if (userId === "annabanza") {
+      return MUSICAL_LIST.filter(
+        (musical) => musical.userAttended.annabanza && musical.year === "2023"
+      );
+    }
+    if (userId === "callmetommy") {
+      return MUSICAL_LIST.filter(
+        (musical) => musical.userAttended.callmetommy && musical.year === "2023"
+      );
+    }
+    if (userId === "bentothetop") {
+      return MUSICAL_LIST.filter(
+        (musical) => musical.userAttended.bentothetop && musical.year === "2023"
+      );
+    }
+    if (userId === "heartofsix") {
+      return MUSICAL_LIST.filter(
+        (musical) => musical.userAttended.heartofsix && musical.year === "2023"
+      );
+    }
+    if (userId === "suddenlykelsey") {
+      return MUSICAL_LIST.filter(
+        (musical) =>
+          musical.userAttended.suddenlykelsey && musical.year === "2023"
+      );
     } else if (userId === "musicalsandmayhem") {
       return MUSICAL_LIST.filter(
         (musical) => musical.groupAttended && musical.year === "2023"
@@ -504,6 +899,37 @@ export function getFeaturedMusicals(year: string, userId: string) {
   } else if (year === "2024") {
     if (userId === "all") {
       return MUSICAL_LIST.filter((musical) => musical.year === "2024");
+    }
+    if (userId === "beingdaniel") {
+      return MUSICAL_LIST.filter(
+        (musical) => musical.userAttended.beingdaniel && musical.year === "2024"
+      );
+    }
+    if (userId === "annabanza") {
+      return MUSICAL_LIST.filter(
+        (musical) => musical.userAttended.annabanza && musical.year === "2024"
+      );
+    }
+    if (userId === "callmetommy") {
+      return MUSICAL_LIST.filter(
+        (musical) => musical.userAttended.callmetommy && musical.year === "2024"
+      );
+    }
+    if (userId === "bentothetop") {
+      return MUSICAL_LIST.filter(
+        (musical) => musical.userAttended.bentothetop && musical.year === "2024"
+      );
+    }
+    if (userId === "heartofsix") {
+      return MUSICAL_LIST.filter(
+        (musical) => musical.userAttended.heartofsix && musical.year === "2024"
+      );
+    }
+    if (userId === "suddenlykelsey") {
+      return MUSICAL_LIST.filter(
+        (musical) =>
+          musical.userAttended.suddenlykelsey && musical.year === "2024"
+      );
     } else if (userId === "musicalsandmayhem") {
       return MUSICAL_LIST.filter(
         (musical) => musical.groupAttended && musical.year === "2024"
@@ -512,6 +938,26 @@ export function getFeaturedMusicals(year: string, userId: string) {
   } else {
     if (userId === "all") {
       return MUSICAL_LIST;
+    }
+    if (userId === "beingdaniel") {
+      return MUSICAL_LIST.filter((musical) => musical.userAttended.beingdaniel);
+    }
+    if (userId === "annabanza") {
+      return MUSICAL_LIST.filter((musical) => musical.userAttended.annabanza);
+    }
+    if (userId === "callmetommy") {
+      return MUSICAL_LIST.filter((musical) => musical.userAttended.callmetommy);
+    }
+    if (userId === "bentothetop") {
+      return MUSICAL_LIST.filter((musical) => musical.userAttended.bentothetop);
+    }
+    if (userId === "heartofsix") {
+      return MUSICAL_LIST.filter((musical) => musical.userAttended.heartofsix);
+    }
+    if (userId === "suddenlykelsey") {
+      return MUSICAL_LIST.filter(
+        (musical) => musical.userAttended.suddenlykelsey
+      );
     } else if (userId === "musicalsandmayhem") {
       return MUSICAL_LIST.filter((musical) => musical.groupAttended);
     }

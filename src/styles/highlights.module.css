@@ -43,3 +43,9 @@ rouge = #e63946 = rgba(230, 57, 70, 1)
   width: 8px;
   border-radius: 50%;
 }
+
+@media (max-width: 600px) {
+.stuff {
+  font-size: 6px;
+}
+}

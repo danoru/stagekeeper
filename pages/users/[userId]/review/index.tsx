@@ -15,10 +15,10 @@ function ReviewPage(props: any) {
   return (
     <Fragment>
       <Head>
-        <title>StageKeeper: Year in Review</title>
+        <title>StageKeeper: All Time Statistics</title>
         <meta
           name="description"
-          content="See what your Year in Review looks like!"
+          content="See what your All Time Statistics looks like!"
         />
       </Head>
       <div>
@@ -52,8 +52,8 @@ export async function getStaticPaths() {
       { params: { userId: "heartofsix", year: "2022" } },
       { params: { userId: "heartofsix", year: "2023" } },
       // { params: { userId: "heartofsix", year: "2024" } },
-      // { params: { userId: "suddenlykelsey", year: "2022" } },
-      // { params: { userId: "suddenlykelsey", year: "2023" } },
+      { params: { userId: "suddenlykelsey", year: "2022" } },
+      { params: { userId: "suddenlykelsey", year: "2023" } },
       // { params: { userId: "suddenlykelsey", year: "2024" } },
       { params: { userId: "all", year: "2022" } },
       { params: { userId: "all", year: "2023" } },

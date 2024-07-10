@@ -2,7 +2,6 @@ import React from "react";
 import moment from "moment";
 import Typography from "@mui/material/Typography";
 import Carousel from "react-material-ui-carousel";
-
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";

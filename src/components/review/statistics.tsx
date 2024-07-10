@@ -1,11 +1,10 @@
+import Image from "next/image";
 import moment from "moment";
-
 import MusicalByPremiereChart from "./musical-by-premiere";
 import MonthlyAttendanceChart from "./monthly-attendance";
 import LocationsChart from "./locations-chart";
-
-import { MUSICAL_LIST_TYPE } from "../../types";
 import styles from "../../styles/statistics.module.css";
+import { MUSICAL_LIST_TYPE } from "../../types";
 
 interface Props {
   stats: MUSICAL_LIST_TYPE[];
@@ -106,10 +105,10 @@ function Statistics(props: Props) {
             </p>
           </div>
           <div className={styles.playbillRight}>
-            <img
+            <Image
               src={firstMusical.playbill}
-              width="58.44%"
-              height="89.29%"
+              width={210}
+              height={280}
               alt={firstMusical.title}
               style={{
                 borderRadius: "5%",
@@ -140,10 +139,10 @@ function Statistics(props: Props) {
             </p>
           </div>
           <div className={styles.playbillLeft}>
-            <img
+            <Image
               src={latestMusical.playbill}
-              width="58.44%"
-              height="68.81%"
+              width={210}
+              height={280}
               alt={latestMusical.title}
               style={{
                 borderRadius: "5%",
@@ -176,10 +175,10 @@ function Statistics(props: Props) {
             </p>
           </div>
           <div className={styles.playbillRight}>
-            <img
+            <Image
               src={oldestMusical.playbill}
-              width="58.44%"
-              height="89.29%"
+              width={210}
+              height={280}
               alt={oldestMusical.title}
               style={{
                 borderRadius: "5%",
@@ -210,10 +209,10 @@ function Statistics(props: Props) {
             </p>
           </div>
           <div className={styles.playbillLeft}>
-            <img
+            <Image
               src={newestMusical.playbill}
-              width="58.44%"
-              height="68.81%"
+              width={210}
+              height={280}
               alt={newestMusical.title}
               style={{
                 borderRadius: "5%",

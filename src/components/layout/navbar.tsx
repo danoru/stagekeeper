@@ -14,10 +14,10 @@ import MenuItem from "@mui/material/MenuItem";
 
 const pages = [
   { id: 1, title: "Review", link: "/users/all/review" },
-  { id: 2, title: "Upcoming", link: "/upcoming" },
+  // { id: 2, title: "Upcoming", link: "/upcoming" },
 ];
 const settings = [
-  { id: 1, title: "Profile", link: "/users/musicalsandmayhem" },
+  // { id: 1, title: "Profile", link: "/users/musicalsandmayhem" },
   { id: 2, title: "All-Time Stats", link: "/users/musicalsandmayhem/review" },
   {
     id: 3,
@@ -121,11 +121,9 @@ function Navbar() {
           </Box>
 
           <Box sx={{ flexGrow: 0 }}>
-            <Tooltip title="Open settings">
-              <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                <Avatar alt="Musicals & Mayhem" />
-              </IconButton>
-            </Tooltip>
+            <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+              <Avatar alt="Musicals & Mayhem" />
+            </IconButton>
             <Menu
               sx={{ mt: "45px" }}
               id="menu-appbar"

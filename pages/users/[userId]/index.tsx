@@ -3,6 +3,7 @@ import { filteredEventList } from "../../../src/data/events";
 import { List, ListItem, ListItemText } from "@mui/material";
 
 import EventCalendar from "../../../src/components/schedule/event-calendar";
+import moment from "moment";
 
 function ProfilePage() {
   const humanReadableUsername = () => {
@@ -21,10 +22,6 @@ function ProfilePage() {
   return (
     <div>
       <h1>Hello, {humanReadableUsername()}!</h1>
-      <p>
-        This page is under construction. Know what you'd want to see here?
-        Contact the administrator with your ideas!
-      </p>
       <EventCalendar />
       <div>
         <h1>Upcoming Events</h1>
@@ -33,7 +30,11 @@ function ProfilePage() {
             return (
               <ListItem key={event.id}>
                 <ListItemText
-                  primary={`You have an upcoming event, ${event.title}, on ${event.start}, at ${event.playhouse} in ${event.location}`}
+                  primary={`You have an upcoming event, ${
+                    event.title
+                  }, on ${moment(event.start).format("LLL")}, at ${
+                    event.playhouse
+                  } in ${event.location}.`}
                 />
               </ListItem>
             );

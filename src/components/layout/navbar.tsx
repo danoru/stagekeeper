@@ -9,12 +9,13 @@ import MenuIcon from "@mui/icons-material/Menu";
 import Container from "@mui/material/Container";
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
-import Tooltip from "@mui/material/Tooltip";
 import MenuItem from "@mui/material/MenuItem";
 
 const pages = [
-  { id: 1, title: "Review", link: "/users/all/review" },
-  // { id: 2, title: "Upcoming", link: "/upcoming" },
+  { id: 1, title: "Musicals", link: "/musicals" },
+  { id: 2, title: "Theatres", link: "/theatres" },
+  { id: 3, title: "Review", link: "/users/all/review" },
+  // { id: 4, title: "Upcoming", link: "/upcoming" },
 ];
 const settings = [
   // { id: 1, title: "Profile", link: "/users/musicalsandmayhem" },

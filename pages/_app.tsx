@@ -4,7 +4,7 @@ import { CacheProvider, EmotionCache } from "@emotion/react";
 import { ThemeProvider, CssBaseline, createTheme } from "@mui/material";
 import Navbar from "../src/components/layout/navbar";
 
-import createEmotionCache from "../src/utility/createEmotionCache";
+import createEmotionCache from "../src/utils/createEmotionCache";
 import darkThemeOptions from "../src/styles/theme/darkThemeOptions";
 import "../src/styles/globals.css";
 

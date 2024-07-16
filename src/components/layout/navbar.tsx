@@ -14,7 +14,7 @@ import MenuItem from "@mui/material/MenuItem";
 const pages = [
   { id: 1, title: "Musicals", link: "/musicals" },
   { id: 2, title: "Theatres", link: "/theatres" },
-  { id: 3, title: "Review", link: "/users/all/review" },
+  { id: 3, title: "Users", link: "/users/" },
   // { id: 4, title: "Upcoming", link: "/upcoming" },
 ];
 const settings = [

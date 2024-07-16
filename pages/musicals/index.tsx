@@ -20,7 +20,9 @@ function MusicalsPage({ musicals }: Props) {
           <InfoCard
             key={i}
             name={musical.title}
-            link={musical.title.replace(/\s+/g, "").toLowerCase()}
+            link={`/musicals/${musical.title
+              .replace(/\s+/g, "")
+              .toLowerCase()}`}
             image={musical.playbill}
           />
         ))}

@@ -407,3 +407,27 @@ export async function getMusicals() {
   });
   return musicals;
 }
+
+export async function getMusicalByTitle(musicalTitle: string) {
+  const formattedTitle = musicalTitle.replace(/\s+/g, "").toLowerCase();
+  const musicals = await prisma.musicals.findMany({
+    select: {
+      title: true,
+    },
+  });
+
+  const matchedMusical = musicals.find(
+    (musical) =>
+      musical.title.replace(/\s+/g, "").toLowerCase() === formattedTitle
+  );
+
+  if (matchedMusical) {
+    const musical = await prisma.musicals.findFirst({
+      where: {
+        title: matchedMusical.title,
+      },
+    });
+    return musical;
+  }
+  return null;
+}

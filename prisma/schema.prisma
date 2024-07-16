@@ -1,0 +1,109 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  directUrl  = env("DIRECT_URL")
+  extensions = [uuid_ossp(map: "uuid-ossp", schema: "extensions")]
+}
+
+model attendance {
+  id           Int          @id @default(autoincrement())
+  event        Int
+  attendant    Int?
+  createdAt    DateTime     @default(now()) @db.Timestamptz(6)
+  users        users?       @relation(fields: [attendant], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  performances performances @relation(fields: [event], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model groups {
+  id    Int     @id(map: "group_pkey") @default(autoincrement())
+  name  String?
+  users users[]
+}
+
+model musicals {
+  id           Int            @id @default(autoincrement())
+  title        String         @unique
+  playbill     String?
+  duration     Int?
+  musicBy      String
+  lyricsBy     String
+  bookBy       String
+  premiere     DateTime?      @db.Date
+  performances performances[]
+  programming  programming[]
+}
+
+model performances {
+  id         Int          @id(map: "showings_pkey") @default(autoincrement())
+  musical    Int
+  theatre    Int
+  startTime  DateTime     @db.Timestamptz(6)
+  endTime    DateTime     @db.Timestamptz(6)
+  rating     Decimal?     @db.Decimal
+  comment    String?
+  createdAt  DateTime     @default(now()) @db.Timestamptz(6)
+  attendance attendance[]
+  musicals   musicals     @relation(fields: [musical], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "showings_musical_fkey")
+  theatres   theatres     @relation(fields: [theatre], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "showings_theatre_fkey")
+}
+
+model programming {
+  id        Int       @id @default(autoincrement())
+  createdAt DateTime  @default(now()) @db.Timestamptz(6)
+  musical   Int
+  season    Int
+  endDate   DateTime? @db.Date
+  startDate DateTime? @db.Date
+  musicals  musicals  @relation(fields: [musical], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  seasons   seasons   @relation(fields: [season], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model seasons {
+  id          Int           @id @default(autoincrement())
+  createdAt   DateTime      @default(now()) @db.Timestamptz(6)
+  theatre     Int
+  name        String
+  startDate   DateTime      @db.Date
+  endDate     DateTime      @db.Date
+  programming programming[]
+  theatres    theatres      @relation(fields: [theatre], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model theatres {
+  id           Int            @id(map: "playhouses_pkey") @default(autoincrement())
+  name         String
+  location     String
+  image        String?
+  address      String?
+  performances performances[]
+  seasons      seasons[]
+}
+
+model users {
+  id         Int          @id @default(autoincrement())
+  createdAt  DateTime     @default(now()) @db.Timestamptz(6)
+  username   String       @unique
+  email      String       @unique
+  password   String
+  firstName  String?
+  lastName   String?
+  location   String?
+  website    String?
+  bio        String?
+  image      String?
+  badge      Badge        @default(USER)
+  inGroup    Int?
+  attendance attendance[]
+  groups     groups?      @relation(fields: [inGroup], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+enum Badge {
+  ADMIN
+  PATRON
+  USER
+}

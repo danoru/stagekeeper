@@ -123,23 +123,42 @@ export async function getTheatres() {
 }
 
 export async function getTheatreByName(theatreName: string) {
-  const theatre = await prisma.theatres.findFirst({
-    where: {
-      name: theatreName,
+  const formattedName = theatreName.replace(/\s+/g, "").toLowerCase();
+  const theatres = await prisma.theatres.findMany({
+    select: {
+      name: true,
     },
   });
-  return theatre;
+
+  const matchedTheatre = theatres.find(
+    (theatre) =>
+      theatre.name.replace(/\s+/g, "").toLowerCase() === formattedName
+  );
+
+  if (matchedTheatre) {
+    const theatre = await prisma.theatres.findFirst({
+      where: {
+        name: matchedTheatre.name,
+      },
+    });
+    return theatre;
+  }
+  return null;
 }
 
 export async function getSeasons(theatreId: number) {
-  const season = await prisma.theatres.findUnique({
+  const seasons = await prisma.seasons.findMany({
     where: {
-      id: theatreId,
+      theatre: theatreId,
     },
     include: {
-      seasons: { include: { programming: { include: { musicals: true } } } },
+      programming: {
+        include: {
+          musicals: true,
+        },
+      },
     },
   });
 
-  return season;
+  return seasons;
 }

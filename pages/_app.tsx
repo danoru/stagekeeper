@@ -1,43 +1,50 @@
 import * as React from "react";
 import createEmotionCache from "../src/utils/createEmotionCache";
 import darkThemeOptions from "../src/styles/theme/darkThemeOptions";
-import { Decimal } from "decimal.js";
 import Head from "next/head";
-import Navbar from "../src/components/layout/navbar";
+import Navbar from "../src/components/layout/Navbar";
+import PropTypes from "prop-types";
 import superjson from "superjson";
-import type { AppProps } from "next/app";
-import { CacheProvider, EmotionCache } from "@emotion/react";
+import { CacheProvider } from "@emotion/react";
+import { Decimal } from "decimal.js";
+import { SessionProvider } from "next-auth/react";
 import { ThemeProvider, CssBaseline, createTheme } from "@mui/material";
+import type { AppProps } from "next/app";
 import "../src/styles/globals.css";
-
-interface MyAppProps extends AppProps {
-  emotionCache?: EmotionCache;
-}
 
 const clientSideEmotionCache = createEmotionCache();
 
 const darkTheme = createTheme(darkThemeOptions);
 
-const MyApp: React.FunctionComponent<MyAppProps> = (props: any) => {
-  const { Component, emotionCache = clientSideEmotionCache, pageProps } = props;
+export default function App(props: AppProps) {
+  const { Component, pageProps } = props;
+  const emotionCache = clientSideEmotionCache;
 
   return (
-    <CacheProvider value={emotionCache}>
-      <ThemeProvider theme={darkTheme}>
-        <Head>
-          <title>StageKeeper</title>
-          <meta charSet="utf-8" />
-          <meta
-            name="viewport"
-            content="initial-scale=1.0, width=device-width"
-          />
-        </Head>
-        <CssBaseline />
-        <Navbar />
-        <Component {...pageProps} />
-      </ThemeProvider>
-    </CacheProvider>
+    <SessionProvider>
+      <CacheProvider value={emotionCache}>
+        <ThemeProvider theme={darkTheme}>
+          <Head>
+            <title>StageKeeper</title>
+            <meta charSet="utf-8" />
+            <meta
+              name="viewport"
+              content="initial-scale=1.0, width=device-width"
+            />
+          </Head>
+          <CssBaseline />
+          <Navbar />
+          <Component {...pageProps} />
+        </ThemeProvider>
+      </CacheProvider>
+    </SessionProvider>
   );
+}
+
+App.propTypes = {
+  Component: PropTypes.elementType.isRequired,
+  emotionCache: PropTypes.object,
+  pageProps: PropTypes.object.isRequired,
 };
 
 superjson.registerCustom<Decimal, string>(
@@ -48,5 +55,3 @@ superjson.registerCustom<Decimal, string>(
   },
   "decimal.js"
 );
-
-export default MyApp;

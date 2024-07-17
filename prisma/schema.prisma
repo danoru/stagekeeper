@@ -12,11 +12,13 @@ datasource db {
 
 model attendance {
   id           Int          @id @default(autoincrement())
-  event        Int
-  attendant    Int?
+  performance  Int
+  user         Int?
   createdAt    DateTime     @default(now()) @db.Timestamptz(6)
-  users        users?       @relation(fields: [attendant], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  performances performances @relation(fields: [event], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  rating       Decimal?     @db.Decimal
+  comment      String?
+  users        users?       @relation(fields: [user], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  performances performances @relation(fields: [performance], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model groups {
@@ -36,6 +38,7 @@ model musicals {
   premiere     DateTime?      @db.Date
   performances performances[]
   programming  programming[]
+  watchlist    watchlist[]
 }
 
 model performances {
@@ -44,8 +47,6 @@ model performances {
   theatre    Int
   startTime  DateTime     @db.Timestamptz(6)
   endTime    DateTime     @db.Timestamptz(6)
-  rating     Decimal?     @db.Decimal
-  comment    String?
   createdAt  DateTime     @default(now()) @db.Timestamptz(6)
   attendance attendance[]
   musicals   musicals     @relation(fields: [musical], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "showings_musical_fkey")
@@ -100,6 +101,16 @@ model users {
   inGroup    Int?
   attendance attendance[]
   groups     groups?      @relation(fields: [inGroup], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  watchlist  watchlist[]
+}
+
+model watchlist {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  user      Int
+  musical   Int
+  musicals  musicals @relation(fields: [musical], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users     users?   @relation(fields: [user], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 enum Badge {

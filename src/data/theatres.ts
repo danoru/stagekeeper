@@ -122,6 +122,22 @@ export async function getTheatres() {
   return theatres;
 }
 
+export async function getPaginatedTheatres(
+  page: number = 1,
+  limit: number = 10
+) {
+  const skip = (page - 1) * limit;
+  const theatres = await prisma.theatres.findMany({
+    orderBy: {
+      name: "asc",
+    },
+    skip,
+    take: limit,
+  });
+  const theatreCount = await prisma.theatres.count();
+  return { theatres, theatreCount };
+}
+
 export async function getTheatreByName(theatreName: string) {
   const formattedName = theatreName.replace(/\s+/g, "").toLowerCase();
   const theatres = await prisma.theatres.findMany({

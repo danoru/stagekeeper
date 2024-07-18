@@ -15,7 +15,7 @@ function ReviewPage(props: any) {
   return (
     <Fragment>
       <Head>
-        <title>StageKeeper: All Time Statistics</title>
+        <title>All Time Statistics • StageKeeper</title>
         <meta
           name="description"
           content="See what your All Time Statistics looks like!"

@@ -15,7 +15,7 @@ function ReviewPage(props: any) {
   return (
     <Fragment>
       <Head>
-        <title>StageKeeper: Year in Review</title>
+        <title>Year in Review • StageKeeper</title>
         <meta
           name="description"
           content="See what your Year in Review looks like!"

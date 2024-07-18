@@ -408,6 +408,22 @@ export async function getMusicals() {
   return musicals;
 }
 
+export async function getPaginatedMusicals(
+  page: number = 1,
+  limit: number = 10
+) {
+  const skip = (page - 1) * limit;
+  const musicals = await prisma.musicals.findMany({
+    orderBy: {
+      title: "asc",
+    },
+    skip,
+    take: limit,
+  });
+  const musicalCount = await prisma.musicals.count();
+  return { musicals, musicalCount };
+}
+
 export async function getMusicalByTitle(musicalTitle: string) {
   const formattedTitle = musicalTitle.replace(/\s+/g, "").toLowerCase();
   const musicals = await prisma.musicals.findMany({

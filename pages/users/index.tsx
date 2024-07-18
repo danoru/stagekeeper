@@ -41,12 +41,15 @@ function UsersPage({ users }: Props) {
                 sx={{ alignItems: "center", paddingLeft: "10px" }}
               >
                 <div style={{ width: "25%" }}>
-                  <Link href={`/${user.username}`} underline="none">
+                  <Link href={`/users/${user.username}`} underline="none">
                     {user.username}
                   </Link>
                 </div>
                 <div style={{ width: "25%" }}>
-                  <Link href={`/${user.username}/musicals`} underline="none">
+                  <Link
+                    href={`/users/${user.username}/musicals`}
+                    underline="none"
+                  >
                     <Tooltip
                       title={`${user.username}'s Musicals`}
                       placement="top-start"
@@ -57,7 +60,7 @@ function UsersPage({ users }: Props) {
                 </div>
                 <div style={{ width: "25%" }}>
                   <Link
-                    href={`users/${user.username}/watchlist`}
+                    href={`/users/${user.username}/watchlist`}
                     underline="none"
                   >
                     <Tooltip
@@ -69,7 +72,7 @@ function UsersPage({ users }: Props) {
                   </Link>
                 </div>
                 <div style={{ width: "25%" }}>
-                  <Link href={`users/${user.username}/likes`} underline="none">
+                  <Link href={`/users/${user.username}/likes`} underline="none">
                     <Tooltip
                       title={`${user.username}'s Likes`}
                       placement="top-start"

@@ -17,7 +17,7 @@ interface Props {
 }
 
 function MusicalPage({ musical }: Props) {
-  const title = `${musical.title} • Savry`;
+  const title = `${musical.title} • StageKeeper`;
 
   return (
     <div>

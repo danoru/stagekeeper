@@ -3,7 +3,6 @@ import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import moment from "moment";
 import { musicals, programming } from "@prisma/client";
-import "react-big-calendar/lib/css/react-big-calendar.css";
 
 interface Props {
   theatreName: string;

@@ -1,8 +1,6 @@
 import { useRouter } from "next/router";
 import { filteredEventList } from "../../../src/data/events";
 import { List, ListItem, ListItemText } from "@mui/material";
-
-import EventCalendar from "../../../src/components/schedule/event-calendar";
 import moment from "moment";
 
 function ProfilePage() {
@@ -22,7 +20,7 @@ function ProfilePage() {
   return (
     <div>
       <h1>Hello, {humanReadableUsername()}!</h1>
-      <EventCalendar />
+      {/* <EventCalendar /> */}
       <div>
         <h1>Upcoming Events</h1>
         <List>

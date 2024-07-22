@@ -18,7 +18,7 @@ function getPages(session: any) {
       {
         id: 1,
         title: session.user.username,
-        link: `/${session.user.username}`,
+        link: `/users/${session.user.username}`,
       },
       { id: 2, title: "Musicals", link: "/musicals" },
       { id: 3, title: "Theatres", link: "/theatres" },

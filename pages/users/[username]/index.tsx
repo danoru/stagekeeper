@@ -3,23 +3,13 @@ import { filteredEventList } from "../../../src/data/events";
 import { List, ListItem, ListItemText } from "@mui/material";
 import moment from "moment";
 
-function ProfilePage() {
-  const humanReadableUsername = () => {
-    const router = useRouter();
-    const userId = router.query.userId;
-
-    if (userId === "musicalsandmayhem") {
-      return "Musicals and Mayhem";
-    } else if (userId === "all") {
-      return "Everyone";
-    } else {
-      return userId;
-    }
-  };
+function ProfilePage(session: any) {
+  const router = useRouter();
+  const username = router.query.username;
 
   return (
     <div>
-      <h1>Hello, {humanReadableUsername()}!</h1>
+      <h1>Hello, {username}!</h1>
       {/* <EventCalendar /> */}
       <div>
         <h1>Upcoming Events</h1>

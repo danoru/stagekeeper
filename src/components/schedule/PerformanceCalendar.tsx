@@ -82,8 +82,6 @@ function PerformanceCalendar({ viewType, identifier }: Props) {
             Math.min(...allEvents.map((e) => e.start.getTime()))
           );
           setInitialDate(earliestDate);
-          console.log(initialDate);
-          console.log(earliestDate);
         }
 
         setEvents(allEvents);

@@ -21,24 +21,42 @@ model attendance {
   performances performances @relation(fields: [performance], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
+model following {
+  user              Int
+  followingUsername String
+  users             users  @relation(fields: [user], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([user, followingUsername])
+}
+
 model groups {
   id    Int     @id(map: "group_pkey") @default(autoincrement())
   name  String?
   users users[]
 }
 
+model likedMusicals {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  user      Int
+  musical   Int
+  musicals  musicals @relation(fields: [musical], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users     users?   @relation(fields: [user], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
 model musicals {
-  id           Int            @id @default(autoincrement())
-  title        String         @unique
-  playbill     String?
-  duration     Int?
-  musicBy      String
-  lyricsBy     String
-  bookBy       String
-  premiere     DateTime?      @db.Date
-  performances performances[]
-  programming  programming[]
-  watchlist    watchlist[]
+  id            Int             @id @default(autoincrement())
+  title         String          @unique
+  playbill      String?
+  duration      Int?
+  musicBy       String
+  lyricsBy      String
+  bookBy        String
+  premiere      DateTime?       @db.Date
+  performances  performances[]
+  programming   programming[]
+  watchlist     watchlist[]
+  likedMusicals likedMusicals[]
 }
 
 model performances {
@@ -58,8 +76,8 @@ model programming {
   createdAt DateTime  @default(now()) @db.Timestamptz(6)
   musical   Int
   season    Int
-  endDate   DateTime? @db.Date
   startDate DateTime? @db.Date
+  endDate   DateTime? @db.Date
   musicals  musicals  @relation(fields: [musical], references: [id], onDelete: NoAction, onUpdate: NoAction)
   seasons   seasons   @relation(fields: [season], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
@@ -86,22 +104,24 @@ model theatres {
 }
 
 model users {
-  id         Int          @id @default(autoincrement())
-  createdAt  DateTime     @default(now()) @db.Timestamptz(6)
-  username   String       @unique
-  email      String       @unique
-  password   String
-  firstName  String?
-  lastName   String?
-  location   String?
-  website    String?
-  bio        String?
-  image      String?
-  badge      Badge        @default(USER)
-  inGroup    Int?
-  attendance attendance[]
-  groups     groups?      @relation(fields: [inGroup], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  watchlist  watchlist[]
+  id            Int             @id @default(autoincrement())
+  createdAt     DateTime        @default(now()) @db.Timestamptz(6)
+  username      String          @unique
+  email         String          @unique
+  password      String
+  firstName     String?
+  lastName      String?
+  location      String?
+  website       String?
+  bio           String?
+  image         String?
+  badge         Badge           @default(USER)
+  inGroup       Int?
+  attendance    attendance[]
+  groups        groups?         @relation(fields: [inGroup], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  watchlist     watchlist[]
+  likedMusicals likedMusicals[]
+  following     following[]
 }
 
 model watchlist {

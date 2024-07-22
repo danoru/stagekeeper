@@ -25,7 +25,7 @@ export interface EVENT_LIST_TYPE {
 
 export interface USER_ATTENDANCE_TYPE {
   musicalsandmayhem: boolean; // Group
-  beingdaniel: boolean; // Daniel
+  danoru: boolean; // Daniel
   annabanza: boolean; // Anna
   bentothetop: boolean; // Ben
   callmetommy: boolean; // Tommy

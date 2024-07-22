@@ -34,40 +34,40 @@ function ReviewPage(props: any) {
 export async function getStaticPaths() {
   return {
     paths: [
-      { params: { userId: "musicalsandmayhem", year: "2022" } },
-      { params: { userId: "musicalsandmayhem", year: "2023" } },
-      { params: { userId: "musicalsandmayhem", year: "2024" } },
-      { params: { userId: "beingdaniel", year: "2022" } },
-      { params: { userId: "beingdaniel", year: "2023" } },
-      { params: { userId: "beingdaniel", year: "2024" } },
-      { params: { userId: "annabanza", year: "2022" } },
-      { params: { userId: "annabanza", year: "2023" } },
-      { params: { userId: "annabanza", year: "2024" } },
-      { params: { userId: "callmetommy", year: "2022" } },
-      { params: { userId: "callmetommy", year: "2023" } },
-      // { params: { userId: "callmetommy", year: "2024" } },
-      // { params: { userId: "bentothetop", year: "2022" } },
-      // { params: { userId: "bentothetop", year: "2023" } },
-      // { params: { userId: "bentothetop", year: "2024" } },
-      { params: { userId: "heartofsix", year: "2022" } },
-      { params: { userId: "heartofsix", year: "2023" } },
-      // { params: { userId: "heartofsix", year: "2024" } },
-      { params: { userId: "suddenlykelsey", year: "2022" } },
-      { params: { userId: "suddenlykelsey", year: "2023" } },
-      // { params: { userId: "suddenlykelsey", year: "2024" } },
-      { params: { userId: "all", year: "2022" } },
-      { params: { userId: "all", year: "2023" } },
-      { params: { userId: "all", year: "2024" } },
+      { params: { username: "musicalsandmayhem", year: "2022" } },
+      { params: { username: "musicalsandmayhem", year: "2023" } },
+      { params: { username: "musicalsandmayhem", year: "2024" } },
+      { params: { username: "danoru", year: "2022" } },
+      { params: { username: "danoru", year: "2023" } },
+      { params: { username: "danoru", year: "2024" } },
+      { params: { username: "annabanza", year: "2022" } },
+      { params: { username: "annabanza", year: "2023" } },
+      { params: { username: "annabanza", year: "2024" } },
+      { params: { username: "callmetommy", year: "2022" } },
+      { params: { username: "callmetommy", year: "2023" } },
+      // { params: { username: "callmetommy", year: "2024" } },
+      // { params: { username: "bentothetop", year: "2022" } },
+      // { params: { username: "bentothetop", year: "2023" } },
+      // { params: { username: "bentothetop", year: "2024" } },
+      { params: { username: "heartofsix", year: "2022" } },
+      { params: { username: "heartofsix", year: "2023" } },
+      // { params: { username: "heartofsix", year: "2024" } },
+      { params: { username: "suddenlykelsey", year: "2022" } },
+      { params: { username: "suddenlykelsey", year: "2023" } },
+      // { params: { username: "suddenlykelsey", year: "2024" } },
+      { params: { username: "all", year: "2022" } },
+      { params: { username: "all", year: "2023" } },
+      { params: { username: "all", year: "2024" } },
     ],
     fallback: false,
   };
 }
 
 export async function getStaticProps(context: any) {
-  const userId = context.params.userId;
+  const username = context.params.username;
   const year = context.params.year;
 
-  let featuredMusicals = getFeaturedMusicals(year, userId);
+  let featuredMusicals = getFeaturedMusicals(year, username);
 
   return {
     props: {

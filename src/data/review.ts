@@ -14,7 +14,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     groupAttended: false,
     userAttended: {
       musicalsandmayhem: false,
-      beingdaniel: true,
+      danoru: true,
       annabanza: true,
       bentothetop: false,
       callmetommy: false,
@@ -36,7 +36,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     groupAttended: true,
     userAttended: {
       musicalsandmayhem: true,
-      beingdaniel: true,
+      danoru: true,
       annabanza: true,
       bentothetop: false,
       callmetommy: false,
@@ -58,7 +58,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     groupAttended: true,
     userAttended: {
       musicalsandmayhem: true,
-      beingdaniel: true,
+      danoru: true,
       annabanza: true,
       bentothetop: true,
       callmetommy: true,
@@ -80,7 +80,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     groupAttended: true,
     userAttended: {
       musicalsandmayhem: true,
-      beingdaniel: true,
+      danoru: true,
       annabanza: true,
       bentothetop: false,
       callmetommy: false,
@@ -102,7 +102,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     groupAttended: false,
     userAttended: {
       musicalsandmayhem: false,
-      beingdaniel: true,
+      danoru: true,
       annabanza: true,
       bentothetop: false,
       callmetommy: false,
@@ -124,7 +124,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     groupAttended: false,
     userAttended: {
       musicalsandmayhem: false,
-      beingdaniel: true,
+      danoru: true,
       annabanza: true,
       bentothetop: false,
       callmetommy: false,
@@ -146,7 +146,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     groupAttended: true,
     userAttended: {
       musicalsandmayhem: true,
-      beingdaniel: true,
+      danoru: true,
       annabanza: true,
       bentothetop: false,
       callmetommy: true,
@@ -168,7 +168,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     groupAttended: false,
     userAttended: {
       musicalsandmayhem: false,
-      beingdaniel: true,
+      danoru: true,
       annabanza: true,
       bentothetop: false,
       callmetommy: false,
@@ -190,7 +190,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     groupAttended: false,
     userAttended: {
       musicalsandmayhem: false,
-      beingdaniel: true,
+      danoru: true,
       annabanza: true,
       bentothetop: false,
       callmetommy: false,
@@ -212,7 +212,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     groupAttended: false,
     userAttended: {
       musicalsandmayhem: false,
-      beingdaniel: true,
+      danoru: true,
       annabanza: true,
       bentothetop: false,
       callmetommy: false,
@@ -234,7 +234,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     groupAttended: true,
     userAttended: {
       musicalsandmayhem: true,
-      beingdaniel: true,
+      danoru: true,
       annabanza: true,
       bentothetop: false,
       callmetommy: true,
@@ -256,7 +256,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     groupAttended: true,
     userAttended: {
       musicalsandmayhem: true,
-      beingdaniel: true,
+      danoru: true,
       annabanza: true,
       bentothetop: true,
       callmetommy: false,
@@ -278,7 +278,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     groupAttended: false,
     userAttended: {
       musicalsandmayhem: false,
-      beingdaniel: true,
+      danoru: true,
       annabanza: true,
       bentothetop: false,
       callmetommy: false,
@@ -300,7 +300,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     groupAttended: true,
     userAttended: {
       musicalsandmayhem: true,
-      beingdaniel: true,
+      danoru: true,
       annabanza: true,
       bentothetop: false,
       callmetommy: false,
@@ -322,7 +322,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     groupAttended: true,
     userAttended: {
       musicalsandmayhem: true,
-      beingdaniel: true,
+      danoru: true,
       annabanza: true,
       bentothetop: false,
       callmetommy: true,
@@ -344,7 +344,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     groupAttended: true,
     userAttended: {
       musicalsandmayhem: true,
-      beingdaniel: true,
+      danoru: true,
       annabanza: true,
       bentothetop: false,
       callmetommy: true,
@@ -366,7 +366,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     groupAttended: false,
     userAttended: {
       musicalsandmayhem: false,
-      beingdaniel: true,
+      danoru: true,
       annabanza: true,
       bentothetop: false,
       callmetommy: false,
@@ -388,7 +388,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     groupAttended: true,
     userAttended: {
       musicalsandmayhem: true,
-      beingdaniel: true,
+      danoru: true,
       annabanza: true,
       bentothetop: false,
       callmetommy: true,
@@ -410,7 +410,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     groupAttended: true,
     userAttended: {
       musicalsandmayhem: true,
-      beingdaniel: true,
+      danoru: true,
       annabanza: true,
       bentothetop: true,
       callmetommy: true,
@@ -432,7 +432,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     groupAttended: true,
     userAttended: {
       musicalsandmayhem: true,
-      beingdaniel: true,
+      danoru: true,
       annabanza: true,
       bentothetop: false,
       callmetommy: true,
@@ -454,7 +454,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     groupAttended: true,
     userAttended: {
       musicalsandmayhem: true,
-      beingdaniel: true,
+      danoru: true,
       annabanza: true,
       bentothetop: false,
       callmetommy: false,
@@ -476,7 +476,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     groupAttended: true,
     userAttended: {
       musicalsandmayhem: true,
-      beingdaniel: true,
+      danoru: true,
       annabanza: true,
       bentothetop: false,
       callmetommy: true,
@@ -498,7 +498,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     groupAttended: true,
     userAttended: {
       musicalsandmayhem: true,
-      beingdaniel: true,
+      danoru: true,
       annabanza: true,
       bentothetop: false,
       callmetommy: true,
@@ -520,7 +520,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     groupAttended: true,
     userAttended: {
       musicalsandmayhem: true,
-      beingdaniel: true,
+      danoru: true,
       annabanza: true,
       bentothetop: false,
       callmetommy: true,
@@ -542,7 +542,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     groupAttended: true,
     userAttended: {
       musicalsandmayhem: true,
-      beingdaniel: true,
+      danoru: true,
       annabanza: true,
       bentothetop: false,
       callmetommy: true,
@@ -564,7 +564,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     groupAttended: true,
     userAttended: {
       musicalsandmayhem: true,
-      beingdaniel: true,
+      danoru: true,
       annabanza: true,
       bentothetop: false,
       callmetommy: true,
@@ -586,7 +586,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     groupAttended: true,
     userAttended: {
       musicalsandmayhem: true,
-      beingdaniel: true,
+      danoru: true,
       annabanza: true,
       bentothetop: true,
       callmetommy: false,
@@ -608,7 +608,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     groupAttended: true,
     userAttended: {
       musicalsandmayhem: true,
-      beingdaniel: true,
+      danoru: true,
       annabanza: true,
       bentothetop: false,
       callmetommy: false,
@@ -630,7 +630,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     groupAttended: true,
     userAttended: {
       musicalsandmayhem: true,
-      beingdaniel: true,
+      danoru: true,
       annabanza: true,
       bentothetop: false,
       callmetommy: false,
@@ -652,7 +652,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     groupAttended: true,
     userAttended: {
       musicalsandmayhem: true,
-      beingdaniel: true,
+      danoru: true,
       annabanza: true,
       bentothetop: false,
       callmetommy: true,
@@ -674,7 +674,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     groupAttended: true,
     userAttended: {
       musicalsandmayhem: true,
-      beingdaniel: true,
+      danoru: true,
       annabanza: true,
       bentothetop: false,
       callmetommy: false,
@@ -696,7 +696,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     groupAttended: true,
     userAttended: {
       musicalsandmayhem: true,
-      beingdaniel: true,
+      danoru: true,
       annabanza: true,
       bentothetop: false,
       callmetommy: false,
@@ -718,7 +718,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     groupAttended: true,
     userAttended: {
       musicalsandmayhem: true,
-      beingdaniel: true,
+      danoru: true,
       annabanza: true,
       bentothetop: false,
       callmetommy: true,
@@ -740,7 +740,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     groupAttended: true,
     userAttended: {
       musicalsandmayhem: true,
-      beingdaniel: true,
+      danoru: true,
       annabanza: true,
       bentothetop: false,
       callmetommy: true,
@@ -762,7 +762,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     groupAttended: false,
     userAttended: {
       musicalsandmayhem: false,
-      beingdaniel: true,
+      danoru: true,
       annabanza: true,
       bentothetop: false,
       callmetommy: false,
@@ -784,7 +784,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     groupAttended: true,
     userAttended: {
       musicalsandmayhem: true,
-      beingdaniel: true,
+      danoru: true,
       annabanza: true,
       bentothetop: true,
       callmetommy: false,
@@ -806,7 +806,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     groupAttended: false,
     userAttended: {
       musicalsandmayhem: false,
-      beingdaniel: true,
+      danoru: true,
       annabanza: true,
       bentothetop: false,
       callmetommy: false,
@@ -828,7 +828,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     groupAttended: true,
     userAttended: {
       musicalsandmayhem: true,
-      beingdaniel: true,
+      danoru: true,
       annabanza: true,
       bentothetop: true,
       callmetommy: true,
@@ -850,7 +850,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     groupAttended: true,
     userAttended: {
       musicalsandmayhem: true,
-      beingdaniel: true,
+      danoru: true,
       annabanza: true,
       bentothetop: true,
       callmetommy: false,
@@ -872,7 +872,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     groupAttended: true,
     userAttended: {
       musicalsandmayhem: true,
-      beingdaniel: true,
+      danoru: true,
       annabanza: true,
       bentothetop: true,
       callmetommy: false,
@@ -894,7 +894,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     groupAttended: false,
     userAttended: {
       musicalsandmayhem: false,
-      beingdaniel: true,
+      danoru: true,
       annabanza: true,
       bentothetop: false,
       callmetommy: false,
@@ -916,7 +916,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     groupAttended: true,
     userAttended: {
       musicalsandmayhem: true,
-      beingdaniel: true,
+      danoru: true,
       annabanza: true,
       bentothetop: false,
       callmetommy: true,
@@ -938,7 +938,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
     groupAttended: true,
     userAttended: {
       musicalsandmayhem: true,
-      beingdaniel: true,
+      danoru: true,
       annabanza: true,
       bentothetop: true,
       callmetommy: true,
@@ -949,148 +949,148 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
   },
 ];
 
-export function getFeaturedMusicals(year: string, userId: string) {
+export function getFeaturedMusicals(year: string, username: string) {
   if (year === "2022") {
-    if (userId === "all") {
+    if (username === "all") {
       return MUSICAL_LIST.filter((musical) => musical.year === "2022");
     }
-    if (userId === "beingdaniel") {
+    if (username === "danoru") {
       return MUSICAL_LIST.filter(
-        (musical) => musical.userAttended.beingdaniel && musical.year === "2022"
+        (musical) => musical.userAttended.danoru && musical.year === "2022"
       );
     }
-    if (userId === "annabanza") {
+    if (username === "annabanza") {
       return MUSICAL_LIST.filter(
         (musical) => musical.userAttended.annabanza && musical.year === "2022"
       );
     }
-    if (userId === "callmetommy") {
+    if (username === "callmetommy") {
       return MUSICAL_LIST.filter(
         (musical) => musical.userAttended.callmetommy && musical.year === "2022"
       );
     }
-    if (userId === "bentothetop") {
+    if (username === "bentothetop") {
       return MUSICAL_LIST.filter(
         (musical) => musical.userAttended.bentothetop && musical.year === "2022"
       );
     }
-    if (userId === "heartofsix") {
+    if (username === "heartofsix") {
       return MUSICAL_LIST.filter(
         (musical) => musical.userAttended.heartofsix && musical.year === "2022"
       );
     }
-    if (userId === "suddenlykelsey") {
+    if (username === "suddenlykelsey") {
       return MUSICAL_LIST.filter(
         (musical) =>
           musical.userAttended.suddenlykelsey && musical.year === "2022"
       );
-    } else if (userId === "musicalsandmayhem") {
+    } else if (username === "musicalsandmayhem") {
       return MUSICAL_LIST.filter(
         (musical) => musical.groupAttended && musical.year === "2022"
       );
     }
   } else if (year === "2023") {
-    if (userId === "all") {
+    if (username === "all") {
       return MUSICAL_LIST.filter((musical) => musical.year === "2023");
     }
-    if (userId === "beingdaniel") {
+    if (username === "danoru") {
       return MUSICAL_LIST.filter(
-        (musical) => musical.userAttended.beingdaniel && musical.year === "2023"
+        (musical) => musical.userAttended.danoru && musical.year === "2023"
       );
     }
-    if (userId === "annabanza") {
+    if (username === "annabanza") {
       return MUSICAL_LIST.filter(
         (musical) => musical.userAttended.annabanza && musical.year === "2023"
       );
     }
-    if (userId === "callmetommy") {
+    if (username === "callmetommy") {
       return MUSICAL_LIST.filter(
         (musical) => musical.userAttended.callmetommy && musical.year === "2023"
       );
     }
-    if (userId === "bentothetop") {
+    if (username === "bentothetop") {
       return MUSICAL_LIST.filter(
         (musical) => musical.userAttended.bentothetop && musical.year === "2023"
       );
     }
-    if (userId === "heartofsix") {
+    if (username === "heartofsix") {
       return MUSICAL_LIST.filter(
         (musical) => musical.userAttended.heartofsix && musical.year === "2023"
       );
     }
-    if (userId === "suddenlykelsey") {
+    if (username === "suddenlykelsey") {
       return MUSICAL_LIST.filter(
         (musical) =>
           musical.userAttended.suddenlykelsey && musical.year === "2023"
       );
-    } else if (userId === "musicalsandmayhem") {
+    } else if (username === "musicalsandmayhem") {
       return MUSICAL_LIST.filter(
         (musical) => musical.groupAttended && musical.year === "2023"
       );
     }
   } else if (year === "2024") {
-    if (userId === "all") {
+    if (username === "all") {
       return MUSICAL_LIST.filter((musical) => musical.year === "2024");
     }
-    if (userId === "beingdaniel") {
+    if (username === "danoru") {
       return MUSICAL_LIST.filter(
-        (musical) => musical.userAttended.beingdaniel && musical.year === "2024"
+        (musical) => musical.userAttended.danoru && musical.year === "2024"
       );
     }
-    if (userId === "annabanza") {
+    if (username === "annabanza") {
       return MUSICAL_LIST.filter(
         (musical) => musical.userAttended.annabanza && musical.year === "2024"
       );
     }
-    if (userId === "callmetommy") {
+    if (username === "callmetommy") {
       return MUSICAL_LIST.filter(
         (musical) => musical.userAttended.callmetommy && musical.year === "2024"
       );
     }
-    if (userId === "bentothetop") {
+    if (username === "bentothetop") {
       return MUSICAL_LIST.filter(
         (musical) => musical.userAttended.bentothetop && musical.year === "2024"
       );
     }
-    if (userId === "heartofsix") {
+    if (username === "heartofsix") {
       return MUSICAL_LIST.filter(
         (musical) => musical.userAttended.heartofsix && musical.year === "2024"
       );
     }
-    if (userId === "suddenlykelsey") {
+    if (username === "suddenlykelsey") {
       return MUSICAL_LIST.filter(
         (musical) =>
           musical.userAttended.suddenlykelsey && musical.year === "2024"
       );
-    } else if (userId === "musicalsandmayhem") {
+    } else if (username === "musicalsandmayhem") {
       return MUSICAL_LIST.filter(
         (musical) => musical.groupAttended && musical.year === "2024"
       );
     }
   } else {
-    if (userId === "all") {
+    if (username === "all") {
       return MUSICAL_LIST;
     }
-    if (userId === "beingdaniel") {
-      return MUSICAL_LIST.filter((musical) => musical.userAttended.beingdaniel);
+    if (username === "danoru") {
+      return MUSICAL_LIST.filter((musical) => musical.userAttended.danoru);
     }
-    if (userId === "annabanza") {
+    if (username === "annabanza") {
       return MUSICAL_LIST.filter((musical) => musical.userAttended.annabanza);
     }
-    if (userId === "callmetommy") {
+    if (username === "callmetommy") {
       return MUSICAL_LIST.filter((musical) => musical.userAttended.callmetommy);
     }
-    if (userId === "bentothetop") {
+    if (username === "bentothetop") {
       return MUSICAL_LIST.filter((musical) => musical.userAttended.bentothetop);
     }
-    if (userId === "heartofsix") {
+    if (username === "heartofsix") {
       return MUSICAL_LIST.filter((musical) => musical.userAttended.heartofsix);
     }
-    if (userId === "suddenlykelsey") {
+    if (username === "suddenlykelsey") {
       return MUSICAL_LIST.filter(
         (musical) => musical.userAttended.suddenlykelsey
       );
-    } else if (userId === "musicalsandmayhem") {
+    } else if (username === "musicalsandmayhem") {
       return MUSICAL_LIST.filter((musical) => musical.groupAttended);
     }
   }

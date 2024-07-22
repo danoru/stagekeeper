@@ -425,7 +425,7 @@ export async function getPaginatedMusicals(
 }
 
 export async function getMusicalByTitle(musicalTitle: string) {
-  const formattedTitle = musicalTitle.replace(/\s+/g, "").toLowerCase();
+  const formattedTitle = musicalTitle.replace(/\s+/g, "-").toLowerCase();
   const musicals = await prisma.musicals.findMany({
     select: {
       title: true,
@@ -434,7 +434,7 @@ export async function getMusicalByTitle(musicalTitle: string) {
 
   const matchedMusical = musicals.find(
     (musical) =>
-      musical.title.replace(/\s+/g, "").toLowerCase() === formattedTitle
+      musical.title.replace(/\s+/g, "-").toLowerCase() === formattedTitle
   );
 
   if (matchedMusical) {

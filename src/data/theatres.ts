@@ -139,7 +139,7 @@ export async function getPaginatedTheatres(
 }
 
 export async function getTheatreByName(theatreName: string) {
-  const formattedName = theatreName.replace(/\s+/g, "").toLowerCase();
+  const formattedName = theatreName.replace(/\s+/g, "-").toLowerCase();
   const theatres = await prisma.theatres.findMany({
     select: {
       name: true,
@@ -148,7 +148,7 @@ export async function getTheatreByName(theatreName: string) {
 
   const matchedTheatre = theatres.find(
     (theatre) =>
-      theatre.name.replace(/\s+/g, "").toLowerCase() === formattedName
+      theatre.name.replace(/\s+/g, "-").toLowerCase() === formattedName
   );
 
   if (matchedTheatre) {

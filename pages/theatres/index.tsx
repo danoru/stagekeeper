@@ -42,7 +42,9 @@ function TheatresPage({ theatres: initialTheatres, theatreCount }: Props) {
           <InfoCard
             key={i}
             name={theatre.name}
-            link={`/theatres/${theatre.name.replace(/\s+/g, "").toLowerCase()}`}
+            link={`/theatres/${theatre.name
+              .replace(/\s+/g, "-")
+              .toLowerCase()}`}
             image={theatre.image}
           />
         ))}

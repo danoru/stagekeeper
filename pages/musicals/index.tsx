@@ -43,7 +43,7 @@ function MusicalsPage({ musicals: initialMusicals, musicalCount }: Props) {
             key={i}
             name={musical.title}
             link={`/musicals/${musical.title
-              .replace(/\s+/g, "")
+              .replace(/\s+/g, "-")
               .toLowerCase()}`}
             image={musical.playbill}
           />

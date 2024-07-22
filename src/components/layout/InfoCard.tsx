@@ -17,12 +17,7 @@ function InfoCard(props: any) {
               title={props.name}
               height="194"
             />
-            <Typography
-              gutterBottom
-              variant="h6"
-              component="h6"
-              color="secondary"
-            >
+            <Typography gutterBottom variant="subtitle1" color="secondary">
               {props.name}
             </Typography>
           </CardContent>

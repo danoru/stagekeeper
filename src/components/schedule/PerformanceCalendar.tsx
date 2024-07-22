@@ -17,6 +17,7 @@ interface Event {
 
 function PerformanceCalendar({ viewType, identifier }: Props) {
   const [events, setEvents] = useState<Event[]>([]);
+  const [initialDate, setInitialDate] = useState<Date | null>(null);
   const daysTimes = {
     Thursday: ["20:00"],
     Friday: ["20:00"],
@@ -75,6 +76,16 @@ function PerformanceCalendar({ viewType, identifier }: Props) {
         const allEvents = programmingData.flatMap((program) =>
           generateEventDates(program, daysTimes)
         );
+
+        if (allEvents.length > 0) {
+          const earliestDate = new Date(
+            Math.min(...allEvents.map((e) => e.start.getTime()))
+          );
+          setInitialDate(earliestDate);
+          console.log(initialDate);
+          console.log(earliestDate);
+        }
+
         setEvents(allEvents);
       } catch (error) {
         console.error("Error fetching performances:", error);
@@ -84,16 +95,21 @@ function PerformanceCalendar({ viewType, identifier }: Props) {
     fetchAndGenerateEvents();
   }, [viewType, identifier]);
 
-  return (
-    <div style={{ margin: "0 auto", maxWidth: "75%" }}>
-      <FullCalendar
-        events={events}
-        fixedWeekCount={false}
-        initialView="dayGridMonth"
-        plugins={[dayGridPlugin]}
-      />
-    </div>
-  );
+  if (initialDate) {
+    return (
+      <div style={{ margin: "0 auto", maxWidth: "75%" }}>
+        <FullCalendar
+          events={events}
+          fixedWeekCount={false}
+          initialDate={initialDate}
+          initialView="dayGridMonth"
+          plugins={[dayGridPlugin]}
+        />
+      </div>
+    );
+  }
+
+  return <></>;
 }
 
 export default PerformanceCalendar;

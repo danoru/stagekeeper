@@ -267,8 +267,8 @@ export const PERFORMANCE_LIST = [
   },
 ];
 
-export function getPerformances() {
-  const performances = prisma.performances.findMany({
+export async function getPerformances() {
+  const performances = await prisma.performances.findMany({
     include: { musicals: true, theatres: true },
     orderBy: {
       startTime: "asc",

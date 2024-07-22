@@ -2,6 +2,7 @@ import Head from "next/head";
 import Image from "next/image";
 import moment from "moment";
 import MusicalActionBar from "../../src/components/musical/MusicalActionBar";
+import PerformanceCalendar from "../../src/components/schedule/PerformanceCalendar";
 import Stack from "@mui/material/Stack";
 import superjson from "superjson";
 import Typography from "@mui/material/Typography";
@@ -18,6 +19,7 @@ interface Props {
 
 function MusicalPage({ musical }: Props) {
   const title = `${musical.title} • StageKeeper`;
+  const musicalTitle = musical.title;
 
   return (
     <div>
@@ -64,6 +66,7 @@ function MusicalPage({ musical }: Props) {
           <MusicalActionBar />
         </Stack>
       </Stack>
+      <PerformanceCalendar viewType="musical" identifier={musicalTitle} />
     </div>
   );
 }

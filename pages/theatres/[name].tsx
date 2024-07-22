@@ -22,7 +22,7 @@ interface Params {
 
 function TheatrePage({ theatre, seasons }: Props) {
   const title = `${theatre.name} • StageKeeper`;
-  const theatreName = theatre.name.toLowerCase().replace(/\s+/g, "-");
+  const theatreName = theatre.name;
 
   return (
     <div>
@@ -68,7 +68,7 @@ function TheatrePage({ theatre, seasons }: Props) {
           ))}
         </Grid>
       ))}
-      <PerformanceCalendar theatreName={theatreName} />
+      <PerformanceCalendar viewType="theatre" identifier={theatreName} />
     </div>
   );
 }

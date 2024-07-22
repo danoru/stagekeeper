@@ -5,7 +5,8 @@ import moment from "moment";
 import { musicals, programming } from "@prisma/client";
 
 interface Props {
-  theatreName: string;
+  viewType: "musical" | "theatre";
+  identifier: string;
 }
 
 interface Event {
@@ -14,7 +15,7 @@ interface Event {
   title: string;
 }
 
-function PerformanceCalendar({ theatreName }: Props) {
+function PerformanceCalendar({ viewType, identifier }: Props) {
   const [events, setEvents] = useState<Event[]>([]);
   const daysTimes = {
     Thursday: ["20:00"],
@@ -60,9 +61,11 @@ function PerformanceCalendar({ theatreName }: Props) {
   useEffect(() => {
     async function fetchAndGenerateEvents() {
       try {
-        const response = await fetch(
-          `/api/theatres/programming?theatreName=${theatreName}`
-        );
+        const endpoint =
+          viewType === "musical"
+            ? `/api/musicals/programming?musicalTitle=${identifier}`
+            : `/api/theatres/programming?theatreName=${identifier}`;
+        const response = await fetch(endpoint);
         if (!response.ok) {
           throw new Error("Failed to fetch performances.");
         }
@@ -79,7 +82,7 @@ function PerformanceCalendar({ theatreName }: Props) {
     }
 
     fetchAndGenerateEvents();
-  }, [theatreName]);
+  }, [viewType, identifier]);
 
   return (
     <div style={{ margin: "0 auto", maxWidth: "75%" }}>

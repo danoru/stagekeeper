@@ -7,31 +7,31 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const { theatreName } = req.query;
+  const { musicalTitle } = req.query;
 
   if (req.method !== "GET") {
     return res.status(405).json({ error: "Method not allowed." });
   }
 
-  if (!theatreName || typeof theatreName !== "string") {
-    res.status(400).json({ error: "Theatre name is required." });
+  if (!musicalTitle || typeof musicalTitle !== "string") {
+    res.status(400).json({ error: "Musical title is required." });
     return;
   }
 
   try {
-    const theatre = await prisma.theatres.findFirst({
+    const musical = await prisma.musicals.findUnique({
       where: {
-        name: theatreName,
+        title: musicalTitle,
       },
     });
 
-    if (!theatre) {
-      res.status(404).json({ error: "Theatre not found." });
+    if (!musical) {
+      res.status(404).json({ error: "Musical not found." });
       return;
     }
 
     const performances = await prisma.programming.findMany({
-      where: { seasons: { theatre: theatre.id } },
+      where: { musical: musical.id },
       include: {
         musicals: true,
       },

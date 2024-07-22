@@ -1,6 +1,7 @@
 import Grid from "@mui/material/Grid";
 import Head from "next/head";
 import InfoCard from "../../src/components/layout/InfoCard";
+import PerformanceCalendar from "../../src/components/schedule/PerformanceCalendar";
 import Stack from "@mui/material/Stack";
 import superjson from "superjson";
 import Typography from "@mui/material/Typography";
@@ -21,6 +22,8 @@ interface Params {
 
 function TheatrePage({ theatre, seasons }: Props) {
   const title = `${theatre.name} • StageKeeper`;
+  const theatreName = theatre.name.toLowerCase().replace(/\s+/g, "-");
+
   return (
     <div>
       <Head>
@@ -65,6 +68,7 @@ function TheatrePage({ theatre, seasons }: Props) {
           ))}
         </Grid>
       ))}
+      <PerformanceCalendar theatreName={theatreName} />
     </div>
   );
 }

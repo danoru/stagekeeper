@@ -1,8 +1,8 @@
 import Head from "next/head";
 import Image from "next/image";
-import styles from "../src/styles/home.module.css";
 import LoggedInHomePage from "../src/components/home/LoggedInHomePage";
 import LoggedOutHomePage from "../src/components/home/LoggedOutHomePage";
+import styles from "../src/styles/home.module.css";
 import { GetServerSidePropsContext } from "next";
 import { getSession } from "next-auth/react";
 
@@ -11,7 +11,7 @@ interface Props {
 }
 
 function Home({ session }: Props) {
-  const sessionUser = session.user.username;
+  const sessionUser = session?.user.username;
 
   return (
     <div className={styles.container}>

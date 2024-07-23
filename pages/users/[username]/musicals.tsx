@@ -8,12 +8,18 @@ import {
   findUserByUsername,
   getUserAttendance,
 } from "../../../src/data/users";
-import { attendance, musicals, performances, users } from "@prisma/client";
+import {
+  attendance,
+  musicals,
+  performances,
+  theatres,
+  users,
+} from "@prisma/client";
 
 interface Props {
   user: users;
   attendance: (attendance & {
-    performance: performances & { musicals: musicals };
+    performances: performances & { musicals: musicals; theatres: theatres };
   })[];
 }
 
@@ -26,7 +32,7 @@ interface Params {
 function UserMusicalsList({ attendance, user }: Props) {
   const title = `${user.username}'s Musicals • Savry`;
   const musicalHeader = `${user.username}'S MUSICALS`;
-  const musicals = attendance?.map((a) => a.performance.musicals);
+  const musicals = attendance?.map((a) => a.performances.musicals);
   const style = "overline";
 
   return (

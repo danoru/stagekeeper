@@ -97,6 +97,7 @@ export async function unfollowUser(userId: number, followingUsername: string) {
 export async function getUserAttendance(id: number) {
   const attendance = await prisma.attendance.findMany({
     where: { user: id },
+    orderBy: { performances: { musicals: { title: "asc" } } },
     include: {
       performances: { include: { musicals: true, theatres: true } },
     },

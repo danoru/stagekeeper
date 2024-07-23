@@ -32,12 +32,9 @@ function Home({ session }: Props) {
 export async function getServerSideProps(context: GetServerSidePropsContext) {
   const session = await getSession(context);
 
-  if (session) {
-    return {
-      props: { session },
-    };
-  }
-  return;
+  return {
+    props: { session },
+  };
 }
 
 export default Home;

@@ -57,9 +57,11 @@ function MusicalList({ musicals, header, style }: Props) {
         {musicals?.map((musical: any, i: number) => (
           <InfoCard
             key={`card-${i}`}
-            name={musical.name}
-            link={`musicals/${musical.link}`}
-            image={musical.image}
+            name={musical.title}
+            link={`/musicals/${musical.title
+              .replace(/\s+/g, "-")
+              .toLowerCase()}`}
+            image={musical.playbill}
             sx={{
               width: "100%",
               height: "100%",

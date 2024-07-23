@@ -1,24 +1,24 @@
 generator client {
   provider        = "prisma-client-js"
-  previewFeatures = ["postgresqlExtensions"]
+  previewFeatures = ["driverAdapters", "postgresqlExtensions"]
 }
 
 datasource db {
   provider   = "postgresql"
   url        = env("DATABASE_URL")
   directUrl  = env("DIRECT_URL")
-  extensions = [uuid_ossp(map: "uuid-ossp", schema: "extensions")]
+  extensions = [citext(schema: "public"), uuid_ossp(map: "uuid-ossp", schema: "extensions")]
 }
 
 model attendance {
   id           Int          @id @default(autoincrement())
+  createdAt    DateTime     @default(now()) @db.Timestamptz(6)
+  comment      String?
+  rating       Decimal?     @db.Decimal
   performance  Int
   user         Int?
-  createdAt    DateTime     @default(now()) @db.Timestamptz(6)
-  rating       Decimal?     @db.Decimal
-  comment      String?
-  users        users?       @relation(fields: [user], references: [id], onDelete: NoAction, onUpdate: NoAction)
   performances performances @relation(fields: [performance], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users        users?       @relation(fields: [user], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model following {
@@ -41,7 +41,7 @@ model likedMusicals {
   user      Int
   musical   Int
   musicals  musicals @relation(fields: [musical], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  users     users?   @relation(fields: [user], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users     users    @relation(fields: [user], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model musicals {
@@ -53,10 +53,10 @@ model musicals {
   lyricsBy      String
   bookBy        String
   premiere      DateTime?       @db.Date
+  likedMusicals likedMusicals[]
   performances  performances[]
   programming   programming[]
   watchlist     watchlist[]
-  likedMusicals likedMusicals[]
 }
 
 model performances {
@@ -76,8 +76,8 @@ model programming {
   createdAt DateTime  @default(now()) @db.Timestamptz(6)
   musical   Int
   season    Int
-  startDate DateTime? @db.Date
   endDate   DateTime? @db.Date
+  startDate DateTime? @db.Date
   musicals  musicals  @relation(fields: [musical], references: [id], onDelete: NoAction, onUpdate: NoAction)
   seasons   seasons   @relation(fields: [season], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
@@ -106,8 +106,8 @@ model theatres {
 model users {
   id            Int             @id @default(autoincrement())
   createdAt     DateTime        @default(now()) @db.Timestamptz(6)
-  username      String          @unique
-  email         String          @unique
+  username      String          @unique @db.Citext
+  email         String          @unique @db.Citext
   password      String
   firstName     String?
   lastName      String?
@@ -118,10 +118,10 @@ model users {
   badge         Badge           @default(USER)
   inGroup       Int?
   attendance    attendance[]
+  following     following[]
+  likedMusicals likedMusicals[]
   groups        groups?         @relation(fields: [inGroup], references: [id], onDelete: NoAction, onUpdate: NoAction)
   watchlist     watchlist[]
-  likedMusicals likedMusicals[]
-  following     following[]
 }
 
 model watchlist {
@@ -130,7 +130,7 @@ model watchlist {
   user      Int
   musical   Int
   musicals  musicals @relation(fields: [musical], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  users     users?   @relation(fields: [user], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users     users    @relation(fields: [user], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 enum Badge {

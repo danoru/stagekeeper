@@ -41,6 +41,7 @@ export async function getFollowers(username: string) {
     include: {
       users: true,
     },
+    orderBy: { users: { username: "asc" } },
   });
   return followers;
 }
@@ -53,6 +54,7 @@ export async function getFollowing(user: number) {
     include: {
       users: true,
     },
+    orderBy: { users: { username: "asc" } },
   });
 
   return following;
@@ -115,6 +117,7 @@ export async function getUserLikes(username: string) {
         include: {
           musicals: true,
         },
+        orderBy: { musicals: { title: "asc" } },
       },
     },
   });

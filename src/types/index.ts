@@ -28,7 +28,7 @@ export interface USER_ATTENDANCE_TYPE {
   danoru: boolean; // Daniel
   annabanza: boolean; // Anna
   bentothetop: boolean; // Ben
-  callmetommy: boolean; // Tommy
-  suddenlykelsey: boolean; // Kelsey
-  heartofsix: boolean; // Mallory
+  TommyExpress: boolean; // Tommy
+  Kelsey: boolean; // Kelsey
+  Marochan: boolean; // Mallory
 }

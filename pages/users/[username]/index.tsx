@@ -7,15 +7,19 @@ import {
   attendance,
   following,
   musicals,
+  performances,
   users,
   watchlist,
 } from "@prisma/client";
 import { getUserProfile, getFollowers } from "../../../src/data/users";
 import { getSession } from "next-auth/react";
 import { useRouter } from "next/router";
+import UserFollowing from "../../../src/components/users/UserFollowing";
 
 interface Props {
-  attendance: (attendance & { users: users; musicals: musicals })[];
+  attendance: (attendance & {
+    performances: performances;
+  })[];
   followers: following[];
   following: following[];
   sessionUser: any;
@@ -55,8 +59,10 @@ function ProfilePage({
               user={user}
             />
             <ProfileLinkBar username={user.username} />
-          </Grid>{" "}
-          <Grid item xs={8}></Grid>
+          </Grid>
+          <Grid item xs={8}>
+            <UserFollowing following={following} />
+          </Grid>
           <Grid item xs={4}>
             <UserWatchlistPreview watchlist={watchlist} />
           </Grid>

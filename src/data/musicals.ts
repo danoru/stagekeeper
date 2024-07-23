@@ -449,13 +449,16 @@ export async function getMusicalByTitle(musicalTitle: string) {
 }
 
 export async function getWatchlist(id: number) {
-  const cooklist = await prisma.watchlist.findMany({
+  const watchlist = await prisma.watchlist.findMany({
     where: {
       user: id,
     },
     include: {
       musicals: true,
     },
+    orderBy: {
+      musicals: { title: "asc" },
+    },
   });
-  return cooklist;
+  return watchlist;
 }

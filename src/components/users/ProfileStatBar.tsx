@@ -7,11 +7,14 @@ import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import Typography from "@mui/material/Typography";
 import UserAvatar from "./UserAvatar";
-import { attendance, following, users } from "@prisma/client";
+import { attendance, following, performances, users } from "@prisma/client";
 import { followUser, unfollowUser } from "../../data/users";
+import moment from "moment";
 
 interface Props {
-  attendance: attendance[];
+  attendance: (attendance & {
+    performances: performances;
+  })[];
   avatarSize: string;
   followers: following[];
   following: following[];
@@ -98,6 +101,12 @@ function ProfileStatBar({
     </Button>
   );
 
+  const currentYear = moment().format("YYYY");
+  const attendanceThisYear = attendance.filter((a) => {
+    const startTime = moment(a.performances.startTime);
+    return moment(startTime).format("YYYY") === currentYear;
+  });
+
   return (
     <Grid container item sx={{ marginTop: "10px" }}>
       <Grid container item xs={6} justifyContent="center" alignItems="center">
@@ -138,12 +147,12 @@ function ProfileStatBar({
       <Grid container item xs={6} justifyContent="center">
         <Button
           size="small"
-          href={`${user.username}/recipes`}
-        >{`${attendance.length} RECIPES`}</Button>
+          href={`${user.username}/musicals`}
+        >{`${attendance.length} MUSICALS`}</Button>
         <Button
           size="small"
-          href={`${user.username}/recipes`}
-        >{`${attendance.length} THIS YEAR`}</Button>
+          href={`${user.username}/musicals`}
+        >{`${attendanceThisYear?.length} THIS YEAR`}</Button>
         <Button
           size="small"
           href={`${user.username}/following`}

@@ -15,6 +15,7 @@ import {
   theatres,
   users,
 } from "@prisma/client";
+import moment from "moment";
 
 interface Props {
   user: users;
@@ -32,8 +33,21 @@ interface Params {
 function UserMusicalsList({ attendance, user }: Props) {
   const title = `${user.username}'s Musicals • Savry`;
   const musicalHeader = `${user.username}'S MUSICALS`;
-  const musicals = attendance?.map((a) => a.performances.musicals);
   const style = "overline";
+
+  const currentDate = moment();
+  const uniqueTitles = new Set<string>();
+  const filteredAttendance = attendance.filter((a) => {
+    const startTime = moment(a.performances.startTime);
+    const title = a.performances.musicals.title;
+    if (startTime <= currentDate && !uniqueTitles.has(title)) {
+      uniqueTitles.add(title);
+      return true;
+    }
+    return false;
+  });
+
+  const musicals = filteredAttendance?.map((a) => a.performances.musicals);
 
   return (
     <div>

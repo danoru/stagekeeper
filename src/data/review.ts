@@ -17,9 +17,9 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       danoru: true,
       annabanza: true,
       bentothetop: false,
-      callmetommy: false,
-      suddenlykelsey: false,
-      heartofsix: false,
+      TommyExpress: false,
+      Kelsey: false,
+      Marochan: false,
     },
     year: "2019",
   },
@@ -39,9 +39,9 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       danoru: true,
       annabanza: true,
       bentothetop: false,
-      callmetommy: false,
-      suddenlykelsey: false,
-      heartofsix: false,
+      TommyExpress: false,
+      Kelsey: false,
+      Marochan: false,
     },
     year: "2019",
   },
@@ -61,9 +61,9 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       danoru: true,
       annabanza: true,
       bentothetop: true,
-      callmetommy: true,
-      suddenlykelsey: true,
-      heartofsix: false,
+      TommyExpress: true,
+      Kelsey: true,
+      Marochan: false,
     },
     year: "2020",
   },
@@ -83,9 +83,9 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       danoru: true,
       annabanza: true,
       bentothetop: false,
-      callmetommy: false,
-      suddenlykelsey: false,
-      heartofsix: false,
+      TommyExpress: false,
+      Kelsey: false,
+      Marochan: false,
     },
     year: "2020",
   },
@@ -105,9 +105,9 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       danoru: true,
       annabanza: true,
       bentothetop: false,
-      callmetommy: false,
-      suddenlykelsey: false,
-      heartofsix: false,
+      TommyExpress: false,
+      Kelsey: false,
+      Marochan: false,
     },
     year: "2020",
   },
@@ -127,9 +127,9 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       danoru: true,
       annabanza: true,
       bentothetop: false,
-      callmetommy: false,
-      suddenlykelsey: false,
-      heartofsix: false,
+      TommyExpress: false,
+      Kelsey: false,
+      Marochan: false,
     },
     year: "2020",
   },
@@ -149,9 +149,9 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       danoru: true,
       annabanza: true,
       bentothetop: false,
-      callmetommy: true,
-      suddenlykelsey: true,
-      heartofsix: false,
+      TommyExpress: true,
+      Kelsey: true,
+      Marochan: false,
     },
     year: "2021",
   },
@@ -171,9 +171,9 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       danoru: true,
       annabanza: true,
       bentothetop: false,
-      callmetommy: false,
-      suddenlykelsey: true,
-      heartofsix: false,
+      TommyExpress: false,
+      Kelsey: true,
+      Marochan: false,
     },
     year: "2021",
   },
@@ -193,9 +193,9 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       danoru: true,
       annabanza: true,
       bentothetop: false,
-      callmetommy: false,
-      suddenlykelsey: false,
-      heartofsix: false,
+      TommyExpress: false,
+      Kelsey: false,
+      Marochan: false,
     },
     year: "2022",
   },
@@ -215,9 +215,9 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       danoru: true,
       annabanza: true,
       bentothetop: false,
-      callmetommy: false,
-      suddenlykelsey: false,
-      heartofsix: false,
+      TommyExpress: false,
+      Kelsey: false,
+      Marochan: false,
     },
     year: "2022",
   },
@@ -237,9 +237,9 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       danoru: true,
       annabanza: true,
       bentothetop: false,
-      callmetommy: true,
-      suddenlykelsey: true,
-      heartofsix: true,
+      TommyExpress: true,
+      Kelsey: true,
+      Marochan: true,
     },
     year: "2022",
   },
@@ -259,9 +259,9 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       danoru: true,
       annabanza: true,
       bentothetop: true,
-      callmetommy: false,
-      suddenlykelsey: false,
-      heartofsix: false,
+      TommyExpress: false,
+      Kelsey: false,
+      Marochan: false,
     },
     year: "2022",
   },
@@ -281,9 +281,9 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       danoru: true,
       annabanza: true,
       bentothetop: false,
-      callmetommy: false,
-      suddenlykelsey: false,
-      heartofsix: false,
+      TommyExpress: false,
+      Kelsey: false,
+      Marochan: false,
     },
     year: "2022",
   },
@@ -303,9 +303,9 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       danoru: true,
       annabanza: true,
       bentothetop: false,
-      callmetommy: false,
-      suddenlykelsey: false,
-      heartofsix: true,
+      TommyExpress: false,
+      Kelsey: false,
+      Marochan: true,
     },
     year: "2022",
   },
@@ -325,9 +325,9 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       danoru: true,
       annabanza: true,
       bentothetop: false,
-      callmetommy: true,
-      suddenlykelsey: true,
-      heartofsix: false,
+      TommyExpress: true,
+      Kelsey: true,
+      Marochan: false,
     },
     year: "2022",
   },
@@ -347,9 +347,9 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       danoru: true,
       annabanza: true,
       bentothetop: false,
-      callmetommy: true,
-      suddenlykelsey: false,
-      heartofsix: true,
+      TommyExpress: true,
+      Kelsey: false,
+      Marochan: true,
     },
     year: "2022",
   },
@@ -369,9 +369,9 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       danoru: true,
       annabanza: true,
       bentothetop: false,
-      callmetommy: false,
-      suddenlykelsey: false,
-      heartofsix: false,
+      TommyExpress: false,
+      Kelsey: false,
+      Marochan: false,
     },
     year: "2022",
   },
@@ -391,9 +391,9 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       danoru: true,
       annabanza: true,
       bentothetop: false,
-      callmetommy: true,
-      suddenlykelsey: true,
-      heartofsix: true,
+      TommyExpress: true,
+      Kelsey: true,
+      Marochan: true,
     },
     year: "2022",
   },
@@ -413,9 +413,9 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       danoru: true,
       annabanza: true,
       bentothetop: true,
-      callmetommy: true,
-      suddenlykelsey: true,
-      heartofsix: true,
+      TommyExpress: true,
+      Kelsey: true,
+      Marochan: true,
     },
     year: "2022",
   },
@@ -435,9 +435,9 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       danoru: true,
       annabanza: true,
       bentothetop: false,
-      callmetommy: true,
-      suddenlykelsey: true,
-      heartofsix: false,
+      TommyExpress: true,
+      Kelsey: true,
+      Marochan: false,
     },
     year: "2022",
   },
@@ -457,9 +457,9 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       danoru: true,
       annabanza: true,
       bentothetop: false,
-      callmetommy: false,
-      suddenlykelsey: true,
-      heartofsix: false,
+      TommyExpress: false,
+      Kelsey: true,
+      Marochan: false,
     },
     year: "2022",
   },
@@ -479,9 +479,9 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       danoru: true,
       annabanza: true,
       bentothetop: false,
-      callmetommy: true,
-      suddenlykelsey: true,
-      heartofsix: true,
+      TommyExpress: true,
+      Kelsey: true,
+      Marochan: true,
     },
     year: "2022",
   },
@@ -501,9 +501,9 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       danoru: true,
       annabanza: true,
       bentothetop: false,
-      callmetommy: true,
-      suddenlykelsey: false,
-      heartofsix: true,
+      TommyExpress: true,
+      Kelsey: false,
+      Marochan: true,
     },
     year: "2022",
   },
@@ -523,9 +523,9 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       danoru: true,
       annabanza: true,
       bentothetop: false,
-      callmetommy: true,
-      suddenlykelsey: true,
-      heartofsix: true,
+      TommyExpress: true,
+      Kelsey: true,
+      Marochan: true,
     },
     year: "2023",
   },
@@ -545,9 +545,9 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       danoru: true,
       annabanza: true,
       bentothetop: false,
-      callmetommy: true,
-      suddenlykelsey: false,
-      heartofsix: false,
+      TommyExpress: true,
+      Kelsey: false,
+      Marochan: false,
     },
     year: "2023",
   },
@@ -567,9 +567,9 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       danoru: true,
       annabanza: true,
       bentothetop: false,
-      callmetommy: true,
-      suddenlykelsey: false,
-      heartofsix: true,
+      TommyExpress: true,
+      Kelsey: false,
+      Marochan: true,
     },
     year: "2023",
   },
@@ -589,9 +589,9 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       danoru: true,
       annabanza: true,
       bentothetop: true,
-      callmetommy: false,
-      suddenlykelsey: false,
-      heartofsix: false,
+      TommyExpress: false,
+      Kelsey: false,
+      Marochan: false,
     },
     year: "2023",
   },
@@ -611,9 +611,9 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       danoru: true,
       annabanza: true,
       bentothetop: false,
-      callmetommy: false,
-      suddenlykelsey: false,
-      heartofsix: true,
+      TommyExpress: false,
+      Kelsey: false,
+      Marochan: true,
     },
     year: "2023",
   },
@@ -633,9 +633,9 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       danoru: true,
       annabanza: true,
       bentothetop: false,
-      callmetommy: false,
-      suddenlykelsey: true,
-      heartofsix: true,
+      TommyExpress: false,
+      Kelsey: true,
+      Marochan: true,
     },
     year: "2023",
   },
@@ -655,9 +655,9 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       danoru: true,
       annabanza: true,
       bentothetop: false,
-      callmetommy: true,
-      suddenlykelsey: false,
-      heartofsix: false,
+      TommyExpress: true,
+      Kelsey: false,
+      Marochan: false,
     },
     year: "2023",
   },
@@ -677,9 +677,9 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       danoru: true,
       annabanza: true,
       bentothetop: false,
-      callmetommy: false,
-      suddenlykelsey: true,
-      heartofsix: true,
+      TommyExpress: false,
+      Kelsey: true,
+      Marochan: true,
     },
     year: "2023",
   },
@@ -699,9 +699,9 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       danoru: true,
       annabanza: true,
       bentothetop: false,
-      callmetommy: false,
-      suddenlykelsey: false,
-      heartofsix: true,
+      TommyExpress: false,
+      Kelsey: false,
+      Marochan: true,
     },
     year: "2023",
   },
@@ -721,9 +721,9 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       danoru: true,
       annabanza: true,
       bentothetop: false,
-      callmetommy: true,
-      suddenlykelsey: true,
-      heartofsix: false,
+      TommyExpress: true,
+      Kelsey: true,
+      Marochan: false,
     },
     year: "2023",
   },
@@ -743,9 +743,9 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       danoru: true,
       annabanza: true,
       bentothetop: false,
-      callmetommy: true,
-      suddenlykelsey: false,
-      heartofsix: false,
+      TommyExpress: true,
+      Kelsey: false,
+      Marochan: false,
     },
     year: "2023",
   },
@@ -765,9 +765,9 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       danoru: true,
       annabanza: true,
       bentothetop: false,
-      callmetommy: false,
-      suddenlykelsey: false,
-      heartofsix: false,
+      TommyExpress: false,
+      Kelsey: false,
+      Marochan: false,
     },
     year: "2023",
   },
@@ -787,9 +787,9 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       danoru: true,
       annabanza: true,
       bentothetop: true,
-      callmetommy: false,
-      suddenlykelsey: false,
-      heartofsix: false,
+      TommyExpress: false,
+      Kelsey: false,
+      Marochan: false,
     },
     year: "2024",
   },
@@ -809,9 +809,9 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       danoru: true,
       annabanza: true,
       bentothetop: false,
-      callmetommy: false,
-      suddenlykelsey: false,
-      heartofsix: false,
+      TommyExpress: false,
+      Kelsey: false,
+      Marochan: false,
     },
     year: "2024",
   },
@@ -831,9 +831,9 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       danoru: true,
       annabanza: true,
       bentothetop: true,
-      callmetommy: true,
-      suddenlykelsey: false,
-      heartofsix: false,
+      TommyExpress: true,
+      Kelsey: false,
+      Marochan: false,
     },
     year: "2024",
   },
@@ -853,9 +853,9 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       danoru: true,
       annabanza: true,
       bentothetop: true,
-      callmetommy: false,
-      suddenlykelsey: false,
-      heartofsix: false,
+      TommyExpress: false,
+      Kelsey: false,
+      Marochan: false,
     },
     year: "2024",
   },
@@ -875,9 +875,9 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       danoru: true,
       annabanza: true,
       bentothetop: true,
-      callmetommy: false,
-      suddenlykelsey: false,
-      heartofsix: true,
+      TommyExpress: false,
+      Kelsey: false,
+      Marochan: true,
     },
     year: "2024",
   },
@@ -897,9 +897,9 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       danoru: true,
       annabanza: true,
       bentothetop: false,
-      callmetommy: false,
-      suddenlykelsey: false,
-      heartofsix: false,
+      TommyExpress: false,
+      Kelsey: false,
+      Marochan: false,
     },
     year: "2024",
   },
@@ -919,9 +919,9 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       danoru: true,
       annabanza: true,
       bentothetop: false,
-      callmetommy: true,
-      suddenlykelsey: false,
-      heartofsix: false,
+      TommyExpress: true,
+      Kelsey: false,
+      Marochan: false,
     },
     year: "2024",
   },
@@ -941,9 +941,9 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       danoru: true,
       annabanza: true,
       bentothetop: true,
-      callmetommy: true,
-      suddenlykelsey: true,
-      heartofsix: true,
+      TommyExpress: true,
+      Kelsey: true,
+      Marochan: true,
     },
     year: "2024",
   },
@@ -964,9 +964,10 @@ export function getFeaturedMusicals(year: string, username: string) {
         (musical) => musical.userAttended.annabanza && musical.year === "2022"
       );
     }
-    if (username === "callmetommy") {
+    if (username === "TommyExpress") {
       return MUSICAL_LIST.filter(
-        (musical) => musical.userAttended.callmetommy && musical.year === "2022"
+        (musical) =>
+          musical.userAttended.TommyExpress && musical.year === "2022"
       );
     }
     if (username === "bentothetop") {
@@ -974,15 +975,14 @@ export function getFeaturedMusicals(year: string, username: string) {
         (musical) => musical.userAttended.bentothetop && musical.year === "2022"
       );
     }
-    if (username === "heartofsix") {
+    if (username === "Marochan") {
       return MUSICAL_LIST.filter(
-        (musical) => musical.userAttended.heartofsix && musical.year === "2022"
+        (musical) => musical.userAttended.Marochan && musical.year === "2022"
       );
     }
-    if (username === "suddenlykelsey") {
+    if (username === "Kelsey") {
       return MUSICAL_LIST.filter(
-        (musical) =>
-          musical.userAttended.suddenlykelsey && musical.year === "2022"
+        (musical) => musical.userAttended.Kelsey && musical.year === "2022"
       );
     } else if (username === "musicalsandmayhem") {
       return MUSICAL_LIST.filter(
@@ -1003,9 +1003,10 @@ export function getFeaturedMusicals(year: string, username: string) {
         (musical) => musical.userAttended.annabanza && musical.year === "2023"
       );
     }
-    if (username === "callmetommy") {
+    if (username === "TommyExpress") {
       return MUSICAL_LIST.filter(
-        (musical) => musical.userAttended.callmetommy && musical.year === "2023"
+        (musical) =>
+          musical.userAttended.TommyExpress && musical.year === "2023"
       );
     }
     if (username === "bentothetop") {
@@ -1013,15 +1014,14 @@ export function getFeaturedMusicals(year: string, username: string) {
         (musical) => musical.userAttended.bentothetop && musical.year === "2023"
       );
     }
-    if (username === "heartofsix") {
+    if (username === "Marochan") {
       return MUSICAL_LIST.filter(
-        (musical) => musical.userAttended.heartofsix && musical.year === "2023"
+        (musical) => musical.userAttended.Marochan && musical.year === "2023"
       );
     }
-    if (username === "suddenlykelsey") {
+    if (username === "Kelsey") {
       return MUSICAL_LIST.filter(
-        (musical) =>
-          musical.userAttended.suddenlykelsey && musical.year === "2023"
+        (musical) => musical.userAttended.Kelsey && musical.year === "2023"
       );
     } else if (username === "musicalsandmayhem") {
       return MUSICAL_LIST.filter(
@@ -1042,9 +1042,10 @@ export function getFeaturedMusicals(year: string, username: string) {
         (musical) => musical.userAttended.annabanza && musical.year === "2024"
       );
     }
-    if (username === "callmetommy") {
+    if (username === "TommyExpress") {
       return MUSICAL_LIST.filter(
-        (musical) => musical.userAttended.callmetommy && musical.year === "2024"
+        (musical) =>
+          musical.userAttended.TommyExpress && musical.year === "2024"
       );
     }
     if (username === "bentothetop") {
@@ -1052,15 +1053,14 @@ export function getFeaturedMusicals(year: string, username: string) {
         (musical) => musical.userAttended.bentothetop && musical.year === "2024"
       );
     }
-    if (username === "heartofsix") {
+    if (username === "Marochan") {
       return MUSICAL_LIST.filter(
-        (musical) => musical.userAttended.heartofsix && musical.year === "2024"
+        (musical) => musical.userAttended.Marochan && musical.year === "2024"
       );
     }
-    if (username === "suddenlykelsey") {
+    if (username === "Kelsey") {
       return MUSICAL_LIST.filter(
-        (musical) =>
-          musical.userAttended.suddenlykelsey && musical.year === "2024"
+        (musical) => musical.userAttended.Kelsey && musical.year === "2024"
       );
     } else if (username === "musicalsandmayhem") {
       return MUSICAL_LIST.filter(
@@ -1077,19 +1077,19 @@ export function getFeaturedMusicals(year: string, username: string) {
     if (username === "annabanza") {
       return MUSICAL_LIST.filter((musical) => musical.userAttended.annabanza);
     }
-    if (username === "callmetommy") {
-      return MUSICAL_LIST.filter((musical) => musical.userAttended.callmetommy);
+    if (username === "TommyExpress") {
+      return MUSICAL_LIST.filter(
+        (musical) => musical.userAttended.TommyExpress
+      );
     }
     if (username === "bentothetop") {
       return MUSICAL_LIST.filter((musical) => musical.userAttended.bentothetop);
     }
-    if (username === "heartofsix") {
-      return MUSICAL_LIST.filter((musical) => musical.userAttended.heartofsix);
+    if (username === "Marochan") {
+      return MUSICAL_LIST.filter((musical) => musical.userAttended.Marochan);
     }
-    if (username === "suddenlykelsey") {
-      return MUSICAL_LIST.filter(
-        (musical) => musical.userAttended.suddenlykelsey
-      );
+    if (username === "Kelsey") {
+      return MUSICAL_LIST.filter((musical) => musical.userAttended.Kelsey);
     } else if (username === "musicalsandmayhem") {
       return MUSICAL_LIST.filter((musical) => musical.groupAttended);
     }

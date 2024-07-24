@@ -3,17 +3,21 @@ import LoggedInHomePage from "../src/components/home/LoggedInHomePage";
 import LoggedOutHomePage from "../src/components/home/LoggedOutHomePage";
 import superjson from "superjson";
 import { getFollowing } from "../src/data/users";
-import { getFriendsUpcomingPerformances } from "../src/data/performances";
+import {
+  getFriendsRecentPerformances,
+  getFriendsUpcomingPerformances,
+} from "../src/data/performances";
 import { GetServerSidePropsContext } from "next";
 import { getSession } from "next-auth/react";
 import styles from "../src/styles/home.module.css";
 
 interface Props {
+  recentPerformances: any;
   session: any;
   upcomingPerformances: any;
 }
 
-function Home({ session, upcomingPerformances }: Props) {
+function Home({ recentPerformances, session, upcomingPerformances }: Props) {
   const sessionUser = session?.user.username;
 
   return (
@@ -27,6 +31,7 @@ function Home({ session, upcomingPerformances }: Props) {
         <LoggedInHomePage
           sessionUser={sessionUser}
           upcomingPerformances={upcomingPerformances}
+          recentPerformances={recentPerformances}
         />
       ) : (
         <LoggedOutHomePage />
@@ -42,12 +47,17 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     const userId = Number(session.user.id);
     const following = await getFollowing(userId);
     const followingList = following.map((user) => user.followingUsername);
-    const [upcomingPerformances] = await Promise.all([
+    const [upcomingPerformances, recentPerformances] = await Promise.all([
       getFriendsUpcomingPerformances(followingList),
+      getFriendsRecentPerformances(followingList),
     ]);
 
     return {
-      props: superjson.serialize({ session, upcomingPerformances }).json,
+      props: superjson.serialize({
+        recentPerformances,
+        session,
+        upcomingPerformances,
+      }).json,
     };
   }
   return {

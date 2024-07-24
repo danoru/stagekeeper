@@ -9,7 +9,7 @@ interface WatchlistProps {
   watchlist: (watchlist & { musicals: musicals })[];
 }
 
-interface RecipeCardProps {
+interface CardProps {
   title: string;
   playbill: string;
 }
@@ -44,7 +44,7 @@ function UserWatchlistPreview({ watchlist }: WatchlistProps) {
   );
 }
 
-function MusicalCard({ title, playbill }: RecipeCardProps) {
+function MusicalCard({ title, playbill }: CardProps) {
   const musicalSlug = `/musical/${title.replace(/\s+/g, "-").toLowerCase()}`;
   return (
     <Grid item>

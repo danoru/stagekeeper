@@ -4,11 +4,16 @@ import FriendUpcomingActivity from "./FriendUpcomingActivity";
 import FriendRecentActivity from "./FriendRecentActivity";
 
 interface Props {
+  recentPerformances: any;
   sessionUser: string;
   upcomingPerformances: any;
 }
 
-function LoggedInHomePage({ sessionUser, upcomingPerformances }: Props) {
+function LoggedInHomePage({
+  recentPerformances,
+  sessionUser,
+  upcomingPerformances,
+}: Props) {
   return (
     <main style={{ marginTop: "20px", textAlign: "center" }}>
       <Typography variant="h6">
@@ -19,7 +24,7 @@ function LoggedInHomePage({ sessionUser, upcomingPerformances }: Props) {
         . Here&apos;s what your friends have been watching...
       </Typography>
       <FriendUpcomingActivity upcomingPerformances={upcomingPerformances} />
-      {/* <FriendRecentActivity recentEntries={recentEntries} /> */}
+      <FriendRecentActivity recentPerformances={recentPerformances} />
     </main>
   );
 }

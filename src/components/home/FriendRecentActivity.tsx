@@ -15,11 +15,12 @@ import {
 } from "@prisma/client";
 
 interface Props {
-  upcomingPerformances: (attendance & {
+  recentPerformances: (attendance & {
     performances: performances & {
       musicals: musicals;
       theatres: theatres;
     };
+    users: users;
   })[];
 }
 
@@ -31,9 +32,9 @@ interface CardProps {
   sx: any;
 }
 
-function FriendUpcomingActivity({ upcomingPerformances }: Props) {
+function FriendRecentActivity({ recentPerformances }: Props) {
   const uniquePerformances = new Set<string>();
-  const upcoming = upcomingPerformances
+  const recent = recentPerformances
     .filter((a) => {
       const title = a.performances.musicals.title;
       const date = a.performances.startTime;
@@ -62,7 +63,7 @@ function FriendUpcomingActivity({ upcomingPerformances }: Props) {
         }}
       >
         <Typography variant="overline" component="div">
-          UPCOMING MUSICALS FROM FRIENDS
+          RECENT MUSICALS FROM FRIENDS
         </Typography>
       </Grid>
       <Grid
@@ -75,7 +76,7 @@ function FriendUpcomingActivity({ upcomingPerformances }: Props) {
           maxWidth: "75%",
         }}
       >
-        {upcoming.map(
+        {recent.map(
           (
             entry: attendance & {
               performances: performances & {
@@ -133,13 +134,10 @@ function DetailInfoCard(card: CardProps) {
           </CardMedia>
           <CardContent>
             <Typography variant="body1" component="div">
-              {moment(card.date).format("MMM DD")}
-            </Typography>
-            <Typography variant="h6" component="div">
               {card.musical}
             </Typography>
-            <Typography variant="body1" component="div">
-              {card.theatre}
+            <Typography variant="body2" component="div">
+              {moment(card.date).format("MMM DD")}
             </Typography>
           </CardContent>
         </Card>
@@ -148,4 +146,4 @@ function DetailInfoCard(card: CardProps) {
   );
 }
 
-export default FriendUpcomingActivity;
+export default FriendRecentActivity;

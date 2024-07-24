@@ -1,16 +1,19 @@
 import Head from "next/head";
-import Image from "next/image";
 import LoggedInHomePage from "../src/components/home/LoggedInHomePage";
 import LoggedOutHomePage from "../src/components/home/LoggedOutHomePage";
-import styles from "../src/styles/home.module.css";
+import superjson from "superjson";
+import { getFollowing } from "../src/data/users";
+import { getFriendsUpcomingPerformances } from "../src/data/performances";
 import { GetServerSidePropsContext } from "next";
 import { getSession } from "next-auth/react";
+import styles from "../src/styles/home.module.css";
 
 interface Props {
   session: any;
+  upcomingPerformances: any;
 }
 
-function Home({ session }: Props) {
+function Home({ session, upcomingPerformances }: Props) {
   const sessionUser = session?.user.username;
 
   return (
@@ -21,7 +24,10 @@ function Home({ session }: Props) {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       {session ? (
-        <LoggedInHomePage sessionUser={sessionUser} />
+        <LoggedInHomePage
+          sessionUser={sessionUser}
+          upcomingPerformances={upcomingPerformances}
+        />
       ) : (
         <LoggedOutHomePage />
       )}
@@ -32,6 +38,18 @@ function Home({ session }: Props) {
 export async function getServerSideProps(context: GetServerSidePropsContext) {
   const session = await getSession(context);
 
+  if (session) {
+    const userId = Number(session.user.id);
+    const following = await getFollowing(userId);
+    const followingList = following.map((user) => user.followingUsername);
+    const [upcomingPerformances] = await Promise.all([
+      getFriendsUpcomingPerformances(followingList),
+    ]);
+
+    return {
+      props: superjson.serialize({ session, upcomingPerformances }).json,
+    };
+  }
   return {
     props: { session },
   };

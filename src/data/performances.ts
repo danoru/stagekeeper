@@ -276,3 +276,26 @@ export async function getPerformances() {
   });
   return performances;
 }
+
+export async function getFriendsUpcomingPerformances(usernames: string[]) {
+  const performances = await prisma.attendance.findMany({
+    where: {
+      users: {
+        username: {
+          in: usernames,
+        },
+      },
+      performances: {
+        startTime: { gte: new Date() },
+      },
+    },
+    include: {
+      performances: {
+        include: { musicals: true, theatres: true },
+      },
+      users: true,
+    },
+  });
+
+  return performances;
+}

@@ -33,6 +33,15 @@ export async function findUserByUsername(username: string) {
   return user;
 }
 
+export async function findUserByUserId(id: number) {
+  const user = await prisma.users.findUnique({
+    where: {
+      id,
+    },
+  });
+  return user;
+}
+
 export async function getFollowers(username: string) {
   const followers = await prisma.following.findMany({
     where: {

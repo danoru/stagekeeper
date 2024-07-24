@@ -1,3 +1,5 @@
+import { users } from "@prisma/client";
+
 export interface MUSICAL_LIST_TYPE {
   date: string;
   duration: number;
@@ -31,4 +33,16 @@ export interface USER_ATTENDANCE_TYPE {
   TommyExpress: boolean; // Tommy
   Kelsey: boolean; // Kelsey
   Marochan: boolean; // Mallory
+}
+
+declare module "next-auth" {
+  interface Session {
+    user: users;
+  }
+}
+
+declare module "next-auth/jwt" {
+  interface JWT {
+    user: users;
+  }
 }

@@ -63,7 +63,7 @@ function UserFollowing({ user, following }: Props) {
               >
                 <div style={{ width: "25%" }}>
                   <Link
-                    href={`/${following.followingUsername}`}
+                    href={`/users/${following.followingUsername}`}
                     underline="none"
                   >
                     {following.followingUsername}

@@ -40,7 +40,7 @@ function UserFollowing({ following }: Props) {
       >
         {following?.map((user: any, i: number) => (
           <Grid item key={i}>
-            <Button href={`/${user.followingUsername}`}>
+            <Button href={`/users/${user.followingUsername}`}>
               <UserAvatar avatarSize="56px" name={user.followingUsername} />
             </Button>
           </Grid>

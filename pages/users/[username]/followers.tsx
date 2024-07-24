@@ -62,7 +62,10 @@ function UserFollowers({ user, followers }: Props) {
                 sx={{ alignItems: "center", paddingLeft: "10px" }}
               >
                 <div style={{ width: "25%" }}>
-                  <Link href={`/${follower.users.username}`} underline="none">
+                  <Link
+                    href={`/users/${follower.users.username}`}
+                    underline="none"
+                  >
                     {follower.users.username}
                   </Link>
                 </div>

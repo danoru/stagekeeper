@@ -1,7 +1,7 @@
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
 import { musicals } from "@prisma/client";
-import InfoCard from "../layout/InfoCard";
+import MusicalCard from "../layout/MusicalCard";
 interface Props {
   musicals: musicals[];
   header: string;
@@ -55,17 +55,13 @@ function MusicalList({ musicals, header, style }: Props) {
         }}
       >
         {musicals?.map((musical: any, i: number) => (
-          <InfoCard
+          <MusicalCard
             key={`card-${i}`}
             name={musical.title}
             link={`/musicals/${musical.title
               .replace(/\s+/g, "-")
               .toLowerCase()}`}
             image={musical.playbill}
-            sx={{
-              width: "100%",
-              height: "100%",
-            }}
           />
         ))}
       </Grid>

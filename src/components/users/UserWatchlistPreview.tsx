@@ -33,7 +33,7 @@ function UserWatchlistPreview({ watchlist }: WatchlistProps) {
       </Grid>
       <Grid container>
         {watchlist.map((item, i: number) => (
-          <MusicalCard
+          <TinyCard
             key={`card-${i}`}
             title={item.musicals.title}
             playbill={item.musicals.playbill || ""}
@@ -44,8 +44,8 @@ function UserWatchlistPreview({ watchlist }: WatchlistProps) {
   );
 }
 
-function MusicalCard({ title, playbill }: CardProps) {
-  const musicalSlug = `/musical/${title.replace(/\s+/g, "-").toLowerCase()}`;
+function TinyCard({ title, playbill }: CardProps) {
+  const musicalSlug = `/musicals/${title.replace(/\s+/g, "-").toLowerCase()}`;
   return (
     <Grid item>
       <Link href={musicalSlug}>

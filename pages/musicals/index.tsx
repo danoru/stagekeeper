@@ -1,14 +1,14 @@
 import Grid from "@mui/material/Grid";
 import Head from "next/head";
-import InfoCard from "../../src/components/layout/InfoCard";
+import MusicalCard from "../../src/components/layout/MusicalCard";
 import Pagination from "@mui/material/Pagination";
 import superjson from "superjson";
+import Typography from "@mui/material/Typography";
+import UpcomingMusicalList from "../../src/components/musical/UpcomingMusicalList";
 import { getPaginatedMusicals } from "../../src/data/musicals";
 import { musicals, programming, seasons, theatres } from "@prisma/client";
 import { useState, useEffect } from "react";
 import { getUpcomingPerformances } from "../../src/data/performances";
-import UpcomingMusicalList from "../../src/components/musical/UpcomingMusicalList";
-import { Typography } from "@mui/material";
 
 interface Props {
   musicals: musicals[];
@@ -51,17 +51,19 @@ function MusicalsPage({
       <UpcomingMusicalList upcomingPerformances={upcomingPerformances} />
       <Grid container direction="row">
         <Grid item xs={12}>
-          <Typography variant="h6">All Musicals</Typography>
+          <Typography variant="h6" sx={{ margin: "1vh 0" }}>
+            All Musicals
+          </Typography>
         </Grid>
-        <Grid container item xs={12}>
+        <Grid container item xs={8} sx={{ margin: "0 auto" }}>
           {musicals.map((musical, i) => (
-            <InfoCard
+            <MusicalCard
               key={i}
               name={musical.title}
               link={`/musicals/${musical.title
                 .replace(/\s+/g, "-")
                 .toLowerCase()}`}
-              image={musical.playbill}
+              image={musical.playbill || ""}
             />
           ))}
         </Grid>
@@ -70,7 +72,7 @@ function MusicalsPage({
         count={Math.ceil(musicalCount / itemsPerPage)}
         page={page}
         onChange={handleChange}
-        sx={{ marginTop: 2 }}
+        sx={{ margin: "1vh", justifyContent: "center", display: "flex" }}
       />
     </div>
   );

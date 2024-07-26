@@ -17,7 +17,9 @@ interface Props {
 function UpcomingMusicalList({ upcomingPerformances }: Props) {
   return (
     <Grid item>
-      <Typography variant="h5">Upcoming Performances</Typography>
+      <Typography variant="h5" sx={{ margin: "2vh 0" }}>
+        Upcoming Performances
+      </Typography>
       <Carousel sx={{ maxWidth: 300, margin: "auto" }}>
         {upcomingPerformances.map((performance: any) => {
           const musicalSlug = `${performance.musicals.title

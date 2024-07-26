@@ -326,7 +326,7 @@ export async function getFriendsUpcomingPerformances(usernames: string[]) {
   return performances;
 }
 
-export async function getFriendsRecentPerformances(usernames: string[]) {
+export async function getRecentPerformances(usernames: string[]) {
   const performances = await prisma.attendance.findMany({
     where: {
       users: {

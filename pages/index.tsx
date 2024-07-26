@@ -4,7 +4,7 @@ import LoggedOutHomePage from "../src/components/home/LoggedOutHomePage";
 import superjson from "superjson";
 import { getFollowing } from "../src/data/users";
 import {
-  getFriendsRecentPerformances,
+  getRecentPerformances,
   getFriendsUpcomingPerformances,
 } from "../src/data/performances";
 import { GetServerSidePropsContext } from "next";
@@ -49,7 +49,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     const followingList = following.map((user) => user.followingUsername);
     const [upcomingPerformances, recentPerformances] = await Promise.all([
       getFriendsUpcomingPerformances(followingList),
-      getFriendsRecentPerformances(followingList),
+      getRecentPerformances(followingList),
     ]);
 
     return {

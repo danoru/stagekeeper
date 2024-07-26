@@ -1,7 +1,7 @@
 import Link from "@mui/material/Link";
 import Typography from "@mui/material/Typography";
 import FriendUpcomingActivity from "./FriendUpcomingActivity";
-import FriendRecentActivity from "./FriendRecentActivity";
+import RecentActivity from "../performances/RecentActivity";
 
 interface Props {
   recentPerformances: any;
@@ -24,7 +24,7 @@ function LoggedInHomePage({
         . Here&apos;s what your friends have been watching...
       </Typography>
       <FriendUpcomingActivity upcomingPerformances={upcomingPerformances} />
-      <FriendRecentActivity recentPerformances={recentPerformances} />
+      <RecentActivity recentPerformances={recentPerformances} />
     </main>
   );
 }

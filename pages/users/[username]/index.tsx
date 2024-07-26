@@ -15,6 +15,8 @@ import { getUserProfile, getFollowers } from "../../../src/data/users";
 import { getSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import UserFollowing from "../../../src/components/users/UserFollowing";
+import { getRecentPerformances } from "../../../src/data/performances";
+import FriendRecentActivity from "../../../src/components/performances/RecentActivity";
 
 interface Props {
   attendance: (attendance & {
@@ -22,6 +24,7 @@ interface Props {
   })[];
   followers: following[];
   following: following[];
+  recentPerformances: any;
   sessionUser: any;
   user: users;
   watchlist: (watchlist & { musicals: musicals })[];
@@ -35,6 +38,7 @@ function ProfilePage({
   attendance,
   followers,
   following,
+  recentPerformances,
   sessionUser,
   user,
   watchlist,
@@ -61,6 +65,7 @@ function ProfilePage({
             <ProfileLinkBar username={user.username} />
           </Grid>
           <Grid item xs={8}>
+            <FriendRecentActivity recentPerformances={recentPerformances} />
             <UserFollowing following={following} />
           </Grid>
           <Grid item xs={4}>
@@ -84,6 +89,7 @@ export async function getServerSideProps(context: {
   let attendance: attendance[] = [];
   let followers: following[] = [];
   let following: following[] = [];
+  let recentPerformances: any[] = [];
 
   const user = await getUserProfile(username);
 
@@ -92,6 +98,7 @@ export async function getServerSideProps(context: {
     attendance = user.attendance;
     followers = await getFollowers(username);
     following = user.following;
+    recentPerformances = await getRecentPerformances([user.username]);
   }
 
   return {
@@ -99,6 +106,7 @@ export async function getServerSideProps(context: {
       attendance,
       following,
       followers,
+      recentPerformances,
       sessionUser,
       user,
       watchlist,

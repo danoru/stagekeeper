@@ -1,10 +1,5 @@
-import Card from "@mui/material/Card";
-import CardMedia from "@mui/material/CardMedia";
-import CardContent from "@mui/material/CardContent";
+import DetailInfoCard from "../layout/DetailInfoCard";
 import Grid from "@mui/material/Grid";
-import Image from "next/image";
-import Link from "@mui/material/Link";
-import moment from "moment";
 import Typography from "@mui/material/Typography";
 import {
   attendance,
@@ -24,15 +19,7 @@ interface Props {
   })[];
 }
 
-interface CardProps {
-  date: Date;
-  image: string;
-  musical: string;
-  theatre: string;
-  sx: any;
-}
-
-function FriendRecentActivity({ recentPerformances }: Props) {
+function RecentActivity({ recentPerformances }: Props) {
   const uniquePerformances = new Set<string>();
   const recent = recentPerformances
     .filter((a) => {
@@ -45,7 +32,7 @@ function FriendRecentActivity({ recentPerformances }: Props) {
       }
       return false;
     })
-    .slice(0, 5);
+    .slice(0, 3);
 
   return (
     <Grid container>
@@ -63,7 +50,7 @@ function FriendRecentActivity({ recentPerformances }: Props) {
         }}
       >
         <Typography variant="overline" component="div">
-          RECENT MUSICALS FROM FRIENDS
+          RECENT MUSICALS
         </Typography>
       </Grid>
       <Grid
@@ -107,46 +94,4 @@ function FriendRecentActivity({ recentPerformances }: Props) {
   );
 }
 
-function DetailInfoCard(card: CardProps) {
-  const musicalSlug = `/musicals/${card.musical
-    .replace(/\s+/g, "-")
-    .toLowerCase()}`;
-  return (
-    <Grid item>
-      <Link href={musicalSlug} underline="none">
-        <Card
-          sx={{
-            height: "300px",
-            width: "250px",
-            cursor: "pointer",
-          }}
-        >
-          <CardMedia
-            style={{ position: "relative", height: 140, width: "100%" }}
-          >
-            <Image
-              src={card.image}
-              alt={card.musical}
-              fill
-              sizes="(max-width: 600px) 100vw, (max-width: 900px) 50vw, 33vw"
-              style={{ objectFit: "cover" }}
-            />
-          </CardMedia>
-          <CardContent>
-            <Typography variant="body2" component="div">
-              {moment(card.date).format("MMM DD")}
-            </Typography>
-            <Typography variant="h6" component="div">
-              {card.musical}
-            </Typography>
-            <Typography variant="body1" component="div">
-              {card.theatre}
-            </Typography>
-          </CardContent>
-        </Card>
-      </Link>
-    </Grid>
-  );
-}
-
-export default FriendRecentActivity;
+export default RecentActivity;

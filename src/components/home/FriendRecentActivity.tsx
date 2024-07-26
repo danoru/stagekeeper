@@ -133,11 +133,14 @@ function DetailInfoCard(card: CardProps) {
             />
           </CardMedia>
           <CardContent>
-            <Typography variant="body1" component="div">
-              {card.musical}
-            </Typography>
             <Typography variant="body2" component="div">
               {moment(card.date).format("MMM DD")}
+            </Typography>
+            <Typography variant="h6" component="div">
+              {card.musical}
+            </Typography>
+            <Typography variant="body1" component="div">
+              {card.theatre}
             </Typography>
           </CardContent>
         </Card>

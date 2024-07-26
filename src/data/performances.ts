@@ -277,6 +277,33 @@ export async function getPerformances() {
   return performances;
 }
 
+export async function getUpcomingPerformances() {
+  const upcomingLimit = new Date();
+  upcomingLimit.setMonth(upcomingLimit.getMonth() + 6);
+
+  const programming = await prisma.programming.findMany({
+    where: {
+      startDate: {
+        gte: new Date(),
+        lte: upcomingLimit,
+      },
+    },
+    include: {
+      musicals: true,
+      seasons: {
+        include: {
+          theatres: true,
+        },
+      },
+    },
+    orderBy: {
+      startDate: "asc",
+    },
+  });
+
+  return programming;
+}
+
 export async function getFriendsUpcomingPerformances(usernames: string[]) {
   const performances = await prisma.attendance.findMany({
     where: {

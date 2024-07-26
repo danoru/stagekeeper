@@ -4,15 +4,26 @@ import InfoCard from "../../src/components/layout/InfoCard";
 import Pagination from "@mui/material/Pagination";
 import superjson from "superjson";
 import { getPaginatedMusicals } from "../../src/data/musicals";
-import { musicals } from "@prisma/client";
+import { musicals, programming, seasons, theatres } from "@prisma/client";
 import { useState, useEffect } from "react";
+import { getUpcomingPerformances } from "../../src/data/performances";
+import UpcomingMusicalList from "../../src/components/musical/UpcomingMusicalList";
+import { Typography } from "@mui/material";
 
 interface Props {
   musicals: musicals[];
   musicalCount: number;
+  upcomingPerformances: (programming & {
+    musicals: musicals;
+    seasons: seasons & { theatres: theatres };
+  })[];
 }
 
-function MusicalsPage({ musicals: initialMusicals, musicalCount }: Props) {
+function MusicalsPage({
+  musicals: initialMusicals,
+  musicalCount,
+  upcomingPerformances,
+}: Props) {
   const [musicals, setMusicals] = useState(initialMusicals);
   const [page, setPage] = useState(1);
   const itemsPerPage = 10;
@@ -37,17 +48,23 @@ function MusicalsPage({ musicals: initialMusicals, musicalCount }: Props) {
       <Head>
         <title>Musicals • StageKeeper</title>
       </Head>
+      <UpcomingMusicalList upcomingPerformances={upcomingPerformances} />
       <Grid container direction="row">
-        {musicals.map((musical, i) => (
-          <InfoCard
-            key={i}
-            name={musical.title}
-            link={`/musicals/${musical.title
-              .replace(/\s+/g, "-")
-              .toLowerCase()}`}
-            image={musical.playbill}
-          />
-        ))}
+        <Grid item xs={12}>
+          <Typography variant="h6">All Musicals</Typography>
+        </Grid>
+        <Grid container item xs={12}>
+          {musicals.map((musical, i) => (
+            <InfoCard
+              key={i}
+              name={musical.title}
+              link={`/musicals/${musical.title
+                .replace(/\s+/g, "-")
+                .toLowerCase()}`}
+              image={musical.playbill}
+            />
+          ))}
+        </Grid>
       </Grid>
       <Pagination
         count={Math.ceil(musicalCount / itemsPerPage)}
@@ -61,11 +78,13 @@ function MusicalsPage({ musicals: initialMusicals, musicalCount }: Props) {
 
 export async function getStaticProps() {
   const { musicals, musicalCount } = await getPaginatedMusicals(1, 10);
+  const upcomingPerformances = await getUpcomingPerformances();
 
   return {
     props: superjson.serialize({
       musicals,
       musicalCount,
+      upcomingPerformances,
     }).json,
   };
 }

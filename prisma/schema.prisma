@@ -75,11 +75,11 @@ model programming {
   id        Int       @id @default(autoincrement())
   createdAt DateTime  @default(now()) @db.Timestamptz(6)
   musical   Int
-  season    Int
+  season    Int?
   endDate   DateTime? @db.Date
   startDate DateTime? @db.Date
   musicals  musicals  @relation(fields: [musical], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  seasons   seasons   @relation(fields: [season], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  seasons   seasons?  @relation(fields: [season], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model seasons {

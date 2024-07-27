@@ -16,7 +16,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       musicalsandmayhem: false,
       danoru: true,
       annabanza: true,
-      bentothetop: false,
+      Benito: false,
       TommyExpress: false,
       Kelsey: false,
       Marochan: false,
@@ -38,7 +38,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       musicalsandmayhem: true,
       danoru: true,
       annabanza: true,
-      bentothetop: false,
+      Benito: false,
       TommyExpress: false,
       Kelsey: false,
       Marochan: false,
@@ -60,7 +60,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       musicalsandmayhem: true,
       danoru: true,
       annabanza: true,
-      bentothetop: true,
+      Benito: true,
       TommyExpress: true,
       Kelsey: true,
       Marochan: false,
@@ -82,7 +82,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       musicalsandmayhem: true,
       danoru: true,
       annabanza: true,
-      bentothetop: false,
+      Benito: false,
       TommyExpress: false,
       Kelsey: false,
       Marochan: false,
@@ -104,7 +104,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       musicalsandmayhem: false,
       danoru: true,
       annabanza: true,
-      bentothetop: false,
+      Benito: false,
       TommyExpress: false,
       Kelsey: false,
       Marochan: false,
@@ -126,7 +126,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       musicalsandmayhem: false,
       danoru: true,
       annabanza: true,
-      bentothetop: false,
+      Benito: false,
       TommyExpress: false,
       Kelsey: false,
       Marochan: false,
@@ -148,7 +148,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       musicalsandmayhem: true,
       danoru: true,
       annabanza: true,
-      bentothetop: false,
+      Benito: false,
       TommyExpress: true,
       Kelsey: true,
       Marochan: false,
@@ -170,7 +170,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       musicalsandmayhem: false,
       danoru: true,
       annabanza: true,
-      bentothetop: false,
+      Benito: false,
       TommyExpress: false,
       Kelsey: true,
       Marochan: false,
@@ -192,7 +192,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       musicalsandmayhem: false,
       danoru: true,
       annabanza: true,
-      bentothetop: false,
+      Benito: false,
       TommyExpress: false,
       Kelsey: false,
       Marochan: false,
@@ -214,7 +214,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       musicalsandmayhem: false,
       danoru: true,
       annabanza: true,
-      bentothetop: false,
+      Benito: false,
       TommyExpress: false,
       Kelsey: false,
       Marochan: false,
@@ -236,7 +236,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       musicalsandmayhem: true,
       danoru: true,
       annabanza: true,
-      bentothetop: false,
+      Benito: false,
       TommyExpress: true,
       Kelsey: true,
       Marochan: true,
@@ -258,7 +258,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       musicalsandmayhem: true,
       danoru: true,
       annabanza: true,
-      bentothetop: true,
+      Benito: true,
       TommyExpress: false,
       Kelsey: false,
       Marochan: false,
@@ -280,7 +280,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       musicalsandmayhem: false,
       danoru: true,
       annabanza: true,
-      bentothetop: false,
+      Benito: false,
       TommyExpress: false,
       Kelsey: false,
       Marochan: false,
@@ -302,7 +302,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       musicalsandmayhem: true,
       danoru: true,
       annabanza: true,
-      bentothetop: false,
+      Benito: false,
       TommyExpress: false,
       Kelsey: false,
       Marochan: true,
@@ -324,7 +324,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       musicalsandmayhem: true,
       danoru: true,
       annabanza: true,
-      bentothetop: false,
+      Benito: false,
       TommyExpress: true,
       Kelsey: true,
       Marochan: false,
@@ -346,7 +346,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       musicalsandmayhem: true,
       danoru: true,
       annabanza: true,
-      bentothetop: false,
+      Benito: false,
       TommyExpress: true,
       Kelsey: false,
       Marochan: true,
@@ -368,7 +368,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       musicalsandmayhem: false,
       danoru: true,
       annabanza: true,
-      bentothetop: false,
+      Benito: false,
       TommyExpress: false,
       Kelsey: false,
       Marochan: false,
@@ -390,7 +390,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       musicalsandmayhem: true,
       danoru: true,
       annabanza: true,
-      bentothetop: false,
+      Benito: false,
       TommyExpress: true,
       Kelsey: true,
       Marochan: true,
@@ -412,7 +412,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       musicalsandmayhem: true,
       danoru: true,
       annabanza: true,
-      bentothetop: true,
+      Benito: true,
       TommyExpress: true,
       Kelsey: true,
       Marochan: true,
@@ -434,7 +434,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       musicalsandmayhem: true,
       danoru: true,
       annabanza: true,
-      bentothetop: false,
+      Benito: false,
       TommyExpress: true,
       Kelsey: true,
       Marochan: false,
@@ -456,7 +456,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       musicalsandmayhem: true,
       danoru: true,
       annabanza: true,
-      bentothetop: false,
+      Benito: false,
       TommyExpress: false,
       Kelsey: true,
       Marochan: false,
@@ -478,7 +478,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       musicalsandmayhem: true,
       danoru: true,
       annabanza: true,
-      bentothetop: false,
+      Benito: false,
       TommyExpress: true,
       Kelsey: true,
       Marochan: true,
@@ -500,7 +500,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       musicalsandmayhem: true,
       danoru: true,
       annabanza: true,
-      bentothetop: false,
+      Benito: false,
       TommyExpress: true,
       Kelsey: false,
       Marochan: true,
@@ -522,7 +522,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       musicalsandmayhem: true,
       danoru: true,
       annabanza: true,
-      bentothetop: false,
+      Benito: false,
       TommyExpress: true,
       Kelsey: true,
       Marochan: true,
@@ -544,7 +544,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       musicalsandmayhem: true,
       danoru: true,
       annabanza: true,
-      bentothetop: false,
+      Benito: false,
       TommyExpress: true,
       Kelsey: false,
       Marochan: false,
@@ -566,7 +566,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       musicalsandmayhem: true,
       danoru: true,
       annabanza: true,
-      bentothetop: false,
+      Benito: false,
       TommyExpress: true,
       Kelsey: false,
       Marochan: true,
@@ -588,7 +588,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       musicalsandmayhem: true,
       danoru: true,
       annabanza: true,
-      bentothetop: true,
+      Benito: true,
       TommyExpress: false,
       Kelsey: false,
       Marochan: false,
@@ -610,7 +610,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       musicalsandmayhem: true,
       danoru: true,
       annabanza: true,
-      bentothetop: false,
+      Benito: false,
       TommyExpress: false,
       Kelsey: false,
       Marochan: true,
@@ -632,7 +632,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       musicalsandmayhem: true,
       danoru: true,
       annabanza: true,
-      bentothetop: false,
+      Benito: false,
       TommyExpress: false,
       Kelsey: true,
       Marochan: true,
@@ -654,7 +654,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       musicalsandmayhem: true,
       danoru: true,
       annabanza: true,
-      bentothetop: false,
+      Benito: false,
       TommyExpress: true,
       Kelsey: false,
       Marochan: false,
@@ -676,7 +676,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       musicalsandmayhem: true,
       danoru: true,
       annabanza: true,
-      bentothetop: false,
+      Benito: false,
       TommyExpress: false,
       Kelsey: true,
       Marochan: true,
@@ -698,7 +698,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       musicalsandmayhem: true,
       danoru: true,
       annabanza: true,
-      bentothetop: false,
+      Benito: false,
       TommyExpress: false,
       Kelsey: false,
       Marochan: true,
@@ -720,7 +720,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       musicalsandmayhem: true,
       danoru: true,
       annabanza: true,
-      bentothetop: false,
+      Benito: false,
       TommyExpress: true,
       Kelsey: true,
       Marochan: false,
@@ -742,7 +742,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       musicalsandmayhem: true,
       danoru: true,
       annabanza: true,
-      bentothetop: false,
+      Benito: false,
       TommyExpress: true,
       Kelsey: false,
       Marochan: false,
@@ -764,7 +764,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       musicalsandmayhem: false,
       danoru: true,
       annabanza: true,
-      bentothetop: false,
+      Benito: false,
       TommyExpress: false,
       Kelsey: false,
       Marochan: false,
@@ -786,7 +786,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       musicalsandmayhem: true,
       danoru: true,
       annabanza: true,
-      bentothetop: true,
+      Benito: true,
       TommyExpress: false,
       Kelsey: false,
       Marochan: false,
@@ -808,7 +808,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       musicalsandmayhem: false,
       danoru: true,
       annabanza: true,
-      bentothetop: false,
+      Benito: false,
       TommyExpress: false,
       Kelsey: false,
       Marochan: false,
@@ -830,7 +830,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       musicalsandmayhem: true,
       danoru: true,
       annabanza: true,
-      bentothetop: true,
+      Benito: true,
       TommyExpress: true,
       Kelsey: false,
       Marochan: false,
@@ -852,7 +852,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       musicalsandmayhem: true,
       danoru: true,
       annabanza: true,
-      bentothetop: true,
+      Benito: true,
       TommyExpress: false,
       Kelsey: false,
       Marochan: false,
@@ -874,7 +874,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       musicalsandmayhem: true,
       danoru: true,
       annabanza: true,
-      bentothetop: true,
+      Benito: true,
       TommyExpress: false,
       Kelsey: false,
       Marochan: true,
@@ -896,7 +896,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       musicalsandmayhem: false,
       danoru: true,
       annabanza: true,
-      bentothetop: false,
+      Benito: false,
       TommyExpress: false,
       Kelsey: false,
       Marochan: false,
@@ -918,7 +918,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       musicalsandmayhem: true,
       danoru: true,
       annabanza: true,
-      bentothetop: false,
+      Benito: false,
       TommyExpress: true,
       Kelsey: false,
       Marochan: false,
@@ -940,7 +940,7 @@ export const MUSICAL_LIST: MUSICAL_LIST_TYPE[] = [
       musicalsandmayhem: true,
       danoru: true,
       annabanza: true,
-      bentothetop: true,
+      Benito: true,
       TommyExpress: true,
       Kelsey: true,
       Marochan: true,
@@ -970,9 +970,9 @@ export function getFeaturedMusicals(year: string, username: string) {
           musical.userAttended.TommyExpress && musical.year === "2022"
       );
     }
-    if (username === "bentothetop") {
+    if (username === "Benito") {
       return MUSICAL_LIST.filter(
-        (musical) => musical.userAttended.bentothetop && musical.year === "2022"
+        (musical) => musical.userAttended.Benito && musical.year === "2022"
       );
     }
     if (username === "Marochan") {
@@ -1009,9 +1009,9 @@ export function getFeaturedMusicals(year: string, username: string) {
           musical.userAttended.TommyExpress && musical.year === "2023"
       );
     }
-    if (username === "bentothetop") {
+    if (username === "Benito") {
       return MUSICAL_LIST.filter(
-        (musical) => musical.userAttended.bentothetop && musical.year === "2023"
+        (musical) => musical.userAttended.Benito && musical.year === "2023"
       );
     }
     if (username === "Marochan") {
@@ -1048,9 +1048,9 @@ export function getFeaturedMusicals(year: string, username: string) {
           musical.userAttended.TommyExpress && musical.year === "2024"
       );
     }
-    if (username === "bentothetop") {
+    if (username === "Benito") {
       return MUSICAL_LIST.filter(
-        (musical) => musical.userAttended.bentothetop && musical.year === "2024"
+        (musical) => musical.userAttended.Benito && musical.year === "2024"
       );
     }
     if (username === "Marochan") {
@@ -1082,8 +1082,8 @@ export function getFeaturedMusicals(year: string, username: string) {
         (musical) => musical.userAttended.TommyExpress
       );
     }
-    if (username === "bentothetop") {
-      return MUSICAL_LIST.filter((musical) => musical.userAttended.bentothetop);
+    if (username === "Benito") {
+      return MUSICAL_LIST.filter((musical) => musical.userAttended.Benito);
     }
     if (username === "Marochan") {
       return MUSICAL_LIST.filter((musical) => musical.userAttended.Marochan);

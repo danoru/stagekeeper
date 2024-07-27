@@ -29,7 +29,7 @@ export interface USER_ATTENDANCE_TYPE {
   musicalsandmayhem: boolean; // Group
   danoru: boolean; // Daniel
   annabanza: boolean; // Anna
-  bentothetop: boolean; // Ben
+  Benito: boolean; // Ben
   TommyExpress: boolean; // Tommy
   Kelsey: boolean; // Kelsey
   Marochan: boolean; // Mallory

@@ -11,14 +11,14 @@ interface Props {
   name: string;
 }
 
-function MusicalCard(props: Props) {
+function TheatreCard(props: Props) {
   return (
     <Grid item sx={{ margin: "10px" }}>
       <Card
         sx={{
           position: "relative",
-          height: "270px",
-          width: "211.5px",
+          height: "211.5px",
+          width: "270px",
           overflow: "hidden",
           "&:hover": {
             ".overlay": {
@@ -47,7 +47,7 @@ function MusicalCard(props: Props) {
           />
           <Box
             className="overlay"
-            style={{
+            sx={{
               position: "absolute",
               top: "5px",
               right: "5px",
@@ -78,4 +78,4 @@ function MusicalCard(props: Props) {
   );
 }
 
-export default MusicalCard;
+export default TheatreCard;

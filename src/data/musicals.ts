@@ -408,10 +408,7 @@ export async function getMusicals() {
   return musicals;
 }
 
-export async function getPaginatedMusicals(
-  page: number = 1,
-  limit: number = 10
-) {
+export async function getPaginatedMusicals(page: number, limit: number) {
   const skip = (page - 1) * limit;
   const musicals = await prisma.musicals.findMany({
     orderBy: {

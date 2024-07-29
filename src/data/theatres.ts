@@ -122,10 +122,7 @@ export async function getTheatres() {
   return theatres;
 }
 
-export async function getPaginatedTheatres(
-  page: number = 1,
-  limit: number = 10
-) {
+export async function getPaginatedTheatres(page: number, limit: number) {
   const skip = (page - 1) * limit;
   const theatres = await prisma.theatres.findMany({
     orderBy: {

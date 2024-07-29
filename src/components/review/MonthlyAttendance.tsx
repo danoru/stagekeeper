@@ -10,11 +10,12 @@ import {
   Legend,
 } from "chart.js";
 import moment from "moment";
-
-import { MUSICAL_LIST_TYPE } from "../../types";
+import { attendance, musicals, performances, theatres } from "@prisma/client";
 
 interface Props {
-  stats: MUSICAL_LIST_TYPE[];
+  stats: (attendance & {
+    performances: performances & { musicals: musicals; theatres: theatres };
+  })[];
 }
 
 ChartJS.register(
@@ -57,7 +58,9 @@ function MonthlyAttendanceChart(props: Props) {
     "December",
   ];
 
-  const musicalMonths = stats.map((data) => moment(data.date).format("MMMM"));
+  const musicalMonths = stats.map((data) =>
+    moment(data.performances.startTime).format("MMMM")
+  );
 
   const monthlyOccurence: Record<string, number> = {};
 

@@ -1,17 +1,20 @@
-import { Fragment } from "react";
+import Carousel from "../../../../src/components/review/Carousel";
 import Head from "next/head";
+import Highlights from "../../../../src/components/review/Highlights";
+import ReviewHeader from "../../../../src/components/review/ReviewHeader";
+import Statistics from "../../../../src/components/review/Statistics";
+import superjson from "superjson";
+import { Fragment } from "react";
+import { getUserAttendanceByYear, getUsers } from "../../../../src/data/users";
+import { attendance, musicals, performances, theatres } from "@prisma/client";
 
-import { getFeaturedMusicals } from "../../../../src/data/review";
+interface Props {
+  musicals: (attendance & {
+    performances: performances & { musicals: musicals; theatres: theatres };
+  })[];
+}
 
-import Carousel from "../../../../src/components/review/carousel";
-import Highlights from "../../../../src/components/review/highlights";
-import ReviewHeader from "../../../../src/components/review/review-header";
-import Statistics from "../../../../src/components/review/statistics";
-
-function ReviewPage(props: any) {
-  const { musicals } = props;
-  const musicalCount = musicals.length;
-
+function ReviewPage({ musicals }: any) {
   return (
     <Fragment>
       <Head>
@@ -32,48 +35,35 @@ function ReviewPage(props: any) {
 }
 
 export async function getStaticPaths() {
+  const users = await getUsers();
+  const years = ["2020", "2021", "2022", "2023", "2024"];
+  const paths = users.flatMap((user) =>
+    years.map((year) => ({
+      params: { username: user.username, year: year },
+    }))
+  );
+
   return {
-    paths: [
-      { params: { username: "musicalsandmayhem", year: "2022" } },
-      { params: { username: "musicalsandmayhem", year: "2023" } },
-      { params: { username: "musicalsandmayhem", year: "2024" } },
-      { params: { username: "danoru", year: "2022" } },
-      { params: { username: "danoru", year: "2023" } },
-      { params: { username: "danoru", year: "2024" } },
-      { params: { username: "annabanza", year: "2022" } },
-      { params: { username: "annabanza", year: "2023" } },
-      { params: { username: "annabanza", year: "2024" } },
-      { params: { username: "TommyExpress", year: "2022" } },
-      { params: { username: "TommyExpress", year: "2023" } },
-      { params: { username: "TommyExpress", year: "2024" } },
-      { params: { username: "Benito", year: "2022" } },
-      { params: { username: "Benito", year: "2023" } },
-      { params: { username: "Benito", year: "2024" } },
-      { params: { username: "Marochan", year: "2022" } },
-      { params: { username: "Marochan", year: "2023" } },
-      { params: { username: "Marochan", year: "2024" } },
-      { params: { username: "Kelsey", year: "2022" } },
-      { params: { username: "Kelsey", year: "2023" } },
-      { params: { username: "Kelsey", year: "2024" } },
-      { params: { username: "all", year: "2022" } },
-      { params: { username: "all", year: "2023" } },
-      { params: { username: "all", year: "2024" } },
-    ],
+    paths,
     fallback: false,
   };
 }
 
 export async function getStaticProps(context: any) {
-  const username = context.params.username;
-  const year = context.params.year;
+  const { username, year } = context.params!;
+  const users = await getUsers();
+  const user = users.find((user) => user.username === username);
+  let musicals: any[] = [];
 
-  let featuredMusicals = getFeaturedMusicals(year, username);
+  if (user) {
+    const userId = user.id;
+    musicals = await getUserAttendanceByYear(Number(year), userId);
+  }
 
   return {
-    props: {
-      musicals: featuredMusicals,
-    },
-    revalidate: 1800,
+    props: superjson.serialize({
+      musicals,
+    }).json,
   };
 }
 

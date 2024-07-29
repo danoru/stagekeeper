@@ -1,4 +1,6 @@
 import React from "react";
+import moment from "moment";
+import { attendance, musicals, performances, theatres } from "@prisma/client";
 import { Bar } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -9,12 +11,11 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
-import moment from "moment";
-
-import { MUSICAL_LIST_TYPE } from "../../types";
 
 interface Props {
-  stats: MUSICAL_LIST_TYPE[];
+  stats: (attendance & {
+    performances: performances & { musicals: musicals; theatres: theatres };
+  })[];
 }
 
 ChartJS.register(
@@ -43,7 +44,7 @@ function MusicalByPremiereChart(props: Props) {
   const { stats } = props;
 
   const musicalPremieres = stats.map((data) =>
-    moment(data.premiere).format("YYYY")
+    moment(data.performances.musicals.premiere).format("YYYY")
   );
 
   const yearlyOccurence: Record<string, number> = {};

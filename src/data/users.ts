@@ -116,6 +116,34 @@ export async function getUserAttendance(id: number) {
   return attendance;
 }
 
+export async function getUserAttendanceByYear(year: number | null, id: number) {
+  let dateFilter = {};
+
+  if (year) {
+    const startOfYear = new Date(year, 0, 1);
+    const endOfYear = new Date(year + 1, 0, 1);
+    dateFilter = {
+      startTime: {
+        gte: startOfYear,
+        lt: endOfYear,
+      },
+    };
+  }
+
+  const attendance = await prisma.attendance.findMany({
+    where: {
+      user: id,
+
+      performances: dateFilter,
+    },
+    orderBy: { performances: { startTime: "asc" } },
+    include: {
+      performances: { include: { musicals: true, theatres: true } },
+    },
+  });
+  return attendance;
+}
+
 export async function getUserLikes(username: string) {
   const user = await prisma.users.findUnique({
     where: {

@@ -1,22 +1,18 @@
-import { MUSICAL_LIST_TYPE } from "../../types";
-
+import { attendance, musicals, performances, theatres } from "@prisma/client";
 import styles from "../../styles/highlights.module.css";
 
 interface Props {
-  highlights: MUSICAL_LIST_TYPE[];
+  highlights: (attendance & {
+    performances: performances & { musicals: musicals; theatres: theatres };
+  })[];
 }
 
-function Highlights(props: Props) {
-  const { highlights } = props;
-
+function Highlights({ highlights }: Props) {
   const musicalCount = highlights.length;
 
-  const totalDuration = highlights.reduce(
-    (accumulator: number, highlight: MUSICAL_LIST_TYPE): number => {
-      return accumulator + highlight.duration;
-    },
-    0
-  );
+  const totalDuration = highlights.reduce((accumulator, highlight) => {
+    return accumulator + (highlight.performances.musicals.duration ?? 150);
+  }, 0);
 
   function convertTime(num: number) {
     let hours = Math.floor(num / 60);
@@ -29,9 +25,9 @@ function Highlights(props: Props) {
   const locationStorage: Record<string, number> = {};
   let locationCount = 0;
 
-  highlights.forEach((highlight: MUSICAL_LIST_TYPE) => {
-    if (!locationStorage[highlight.location]) {
-      locationStorage[highlight.location] = 1;
+  highlights.forEach((highlight) => {
+    if (!locationStorage[highlight.performances.theatres.location]) {
+      locationStorage[highlight.performances.theatres.location] = 1;
       locationCount++;
     }
   });
@@ -39,9 +35,9 @@ function Highlights(props: Props) {
   const stageStorage: Record<string, number> = {};
   let stageCount = 0;
 
-  highlights.forEach((highlight: MUSICAL_LIST_TYPE) => {
-    if (!stageStorage[highlight.playhouse]) {
-      stageStorage[highlight.playhouse] = 1;
+  highlights.forEach((highlight) => {
+    if (!stageStorage[highlight.performances.theatres.name]) {
+      stageStorage[highlight.performances.theatres.name] = 1;
       stageCount++;
     }
   });

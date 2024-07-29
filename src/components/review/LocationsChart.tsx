@@ -1,11 +1,12 @@
 import React from "react";
-import { Doughnut } from "react-chartjs-2";
+import { attendance, musicals, performances, theatres } from "@prisma/client";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, Title } from "chart.js";
-
-import { MUSICAL_LIST_TYPE } from "../../types";
+import { Doughnut } from "react-chartjs-2";
 
 interface Props {
-  stats: MUSICAL_LIST_TYPE[];
+  stats: (attendance & {
+    performances: performances & { musicals: musicals; theatres: theatres };
+  })[];
 }
 
 ChartJS.register(ArcElement, Title, Tooltip, Legend);
@@ -28,11 +29,11 @@ function LocationsChart(props: Props) {
 
   const locationOccurence: Record<string, number> = {};
 
-  stats.forEach((stats: MUSICAL_LIST_TYPE) => {
-    if (!locationOccurence[stats.location]) {
-      locationOccurence[stats.location] = 1;
+  stats.forEach((stats) => {
+    if (!locationOccurence[stats.performances.theatres.location]) {
+      locationOccurence[stats.performances.theatres.location] = 1;
     } else {
-      locationOccurence[stats.location]++;
+      locationOccurence[stats.performances.theatres.location]++;
     }
   });
 

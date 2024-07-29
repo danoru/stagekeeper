@@ -1,38 +1,45 @@
-import React from "react";
-import moment from "moment";
-import Typography from "@mui/material/Typography";
-import Carousel from "react-material-ui-carousel";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
-
-import { MUSICAL_LIST_TYPE } from "../../types";
+import Carousel from "react-material-ui-carousel";
+import moment from "moment";
+import Typography from "@mui/material/Typography";
+import { attendance, musicals, performances, theatres } from "@prisma/client";
 
 interface Props {
-  items: MUSICAL_LIST_TYPE[];
+  items: (attendance & {
+    performances: performances & { musicals: musicals; theatres: theatres };
+  })[];
 }
 
-function Cards(props: Props) {
-  const { items } = props;
+interface CardProps {
+  title: string;
+  location: string;
+  duration?: number | null;
+  playhouse: string;
+  date: Date;
+  playbill?: string;
+}
 
+function MusicalCarousel({ items }: Props) {
   return (
     <Carousel sx={{ maxWidth: 500, margin: "auto" }}>
-      {items.map((item: any, i: any) => (
+      {items?.map((item, i) => (
         <CarouselItem
           key={i}
-          title={item.title}
-          location={item.location}
-          duration={item.duration}
-          playhouse={item.playhouse}
-          date={item.date}
-          playbill={item.playbill}
+          title={item.performances.musicals.title}
+          location={item.performances.theatres.location}
+          duration={item.performances.musicals.duration}
+          playhouse={item.performances.theatres.name}
+          date={item.performances.startTime}
+          playbill={item.performances.musicals.playbill || ""}
         />
       ))}
     </Carousel>
   );
 }
 
-function CarouselItem(props: any) {
+function CarouselItem(props: CardProps) {
   const humanReadableDate = moment(props.date).format("MMMM Do, YYYY");
 
   return (
@@ -61,4 +68,4 @@ function CarouselItem(props: any) {
   );
 }
 
-export default Cards;
+export default MusicalCarousel;

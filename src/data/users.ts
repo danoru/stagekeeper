@@ -144,6 +144,19 @@ export async function getUserAttendanceByYear(year: number | null, id: number) {
   return attendance;
 }
 
+export async function getDistinctYears() {
+  const performances = await prisma.performances.findMany({
+    select: {
+      startTime: true,
+    },
+  });
+
+  const years = performances
+    .map((performance) => new Date(performance.startTime).getFullYear())
+    .filter((year, index, self) => self.indexOf(year) === index);
+  return years;
+}
+
 export async function getUserLikes(username: string) {
   const user = await prisma.users.findUnique({
     where: {

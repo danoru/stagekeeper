@@ -5,16 +5,22 @@ import ReviewHeader from "../../../../src/components/review/ReviewHeader";
 import Statistics from "../../../../src/components/review/Statistics";
 import superjson from "superjson";
 import { Fragment } from "react";
-import { getUserAttendanceByYear, getUsers } from "../../../../src/data/users";
+import {
+  getDistinctYears,
+  getUserAttendanceByYear,
+  getUsers,
+} from "../../../../src/data/users";
 import { attendance, musicals, performances, theatres } from "@prisma/client";
 
 interface Props {
   musicals: (attendance & {
     performances: performances & { musicals: musicals; theatres: theatres };
   })[];
+  username: string;
+  year: string;
 }
 
-function ReviewPage({ musicals }: any) {
+function ReviewPage({ musicals, username, year }: Props) {
   return (
     <Fragment>
       <Head>
@@ -25,7 +31,7 @@ function ReviewPage({ musicals }: any) {
         />
       </Head>
       <div>
-        <ReviewHeader />
+        <ReviewHeader username={username} year={year} />
         <Carousel items={musicals} />
         <Highlights highlights={musicals} />
         <Statistics stats={musicals} />
@@ -36,13 +42,13 @@ function ReviewPage({ musicals }: any) {
 
 export async function getStaticPaths() {
   const users = await getUsers();
-  const years = ["2020", "2021", "2022", "2023", "2024"];
+  const years = await getDistinctYears();
+
   const paths = users.flatMap((user) =>
     years.map((year) => ({
-      params: { username: user.username, year: year },
+      params: { username: user.username, year: year.toString() },
     }))
   );
-
   return {
     paths,
     fallback: false,
@@ -53,7 +59,9 @@ export async function getStaticProps(context: any) {
   const { username, year } = context.params!;
   const users = await getUsers();
   const user = users.find((user) => user.username === username);
-  let musicals: any[] = [];
+  let musicals: (attendance & {
+    performances: performances & { musicals: musicals; theatres: theatres };
+  })[] = [];
 
   if (user) {
     const userId = user.id;
@@ -63,6 +71,8 @@ export async function getStaticProps(context: any) {
   return {
     props: superjson.serialize({
       musicals,
+      username,
+      year,
     }).json,
   };
 }

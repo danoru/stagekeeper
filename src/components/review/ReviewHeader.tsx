@@ -1,76 +1,46 @@
-import { useRouter } from "next/router";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
+import Typography from "@mui/material/Typography";
+import Link from "next/link";
 
-function ReviewHeader() {
-  const router = useRouter();
-  const year = router.query.year;
-  const userId = router.query.userId;
+interface Props {
+  username: string;
+  year?: string | null;
+}
 
-  const previousYear = Number(year) - 1;
-  const prevYearURL = "/users/" + userId + "/review/" + [previousYear];
+function ReviewHeader({ year, username }: Props) {
+  const previousYear = year ? Number(year) - 1 : null;
+  const nextYear = year ? Number(year) + 1 : null;
 
-  const nextYear = Number(year) + 1;
-  const nextYearURL = "/users/" + userId + "/review/" + [nextYear];
-
-  function musicalScopeHandler() {
-    if (userId === "all") {
-      return router.push("/users/" + userId + "/review/" + [year]);
-    } else {
-      return router.push("/users/all/review/" + [year]);
-    }
-  }
-
-  const humanReadableUsername = () => {
-    if (userId === "musicalsandmayhem") {
-      return "Musicals and Mayhem";
-    } else if (userId === "all") {
-      return "All Musicals";
-    } else {
-      return userId;
-    }
-  };
+  const prevYearURL = `/users/${username}/review/${previousYear}`;
+  const nextYearURL = `/users/${username}/review/${nextYear}`;
 
   const humanReadableYear = () => {
-    if (!year) {
-      return "All Time Statistics";
-    } else {
-      return year + " Year in Review";
-    }
+    return year ? `${year} Year in Review` : "All Time Statistics";
   };
 
-  const prevYearCheck = () => {
-    if (!previousYear || previousYear < 2022) {
-      return;
-    } else {
-      return (
-        <a href={prevYearURL}>
-          <ArrowBackIosIcon />
-        </a>
-      );
-    }
-  };
+  const prevYearCheck = () =>
+    previousYear && previousYear >= 2022 ? (
+      <Link href={prevYearURL}>
+        <ArrowBackIosIcon />
+      </Link>
+    ) : null;
 
-  const nextYearCheck = () => {
-    if (!nextYear || nextYear > 2024) {
-      return;
-    } else {
-      return (
-        <a href={nextYearURL}>
-          <ArrowForwardIosIcon />
-        </a>
-      );
-    }
-  };
+  const nextYearCheck = () =>
+    nextYear && nextYear <= 2024 ? (
+      <Link href={nextYearURL}>
+        <ArrowForwardIosIcon />
+      </Link>
+    ) : null;
 
   return (
     <div>
-      <h1 onClick={musicalScopeHandler}>{humanReadableUsername()}</h1>
-      <h2>
+      <Typography variant="h5">{username}</Typography>
+      <Typography variant="h6">
         {prevYearCheck()}
         {humanReadableYear()}
         {nextYearCheck()}
-      </h2>
+      </Typography>
     </div>
   );
 }

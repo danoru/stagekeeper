@@ -12,9 +12,10 @@ interface Props {
   musicals: (attendance & {
     performances: performances & { musicals: musicals; theatres: theatres };
   })[];
+  username: string;
 }
 
-function ReviewPage({ musicals }: Props) {
+function ReviewPage({ musicals, username }: Props) {
   return (
     <Fragment>
       <Head>
@@ -25,7 +26,7 @@ function ReviewPage({ musicals }: Props) {
         />
       </Head>
       <div>
-        <ReviewHeader />
+        <ReviewHeader username={username} />
         <Carousel items={musicals} />
         <Highlights highlights={musicals} />
         <Statistics stats={musicals} />
@@ -60,6 +61,7 @@ export async function getStaticProps(context: any) {
   return {
     props: superjson.serialize({
       musicals,
+      username,
     }).json,
   };
 }

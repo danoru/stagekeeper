@@ -69,7 +69,7 @@ export async function getFollowing(user: number) {
   return following;
 }
 
-export async function followUser(userId: number, followingUsername: string) {
+export async function followUser(user: number, followingUsername: string) {
   try {
     await fetch("/api/user/follow", {
       method: "POST",
@@ -77,7 +77,7 @@ export async function followUser(userId: number, followingUsername: string) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        userId,
+        user,
         followingUsername,
         action: "follow",
       }),
@@ -87,7 +87,7 @@ export async function followUser(userId: number, followingUsername: string) {
   }
 }
 
-export async function unfollowUser(userId: number, followingUsername: string) {
+export async function unfollowUser(user: number, followingUsername: string) {
   try {
     await fetch("/api/user/follow", {
       method: "POST",
@@ -95,7 +95,7 @@ export async function unfollowUser(userId: number, followingUsername: string) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        userId,
+        user,
         followingUsername,
         action: "unfollow",
       }),

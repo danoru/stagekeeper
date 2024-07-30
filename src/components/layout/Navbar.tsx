@@ -38,16 +38,6 @@ function getPages(session: any) {
   }
 }
 
-const settings = [
-  // { id: 1, title: "Profile", link: "/users/musicalsandmayhem" },
-  { id: 2, title: "All-Time Stats", link: "/users/musicalsandmayhem/review" },
-  {
-    id: 3,
-    title: "Year in Review",
-    link: "/users/musicalsandmayhem/review/2024",
-  },
-];
-
 function Navbar() {
   const { data: session, status } = useSession();
   const pages = getPages(session);
@@ -55,23 +45,13 @@ function Navbar() {
   const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(
     null
   );
-  const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(
-    null
-  );
 
   const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElNav(event.currentTarget);
   };
-  const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorElUser(event.currentTarget);
-  };
 
   const handleCloseNavMenu = () => {
     setAnchorElNav(null);
-  };
-
-  const handleCloseUserMenu = () => {
-    setAnchorElUser(null);
   };
 
   return (
@@ -143,36 +123,6 @@ function Navbar() {
                 <a href={page.link}>{page.title}</a>
               </Button>
             ))}
-          </Box>
-
-          <Box sx={{ flexGrow: 0 }}>
-            <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-              <Avatar alt="Musicals & Mayhem" />
-            </IconButton>
-            <Menu
-              sx={{ mt: "45px" }}
-              id="menu-appbar"
-              anchorEl={anchorElUser}
-              anchorOrigin={{
-                vertical: "top",
-                horizontal: "right",
-              }}
-              keepMounted
-              transformOrigin={{
-                vertical: "top",
-                horizontal: "right",
-              }}
-              open={Boolean(anchorElUser)}
-              onClose={handleCloseUserMenu}
-            >
-              {settings.map((setting) => (
-                <MenuItem key={setting.id} onClick={handleCloseUserMenu}>
-                  <Typography textAlign="center">
-                    <a href={setting.link}>{setting.title}</a>
-                  </Typography>
-                </MenuItem>
-              ))}
-            </Menu>
           </Box>
         </Toolbar>
       </Container>

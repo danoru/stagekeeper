@@ -3,6 +3,7 @@ import prisma from "../../../src/data/db";
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { user, followingUsername, action } = req.body;
+
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed." });
   }
@@ -28,7 +29,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       res.status(200).json({ message: "Successfully unfollowed user." });
     }
   } catch (e) {
-    console.error({ e });
+    console.error(e);
     res.status(500).json({ error: "Failed to update follow status." });
   } finally {
     await prisma.$disconnect();

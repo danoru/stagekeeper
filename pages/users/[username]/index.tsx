@@ -50,7 +50,6 @@ function ProfilePage({
   return (
     <div>
       <h1>Hello, {username}!</h1>
-      {/* <EventCalendar /> */}
       <div>
         <Grid container spacing={2}>
           <Grid item xs={12}>

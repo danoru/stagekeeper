@@ -143,11 +143,6 @@ function ProfileStatBar({
               "aria-labelledby": "basic-button",
             }}
           >
-            <MenuItem>
-              <Link href="/settings" underline="none">
-                Settings
-              </Link>
-            </MenuItem>
             <MenuItem onClick={copyUrlToClipboard}>
               <LinkIcon /> &nbsp; Copy profile link
             </MenuItem>

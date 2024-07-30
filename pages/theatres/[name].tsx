@@ -1,13 +1,13 @@
 import Grid from "@mui/material/Grid";
 import Head from "next/head";
-import InfoCard from "../../src/components/layout/InfoCard";
+import moment from "moment";
+import MusicalCard from "../../src/components/layout/MusicalCard";
 import PerformanceCalendar from "../../src/components/schedule/PerformanceCalendar";
 import Stack from "@mui/material/Stack";
 import superjson from "superjson";
 import Typography from "@mui/material/Typography";
 import { getTheatreByName, getSeasons } from "../../src/data/theatres";
 import { musicals, programming, seasons, theatres } from "@prisma/client";
-import moment from "moment";
 
 interface Props {
   theatre: theatres;
@@ -60,10 +60,13 @@ function TheatrePage({ theatre, seasons }: Props) {
             </Typography>
           </Stack>
           {season.programming.map((program: any) => (
-            <InfoCard
+            <MusicalCard
               key={program.musicals.id}
               name={program.musicals.title}
               image={program.musicals.playbill}
+              link={`/musicals/${program.musicals.title
+                .replace(/\s+/g, "-")
+                .toLowerCase()}`}
             />
           ))}
         </Grid>

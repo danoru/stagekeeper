@@ -1,9 +1,11 @@
+import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import CardMedia from "@mui/material/CardMedia";
 import Grid from "@mui/material/Grid";
 import Image from "next/image";
 import Link from "@mui/material/Link";
 import { watchlist, musicals } from "@prisma/client";
+import Tooltip from "@mui/material/Tooltip";
 
 interface WatchlistProps {
   watchlist: (watchlist & { musicals: musicals })[];
@@ -47,29 +49,62 @@ function UserWatchlistPreview({ watchlist }: WatchlistProps) {
 function TinyCard({ title, playbill }: CardProps) {
   const musicalSlug = `/musicals/${title.replace(/\s+/g, "-").toLowerCase()}`;
   return (
-    <Grid item>
-      <Link href={musicalSlug}>
-        <Card
-          sx={{
-            height: "105px",
-            width: "70px",
-            cursor: "pointer",
-          }}
-        >
-          <CardMedia
-            style={{ position: "relative", height: 140, width: "100%" }}
+    <Tooltip title={title}>
+      <Grid item sx={{ margin: "2px" }}>
+        <Link href={musicalSlug}>
+          <Card
+            sx={{
+              position: "relative",
+              height: "105px",
+              width: "70px",
+              cursor: "pointer",
+              overflow: "hidden",
+              "&:hover": {
+                ".overlay": {
+                  borderColor: "white",
+                },
+                ".image": {
+                  filter: "brightness(0.8)",
+                },
+              },
+            }}
           >
-            <Image
-              src={playbill}
-              alt={title}
-              fill
-              sizes="(max-width: 600px) 100vw, (max-width: 900px) 50vw, 33vw"
-              style={{ objectFit: "cover" }}
+            <CardMedia
+              className="image"
+              sx={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                width: "100%",
+                height: "100%",
+                filter: "brightness(0.5)",
+                transition: "filter 0.3s",
+              }}
+            >
+              <Image
+                src={playbill}
+                alt={title}
+                fill
+                style={{ objectFit: "cover" }}
+              />
+            </CardMedia>
+            <Box
+              className="overlay"
+              style={{
+                position: "absolute",
+                top: "5px",
+                right: "5px",
+                bottom: "5px",
+                left: "5px",
+                border: "2px solid rgba(255, 255, 255, 0.5)",
+                pointerEvents: "none",
+                transition: "border-color 0.3s",
+              }}
             />
-          </CardMedia>
-        </Card>
-      </Link>
-    </Grid>
+          </Card>
+        </Link>
+      </Grid>
+    </Tooltip>
   );
 }
 

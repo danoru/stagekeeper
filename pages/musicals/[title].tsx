@@ -8,6 +8,9 @@ import superjson from "superjson";
 import Typography from "@mui/material/Typography";
 import { musicals } from "@prisma/client";
 import { getMusicalByTitle } from "../../src/data/musicals";
+import Card from "@mui/material/Card";
+import CardMedia from "@mui/material/CardMedia";
+import Box from "@mui/material/Box";
 
 interface Params {
   title: string;
@@ -32,14 +35,40 @@ function MusicalPage({ musical }: Props) {
         direction="row"
         sx={{ justifyContent: "center", marginTop: "2vh" }}
       >
-        <Image
-          src={musical.playbill || ""}
-          height="300"
-          width="235"
-          alt={musical.title}
-          style={{ borderRadius: "5%", marginRight: "2vw" }}
-          priority
-        />
+        <Card
+          sx={{
+            position: "relative",
+            height: "270px",
+            width: "211.5px",
+            marginRight: "2vw",
+            overflow: "hidden",
+          }}
+        >
+          <CardMedia
+            className="image"
+            image={musical.playbill || ""}
+            title={musical.title}
+            sx={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              width: "100%",
+              height: "100%",
+            }}
+          />
+          <Box
+            className="overlay"
+            style={{
+              position: "absolute",
+              top: "5px",
+              right: "5px",
+              bottom: "5px",
+              left: "5px",
+              border: "2px solid rgba(255, 255, 255, 1)",
+              pointerEvents: "none",
+            }}
+          />
+        </Card>
         <Stack
           direction="column"
           style={{ alignItems: "flex-start", marginRight: "2vw", width: "50%" }}

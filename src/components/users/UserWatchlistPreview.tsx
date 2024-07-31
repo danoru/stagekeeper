@@ -4,10 +4,11 @@ import CardMedia from "@mui/material/CardMedia";
 import Grid from "@mui/material/Grid";
 import Image from "next/image";
 import Link from "@mui/material/Link";
-import { watchlist, musicals } from "@prisma/client";
 import Tooltip from "@mui/material/Tooltip";
+import { watchlist, musicals } from "@prisma/client";
 
 interface WatchlistProps {
+  username: string;
   watchlist: (watchlist & { musicals: musicals })[];
 }
 
@@ -16,7 +17,7 @@ interface CardProps {
   playbill: string;
 }
 
-function UserWatchlistPreview({ watchlist }: WatchlistProps) {
+function UserWatchlistPreview({ username, watchlist }: WatchlistProps) {
   return (
     <Grid item>
       <Grid
@@ -31,10 +32,12 @@ function UserWatchlistPreview({ watchlist }: WatchlistProps) {
         }}
       >
         <Grid item>Watchlist</Grid>
-        <Grid item>{watchlist?.length}</Grid>
+        <Link href={`${username}/watchlist`} underline="none">
+          <Grid item>{watchlist?.length}</Grid>
+        </Link>
       </Grid>
       <Grid container>
-        {watchlist.map((item, i: number) => (
+        {watchlist.slice(0, 4).map((item, i: number) => (
           <TinyCard
             key={`card-${i}`}
             title={item.musicals.title}

@@ -1,7 +1,9 @@
+import FriendRecentActivity from "../../../src/components/performances/RecentActivity";
 import Grid from "@mui/material/Grid";
 import ProfileLinkBar from "../../../src/components/users/ProfileLinkBar";
 import ProfileStatBar from "../../../src/components/users/ProfileStatBar";
 import superjson from "superjson";
+import UserFollowing from "../../../src/components/users/UserFollowing";
 import UserWatchlistPreview from "../../../src/components/users/UserWatchlistPreview";
 import {
   attendance,
@@ -11,12 +13,9 @@ import {
   users,
   watchlist,
 } from "@prisma/client";
-import { getUserProfile, getFollowers } from "../../../src/data/users";
-import { getSession } from "next-auth/react";
-import { useRouter } from "next/router";
-import UserFollowing from "../../../src/components/users/UserFollowing";
 import { getRecentPerformances } from "../../../src/data/performances";
-import FriendRecentActivity from "../../../src/components/performances/RecentActivity";
+import { getSession } from "next-auth/react";
+import { getUserProfile, getFollowers } from "../../../src/data/users";
 
 interface Props {
   attendance: (attendance & {
@@ -43,13 +42,11 @@ function ProfilePage({
   user,
   watchlist,
 }: Props) {
-  const router = useRouter();
-  const username = router.query.username;
   const avatarSize = "64px";
 
   return (
     <div>
-      <h1>Hello, {username}!</h1>
+      <h1>Hello, {user.username}!</h1>
       <div>
         <Grid container spacing={2}>
           <Grid item xs={12}>
@@ -68,7 +65,10 @@ function ProfilePage({
             <UserFollowing following={following} />
           </Grid>
           <Grid item xs={4}>
-            <UserWatchlistPreview watchlist={watchlist} />
+            <UserWatchlistPreview
+              username={user.username}
+              watchlist={watchlist}
+            />
           </Grid>
         </Grid>
       </div>

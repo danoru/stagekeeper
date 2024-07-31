@@ -287,6 +287,9 @@ export async function getUpcomingPerformances() {
         gte: new Date(),
         lte: upcomingLimit,
       },
+      endDate: {
+        gte: new Date(),
+      },
     },
     include: {
       musicals: true,

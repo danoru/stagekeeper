@@ -73,27 +73,10 @@ function DetailInfoCard(card: Props) {
           />
           <CardContent>
             <Typography
-              variant="body1"
-              component="div"
-              color="secondary"
-              sx={{
-                position: "absolute",
-                bottom: "10px",
-                left: "10px",
-                color: "white",
-                textShadow: "0 0 5px rgba(0, 0, 0, 0.7)",
-              }}
-            >
-              {moment(card.date).format("MMM DD")}
-            </Typography>
-            <Typography
               variant="h6"
               component="div"
-              color="secondary"
               sx={{
-                position: "absolute",
-                bottom: "50px",
-                left: "10px",
+                position: "relative",
                 color: "white",
                 textShadow: "0 0 5px rgba(0, 0, 0, 0.7)",
               }}
@@ -103,16 +86,24 @@ function DetailInfoCard(card: Props) {
             <Typography
               variant="body1"
               component="div"
-              color="secondary"
               sx={{
-                position: "absolute",
-                bottom: "30px",
-                left: "10px",
+                position: "relative",
                 color: "white",
                 textShadow: "0 0 5px rgba(0, 0, 0, 0.7)",
               }}
             >
               {card.theatre}
+            </Typography>
+            <Typography
+              variant="body1"
+              component="div"
+              sx={{
+                position: "relative",
+                color: "white",
+                textShadow: "0 0 5px rgba(0, 0, 0, 0.7)",
+              }}
+            >
+              {moment(card.date).format("MMM DD")}
             </Typography>
           </CardContent>
         </Link>

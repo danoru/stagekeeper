@@ -1,7 +1,8 @@
 import Grid from "@mui/material/Grid";
-import Typography from "@mui/material/Typography";
-import { musicals } from "@prisma/client";
 import MusicalCard from "../layout/MusicalCard";
+import Typography from "@mui/material/Typography";
+import { musicals, programming } from "@prisma/client";
+
 interface Props {
   musicals: musicals[];
   header: string;
@@ -20,10 +21,19 @@ interface Props {
     | "button"
     | "overline"
     | undefined;
+  upcomingPerformances?: (programming & {
+    musicals: musicals;
+  })[];
 }
-function MusicalList({ musicals, header, style }: Props) {
+function MusicalList({ musicals, header, style, upcomingPerformances }: Props) {
   const styledHeader = header.toUpperCase();
   const typographyStyle = style || "h6";
+
+  const hasUpcomingPerformance = (musicalId: number) => {
+    return upcomingPerformances?.some(
+      (performance) => performance.musicals.id === musicalId
+    );
+  };
 
   return (
     <Grid container>
@@ -62,6 +72,7 @@ function MusicalList({ musicals, header, style }: Props) {
               .replace(/\s+/g, "-")
               .toLowerCase()}`}
             image={musical.playbill}
+            hasUpcomingPerformance={hasUpcomingPerformance(musical.id)}
           />
         ))}
       </Grid>

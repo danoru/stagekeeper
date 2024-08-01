@@ -1,16 +1,16 @@
+import Box from "@mui/material/Box";
+import Card from "@mui/material/Card";
+import CardMedia from "@mui/material/CardMedia";
 import Head from "next/head";
-import Image from "next/image";
 import moment from "moment";
 import MusicalActionBar from "../../src/components/musical/MusicalActionBar";
 import PerformanceCalendar from "../../src/components/schedule/PerformanceCalendar";
 import Stack from "@mui/material/Stack";
 import superjson from "superjson";
 import Typography from "@mui/material/Typography";
-import { musicals } from "@prisma/client";
-import { getMusicalByTitle } from "../../src/data/musicals";
-import Card from "@mui/material/Card";
-import CardMedia from "@mui/material/CardMedia";
-import Box from "@mui/material/Box";
+import { musicals, watchlist } from "@prisma/client";
+import { getMusicalByTitle, getWatchlist } from "../../src/data/musicals";
+import { getSession } from "next-auth/react";
 
 interface Params {
   title: string;
@@ -18,9 +18,12 @@ interface Params {
 
 interface Props {
   musical: musicals;
+  session: any;
+  watchlist: watchlist[];
 }
 
-function MusicalPage({ musical }: Props) {
+function MusicalPage({ musical, session, watchlist }: Props) {
+  const sessionUser = session?.user;
   const title = `${musical.title} • StageKeeper`;
   const musicalTitle = musical.title;
 
@@ -92,7 +95,11 @@ function MusicalPage({ musical }: Props) {
           </Stack>
         </Stack>
         <Stack width="15%">
-          <MusicalActionBar />
+          <MusicalActionBar
+            musical={musical}
+            sessionUser={sessionUser}
+            watchlist={watchlist}
+          />
         </Stack>
       </Stack>
       <PerformanceCalendar viewType="musical" identifier={musicalTitle} />
@@ -100,14 +107,31 @@ function MusicalPage({ musical }: Props) {
   );
 }
 
-export async function getServerSideProps(context: { params: Params }) {
+export async function getServerSideProps(context: {
+  params: Params;
+  req: any;
+}) {
   const { title } = context.params;
-  const musical = await getMusicalByTitle(title);
+  const session = await getSession({ req: context.req });
+
+  if (session) {
+    const userId = Number(session.user.id);
+    const [musical, watchlist] = await Promise.all([
+      getMusicalByTitle(title),
+      getWatchlist(userId),
+    ]);
+
+    return {
+      props: superjson.serialize({
+        musical,
+        session,
+        watchlist,
+      }).json,
+    };
+  }
 
   return {
-    props: superjson.serialize({
-      musical,
-    }).json,
+    props: { session },
   };
 }
 

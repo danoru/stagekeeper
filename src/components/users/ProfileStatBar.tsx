@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import Button from "@mui/material/Button";
 import Grid from "@mui/material/Grid";
-import Link from "@mui/material/Link";
 import LinkIcon from "@mui/icons-material/Link";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
@@ -41,6 +40,9 @@ function ProfileStatBar({
   const [hovered, setHovered] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">(
+    "success"
+  );
 
   function handleClick(event: React.MouseEvent<HTMLButtonElement>) {
     setAnchorEl(event.currentTarget);
@@ -55,9 +57,15 @@ function ProfileStatBar({
       .then(() => {
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
+        setSnackbarMessage("Successfully copied.");
+        setSnackbarOpen(true);
+        setSnackbarSeverity("success");
       })
       .catch((err) => {
         console.error("Failed to copy:", err);
+        setSnackbarMessage("Failed to copy.");
+        setSnackbarOpen(true);
+        setSnackbarSeverity("error");
       });
     setAnchorEl(null);
   }
@@ -77,15 +85,18 @@ function ProfileStatBar({
           await unfollowUser(Number(sessionUser.id), user.username);
           setSnackbarMessage("Successfully unfollowed user.");
           setIsFollowing(false);
+          setSnackbarSeverity("success");
         } else {
           await followUser(Number(sessionUser.id), user.username);
           setSnackbarMessage("Successfully followed user.");
           setIsFollowing(true);
+          setSnackbarSeverity("success");
         }
         setSnackbarOpen(true);
       } catch (error) {
         setSnackbarMessage("Failed to update follow status.");
         setSnackbarOpen(true);
+        setSnackbarSeverity("error");
       }
       setHovered(false);
     }
@@ -168,7 +179,10 @@ function ProfileStatBar({
         autoHideDuration={6000}
         onClose={() => setSnackbarOpen(false)}
       >
-        <Alert onClose={() => setSnackbarOpen(false)} severity="success">
+        <Alert
+          onClose={() => setSnackbarOpen(false)}
+          severity={snackbarSeverity}
+        >
           {snackbarMessage}
         </Alert>
       </Snackbar>

@@ -1,4 +1,4 @@
-import DetailInfoCard from "../layout/DetailInfoCard";
+import DetailInfoCard from "../cards/DetailInfoCard";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
 import { attendance, musicals, performances, theatres } from "@prisma/client";

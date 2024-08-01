@@ -1,8 +1,8 @@
 import Grid from "@mui/material/Grid";
 import Head from "next/head";
 import moment from "moment";
-import MusicalCard from "../../src/components/layout/MusicalCard";
 import PerformanceCalendar from "../../src/components/schedule/PerformanceCalendar";
+import ProgramCard from "../../src/components/cards/ProgramCard";
 import Stack from "@mui/material/Stack";
 import superjson from "superjson";
 import Typography from "@mui/material/Typography";
@@ -60,10 +60,12 @@ function TheatrePage({ theatre, seasons }: Props) {
             </Typography>
           </Stack>
           {season.programming.map((program: any) => (
-            <MusicalCard
+            <ProgramCard
               key={program.musicals.id}
-              name={program.musicals.title}
+              musical={program.musicals.title}
               image={program.musicals.playbill}
+              startDate={program.startDate}
+              endDate={program.endDate}
               link={`/musicals/${program.musicals.title
                 .replace(/\s+/g, "-")
                 .toLowerCase()}`}

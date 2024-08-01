@@ -1,5 +1,5 @@
 import Grid from "@mui/material/Grid";
-import MusicalCard from "../layout/MusicalCard";
+import MusicalCard from "../cards/MusicalCard";
 import Typography from "@mui/material/Typography";
 import { musicals, programming } from "@prisma/client";
 

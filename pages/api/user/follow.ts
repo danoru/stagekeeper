@@ -1,7 +1,7 @@
-import { NextApiRequest, NextApiResponse } from "next";
 import prisma from "../../../src/data/db";
+import { NextApiRequest, NextApiResponse } from "next";
 
-async function handler(req: NextApiRequest, res: NextApiResponse) {
+export async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { user, followingUsername, action } = req.body;
 
   if (req.method !== "POST") {
@@ -35,5 +35,3 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     await prisma.$disconnect();
   }
 }
-
-export default handler;

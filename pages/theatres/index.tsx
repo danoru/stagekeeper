@@ -5,7 +5,7 @@ import superjson from "superjson";
 import { getPaginatedTheatres } from "../../src/data/theatres";
 import { useState, useEffect } from "react";
 import { theatres } from "@prisma/client";
-import TheatreCard from "../../src/components/layout/TheatreCard";
+import TheatreCard from "../../src/components/cards/TheatreCard";
 import Typography from "@mui/material/Typography";
 
 interface Props {

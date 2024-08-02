@@ -6,7 +6,8 @@ import Statistics from "../../../../src/components/review/Statistics";
 import superjson from "superjson";
 import { attendance, musicals, performances, theatres } from "@prisma/client";
 import { Fragment } from "react";
-import { getUserAttendanceByYear, getUsers } from "../../../../src/data/users";
+import { getUsers } from "../../../../src/data/users";
+import { getUserAttendanceByYear } from "../../../../src/data/performances";
 
 interface Props {
   musicals: (attendance & {

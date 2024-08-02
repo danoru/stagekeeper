@@ -4,13 +4,10 @@ import Highlights from "../../../../src/components/review/Highlights";
 import ReviewHeader from "../../../../src/components/review/ReviewHeader";
 import Statistics from "../../../../src/components/review/Statistics";
 import superjson from "superjson";
-import { Fragment } from "react";
-import {
-  getDistinctYears,
-  getUserAttendanceByYear,
-  getUsers,
-} from "../../../../src/data/users";
 import { attendance, musicals, performances, theatres } from "@prisma/client";
+import { Fragment } from "react";
+import { getDistinctYears, getUsers } from "../../../../src/data/users";
+import { getUserAttendanceByYear } from "../../../../src/data/performances";
 
 interface Props {
   musicals: (attendance & {

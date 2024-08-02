@@ -22,7 +22,7 @@ import {
 } from "@prisma/client";
 
 interface Props {
-  attendance: (attendance & { performance: performances })[];
+  attendance: (attendance & { performances: performances })[];
   likedMusicals: likedMusicals[];
   musical: musicals;
   sessionUser: any;
@@ -47,10 +47,11 @@ function MusicalActionBar({
   );
 
   const [hasAttended, setHasAttended] = useState(
-    attendance.some(
-      (a) => a.user === userId && a.performance.musical === musicalId
+    attendance?.some(
+      (a) => a.user === userId && a.performances.musical === musicalId
     )
   );
+
   const [isWatchlisted, setIsWatchlisted] = useState(
     watchlist.some((w) => w.user === userId && w.musical === musicalId)
   );

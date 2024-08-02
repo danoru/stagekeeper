@@ -21,14 +21,14 @@ import {
   getWatchlist,
 } from "../../src/data/musicals";
 import { getSession } from "next-auth/react";
-import { getUserAttendance } from "../../src/data/users";
+import { getUserAttendance } from "../../src/data/performances";
 
 interface Params {
   title: string;
 }
 
 interface Props {
-  attendance: (attendance & { performance: performances })[];
+  attendance: (attendance & { performances: performances })[];
   likedMusicals: likedMusicals[];
   musical: musicals;
   session: any;

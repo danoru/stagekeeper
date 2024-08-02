@@ -15,16 +15,6 @@ export interface MUSICAL_LIST_TYPE {
   year: string;
 }
 
-export interface EVENT_LIST_TYPE {
-  id: number;
-  title: string;
-  playhouse: string;
-  location: string;
-  start: Date;
-  end: Date;
-  attending: boolean;
-}
-
 export interface USER_ATTENDANCE_TYPE {
   musicalsandmayhem: boolean; // Group
   danoru: boolean; // Daniel

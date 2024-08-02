@@ -1,13 +1,9 @@
 import Grid from "@mui/material/Grid";
 import Head from "next/head";
+import moment from "moment";
 import MusicalList from "../../../src/components/musical/MusicalList";
 import ProfileLinkBar from "../../../src/components/users/ProfileLinkBar";
 import superjson from "superjson";
-import {
-  getUsers,
-  findUserByUsername,
-  getUserAttendance,
-} from "../../../src/data/users";
 import {
   attendance,
   musicals,
@@ -15,7 +11,8 @@ import {
   theatres,
   users,
 } from "@prisma/client";
-import moment from "moment";
+import { getUsers, findUserByUsername } from "../../../src/data/users";
+import { getUserAttendance } from "../../../src/data/performances";
 
 interface Props {
   user: users;

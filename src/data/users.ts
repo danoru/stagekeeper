@@ -105,45 +105,6 @@ export async function unfollowUser(user: number, followingUsername: string) {
   }
 }
 
-export async function getUserAttendance(id: number) {
-  const attendance = await prisma.attendance.findMany({
-    where: { user: id },
-    orderBy: { performances: { musicals: { title: "asc" } } },
-    include: {
-      performances: { include: { musicals: true, theatres: true } },
-    },
-  });
-  return attendance;
-}
-
-export async function getUserAttendanceByYear(year: number | null, id: number) {
-  let dateFilter = {};
-
-  if (year) {
-    const startOfYear = new Date(year, 0, 1);
-    const endOfYear = new Date(year + 1, 0, 1);
-    dateFilter = {
-      startTime: {
-        gte: startOfYear,
-        lt: endOfYear,
-      },
-    };
-  }
-
-  const attendance = await prisma.attendance.findMany({
-    where: {
-      user: id,
-
-      performances: dateFilter,
-    },
-    orderBy: { performances: { startTime: "asc" } },
-    include: {
-      performances: { include: { musicals: true, theatres: true } },
-    },
-  });
-  return attendance;
-}
-
 export async function getDistinctYears() {
   const performances = await prisma.performances.findMany({
     select: {

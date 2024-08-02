@@ -8,21 +8,40 @@ import PerformanceCalendar from "../../src/components/schedule/PerformanceCalend
 import Stack from "@mui/material/Stack";
 import superjson from "superjson";
 import Typography from "@mui/material/Typography";
-import { musicals, watchlist } from "@prisma/client";
-import { getMusicalByTitle, getWatchlist } from "../../src/data/musicals";
+import {
+  attendance,
+  likedMusicals,
+  musicals,
+  performances,
+  watchlist,
+} from "@prisma/client";
+import {
+  getLikedMusicals,
+  getMusicalByTitle,
+  getWatchlist,
+} from "../../src/data/musicals";
 import { getSession } from "next-auth/react";
+import { getUserAttendance } from "../../src/data/users";
 
 interface Params {
   title: string;
 }
 
 interface Props {
+  attendance: (attendance & { performance: performances })[];
+  likedMusicals: likedMusicals[];
   musical: musicals;
   session: any;
   watchlist: watchlist[];
 }
 
-function MusicalPage({ musical, session, watchlist }: Props) {
+function MusicalPage({
+  attendance,
+  likedMusicals,
+  musical,
+  session,
+  watchlist,
+}: Props) {
   const sessionUser = session?.user;
   const title = `${musical.title} • StageKeeper`;
   const musicalTitle = musical.title;
@@ -96,6 +115,8 @@ function MusicalPage({ musical, session, watchlist }: Props) {
         </Stack>
         <Stack width="15%">
           <MusicalActionBar
+            attendance={attendance}
+            likedMusicals={likedMusicals}
             musical={musical}
             sessionUser={sessionUser}
             watchlist={watchlist}
@@ -116,13 +137,17 @@ export async function getServerSideProps(context: {
 
   if (session) {
     const userId = Number(session.user.id);
-    const [musical, watchlist] = await Promise.all([
+    const [attendance, likedMusicals, musical, watchlist] = await Promise.all([
+      getUserAttendance(userId),
+      getLikedMusicals(userId),
       getMusicalByTitle(title),
       getWatchlist(userId),
     ]);
 
     return {
       props: superjson.serialize({
+        attendance,
+        likedMusicals,
         musical,
         session,
         watchlist,

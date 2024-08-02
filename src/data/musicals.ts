@@ -445,6 +445,21 @@ export async function getMusicalByTitle(musicalTitle: string) {
   return null;
 }
 
+export async function getLikedMusicals(id: number) {
+  const likedMusicals = await prisma.likedMusicals.findMany({
+    where: {
+      user: id,
+    },
+    include: {
+      musicals: true,
+    },
+    orderBy: {
+      musicals: { title: "asc" },
+    },
+  });
+  return likedMusicals;
+}
+
 export async function getWatchlist(id: number) {
   const watchlist = await prisma.watchlist.findMany({
     where: {

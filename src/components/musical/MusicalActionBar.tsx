@@ -2,6 +2,10 @@ import React, { useState } from "react";
 import Alert from "@mui/material/Alert";
 import Button from "@mui/material/Button";
 import Divider from "@mui/material/Divider";
+import FavoriteIcon from "@mui/icons-material/Favorite";
+import FavoriteBorder from "@mui/icons-material/FavoriteBorder";
+import LocalActivity from "@mui/icons-material/LocalActivity";
+import LocalActivityOutlined from "@mui/icons-material/LocalActivityOutlined";
 import Paper from "@mui/material/Paper";
 import Rating from "@mui/material/Rating";
 import Snackbar from "@mui/material/Snackbar";
@@ -9,15 +13,29 @@ import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import WatchLater from "@mui/icons-material/WatchLater";
 import WatchLaterOutlined from "@mui/icons-material/WatchLaterOutlined";
-import { musicals, watchlist } from "@prisma/client";
+import {
+  attendance,
+  likedMusicals,
+  musicals,
+  performances,
+  watchlist,
+} from "@prisma/client";
 
 interface Props {
+  attendance: (attendance & { performance: performances })[];
+  likedMusicals: likedMusicals[];
   musical: musicals;
   sessionUser: any;
   watchlist: watchlist[];
 }
 
-function MusicalActionBar({ musical, sessionUser, watchlist }: Props) {
+function MusicalActionBar({
+  attendance,
+  likedMusicals,
+  musical,
+  sessionUser,
+  watchlist,
+}: Props) {
   const userId = Number(sessionUser.id);
   const musicalId = Number(musical.id);
   const [copied, setCopied] = useState(false);
@@ -27,8 +45,17 @@ function MusicalActionBar({ musical, sessionUser, watchlist }: Props) {
   const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">(
     "success"
   );
+
+  const [hasAttended, setHasAttended] = useState(
+    attendance.some(
+      (a) => a.user === userId && a.performance.musical === musicalId
+    )
+  );
   const [isWatchlisted, setIsWatchlisted] = useState(
     watchlist.some((w) => w.user === userId && w.musical === musicalId)
+  );
+  const [isLiked, setIsLiked] = useState(
+    likedMusicals.some((l) => l.user === userId && l.musical === musicalId)
   );
 
   const copyUrlToClipboard = () => {
@@ -48,6 +75,38 @@ function MusicalActionBar({ musical, sessionUser, watchlist }: Props) {
         setSnackbarSeverity("error");
       });
   };
+
+  async function handleLikes() {
+    if (sessionUser) {
+      const method = isLiked ? "DELETE" : "POST";
+      const response = await fetch(`/api/musicals/likes`, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          user: userId,
+          method,
+          musical: musicalId,
+        }),
+      });
+      const data = await response.json();
+
+      if (response.ok) {
+        setIsLiked(!isLiked);
+        setSnackbarMessage(
+          isLiked
+            ? "Successfully removed from liked musicals."
+            : "Successfully added to liked musicals."
+        );
+        setSnackbarSeverity("success");
+      } else {
+        setSnackbarMessage(data.error || "Failed to update liked musicals.");
+        setSnackbarSeverity("error");
+      }
+      setSnackbarOpen(true);
+    }
+  }
 
   async function handleWatchlist() {
     if (sessionUser) {
@@ -81,6 +140,51 @@ function MusicalActionBar({ musical, sessionUser, watchlist }: Props) {
     }
   }
 
+  const AttendanceButton = () => {
+    return (
+      <Stack direction="column" alignItems="center" width="33%">
+        <Button
+          onMouseEnter={() => setHovered(true)}
+          onMouseLeave={() => setHovered(false)}
+        >
+          <Typography variant="subtitle1">
+            {hasAttended ? (
+              <LocalActivity fontSize="large" />
+            ) : (
+              <LocalActivityOutlined fontSize="large" />
+            )}
+          </Typography>
+        </Button>
+        <Typography variant="subtitle1">
+          {hasAttended ? (hovered ? "Remove" : "Attended") : "Attend"}
+        </Typography>
+      </Stack>
+    );
+  };
+
+  const LikedButton = () => {
+    return (
+      <Stack direction="column" alignItems="center" width="33%">
+        <Button
+          onClick={handleLikes}
+          onMouseEnter={() => setHovered(true)}
+          onMouseLeave={() => setHovered(false)}
+        >
+          <Typography variant="subtitle1">
+            {isLiked ? (
+              <FavoriteIcon fontSize="large" />
+            ) : (
+              <FavoriteBorder fontSize="large" />
+            )}
+          </Typography>
+        </Button>
+        <Typography variant="subtitle1">
+          {isLiked ? (hovered ? "Remove" : "Liked") : "Like"}
+        </Typography>
+      </Stack>
+    );
+  };
+
   const WatchlistButton = () => {
     return (
       <Stack direction="column" alignItems="center" width="33%">
@@ -107,33 +211,16 @@ function MusicalActionBar({ musical, sessionUser, watchlist }: Props) {
   return (
     <Paper sx={{ borderRadius: "1%" }}>
       <Stack direction="row" justifyContent="center">
-        <Stack alignItems="center" padding="1vh 0" width="33%">
-          <Typography variant="subtitle1">Watch</Typography>
-        </Stack>
-        <Stack alignItems="center" padding="1vh 0" width="33%">
-          <Typography variant="subtitle1">Like</Typography>
-        </Stack>
+        <AttendanceButton />
+        <LikedButton />
         <WatchlistButton />
       </Stack>
       <Divider />
       <Stack alignItems="center" padding="1vh 0">
-        <Typography variant="subtitle1">Rate</Typography>
-        <Rating />
+        <Typography variant="subtitle1">Rating</Typography>
+        <Rating readOnly />
       </Stack>
       <Divider />
-      <Typography
-        variant="subtitle1"
-        style={{ padding: "1vh 0", textAlign: "center" }}
-      >
-        Review
-      </Typography>
-      <Divider />
-      <Typography
-        variant="subtitle1"
-        style={{ padding: "1vh 0", textAlign: "center" }}
-      >
-        Performances
-      </Typography>
       <Divider />
       <Button
         fullWidth

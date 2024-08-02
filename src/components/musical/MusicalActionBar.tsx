@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import Alert from "@mui/material/Alert";
 import Button from "@mui/material/Button";
 import Divider from "@mui/material/Divider";
 import Paper from "@mui/material/Paper";
@@ -6,9 +7,9 @@ import Rating from "@mui/material/Rating";
 import Snackbar from "@mui/material/Snackbar";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
+import WatchLater from "@mui/icons-material/WatchLater";
+import WatchLaterOutlined from "@mui/icons-material/WatchLaterOutlined";
 import { musicals, watchlist } from "@prisma/client";
-import { WatchLater, WatchLaterOutlined } from "@mui/icons-material";
-import Alert from "@mui/material/Alert";
 
 interface Props {
   musical: musicals;

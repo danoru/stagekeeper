@@ -29,7 +29,7 @@ export default async function handler(
     }
 
     const performances = await prisma.programming.findMany({
-      where: { musical: musical.id },
+      where: { musical: musical.id, endDate: { gte: new Date() } },
       include: {
         musicals: true,
       },

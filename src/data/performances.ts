@@ -385,6 +385,7 @@ export async function getUserAttendanceById(user: number, musical: number) {
       },
     },
   });
+  return attendance;
 }
 
 export async function getUserAttendanceByYear(year: number | null, id: number) {

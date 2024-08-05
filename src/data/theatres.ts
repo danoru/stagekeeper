@@ -173,5 +173,15 @@ export async function getSeasons(theatreId: number) {
     },
   });
 
-  return seasons;
+  const sortedSeasons = seasons.map((season) => ({
+    ...season,
+    programming: season.programming.sort((a, b) => {
+      if (a.startDate && b.startDate) {
+        return a.startDate.getTime() - b.startDate.getTime();
+      }
+      return 0;
+    }),
+  }));
+
+  return sortedSeasons;
 }

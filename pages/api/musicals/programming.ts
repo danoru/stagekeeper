@@ -33,6 +33,7 @@ export default async function handler(
       include: {
         musicals: true,
       },
+      orderBy: { startDate: "asc" },
     });
 
     res.status(200).json(performances);

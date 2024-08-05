@@ -25,13 +25,11 @@ function ProfileLinkBar({ username }: Props) {
         <Button href={`/users/${username}/review/`}>Statistics</Button>
         {/* <Button href={`/users/${username}/musicals/reviews`}>Reviews</Button> */}
         <Button href={`/users/${username}/watchlist`}>Watchlist</Button>
+        <Button href={`/users/${username}/upcoming`}>Upcoming</Button>
         {/* <Button disabled href={`/users/${username}/lists`}>
           Lists
         </Button> */}
         <Button href={`/users/${username}/likes`}>Likes</Button>
-        {/* <Button disabled href={`/users/${username}/tags`}>
-          Tags
-        </Button> */}
         <Button href={`/users/${username}/following`}>Network</Button>
       </ButtonGroup>
     </Grid>

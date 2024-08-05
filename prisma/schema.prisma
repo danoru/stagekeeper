@@ -76,8 +76,9 @@ model programming {
   createdAt DateTime  @default(now()) @db.Timestamptz(6)
   musical   Int
   season    Int?
-  endDate   DateTime? @db.Date
   startDate DateTime? @db.Date
+  endDate   DateTime? @db.Date
+  dayTimes  Json?
   musicals  musicals  @relation(fields: [musical], references: [id], onDelete: NoAction, onUpdate: NoAction)
   seasons   seasons?  @relation(fields: [season], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
@@ -96,6 +97,7 @@ model seasons {
 model theatres {
   id           Int            @id(map: "playhouses_pkey") @default(autoincrement())
   name         String
+  link         String?
   location     String
   image        String?
   address      String?

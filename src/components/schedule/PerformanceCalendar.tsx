@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
+import FullCalendar from "@fullcalendar/react";
 import moment from "moment";
 import { musicals, programming } from "@prisma/client";
 
@@ -18,7 +18,9 @@ interface Event {
 function PerformanceCalendar({ viewType, identifier }: Props) {
   const [events, setEvents] = useState<Event[]>([]);
   const [initialDate, setInitialDate] = useState<Date | null>(null);
-  const daysTimes = {
+  const defaultDayTimes = {
+    Tuesday: ["20:00"],
+    Wednesday: ["20:00"],
     Thursday: ["20:00"],
     Friday: ["20:00"],
     Saturday: ["14:00", "20:00"],
@@ -27,7 +29,7 @@ function PerformanceCalendar({ viewType, identifier }: Props) {
 
   function generateEventDates(
     programming: programming & { musicals: musicals },
-    daysTimes: Record<string, string[]>
+    dayTimes: Record<string, string[]>
   ): Event[] {
     const { startDate, endDate, musicals } = programming;
     const startMoment = moment(startDate);
@@ -40,7 +42,7 @@ function PerformanceCalendar({ viewType, identifier }: Props) {
       date.add(1, "day")
     ) {
       const dayName = date.format("dddd");
-      const times = daysTimes[dayName] || [];
+      const times = dayTimes[dayName] || [];
       times.forEach((time) => {
         const [hour, minute] = time.split(":").map(Number);
         const startTime = moment(date).set({ hour, minute });
@@ -70,11 +72,12 @@ function PerformanceCalendar({ viewType, identifier }: Props) {
         if (!response.ok) {
           throw new Error("Failed to fetch performances.");
         }
-        const programmingData: (programming & { musicals: musicals })[] =
-          await response.json();
-
+        const programmingData: (programming & {
+          musicals: musicals;
+          dayTimes?: Record<string, string[]>;
+        })[] = await response.json();
         const allEvents = programmingData.flatMap((program) =>
-          generateEventDates(program, daysTimes)
+          generateEventDates(program, program.dayTimes || defaultDayTimes)
         );
 
         if (allEvents.length > 0) {

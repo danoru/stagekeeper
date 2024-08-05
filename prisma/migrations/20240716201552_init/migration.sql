@@ -1,5 +1,5 @@
 -- CreateExtension
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA "extensions";
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- CreateEnum
 CREATE TYPE "Badge" AS ENUM ('ADMIN', 'PATRON', 'USER');
@@ -56,8 +56,10 @@ CREATE TABLE "programming" (
     "createdAt" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "musical" INTEGER NOT NULL,
     "season" INTEGER NOT NULL,
-    "endDate" DATE,
     "startDate" DATE,
+    "endDate" DATE,
+    "dayTimes" JSON,
+
 
     CONSTRAINT "programming_pkey" PRIMARY KEY ("id")
 );

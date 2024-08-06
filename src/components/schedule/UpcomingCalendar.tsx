@@ -7,7 +7,7 @@ import Box from "@mui/material/Box";
 import Modal from "@mui/material/Modal";
 
 interface Props {
-  identifier: string;
+  identifier: number;
 }
 
 interface Program {
@@ -30,7 +30,7 @@ interface Event {
 
 function UpcomingCalendar({ identifier }: Props) {
   const [events, setEvents] = useState<Event[]>([]);
-  const [initialDate, setInitialDate] = useState<Date | null>(null);
+  const [initialDate, setInitialDate] = useState<Date>(new Date());
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const defaultDayTimes = {
     Tuesday: ["20:00"],
@@ -131,54 +131,51 @@ function UpcomingCalendar({ identifier }: Props) {
 
     setSelectedEvent(eventDetails);
   }
-
-  if (initialDate) {
-    return (
-      <div style={{ margin: "0 auto", maxWidth: "75%" }}>
-        <FullCalendar
-          events={events}
-          eventClick={handleEventClick}
-          eventDidMount={eventDidMount}
-          fixedWeekCount={false}
-          initialDate={initialDate}
-          initialView="dayGridMonth"
-          plugins={[dayGridPlugin]}
-        />
-        <Modal
-          open={Boolean(selectedEvent)}
-          onClose={() => setSelectedEvent(null)}
+  return (
+    <div style={{ margin: "0 auto", maxWidth: "75%" }}>
+      <FullCalendar
+        events={events}
+        eventClick={handleEventClick}
+        eventDidMount={eventDidMount}
+        fixedWeekCount={false}
+        initialDate={initialDate}
+        initialView="dayGridMonth"
+        plugins={[dayGridPlugin]}
+      />
+      <Modal
+        open={Boolean(selectedEvent)}
+        onClose={() => setSelectedEvent(null)}
+      >
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: 400,
+            bgcolor: "background.paper",
+            border: "2px solid #FFF",
+            boxShadow: 24,
+            p: 4,
+          }}
         >
-          <Box
-            sx={{
-              position: "absolute",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              width: 400,
-              bgcolor: "background.paper",
-              border: "2px solid #FFF",
-              boxShadow: 24,
-              p: 4,
-            }}
-          >
-            {selectedEvent && (
-              <>
-                <Typography variant="h6" component="h2">
-                  {selectedEvent.title}
-                </Typography>
-                <Typography variant="subtitle1">
-                  {selectedEvent.theatre}
-                </Typography>
-                <Typography variant="subtitle2">
-                  {moment(selectedEvent.start).format("LT")}
-                </Typography>
-              </>
-            )}
-          </Box>
-        </Modal>
-      </div>
-    );
-  }
+          {selectedEvent && (
+            <>
+              <Typography variant="h6" component="h2">
+                {selectedEvent.title}
+              </Typography>
+              <Typography variant="subtitle1">
+                {selectedEvent.theatre}
+              </Typography>
+              <Typography variant="subtitle2">
+                {moment(selectedEvent.start).format("LT")}
+              </Typography>
+            </>
+          )}
+        </Box>
+      </Modal>
+    </div>
+  );
 }
 
 export default UpcomingCalendar;

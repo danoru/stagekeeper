@@ -1,8 +1,7 @@
 import Grid from "@mui/material/Grid";
 import Head from "next/head";
-import moment from "moment";
-import PerformanceCalendar from "../../../src/components/schedule/PerformanceCalendar";
 import ProfileLinkBar from "../../../src/components/users/ProfileLinkBar";
+import UpcomingCalendar from "../../../src/components/schedule/UpcomingCalendar";
 import superjson from "superjson";
 import {
   attendance,
@@ -12,7 +11,6 @@ import {
   users,
 } from "@prisma/client";
 import { getUsers, findUserByUsername } from "../../../src/data/users";
-import { getUserAttendance } from "../../../src/data/performances";
 
 interface Props {
   user: users;
@@ -27,22 +25,8 @@ interface Params {
   };
 }
 
-function UserUpcomingPage({ attendance, user }: Props) {
+function UserUpcomingPage({ user }: Props) {
   const title = `${user.username}'s Upcoming Musicals • Savry`;
-
-  const currentDate = moment();
-  const uniqueTitles = new Set<string>();
-  const filteredAttendance = attendance.filter((a) => {
-    const startTime = moment(a.performances.startTime);
-    const title = a.performances.musicals.title;
-    if (startTime <= currentDate && !uniqueTitles.has(title)) {
-      uniqueTitles.add(title);
-      return true;
-    }
-    return false;
-  });
-
-  const musicals = filteredAttendance?.map((a) => a.performances.musicals);
 
   return (
     <div>
@@ -51,8 +35,8 @@ function UserUpcomingPage({ attendance, user }: Props) {
       </Head>
       <Grid container>
         <ProfileLinkBar username={user.username} />
-        <PerformanceCalendar />
       </Grid>
+      <UpcomingCalendar identifier={user.id} />
     </div>
   );
 }
@@ -72,14 +56,9 @@ export async function getStaticPaths() {
 export async function getStaticProps({ params }: Params) {
   const { username } = params;
   const user = await findUserByUsername(username);
-  let attendance;
-
-  if (user) {
-    attendance = await getUserAttendance(user.id);
-  }
 
   return {
-    props: superjson.serialize({ attendance, user }).json,
+    props: superjson.serialize({ user }).json,
     revalidate: 1800,
   };
 }

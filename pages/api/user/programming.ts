@@ -79,7 +79,7 @@ export default async function handler(
       (attendance) => {
         const startTime = moment(attendance.performances.startTime);
         const dayName = startTime.format("dddd");
-        const time = startTime.format("HH");
+        const time = startTime.format("HH:mm");
         return {
           id: attendance.performances.id,
           title: attendance.performances.musicals.title,

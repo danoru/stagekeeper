@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import FullCalendar from "@fullcalendar/react";
-import moment from "moment";
+import moment from "moment-timezone";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import Modal from "@mui/material/Modal";
@@ -63,8 +63,8 @@ function UpcomingCalendar({ identifier }: Props) {
         const startTime = moment(date).set({ hour, minute });
         const endTime = moment(startTime).add(duration || 150, "minutes");
         events.push({
-          start: startTime.toDate(),
-          end: endTime.toDate(),
+          start: startTime.tz("America/Los_Angeles").toDate(),
+          end: endTime.tz("America/Los_Angeles").toDate(),
           theatre: theatre,
           title: title,
           source: source,

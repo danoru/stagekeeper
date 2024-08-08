@@ -1,6 +1,6 @@
 import prisma from "../../../src/data/db";
 import { NextApiRequest, NextApiResponse } from "next";
-import moment from "moment";
+import moment from "moment-timezone";
 
 export default async function handler(
   req: NextApiRequest,
@@ -77,7 +77,10 @@ export default async function handler(
 
     const attendancePerformancesNormalized = attendancePerformances.map(
       (attendance) => {
-        const startTime = moment(attendance.performances.startTime);
+        const startTime = moment.tz(
+          attendance.performances.startTime,
+          "America/Los_Angeles"
+        );
         const dayName = startTime.format("dddd");
         const time = startTime.format("HH:mm");
         return {

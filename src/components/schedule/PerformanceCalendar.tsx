@@ -32,8 +32,8 @@ function PerformanceCalendar({ viewType, identifier }: Props) {
     dayTimes: Record<string, string[]>
   ): Event[] {
     const { startDate, endDate, musicals } = programming;
-    const startMoment = moment.tz(startDate, "America/Los_Angeles");
-    const endMoment = moment.tz(endDate, "America/Los_Angeles");
+    const startMoment = moment(startDate);
+    const endMoment = moment(endDate);
     const events: Event[] = [];
 
     for (
@@ -45,12 +45,11 @@ function PerformanceCalendar({ viewType, identifier }: Props) {
       const times = dayTimes[dayName] || [];
       times.forEach((time) => {
         const [hour, minute] = time.split(":").map(Number);
-        const startTime = moment
-          .tz(date, "America/Los_Angeles")
-          .set({ hour, minute });
-        const endTime = moment
-          .tz(startTime, "America/Los_Angeles")
-          .add(musicals.duration || 150, "minutes");
+        const startTime = moment(date).set({ hour, minute });
+        const endTime = moment(startTime).add(
+          musicals.duration || 150,
+          "minutes"
+        );
         events.push({
           start: startTime.toDate(),
           end: endTime.toDate(),

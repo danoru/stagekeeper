@@ -32,9 +32,11 @@ function PerformanceCalendar({ viewType, identifier }: Props) {
     dayTimes: Record<string, string[]>
   ): Event[] {
     const { startDate, endDate, musicals } = programming;
-    const startMoment = moment(startDate);
-    const endMoment = moment(endDate);
+    const startMoment = moment.tz(startDate, "America/Los_Angeles");
+    const endMoment = moment.tz(endDate, "America/Los_Angeles");
     const events: Event[] = [];
+
+    console.log(startMoment);
 
     for (
       let date = startMoment;

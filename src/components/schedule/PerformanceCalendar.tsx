@@ -36,8 +36,6 @@ function PerformanceCalendar({ viewType, identifier }: Props) {
     const endMoment = moment.tz(endDate, "America/Los_Angeles");
     const events: Event[] = [];
 
-    console.log(startMoment);
-
     for (
       let date = startMoment;
       date.isSameOrBefore(endMoment);
@@ -47,11 +45,12 @@ function PerformanceCalendar({ viewType, identifier }: Props) {
       const times = dayTimes[dayName] || [];
       times.forEach((time) => {
         const [hour, minute] = time.split(":").map(Number);
-        const startTime = moment(date).set({ hour, minute });
-        const endTime = moment(startTime).add(
-          musicals.duration || 150,
-          "minutes"
-        );
+        const startTime = moment
+          .tz(date, "America/Los_Angeles")
+          .set({ hour, minute });
+        const endTime = moment
+          .tz(startTime, "America/Los_Angeles")
+          .add(musicals.duration || 150, "minutes");
         events.push({
           start: startTime.toDate(),
           end: endTime.toDate(),

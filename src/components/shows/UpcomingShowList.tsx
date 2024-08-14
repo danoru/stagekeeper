@@ -1,20 +1,27 @@
 import Carousel from "react-material-ui-carousel";
-import { musicals, programming, seasons, theatres } from "@prisma/client";
-import Paper from "@mui/material/Paper";
-import Typography from "@mui/material/Typography";
 import Image from "next/image";
-import moment from "moment";
 import Grid from "@mui/material/Grid";
 import Link from "next/link";
+import moment from "moment";
+import Paper from "@mui/material/Paper";
+import Typography from "@mui/material/Typography";
+import {
+  musicals,
+  plays,
+  programming,
+  seasons,
+  theatres,
+} from "@prisma/client";
 
 interface Props {
   upcomingPerformances: (programming & {
-    musicals: musicals;
+    musicals?: musicals;
+    plays?: plays;
     seasons: seasons & { theatres: theatres };
   })[];
 }
 
-function UpcomingMusicalList({ upcomingPerformances }: Props) {
+function UpcomingShowList({ upcomingPerformances }: Props) {
   return (
     <Grid item>
       <Typography variant="h5" sx={{ margin: "2vh 0" }}>
@@ -22,21 +29,23 @@ function UpcomingMusicalList({ upcomingPerformances }: Props) {
       </Typography>
       <Carousel sx={{ maxWidth: 300, margin: "auto" }}>
         {upcomingPerformances.map((performance: any) => {
-          const musicalSlug = `${performance.musicals.title
-            .replace(/\s+/g, "-")
-            .toLowerCase()}`;
+          const showType =
+            performance.type === "MUSICAL" ? "musicals" : "plays";
+          const title =
+            performance.type === "MUSICAL"
+              ? performance.musicals?.title
+              : performance.plays?.title;
+          const image =
+            performance.type === "MUSICAL"
+              ? performance.musicals?.playbill
+              : performance.plays?.playbill;
           return (
-            <Link href={`/musicals/${musicalSlug}`}>
+            <Link
+              href={`/${showType}/${title?.replace(/\s+/g, "-").toLowerCase()}`}
+            >
               <Paper key={performance.id} className="card">
-                <Image
-                  src={performance.musicals.playbill}
-                  alt={performance.musicals.title}
-                  height="185"
-                  width="150"
-                />
-                <Typography variant="h6">
-                  {performance.musicals.title}
-                </Typography>
+                <Image src={image} alt={title} height="185" width="150" />
+                <Typography variant="h6">{title}</Typography>
                 <Typography variant="body2">
                   {moment(performance.startDate).format("LL")} -{" "}
                   {moment(performance.endDate).format("LL")}
@@ -53,4 +62,4 @@ function UpcomingMusicalList({ upcomingPerformances }: Props) {
   );
 }
 
-export default UpcomingMusicalList;
+export default UpcomingShowList;

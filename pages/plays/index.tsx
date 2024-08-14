@@ -1,42 +1,42 @@
 import Grid from "@mui/material/Grid";
 import Head from "next/head";
-import MusicalCard from "../../src/components/cards/MusicalCard";
 import Pagination from "@mui/material/Pagination";
+import ShowCard from "../../src/components/cards/ShowCard";
 import superjson from "superjson";
 import Typography from "@mui/material/Typography";
-import UpcomingMusicalList from "../../src/components/musical/UpcomingMusicalList";
-import { getPaginatedMusicals } from "../../src/data/musicals";
-import { getUpcomingPerformances } from "../../src/data/performances";
-import { musicals, programming, seasons, theatres } from "@prisma/client";
+import UpcomingShowList from "../../src/components/shows/UpcomingShowList";
+import { getPaginatedPlays } from "../../src/data/plays";
+import { getUpcomingPlays } from "../../src/data/plays";
+import { plays, programming, seasons, theatres } from "@prisma/client";
 import { useState, useEffect } from "react";
 
 interface Props {
-  musicals: musicals[];
-  musicalCount: number;
+  plays: plays[];
+  playCount: number;
   upcomingPerformances: (programming & {
-    musicals: musicals;
+    plays: plays;
     seasons: seasons & { theatres: theatres };
   })[];
 }
 
-function MusicalsPage({
-  musicals: initialMusicals,
-  musicalCount,
+function PlaysPage({
+  plays: initialPlays,
+  playCount,
   upcomingPerformances,
 }: Props) {
-  const [musicals, setMusicals] = useState(initialMusicals);
+  const [plays, setPlays] = useState(initialPlays);
   const [page, setPage] = useState(1);
   const itemsPerPage = 10;
 
   useEffect(() => {
-    async function fetchMusicals() {
+    async function fetchPlays() {
       const response = await fetch(
-        `/api/musicals/pages?page=${page}&limit=${itemsPerPage}`
+        `/api/plays/pages?page=${page}&limit=${itemsPerPage}`
       );
       const data = await response.json();
-      setMusicals(data.musicals);
+      setPlays(data.plays);
     }
-    fetchMusicals();
+    fetchPlays();
   }, [page]);
 
   const handleChange = (event: React.ChangeEvent<unknown>, value: number) => {
@@ -46,30 +46,28 @@ function MusicalsPage({
   return (
     <div>
       <Head>
-        <title>Musicals • StageKeeper</title>
+        <title>Plays • StageKeeper</title>
       </Head>
-      <UpcomingMusicalList upcomingPerformances={upcomingPerformances} />
+      <UpcomingShowList upcomingPerformances={upcomingPerformances} />
       <Grid container direction="row">
         <Grid item xs={12}>
           <Typography variant="h6" sx={{ margin: "1vh 0" }}>
-            All Musicals
+            All Plays
           </Typography>
         </Grid>
         <Grid container item xs={8} sx={{ margin: "0 auto" }}>
-          {musicals.map((musical, i) => (
-            <MusicalCard
+          {plays.map((play, i) => (
+            <ShowCard
               key={i}
-              name={musical.title}
-              link={`/musicals/${musical.title
-                .replace(/\s+/g, "-")
-                .toLowerCase()}`}
-              image={musical.playbill}
+              name={play.title}
+              link={`/plays/${play.title.replace(/\s+/g, "-").toLowerCase()}`}
+              image={play.playbill}
             />
           ))}
         </Grid>
       </Grid>
       <Pagination
-        count={Math.ceil(musicalCount / itemsPerPage)}
+        count={Math.ceil(playCount / itemsPerPage)}
         page={page}
         onChange={handleChange}
         sx={{ margin: "1vh", justifyContent: "center", display: "flex" }}
@@ -79,16 +77,16 @@ function MusicalsPage({
 }
 
 export async function getStaticProps() {
-  const { musicals, musicalCount } = await getPaginatedMusicals(1, 10);
-  const upcomingPerformances = await getUpcomingPerformances();
+  const { plays, playCount } = await getPaginatedPlays(1, 10);
+  const upcomingPerformances = await getUpcomingPlays();
 
   return {
     props: superjson.serialize({
-      musicals,
-      musicalCount,
+      plays,
+      playCount,
       upcomingPerformances,
     }).json,
   };
 }
 
-export default MusicalsPage;
+export default PlaysPage;

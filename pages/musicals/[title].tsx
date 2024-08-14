@@ -3,7 +3,7 @@ import Card from "@mui/material/Card";
 import CardMedia from "@mui/material/CardMedia";
 import Head from "next/head";
 import moment from "moment";
-import MusicalActionBar from "../../src/components/musical/MusicalActionBar";
+import ShowActionBar from "../../src/components/shows/ShowActionBar";
 import PerformanceCalendar from "../../src/components/schedule/PerformanceCalendar";
 import Stack from "@mui/material/Stack";
 import superjson from "superjson";
@@ -114,7 +114,7 @@ function MusicalPage({
           </Stack>
         </Stack>
         <Stack width="15%">
-          <MusicalActionBar
+          <ShowActionBar
             attendance={attendance}
             likedShows={likedMusicals}
             musical={musical}

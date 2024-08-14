@@ -1,12 +1,12 @@
 import Grid from "@mui/material/Grid";
 import Head from "next/head";
-import MusicalCard from "../../src/components/cards/MusicalCard";
+import MusicalCard from "../../src/components/cards/ShowCard";
 import Pagination from "@mui/material/Pagination";
 import superjson from "superjson";
 import Typography from "@mui/material/Typography";
-import UpcomingMusicalList from "../../src/components/musical/UpcomingMusicalList";
+import UpcomingShowList from "../../src/components/shows/UpcomingShowList";
 import { getPaginatedMusicals } from "../../src/data/musicals";
-import { getUpcomingPerformances } from "../../src/data/performances";
+import { getUpcomingMusicals } from "../../src/data/musicals";
 import { musicals, programming, seasons, theatres } from "@prisma/client";
 import { useState, useEffect } from "react";
 
@@ -48,7 +48,7 @@ function MusicalsPage({
       <Head>
         <title>Musicals • StageKeeper</title>
       </Head>
-      <UpcomingMusicalList upcomingPerformances={upcomingPerformances} />
+      <UpcomingShowList upcomingPerformances={upcomingPerformances} />
       <Grid container direction="row">
         <Grid item xs={12}>
           <Typography variant="h6" sx={{ margin: "1vh 0" }}>
@@ -80,7 +80,7 @@ function MusicalsPage({
 
 export async function getStaticProps() {
   const { musicals, musicalCount } = await getPaginatedMusicals(1, 10);
-  const upcomingPerformances = await getUpcomingPerformances();
+  const upcomingPerformances = await getUpcomingMusicals();
 
   return {
     props: superjson.serialize({

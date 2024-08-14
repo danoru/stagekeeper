@@ -1,10 +1,10 @@
 import Grid from "@mui/material/Grid";
-import MusicalCard from "../cards/MusicalCard";
+import ShowCard from "../cards/ShowCard";
 import Typography from "@mui/material/Typography";
-import { musicals, programming } from "@prisma/client";
+import { musicals, plays, programming } from "@prisma/client";
 
 interface Props {
-  musicals: musicals[];
+  shows: (musicals | plays)[];
   header: string;
   style?:
     | "h1"
@@ -22,16 +22,18 @@ interface Props {
     | "overline"
     | undefined;
   upcomingPerformances?: (programming & {
-    musicals: musicals;
+    musicals?: musicals;
+    plays?: plays;
   })[];
 }
-function MusicalList({ musicals, header, style, upcomingPerformances }: Props) {
+function ShowList({ shows, header, style, upcomingPerformances }: Props) {
   const styledHeader = header.toUpperCase();
   const typographyStyle = style || "h6";
 
-  const hasUpcomingPerformance = (musicalId: number) => {
+  const hasUpcomingPerformance = (showId: number) => {
     return upcomingPerformances?.some(
-      (performance) => performance.musicals?.id === musicalId
+      (performance) =>
+        performance.musicals?.id === showId || performance.plays?.id === showId
     );
   };
 
@@ -42,7 +44,7 @@ function MusicalList({ musicals, header, style, upcomingPerformances }: Props) {
         style={{
           borderBottomWidth: "1px",
           borderBottomStyle: "solid",
-          borderBottomColor: "theme.palette.secondary",
+          borderBottomColor: "secondary",
           display: "flex",
           justifyContent: "space-between",
           lineHeight: "0",
@@ -64,20 +66,23 @@ function MusicalList({ musicals, header, style, upcomingPerformances }: Props) {
           maxWidth: "75%",
         }}
       >
-        {musicals?.map((musical: any, i: number) => (
-          <MusicalCard
-            key={`card-${i}`}
-            name={musical?.title}
-            link={`/musicals/${musical?.title
-              .replace(/\s+/g, "-")
-              .toLowerCase()}`}
-            image={musical?.playbill}
-            hasUpcomingPerformance={hasUpcomingPerformance(musical?.id)}
-          />
-        ))}
+        {shows.map((show, i) => {
+          const showType = "musicBy" in show ? "musicals" : "plays";
+          return (
+            <ShowCard
+              key={`card-${i}`}
+              name={show?.title}
+              link={`/${showType}/${show?.title
+                .replace(/\s+/g, "-")
+                .toLowerCase()}`}
+              image={show?.playbill}
+              hasUpcomingPerformance={hasUpcomingPerformance(show?.id)}
+            />
+          );
+        })}
       </Grid>
     </Grid>
   );
 }
 
-export default MusicalList;
+export default ShowList;

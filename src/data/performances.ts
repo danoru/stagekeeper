@@ -277,36 +277,6 @@ export async function getPerformances() {
   return performances;
 }
 
-export async function getUpcomingPerformances() {
-  const upcomingLimit = new Date();
-  upcomingLimit.setMonth(upcomingLimit.getMonth() + 6);
-
-  const programming = await prisma.programming.findMany({
-    where: {
-      startDate: {
-        gte: new Date(),
-        lte: upcomingLimit,
-      },
-      endDate: {
-        gte: new Date(),
-      },
-    },
-    include: {
-      musicals: true,
-      seasons: {
-        include: {
-          theatres: true,
-        },
-      },
-    },
-    orderBy: {
-      startDate: "asc",
-    },
-  });
-
-  return programming;
-}
-
 export async function getFriendsUpcomingPerformances(usernames: string[]) {
   const performances = await prisma.attendance.findMany({
     where: {
@@ -361,7 +331,9 @@ export async function getUserAttendance(id: number) {
     where: { user: id },
     orderBy: { performances: { musicals: { title: "asc" } } },
     include: {
-      performances: { include: { musicals: true, theatres: true } },
+      performances: {
+        include: { musicals: true, plays: true, theatres: true },
+      },
     },
   });
   return attendance;

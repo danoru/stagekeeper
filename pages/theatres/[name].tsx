@@ -67,7 +67,6 @@ function TheatrePage({ theatre, seasons }: Props) {
           </Stack>
           {season.programming.map(
             (program: programming & { musicals: musicals; plays: plays }) => {
-              console.log(program);
               const isMusical = program.type === "MUSICAL";
               const showType = isMusical ? "musicals" : "plays";
               const image = isMusical

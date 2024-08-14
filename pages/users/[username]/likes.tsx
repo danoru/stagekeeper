@@ -1,6 +1,6 @@
 import Grid from "@mui/material/Grid";
 import Head from "next/head";
-import MusicalList from "../../../src/components/musical/MusicalList";
+import ShowList from "../../../src/components/shows/ShowList";
 import ProfileLinkBar from "../../../src/components/users/ProfileLinkBar";
 import superjson from "superjson";
 import { getUsers, getUserLikes } from "../../../src/data/users";
@@ -35,7 +35,7 @@ function UserLikes({ user }: Props) {
       </Head>
       <Grid container>
         <ProfileLinkBar username={user.username} />
-        <MusicalList musicals={shows} header={header} style={style} />
+        <ShowList shows={shows} header={header} style={style} />
       </Grid>
     </div>
   );

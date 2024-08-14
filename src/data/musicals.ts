@@ -460,6 +460,52 @@ export async function getLikedMusicals(id: number) {
   return likedMusicals;
 }
 
+export async function getUserMusicalAttendance(id: number) {
+  const attendance = await prisma.attendance.findMany({
+    where: { NOT: { performances: { musical: null } }, user: id },
+    orderBy: { performances: { musicals: { title: "asc" } } },
+    include: {
+      performances: {
+        include: { musicals: true, theatres: true },
+      },
+    },
+  });
+  return attendance;
+}
+
+export async function getUpcomingMusicals() {
+  const upcomingLimit = new Date();
+  upcomingLimit.setMonth(upcomingLimit.getMonth() + 6);
+
+  const programming = await prisma.programming.findMany({
+    where: {
+      NOT: {
+        musical: null,
+      },
+      startDate: {
+        gte: new Date(),
+        lte: upcomingLimit,
+      },
+      endDate: {
+        gte: new Date(),
+      },
+    },
+    include: {
+      musicals: true,
+      seasons: {
+        include: {
+          theatres: true,
+        },
+      },
+    },
+    orderBy: {
+      startDate: "asc",
+    },
+  });
+
+  return programming;
+}
+
 export async function getWatchlist(id: number) {
   const watchlist = await prisma.watchlist.findMany({
     where: {

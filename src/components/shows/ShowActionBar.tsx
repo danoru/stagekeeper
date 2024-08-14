@@ -31,7 +31,7 @@ interface Props {
   watchlist: watchlist[];
 }
 
-function MusicalActionBar({
+function ShowActionBar({
   attendance,
   likedShows,
   musical,
@@ -137,7 +137,7 @@ function MusicalActionBar({
   async function handleWatchlist() {
     if (sessionUser) {
       const method = isWatchlisted ? "DELETE" : "POST";
-      const response = await fetch(`/api/musicals/watchlist`, {
+      const response = await fetch(`/api/shows/watchlist`, {
         method,
         headers: {
           "Content-Type": "application/json",
@@ -278,4 +278,4 @@ function MusicalActionBar({
   );
 }
 
-export default MusicalActionBar;
+export default ShowActionBar;

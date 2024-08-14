@@ -6,18 +6,18 @@ import ProfileLinkBar from "../../../src/components/users/ProfileLinkBar";
 import superjson from "superjson";
 import {
   attendance,
-  musicals,
+  plays,
   performances,
   theatres,
   users,
 } from "@prisma/client";
 import { getUsers, findUserByUsername } from "../../../src/data/users";
-import { getUserMusicalAttendance } from "../../../src/data/musicals";
+import { getUserPlayAttendance } from "../../../src/data/plays";
 
 interface Props {
   user: users;
   attendance: (attendance & {
-    performances: performances & { musicals: musicals; theatres: theatres };
+    performances: performances & { plays: plays; theatres: theatres };
   })[];
 }
 
@@ -27,16 +27,16 @@ interface Params {
   };
 }
 
-function UserMusicalsList({ attendance, user }: Props) {
-  const title = `${user.username}'s Musicals • Savry`;
-  const musicalHeader = `${user.username}'S MUSICALS`;
+function UserPlaysList({ attendance, user }: Props) {
+  const title = `${user.username}'s Plays • Savry`;
+  const musicalHeader = `${user.username}'S PLAYS`;
   const style = "overline";
 
   const currentDate = moment();
   const uniqueTitles = new Set<string>();
   const filteredAttendance = attendance.filter((a) => {
     const startTime = moment(a.performances.startTime);
-    const title = a.performances.musicals?.title;
+    const title = a.performances.plays?.title;
     if (startTime <= currentDate && !uniqueTitles.has(title)) {
       uniqueTitles.add(title);
       return true;
@@ -44,7 +44,7 @@ function UserMusicalsList({ attendance, user }: Props) {
     return false;
   });
 
-  const musicals = filteredAttendance?.map((a) => a.performances.musicals);
+  const plays = filteredAttendance?.map((a) => a.performances.plays);
 
   return (
     <div>
@@ -53,7 +53,7 @@ function UserMusicalsList({ attendance, user }: Props) {
       </Head>
       <Grid container>
         <ProfileLinkBar username={user.username} />
-        <ShowList shows={musicals} header={musicalHeader} style={style} />
+        <ShowList shows={plays} header={musicalHeader} style={style} />
       </Grid>
     </div>
   );
@@ -77,7 +77,7 @@ export async function getStaticProps({ params }: Params) {
   let attendance;
 
   if (user) {
-    attendance = await getUserMusicalAttendance(user.id);
+    attendance = await getUserPlayAttendance(user.id);
   }
 
   return {
@@ -86,4 +86,4 @@ export async function getStaticProps({ params }: Params) {
   };
 }
 
-export default UserMusicalsList;
+export default UserPlaysList;

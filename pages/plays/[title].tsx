@@ -3,7 +3,7 @@ import Card from "@mui/material/Card";
 import CardMedia from "@mui/material/CardMedia";
 import Head from "next/head";
 import moment from "moment";
-import MusicalActionBar from "../../src/components/musical/MusicalActionBar";
+import ShowActionBar from "../../src/components/shows/ShowActionBar";
 import PerformanceCalendar from "../../src/components/schedule/PerformanceCalendar";
 import Stack from "@mui/material/Stack";
 import superjson from "superjson";
@@ -11,15 +11,15 @@ import Typography from "@mui/material/Typography";
 import {
   attendance,
   likedShows,
-  musicals,
+  plays,
   performances,
   watchlist,
 } from "@prisma/client";
 import {
-  getLikedMusicals,
-  getMusicalByTitle,
+  getLikedPlays,
+  getPlayByTitle,
   getWatchlist,
-} from "../../src/data/musicals";
+} from "../../src/data/plays";
 import { getSession } from "next-auth/react";
 import { getUserAttendance } from "../../src/data/performances";
 
@@ -29,22 +29,16 @@ interface Params {
 
 interface Props {
   attendance: (attendance & { performances: performances })[];
-  likedMusicals: likedShows[];
-  musical: musicals;
+  likedPlays: likedShows[];
+  play: plays;
   session: any;
   watchlist: watchlist[];
 }
 
-function MusicalPage({
-  attendance,
-  likedMusicals,
-  musical,
-  session,
-  watchlist,
-}: Props) {
+function PlayPage({ attendance, likedPlays, play, session, watchlist }: Props) {
   const sessionUser = session?.user;
-  const title = `${musical.title} • StageKeeper`;
-  const musicalTitle = musical.title;
+  const playTitle = play.title;
+  const title = `${playTitle} • StageKeeper`;
 
   return (
     <div>
@@ -68,8 +62,8 @@ function MusicalPage({
         >
           <CardMedia
             className="image"
-            image={musical.playbill}
-            title={musical.title}
+            image={play.playbill}
+            title={play.title}
             sx={{
               position: "absolute",
               top: 0,
@@ -96,34 +90,28 @@ function MusicalPage({
           style={{ alignItems: "flex-start", marginRight: "2vw", width: "50%" }}
         >
           <Stack direction="row" spacing={2}>
-            <Typography variant="h6">{musical.title}</Typography>
+            <Typography variant="h6">{play.title}</Typography>
             <Typography variant="h6">
-              {`(${moment(musical.premiere).format("YYYY")})`}
+              {`(${moment(play.premiere).format("YYYY")})`}
             </Typography>
           </Stack>
           <Stack direction="column" style={{ alignItems: "flex-start" }}>
             <Typography variant="subtitle1">
-              Music by {musical.musicBy}
-            </Typography>
-            <Typography variant="subtitle1">
-              Lyrics by {musical.lyricsBy}
-            </Typography>
-            <Typography variant="subtitle1">
-              Book by {musical.bookBy}
+              Written by {play.writtenBy}
             </Typography>
           </Stack>
         </Stack>
         <Stack width="15%">
-          <MusicalActionBar
+          <ShowActionBar
             attendance={attendance}
-            likedShows={likedMusicals}
-            musical={musical}
+            likedShows={likedPlays}
+            play={play}
             sessionUser={sessionUser}
             watchlist={watchlist}
           />
         </Stack>
       </Stack>
-      <PerformanceCalendar viewType="show" identifier={musicalTitle} />
+      <PerformanceCalendar viewType="show" identifier={playTitle} />
     </div>
   );
 }
@@ -137,18 +125,18 @@ export async function getServerSideProps(context: {
 
   if (session) {
     const userId = Number(session.user.id);
-    const [attendance, likedMusicals, musical, watchlist] = await Promise.all([
+    const [attendance, likedPlays, play, watchlist] = await Promise.all([
       getUserAttendance(userId),
-      getLikedMusicals(userId),
-      getMusicalByTitle(title),
+      getLikedPlays(userId),
+      getPlayByTitle(title),
       getWatchlist(userId),
     ]);
 
     return {
       props: superjson.serialize({
         attendance,
-        likedMusicals,
-        musical,
+        likedPlays,
+        play,
         session,
         watchlist,
       }).json,
@@ -160,4 +148,4 @@ export async function getServerSideProps(context: {
   };
 }
 
-export default MusicalPage;
+export default PlayPage;

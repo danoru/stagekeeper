@@ -13,7 +13,7 @@ interface Props {
   name: string;
 }
 
-function MusicalCard({ hasUpcomingPerformance, image, link, name }: Props) {
+function ShowCard({ hasUpcomingPerformance, image, link, name }: Props) {
   return (
     <Grid item sx={{ margin: "10px" }}>
       <Badge
@@ -89,4 +89,4 @@ function MusicalCard({ hasUpcomingPerformance, image, link, name }: Props) {
   );
 }
 
-export default MusicalCard;
+export default ShowCard;

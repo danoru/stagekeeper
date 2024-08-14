@@ -1,19 +1,23 @@
 import Grid from "@mui/material/Grid";
 import Head from "next/head";
-import MusicalList from "../../../src/components/musical/MusicalList";
+import ShowList from "../../../src/components/shows/ShowList";
 import ProfileLinkBar from "../../../src/components/users/ProfileLinkBar";
 import superjson from "superjson";
 import { findUserByUsername, getUsers } from "../../../src/data/users";
-import { getUpcomingPerformances } from "../../../src/data/performances";
-import { getWatchlist } from "../../../src/data/musicals";
-import { watchlist, musicals, users, programming } from "@prisma/client";
+import { getUpcomingPerformances } from "../../../src/data/shows";
+import { getWatchlist } from "../../../src/data/shows";
+import { musicals, plays, programming, users, watchlist } from "@prisma/client";
 
 interface Props {
   upcomingPerformances: (programming & {
     musicals: musicals;
+    plays: plays;
   })[];
   user: users;
-  watchlist: (watchlist & { musicals: musicals })[];
+  watchlist: (watchlist & {
+    musicals: musicals;
+    plays: plays;
+  })[];
 }
 
 interface Params {
@@ -24,9 +28,11 @@ interface Params {
 
 function UserWatchlist({ watchlist, user, upcomingPerformances }: Props) {
   const title = `${user.username}'s Watchlist • Savry`;
-  const header = `${user.username} WANTS TO WATCH ${watchlist.length} MUSICALS`;
+  const header = `${user.username} WANTS TO WATCH ${watchlist.length} SHOWS`;
   const style = "overline";
-  const musicals = watchlist.map((item) => item.musicals);
+  const shows = watchlist.map((show) =>
+    show.type === "MUSICAL" ? show.musicals : show.plays
+  );
 
   return (
     <div>
@@ -35,8 +41,8 @@ function UserWatchlist({ watchlist, user, upcomingPerformances }: Props) {
       </Head>
       <Grid container>
         <ProfileLinkBar username={user.username} />
-        <MusicalList
-          musicals={musicals}
+        <ShowList
+          shows={shows}
           header={header}
           upcomingPerformances={upcomingPerformances}
           style={style}
@@ -61,8 +67,8 @@ export async function getStaticPaths() {
 export async function getStaticProps({ params }: Params) {
   const { username } = params;
   const user = await findUserByUsername(username);
-  let watchlist: watchlist[] = [];
-  let upcomingPerformances: any[] = [];
+  let watchlist;
+  let upcomingPerformances;
 
   if (user) {
     watchlist = await getWatchlist(user.id);

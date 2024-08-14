@@ -446,7 +446,7 @@ export async function getMusicalByTitle(musicalTitle: string) {
 }
 
 export async function getLikedMusicals(id: number) {
-  const likedMusicals = await prisma.likedMusicals.findMany({
+  const likedMusicals = await prisma.likedShows.findMany({
     where: {
       user: id,
     },

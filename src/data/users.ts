@@ -124,7 +124,7 @@ export async function getUserLikes(username: string) {
       username,
     },
     include: {
-      likedMusicals: {
+      likedShows: {
         include: {
           musicals: true,
         },

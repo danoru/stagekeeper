@@ -168,6 +168,7 @@ export async function getSeasons(theatreId: number) {
       programming: {
         include: {
           musicals: true,
+          plays: true,
         },
       },
     },

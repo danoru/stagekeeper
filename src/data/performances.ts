@@ -321,7 +321,7 @@ export async function getFriendsUpcomingPerformances(usernames: string[]) {
     },
     include: {
       performances: {
-        include: { musicals: true, theatres: true },
+        include: { musicals: true, plays: true, theatres: true },
       },
     },
   });
@@ -343,7 +343,7 @@ export async function getRecentPerformances(usernames: string[]) {
     },
     include: {
       performances: {
-        include: { musicals: true, theatres: true },
+        include: { musicals: true, plays: true, theatres: true },
       },
     },
     orderBy: {

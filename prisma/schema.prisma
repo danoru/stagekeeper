@@ -31,56 +31,78 @@ model following {
 
 model groups {
   id    Int     @id(map: "group_pkey") @default(autoincrement())
-  name  String?
+  name  String
   users users[]
 }
 
-model likedMusicals {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now()) @db.Timestamptz(6)
+model likedShows {
+  id        Int             @id @default(autoincrement())
+  createdAt DateTime        @default(now()) @db.Timestamptz(6)
+  type      PerformanceType
   user      Int
-  musical   Int
-  musicals  musicals @relation(fields: [musical], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  users     users    @relation(fields: [user], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  musical   Int?
+  play      Int?
+  musicals  musicals?       @relation(fields: [musical], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "showings_musical_fkey")
+  plays     plays?          @relation(fields: [play], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "showings_play_fkey")
+  users     users           @relation(fields: [user], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model musicals {
-  id            Int             @id @default(autoincrement())
-  title         String          @unique
-  playbill      String?
-  duration      Int?
-  musicBy       String
-  lyricsBy      String
-  bookBy        String
-  premiere      DateTime?       @db.Date
-  likedMusicals likedMusicals[]
-  performances  performances[]
-  programming   programming[]
-  watchlist     watchlist[]
+  id           Int            @id @default(autoincrement())
+  title        String         @unique
+  playbill     String         @default("https://picsum.photos/649/1024")
+  duration     Int?
+  musicBy      String
+  lyricsBy     String
+  bookBy       String
+  premiere     DateTime?      @db.Date
+  likedShows   likedShows[]
+  performances performances[]
+  programming  programming[]
+  watchlist    watchlist[]
 }
 
 model performances {
-  id         Int          @id(map: "showings_pkey") @default(autoincrement())
-  musical    Int
+  id         Int             @id(map: "showings_pkey") @default(autoincrement())
+  type       PerformanceType
+  play       Int?
+  musical    Int?
   theatre    Int
-  startTime  DateTime     @db.Timestamptz(6)
-  endTime    DateTime     @db.Timestamptz(6)
-  createdAt  DateTime     @default(now()) @db.Timestamptz(6)
+  startTime  DateTime        @db.Timestamptz(6)
+  endTime    DateTime        @db.Timestamptz(6)
+  createdAt  DateTime        @default(now()) @db.Timestamptz(6)
   attendance attendance[]
-  musicals   musicals     @relation(fields: [musical], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "showings_musical_fkey")
-  theatres   theatres     @relation(fields: [theatre], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "showings_theatre_fkey")
+  musicals   musicals?       @relation(fields: [musical], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "showings_musical_fkey")
+  plays      plays?          @relation(fields: [play], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "showings_play_fkey")
+  theatres   theatres        @relation(fields: [theatre], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "showings_theatre_fkey")
+}
+
+model plays {
+  id           Int            @id @default(autoincrement())
+  title        String         @unique
+  playbill     String         @default("https://picsum.photos/649/1024")
+  duration     Int?
+  writtenBy    String
+  premiere     DateTime       @db.Date
+  likedShows   likedShows[]
+  performances performances[]
+  programming  programming[]
+  watchlist    watchlist[]
 }
 
 model programming {
-  id        Int       @id @default(autoincrement())
-  createdAt DateTime  @default(now()) @db.Timestamptz(6)
-  musical   Int
+  id        Int             @id @default(autoincrement())
+  createdAt DateTime        @default(now()) @db.Timestamptz(6)
+  type      PerformanceType
+  play      Int?
+  musical   Int?
   season    Int?
-  startDate DateTime? @db.Timestamptz(6)
-  endDate   DateTime? @db.Timestamptz(6)
-  dayTimes  Json?
-  musicals  musicals  @relation(fields: [musical], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  seasons   seasons?  @relation(fields: [season], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  startDate DateTime        @db.Timestamptz(6)
+  endDate   DateTime        @db.Timestamptz(6)
+  dayTimes  Json
+  musicals  musicals?       @relation(fields: [musical], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "showings_musical_fkey")
+  plays     plays?          @relation(fields: [play], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "showings_play_fkey")
+  seasons   seasons?        @relation(fields: [season], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model seasons {
@@ -99,44 +121,52 @@ model theatres {
   name         String
   link         String?
   location     String
-  image        String?
+  image        String         @default("https://picsum.photos/649/1024")
   address      String?
   performances performances[]
   seasons      seasons[]
 }
 
 model users {
-  id            Int             @id @default(autoincrement())
-  createdAt     DateTime        @default(now()) @db.Timestamptz(6)
-  username      String          @unique @db.Citext
-  email         String          @unique @db.Citext
-  password      String
-  firstName     String?
-  lastName      String?
-  location      String?
-  website       String?
-  bio           String?
-  image         String?
-  badge         Badge           @default(USER)
-  inGroup       Int?
-  attendance    attendance[]
-  following     following[]
-  likedMusicals likedMusicals[]
-  groups        groups?         @relation(fields: [inGroup], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  watchlist     watchlist[]
+  id         Int          @id @default(autoincrement())
+  createdAt  DateTime     @default(now()) @db.Timestamptz(6)
+  username   String       @unique @db.Citext
+  email      String       @unique @db.Citext
+  password   String
+  firstName  String?
+  lastName   String?
+  location   String?
+  website    String?
+  bio        String?
+  image      String?
+  badge      Badge        @default(USER)
+  inGroup    Int?
+  attendance attendance[]
+  following  following[]
+  likedShows likedShows[]
+  groups     groups?      @relation(fields: [inGroup], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  watchlist  watchlist[]
 }
 
 model watchlist {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  id        Int             @id @default(autoincrement())
+  createdAt DateTime        @default(now()) @db.Timestamptz(6)
+  type      PerformanceType
   user      Int
-  musical   Int
-  musicals  musicals @relation(fields: [musical], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  users     users    @relation(fields: [user], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  play      Int?
+  musical   Int?
+  musicals  musicals?       @relation(fields: [musical], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "showings_musical_fkey")
+  plays     plays?          @relation(fields: [play], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "showings_play_fkey")
+  users     users           @relation(fields: [user], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 enum Badge {
   ADMIN
   PATRON
   USER
+}
+
+enum PerformanceType {
+  MUSICAL
+  PLAY
 }

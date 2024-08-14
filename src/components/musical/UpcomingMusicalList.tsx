@@ -29,7 +29,7 @@ function UpcomingMusicalList({ upcomingPerformances }: Props) {
             <Link href={`/musicals/${musicalSlug}`}>
               <Paper key={performance.id} className="card">
                 <Image
-                  src={performance.musicals.playbill || ""}
+                  src={performance.musicals.playbill}
                   alt={performance.musicals.title}
                   height="185"
                   width="150"

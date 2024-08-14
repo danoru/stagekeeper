@@ -43,12 +43,12 @@ export default async function handler(
     });
 
     const watchlistPerformances = watchlist.flatMap((watchItem) =>
-      watchItem.musicals.programming
+      watchItem.musicals?.programming
         .filter((program) => program.endDate && program.endDate >= new Date())
         .map((program) => ({
           id: program.id,
-          title: program.musicals.title,
-          duration: program.musicals.duration,
+          title: program.musicals?.title,
+          duration: program.musicals?.duration,
           theatre: program.seasons?.theatres.name,
           startDate: program.startDate,
           endDate: program.endDate,
@@ -85,8 +85,8 @@ export default async function handler(
         const time = startTime.format("HH:mm");
         return {
           id: attendance.performances.id,
-          title: attendance.performances.musicals.title,
-          duration: attendance.performances.musicals.duration,
+          title: attendance.performances.musicals?.title,
+          duration: attendance.performances.musicals?.duration,
           theatre: attendance.performances.theatres.name,
           startDate: attendance.performances.startTime,
           endDate: attendance.performances.endTime,
@@ -102,7 +102,7 @@ export default async function handler(
     ];
 
     performances.sort((a, b) => {
-      if (a.startDate && b.startDate) {
+      if (a?.startDate && b?.startDate) {
         return (
           new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
         );

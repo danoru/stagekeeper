@@ -21,16 +21,18 @@ function getPages(session: any) {
         link: `/users/${session.user.username}`,
       },
       { id: 2, title: "Musicals", link: "/musicals" },
-      { id: 3, title: "Theatres", link: "/theatres" },
-      { id: 4, title: "Users", link: "/users" },
-      // { id: 5, title: "Upcoming", link: "/upcoming" },
-      { id: 6, title: "Logout", link: "/api/auth/signout" },
+      { id: 3, title: "Plays", link: "/plays" },
+      { id: 4, title: "Theatres", link: "/theatres" },
+      { id: 5, title: "Users", link: "/users" },
+      // { id: 6, title: "Upcoming", link: "/upcoming" },
+      { id: 7, title: "Logout", link: "/api/auth/signout" },
     ];
   } else {
     return [
       { id: 1, title: "Login", link: "/login" },
       { id: 2, title: "Create Account", link: "/register" },
       { id: 3, title: "Musicals", link: "/musicals" },
+      { id: 2, title: "Plays", link: "/plays" },
       { id: 4, title: "Theatres", link: "/theatres" },
       // { id: 5, title: "Upcoming", link: "/upcoming" },
       { id: 6, title: "Users", link: "/users" },

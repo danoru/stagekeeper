@@ -31,7 +31,7 @@ function MusicalList({ musicals, header, style, upcomingPerformances }: Props) {
 
   const hasUpcomingPerformance = (musicalId: number) => {
     return upcomingPerformances?.some(
-      (performance) => performance.musicals.id === musicalId
+      (performance) => performance.musicals?.id === musicalId
     );
   };
 
@@ -67,12 +67,12 @@ function MusicalList({ musicals, header, style, upcomingPerformances }: Props) {
         {musicals?.map((musical: any, i: number) => (
           <MusicalCard
             key={`card-${i}`}
-            name={musical.title}
-            link={`/musicals/${musical.title
+            name={musical?.title}
+            link={`/musicals/${musical?.title
               .replace(/\s+/g, "-")
               .toLowerCase()}`}
-            image={musical.playbill}
-            hasUpcomingPerformance={hasUpcomingPerformance(musical.id)}
+            image={musical?.playbill}
+            hasUpcomingPerformance={hasUpcomingPerformance(musical?.id)}
           />
         ))}
       </Grid>

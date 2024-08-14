@@ -27,12 +27,12 @@ function MusicalCarousel({ items }: Props) {
       {items?.map((item, i) => (
         <CarouselItem
           key={i}
-          title={item.performances.musicals.title}
+          title={item.performances.musicals?.title}
           location={item.performances.theatres.location}
-          duration={item.performances.musicals.duration}
+          duration={item.performances.musicals?.duration}
           playhouse={item.performances.theatres.name}
           date={item.performances.startTime}
-          playbill={item.performances.musicals.playbill || ""}
+          playbill={item.performances.musicals?.playbill}
         />
       ))}
     </Carousel>

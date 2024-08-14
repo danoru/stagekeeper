@@ -52,7 +52,7 @@ function TheatresPage({ theatres: initialTheatres, theatreCount }: Props) {
               link={`/theatres/${theatre.name
                 .replace(/\s+/g, "-")
                 .toLowerCase()}`}
-              image={theatre.image || ""}
+              image={theatre.image}
             />
           ))}
         </Grid>

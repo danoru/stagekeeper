@@ -57,7 +57,10 @@ export async function getStaticProps(context: any) {
   const users = await getUsers();
   const user = users.find((user) => user.username === username);
   let musicals: (attendance & {
-    performances: performances & { musicals: musicals; theatres: theatres };
+    performances: performances & {
+      musicals: musicals | null;
+      theatres: theatres;
+    };
   })[] = [];
 
   if (user) {

@@ -44,7 +44,7 @@ function MusicalByPremiereChart(props: Props) {
   const { stats } = props;
 
   const musicalPremieres = stats.map((data) =>
-    moment(data.performances.musicals.premiere).format("YYYY")
+    moment(data.performances.musicals?.premiere).format("YYYY")
   );
 
   const yearlyOccurence: Record<string, number> = {};

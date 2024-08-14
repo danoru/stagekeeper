@@ -1,12 +1,19 @@
 import DetailInfoCard from "../cards/DetailInfoCard";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
-import { attendance, musicals, performances, theatres } from "@prisma/client";
+import {
+  attendance,
+  musicals,
+  performances,
+  plays,
+  theatres,
+} from "@prisma/client";
 
 interface Props {
   upcomingPerformances: (attendance & {
     performances: performances & {
       musicals: musicals;
+      plays: plays;
       theatres: theatres;
     };
   })[];
@@ -16,9 +23,17 @@ function FriendUpcomingActivity({ upcomingPerformances }: Props) {
   const uniquePerformances = new Set<string>();
   const upcoming = upcomingPerformances
     .filter((a) => {
-      const title = a.performances.musicals.title;
+      const type = a.performances.type;
+      let title: string | undefined;
+      if (type === "MUSICAL") {
+        title = a.performances.musicals?.title;
+      } else if (type === "PLAY") {
+        title = a.performances.plays.title;
+      }
       const date = a.performances.startTime;
-      const uniqueKey = `${title}-${date}`;
+      if (!title || !date) return false;
+
+      const uniqueKey = `${type}-${title}-${date}`;
       if (!uniquePerformances.has(uniqueKey)) {
         uniquePerformances.add(uniqueKey);
         return true;
@@ -43,7 +58,7 @@ function FriendUpcomingActivity({ upcomingPerformances }: Props) {
         }}
       >
         <Typography variant="overline" component="div">
-          UPCOMING MUSICALS FROM FRIENDS
+          UPCOMING SHOWS FROM FRIENDS
         </Typography>
       </Grid>
       <Grid
@@ -62,17 +77,26 @@ function FriendUpcomingActivity({ upcomingPerformances }: Props) {
               performances: performances & {
                 musicals: musicals;
                 theatres: theatres;
+                plays: plays;
               };
             },
 
             i: number
           ) => {
+            const isMusical = entry.performances.type === "MUSICAL";
+            const image = isMusical
+              ? entry.performances.musicals?.playbill
+              : entry.performances.plays.playbill;
+            const show = isMusical
+              ? entry.performances.musicals?.title
+              : entry.performances.plays.title;
             return (
               <DetailInfoCard
                 key={`card-${i}`}
-                musical={entry.performances.musicals.title}
-                image={entry.performances.musicals.playbill || ""}
+                image={image}
+                show={show}
                 theatre={entry.performances.theatres.name}
+                type={entry.performances.type}
                 date={entry.performances.startTime}
                 sx={{
                   height: "100%",

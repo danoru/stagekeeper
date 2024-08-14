@@ -11,7 +11,7 @@ function Highlights({ highlights }: Props) {
   const musicalCount = highlights.length;
 
   const totalDuration = highlights.reduce((accumulator, highlight) => {
-    return accumulator + (highlight.performances.musicals.duration ?? 150);
+    return accumulator + (highlight.performances.musicals?.duration ?? 150);
   }, 0);
 
   function convertTime(num: number) {

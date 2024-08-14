@@ -4,13 +4,14 @@ import MusicalList from "../../../src/components/musical/MusicalList";
 import ProfileLinkBar from "../../../src/components/users/ProfileLinkBar";
 import superjson from "superjson";
 import { getUsers, getUserLikes } from "../../../src/data/users";
-import { likedMusicals, musicals, users } from "@prisma/client";
+import { likedShows, musicals, plays, users } from "@prisma/client";
 
 interface Props {
   user: users & {
-    likedMusicals: likedMusicals &
+    likedShows: likedShows &
       {
         musicals: musicals;
+        plays: plays;
       }[];
   };
 }
@@ -23,8 +24,8 @@ interface Params {
 
 function UserLikes({ user }: Props) {
   const title = `${user.username}'s Likes • Savry`;
-  const musicalHeader = `${user.username}'S LIKED MUSICALS`;
-  const musicals = user.likedMusicals.map((user) => user.musicals);
+  const header = `${user.username}'S LIKED SHOWS`;
+  const shows = user.likedShows.map((user) => user.musicals);
   const style = "overline";
 
   return (
@@ -34,7 +35,7 @@ function UserLikes({ user }: Props) {
       </Head>
       <Grid container>
         <ProfileLinkBar username={user.username} />
-        <MusicalList musicals={musicals} header={musicalHeader} style={style} />
+        <MusicalList musicals={shows} header={header} style={style} />
       </Grid>
     </div>
   );

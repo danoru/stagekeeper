@@ -2,10 +2,10 @@ import React, { useEffect, useState } from "react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import FullCalendar from "@fullcalendar/react";
 import moment from "moment";
-import { musicals, programming } from "@prisma/client";
+import { musicals, plays, programming } from "@prisma/client";
 
 interface Props {
-  viewType: "musical" | "theatre";
+  viewType: "show" | "theatre";
   identifier: string;
 }
 
@@ -65,8 +65,8 @@ function PerformanceCalendar({ viewType, identifier }: Props) {
     async function fetchAndGenerateEvents() {
       try {
         const endpoint =
-          viewType === "musical"
-            ? `/api/musicals/programming?musicalTitle=${identifier}`
+          viewType === "show"
+            ? `/api/shows/programming?musicalTitle=${identifier}`
             : `/api/theatres/programming?theatreName=${identifier}`;
         const response = await fetch(endpoint);
         if (!response.ok) {

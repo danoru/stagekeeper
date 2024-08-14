@@ -30,8 +30,8 @@ function Statistics({ stats }: Props) {
 
   const oldestMusical = hasData
     ? stats.reduce((a, b) => {
-        const premiereA = a.performances.musicals.premiere ?? new Date();
-        const premiereB = b.performances.musicals.premiere ?? new Date();
+        const premiereA = a.performances.musicals?.premiere ?? new Date();
+        const premiereB = b.performances.musicals?.premiere ?? new Date();
         return premiereA < premiereB ? a : b;
       })
     : null;
@@ -39,9 +39,9 @@ function Statistics({ stats }: Props) {
   const newestMusical = hasData
     ? stats.reduce((a, b) => {
         const premiereA =
-          a.performances.musicals.premiere ?? new Date("1866-09-12");
+          a.performances.musicals?.premiere ?? new Date("1066-09-12");
         const premiereB =
-          b.performances.musicals.premiere ?? new Date("1866-09-12");
+          b.performances.musicals?.premiere ?? new Date("1066-09-12");
         return premiereA > premiereB ? a : b;
       })
     : null;
@@ -69,7 +69,7 @@ function Statistics({ stats }: Props) {
 
   // Musical Taste Calculations
   const musicalPremieres = stats
-    .map((data) => moment(data.performances.musicals.premiere).year())
+    .map((data) => moment(data.performances.musicals?.premiere).year())
     .filter((year) => year); // Filter out undefined or null years
 
   const musicalPremiereSum =
@@ -126,11 +126,12 @@ function Statistics({ stats }: Props) {
           <div className={styles.infoboxRight}>
             <h1>
               First Musical of the Year ...{" "}
-              {firstMusical ? firstMusical.performances.musicals.title : "N/A"}!
+              {firstMusical ? firstMusical.performances.musicals?.title : "N/A"}
+              !
             </h1>
             <p>
               You watched{" "}
-              {firstMusical ? firstMusical.performances.musicals.title : "N/A"}{" "}
+              {firstMusical ? firstMusical.performances.musicals?.title : "N/A"}{" "}
               at the{" "}
               {firstMusical ? firstMusical.performances.theatres.name : "N/A"}{" "}
               in{" "}
@@ -149,14 +150,12 @@ function Statistics({ stats }: Props) {
           <div className={styles.playbillRight}>
             <Image
               src={
-                firstMusical
-                  ? firstMusical.performances.musicals.playbill || ""
-                  : ""
+                firstMusical ? firstMusical.performances.musicals?.playbill : ""
               }
               width={210}
               height={280}
               alt={
-                firstMusical ? firstMusical.performances.musicals.title : "N/A"
+                firstMusical ? firstMusical.performances.musicals?.title : "N/A"
               }
               style={{
                 borderRadius: "5%",
@@ -170,14 +169,14 @@ function Statistics({ stats }: Props) {
             <h1>
               Last Musical of the Year ...{" "}
               {latestMusical
-                ? latestMusical.performances.musicals.title
+                ? latestMusical.performances.musicals?.title
                 : "N/A"}
               !
             </h1>
             <p>
               You watched{" "}
               {latestMusical
-                ? latestMusical.performances.musicals.title
+                ? latestMusical.performances.musicals?.title
                 : "N/A"}{" "}
               at the{" "}
               {latestMusical ? latestMusical.performances.theatres.name : "N/A"}{" "}
@@ -198,14 +197,14 @@ function Statistics({ stats }: Props) {
             <Image
               src={
                 latestMusical
-                  ? latestMusical.performances.musicals.playbill || ""
+                  ? latestMusical.performances.musicals?.playbill
                   : ""
               }
               width={210}
               height={280}
               alt={
                 latestMusical
-                  ? latestMusical.performances.musicals.title
+                  ? latestMusical.performances.musicals?.title
                   : "N/A"
               }
               style={{
@@ -222,14 +221,14 @@ function Statistics({ stats }: Props) {
             <h1>
               Oldest Musical of the Year ...{" "}
               {oldestMusical
-                ? oldestMusical.performances.musicals.title
+                ? oldestMusical.performances.musicals?.title
                 : "N/A"}
               !
             </h1>
             <p>
               You watched{" "}
               {oldestMusical
-                ? oldestMusical.performances.musicals.title
+                ? oldestMusical.performances.musicals?.title
                 : "N/A"}{" "}
               at the{" "}
               {oldestMusical ? oldestMusical.performances.theatres.name : "N/A"}{" "}
@@ -250,14 +249,14 @@ function Statistics({ stats }: Props) {
             <Image
               src={
                 oldestMusical
-                  ? oldestMusical.performances.musicals.playbill || ""
+                  ? oldestMusical.performances.musicals?.playbill
                   : ""
               }
               width={210}
               height={280}
               alt={
                 oldestMusical
-                  ? oldestMusical.performances.musicals.title
+                  ? oldestMusical.performances.musicals?.title
                   : "N/A"
               }
               style={{
@@ -272,14 +271,14 @@ function Statistics({ stats }: Props) {
             <h1>
               Newest Musical of the Year ...{" "}
               {newestMusical
-                ? newestMusical.performances.musicals.title
+                ? newestMusical.performances.musicals?.title
                 : "N/A"}
               !
             </h1>
             <p>
               You watched{" "}
               {newestMusical
-                ? newestMusical.performances.musicals.title
+                ? newestMusical.performances.musicals?.title
                 : "N/A"}{" "}
               at the{" "}
               {newestMusical ? newestMusical.performances.theatres.name : "N/A"}{" "}
@@ -300,14 +299,14 @@ function Statistics({ stats }: Props) {
             <Image
               src={
                 newestMusical
-                  ? newestMusical.performances.musicals.playbill || ""
+                  ? newestMusical.performances.musicals?.playbill
                   : ""
               }
               width={210}
               height={280}
               alt={
                 newestMusical
-                  ? newestMusical.performances.musicals.title
+                  ? newestMusical.performances.musicals?.title
                   : "N/A"
               }
               style={{

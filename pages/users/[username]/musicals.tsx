@@ -36,7 +36,7 @@ function UserMusicalsList({ attendance, user }: Props) {
   const uniqueTitles = new Set<string>();
   const filteredAttendance = attendance.filter((a) => {
     const startTime = moment(a.performances.startTime);
-    const title = a.performances.musicals.title;
+    const title = a.performances.musicals?.title;
     if (startTime <= currentDate && !uniqueTitles.has(title)) {
       uniqueTitles.add(title);
       return true;

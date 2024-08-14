@@ -15,29 +15,33 @@ import WatchLater from "@mui/icons-material/WatchLater";
 import WatchLaterOutlined from "@mui/icons-material/WatchLaterOutlined";
 import {
   attendance,
-  likedMusicals,
+  likedShows,
   musicals,
   performances,
+  plays,
   watchlist,
 } from "@prisma/client";
 
 interface Props {
   attendance: (attendance & { performances: performances })[];
-  likedMusicals: likedMusicals[];
-  musical: musicals;
+  likedShows: likedShows[];
+  musical?: musicals;
+  play?: plays;
   sessionUser: any;
   watchlist: watchlist[];
 }
 
 function MusicalActionBar({
   attendance,
-  likedMusicals,
+  likedShows,
   musical,
+  play,
   sessionUser,
   watchlist,
 }: Props) {
   const userId = Number(sessionUser.id);
-  const musicalId = Number(musical.id);
+  const musicalId = musical ? Number(musical.id) : undefined;
+  const playId = play ? Number(play.id) : undefined;
   const [copied, setCopied] = useState(false);
   const [hovered, setHovered] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -46,17 +50,36 @@ function MusicalActionBar({
     "success"
   );
 
+  const performanceType = musical ? "MUSICAL" : play ? "PLAY" : null;
+
   const [hasAttended, setHasAttended] = useState(
     attendance?.some(
-      (a) => a.user === userId && a.performances.musical === musicalId
+      (a) =>
+        a.user === userId &&
+        (performanceType === "MUSICAL"
+          ? a.performances.musical === musicalId
+          : a.performances.play === playId)
     )
   );
 
   const [isWatchlisted, setIsWatchlisted] = useState(
-    watchlist.some((w) => w.user === userId && w.musical === musicalId)
+    watchlist.some(
+      (w) =>
+        w.user === userId &&
+        (performanceType === "MUSICAL"
+          ? w.musical === musicalId
+          : w.play === playId)
+    )
   );
+
   const [isLiked, setIsLiked] = useState(
-    likedMusicals.some((l) => l.user === userId && l.musical === musicalId)
+    likedShows.some(
+      (l) =>
+        l.user === userId &&
+        (performanceType === "MUSICAL"
+          ? l.musical === musicalId
+          : l.play === playId)
+    )
   );
 
   const copyUrlToClipboard = () => {
@@ -80,7 +103,7 @@ function MusicalActionBar({
   async function handleLikes() {
     if (sessionUser) {
       const method = isLiked ? "DELETE" : "POST";
-      const response = await fetch(`/api/musicals/likes`, {
+      const response = await fetch(`/api/shows/likes`, {
         method,
         headers: {
           "Content-Type": "application/json",
@@ -88,7 +111,9 @@ function MusicalActionBar({
         body: JSON.stringify({
           user: userId,
           method,
+          type: performanceType,
           musical: musicalId,
+          play: playId,
         }),
       });
       const data = await response.json();
@@ -97,12 +122,12 @@ function MusicalActionBar({
         setIsLiked(!isLiked);
         setSnackbarMessage(
           isLiked
-            ? "Successfully removed from liked musicals."
-            : "Successfully added to liked musicals."
+            ? "Successfully removed from liked shows."
+            : "Successfully added to liked shows."
         );
         setSnackbarSeverity("success");
       } else {
-        setSnackbarMessage(data.error || "Failed to update liked musicals.");
+        setSnackbarMessage(data.error || "Failed to update liked shows.");
         setSnackbarSeverity("error");
       }
       setSnackbarOpen(true);
@@ -120,7 +145,9 @@ function MusicalActionBar({
         body: JSON.stringify({
           user: userId,
           method,
+          type: performanceType,
           musical: musicalId,
+          play: playId,
         }),
       });
       const data = await response.json();

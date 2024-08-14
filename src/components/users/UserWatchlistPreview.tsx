@@ -41,7 +41,7 @@ function UserWatchlistPreview({ username, watchlist }: WatchlistProps) {
           <TinyCard
             key={`card-${i}`}
             title={item.musicals.title}
-            playbill={item.musicals.playbill || ""}
+            playbill={item.musicals.playbill}
           />
         ))}
       </Grid>

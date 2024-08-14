@@ -5,14 +5,16 @@ export default async function handle(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const { method, user, musical } = req.body;
+  const { method, user, type, musical, play } = req.body;
 
   if (method === "POST") {
     try {
       await prisma.watchlist.create({
         data: {
           user,
-          musical,
+          type,
+          musical: type === "MUSICAL" ? musical : null,
+          play: type === "PLAY" ? play : null,
         },
       });
       res.status(200).json({ message: "Added to watchlist." });
@@ -25,7 +27,9 @@ export default async function handle(
       await prisma.watchlist.deleteMany({
         where: {
           user,
-          musical,
+          type,
+          musical: type === "MUSICAL" ? musical : undefined,
+          play: type === "PLAY" ? play : undefined,
         },
       });
       res.status(200).json({ message: "Removed from watchlist." });

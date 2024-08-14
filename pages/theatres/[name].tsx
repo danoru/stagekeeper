@@ -7,12 +7,18 @@ import Stack from "@mui/material/Stack";
 import superjson from "superjson";
 import Typography from "@mui/material/Typography";
 import { getTheatreByName, getSeasons } from "../../src/data/theatres";
-import { musicals, programming, seasons, theatres } from "@prisma/client";
+import {
+  musicals,
+  plays,
+  programming,
+  seasons,
+  theatres,
+} from "@prisma/client";
 
 interface Props {
   theatre: theatres;
   seasons: (seasons & {
-    programming: (programming & { musical: musicals })[];
+    programming: (programming & { musicals: musicals; plays: plays })[];
   })[];
 }
 
@@ -59,18 +65,32 @@ function TheatrePage({ theatre, seasons }: Props) {
               ).format("ll")}`}
             </Typography>
           </Stack>
-          {season.programming.map((program: any) => (
-            <ProgramCard
-              key={program.musicals.id}
-              musical={program.musicals.title}
-              image={program.musicals.playbill}
-              startDate={program.startDate}
-              endDate={program.endDate}
-              link={`/musicals/${program.musicals.title
-                .replace(/\s+/g, "-")
-                .toLowerCase()}`}
-            />
-          ))}
+          {season.programming.map(
+            (program: programming & { musicals: musicals; plays: plays }) => {
+              console.log(program);
+              const isMusical = program.type === "MUSICAL";
+              const showType = isMusical ? "musicals" : "plays";
+              const image = isMusical
+                ? program.musicals?.playbill
+                : program.plays?.playbill;
+              const show = isMusical
+                ? program.musicals?.title
+                : program.plays?.title;
+              return (
+                <ProgramCard
+                  key={program.id}
+                  image={image}
+                  startDate={program.startDate}
+                  show={show}
+                  type={program.type}
+                  endDate={program.endDate}
+                  link={`/${showType}/${show}
+                    .replace(/\s+/g, "-")
+                    .toLowerCase()}`}
+                />
+              );
+            }
+          )}
         </Grid>
       ))}
       <PerformanceCalendar viewType="theatre" identifier={theatreName} />

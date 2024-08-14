@@ -2,11 +2,12 @@ import React, { useEffect, useState } from "react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import FullCalendar from "@fullcalendar/react";
 import moment from "moment";
-import { musicals, programming } from "@prisma/client";
+import { musicals, PerformanceType, plays, programming } from "@prisma/client";
 
 interface Props {
   viewType: "show" | "theatre";
   identifier: string;
+  showType?: PerformanceType;
 }
 
 interface Event {
@@ -15,7 +16,7 @@ interface Event {
   title: string;
 }
 
-function PerformanceCalendar({ viewType, identifier }: Props) {
+function PerformanceCalendar({ viewType, identifier, showType }: Props) {
   const [events, setEvents] = useState<Event[]>([]);
   const [initialDate, setInitialDate] = useState<Date | null>(null);
   const defaultDayTimes = {
@@ -28,13 +29,15 @@ function PerformanceCalendar({ viewType, identifier }: Props) {
   };
 
   function generateEventDates(
-    programming: programming & { musicals: musicals },
+    programming: programming & { musicals?: musicals; plays?: plays },
     dayTimes: Record<string, string[]>
   ): Event[] {
-    const { startDate, endDate, musicals } = programming;
+    const { startDate, endDate, musicals, plays, type } = programming;
     const startMoment = moment(startDate);
     const endMoment = moment(endDate);
     const events: Event[] = [];
+    const duration = type === "MUSICAL" ? musicals?.duration : plays?.duration;
+    const title = type === "MUSICAL" ? musicals?.title : plays?.title;
 
     for (
       let date = startMoment;
@@ -46,14 +49,11 @@ function PerformanceCalendar({ viewType, identifier }: Props) {
       times.forEach((time) => {
         const [hour, minute] = time.split(":").map(Number);
         const startTime = moment(date).set({ hour, minute });
-        const endTime = moment(startTime).add(
-          musicals.duration || 150,
-          "minutes"
-        );
+        const endTime = moment(startTime).add(duration, "minutes");
         events.push({
           start: startTime.toDate(),
           end: endTime.toDate(),
-          title: musicals.title,
+          title: title || "",
         });
       });
     }
@@ -66,7 +66,7 @@ function PerformanceCalendar({ viewType, identifier }: Props) {
       try {
         const endpoint =
           viewType === "show"
-            ? `/api/shows/programming?title=${identifier}`
+            ? `/api/shows/programming?title=${identifier}&type=${showType}`
             : `/api/theatres/programming?theatreName=${identifier}`;
         const response = await fetch(endpoint);
         if (!response.ok) {
@@ -94,7 +94,7 @@ function PerformanceCalendar({ viewType, identifier }: Props) {
     }
 
     fetchAndGenerateEvents();
-  }, [viewType, identifier]);
+  }, [viewType, identifier, showType]);
 
   if (initialDate) {
     return (

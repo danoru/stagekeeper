@@ -32,6 +32,7 @@ export default async function handler(
       where: { seasons: { theatre: theatre.id, endDate: { gte: new Date() } } },
       include: {
         musicals: true,
+        plays: true,
       },
       orderBy: { startDate: "asc" },
     });

@@ -111,7 +111,11 @@ function PlayPage({ attendance, likedPlays, play, session, watchlist }: Props) {
           />
         </Stack>
       </Stack>
-      <PerformanceCalendar viewType="show" identifier={playTitle} />
+      <PerformanceCalendar
+        viewType="show"
+        identifier={playTitle}
+        showType="PLAY"
+      />
     </div>
   );
 }

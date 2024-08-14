@@ -83,7 +83,7 @@ function TheatrePage({ theatre, seasons }: Props) {
                   show={show}
                   type={program.type}
                   endDate={program.endDate}
-                  link={`/${showType}/${show}
+                  link={`/${showType}/${show
                     .replace(/\s+/g, "-")
                     .toLowerCase()}`}
                 />

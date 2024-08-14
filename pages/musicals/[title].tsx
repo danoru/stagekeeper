@@ -123,7 +123,11 @@ function MusicalPage({
           />
         </Stack>
       </Stack>
-      <PerformanceCalendar viewType="show" identifier={musicalTitle} />
+      <PerformanceCalendar
+        viewType="show"
+        identifier={musicalTitle}
+        showType="MUSICAL"
+      />
     </div>
   );
 }

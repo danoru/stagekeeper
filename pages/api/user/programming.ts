@@ -20,13 +20,26 @@ export default async function handler(
     const watchlist = await prisma.watchlist.findMany({
       where: {
         user: Number(userId),
-        musicals: {
-          programming: {
-            some: {
-              endDate: { gte: new Date() },
+        OR: [
+          {
+            musicals: {
+              programming: {
+                some: {
+                  endDate: { gte: new Date() },
+                },
+              },
             },
           },
-        },
+          {
+            plays: {
+              programming: {
+                some: {
+                  endDate: { gte: new Date() },
+                },
+              },
+            },
+          },
+        ],
       },
       select: {
         musicals: {
@@ -34,6 +47,18 @@ export default async function handler(
             programming: {
               include: {
                 musicals: { select: { title: true, duration: true } },
+                plays: { select: { title: true, duration: true } },
+                seasons: { include: { theatres: { select: { name: true } } } },
+              },
+            },
+          },
+        },
+        plays: {
+          include: {
+            programming: {
+              include: {
+                musicals: { select: { title: true, duration: true } },
+                plays: { select: { title: true, duration: true } },
                 seasons: { include: { theatres: { select: { name: true } } } },
               },
             },
@@ -42,20 +67,34 @@ export default async function handler(
       },
     });
 
-    const watchlistPerformances = watchlist.flatMap((watchItem) =>
-      watchItem.musicals?.programming
-        .filter((program) => program.endDate && program.endDate >= new Date())
-        .map((program) => ({
-          id: program.id,
-          title: program.musicals?.title,
-          duration: program.musicals?.duration,
-          theatre: program.seasons?.theatres.name,
-          startDate: program.startDate,
-          endDate: program.endDate,
-          dayTimes: program.dayTimes,
-          source: "watchlist",
-        }))
-    );
+    const watchlistPerformances = watchlist.flatMap((watchItem) => {
+      return [
+        ...(watchItem.musicals?.programming
+          .filter((program) => program.endDate && program.endDate >= new Date())
+          .map((program) => ({
+            id: program.id,
+            title: program.musicals?.title,
+            duration: program.musicals?.duration,
+            theatre: program.seasons?.theatres.name,
+            startDate: program.startDate,
+            endDate: program.endDate,
+            dayTimes: program.dayTimes,
+            source: "watchlist",
+          })) || []),
+        ...(watchItem.plays?.programming
+          .filter((program) => program.endDate && program.endDate >= new Date())
+          .map((program) => ({
+            id: program.id,
+            title: program.plays?.title,
+            duration: program.plays?.duration,
+            theatre: program.seasons?.theatres.name,
+            startDate: program.startDate,
+            endDate: program.endDate,
+            dayTimes: program.dayTimes,
+            source: "watchlist",
+          })) || []),
+      ];
+    });
 
     const date = new Date();
     const firstDayOfMonth = new Date(date.getFullYear(), date.getMonth(), 1);
@@ -69,6 +108,7 @@ export default async function handler(
         performances: {
           include: {
             musicals: { select: { title: true, duration: true } },
+            plays: { select: { title: true, duration: true } },
             theatres: { select: { name: true } },
           },
         },
@@ -85,8 +125,12 @@ export default async function handler(
         const time = startTime.format("HH:mm");
         return {
           id: attendance.performances.id,
-          title: attendance.performances.musicals?.title,
-          duration: attendance.performances.musicals?.duration,
+          title:
+            attendance.performances.musicals?.title ||
+            attendance.performances.plays?.title,
+          duration:
+            attendance.performances.musicals?.duration ||
+            attendance.performances.plays?.duration,
           theatre: attendance.performances.theatres.name,
           startDate: attendance.performances.startTime,
           endDate: attendance.performances.endTime,

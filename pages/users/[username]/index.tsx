@@ -61,7 +61,10 @@ function ProfilePage({
             <ProfileLinkBar username={user.username} />
           </Grid>
           <Grid item xs={8}>
-            <FriendRecentActivity recentPerformances={recentPerformances} />
+            <FriendRecentActivity
+              recentPerformances={recentPerformances}
+              trim={4}
+            />
             <UserFollowing following={following} />
           </Grid>
           <Grid item xs={4}>

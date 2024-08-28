@@ -24,7 +24,7 @@ function LoggedInHomePage({
         . Here&apos;s what your friends have been watching...
       </Typography>
       <FriendUpcomingActivity upcomingPerformances={upcomingPerformances} />
-      <RecentActivity recentPerformances={recentPerformances} />
+      <RecentActivity recentPerformances={recentPerformances} trim={5} />
     </main>
   );
 }

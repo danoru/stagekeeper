@@ -19,9 +19,10 @@ interface Props {
     };
     users: users;
   })[];
+  trim: number;
 }
 
-function RecentActivity({ recentPerformances }: Props) {
+function RecentActivity({ recentPerformances, trim }: Props) {
   const uniquePerformances = new Set<string>();
   const recent = recentPerformances
     .filter((a) => {
@@ -43,7 +44,7 @@ function RecentActivity({ recentPerformances }: Props) {
       }
       return false;
     })
-    .slice(0, 3);
+    .slice(0, trim);
 
   return (
     <Grid container>

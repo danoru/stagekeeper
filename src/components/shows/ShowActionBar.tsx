@@ -2,8 +2,9 @@ import React, { useState } from "react";
 import Alert from "@mui/material/Alert";
 import Button from "@mui/material/Button";
 import Divider from "@mui/material/Divider";
-import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorder from "@mui/icons-material/FavoriteBorder";
+import FavoriteIcon from "@mui/icons-material/Favorite";
+import Link from "@mui/material/Link";
 import LocalActivity from "@mui/icons-material/LocalActivity";
 import LocalActivityOutlined from "@mui/icons-material/LocalActivityOutlined";
 import Paper from "@mui/material/Paper";
@@ -39,7 +40,7 @@ function ShowActionBar({
   sessionUser,
   watchlist,
 }: Props) {
-  const userId = Number(sessionUser.id);
+  const userId = Number(sessionUser?.id);
   const musicalId = musical ? Number(musical.id) : undefined;
   const playId = play ? Number(play.id) : undefined;
   const [copied, setCopied] = useState(false);
@@ -53,33 +54,39 @@ function ShowActionBar({
   const performanceType = musical ? "MUSICAL" : play ? "PLAY" : null;
 
   const [hasAttended, setHasAttended] = useState(
-    attendance?.some(
-      (a) =>
-        a.user === userId &&
-        (performanceType === "MUSICAL"
-          ? a.performances.musical === musicalId
-          : a.performances.play === playId)
-    )
+    userId
+      ? attendance?.some(
+          (a) =>
+            a.user === userId &&
+            (performanceType === "MUSICAL"
+              ? a.performances.musical === musicalId
+              : a.performances.play === playId)
+        )
+      : false
   );
 
   const [isWatchlisted, setIsWatchlisted] = useState(
-    watchlist.some(
-      (w) =>
-        w.user === userId &&
-        (performanceType === "MUSICAL"
-          ? w.musical === musicalId
-          : w.play === playId)
-    )
+    userId
+      ? watchlist.some(
+          (w) =>
+            w.user === userId &&
+            (performanceType === "MUSICAL"
+              ? w.musical === musicalId
+              : w.play === playId)
+        )
+      : false
   );
 
   const [isLiked, setIsLiked] = useState(
-    likedShows.some(
-      (l) =>
-        l.user === userId &&
-        (performanceType === "MUSICAL"
-          ? l.musical === musicalId
-          : l.play === playId)
-    )
+    userId
+      ? likedShows.some(
+          (l) =>
+            l.user === userId &&
+            (performanceType === "MUSICAL"
+              ? l.musical === musicalId
+              : l.play === playId)
+        )
+      : false
   );
 
   const copyUrlToClipboard = () => {
@@ -238,16 +245,30 @@ function ShowActionBar({
 
   return (
     <Paper sx={{ borderRadius: "1%" }}>
-      <Stack direction="row" justifyContent="center">
-        <AttendanceButton />
-        <LikedButton />
-        <WatchlistButton />
-      </Stack>
-      <Divider />
-      <Stack alignItems="center" padding="1vh 0">
-        <Typography variant="subtitle1">Rating</Typography>
-        <Rating readOnly />
-      </Stack>
+      {sessionUser ? (
+        <>
+          <Stack direction="row" justifyContent="center">
+            <AttendanceButton />
+            <LikedButton />
+            <WatchlistButton />
+          </Stack>
+          <Divider />
+          <Stack alignItems="center" padding="1vh 0">
+            <Typography variant="subtitle1">Rating</Typography>
+            <Rating readOnly />
+          </Stack>
+        </>
+      ) : (
+        <Link href="/login" underline="none">
+          <Typography
+            variant="subtitle1"
+            style={{ padding: "1vh 0", textAlign: "center" }}
+            color="text.primary"
+          >
+            Login to Log, Rate or Review
+          </Typography>
+        </Link>
+      )}
       <Divider />
       <Divider />
       <Button

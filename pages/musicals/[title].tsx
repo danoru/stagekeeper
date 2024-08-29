@@ -137,14 +137,16 @@ export async function getServerSideProps(context: {
   req: any;
 }) {
   const { title } = context.params;
-  const session = await getSession({ req: context.req });
+  const [session, musical] = await Promise.all([
+    getSession({ req: context.req }),
+    getMusicalByTitle(title),
+  ]);
 
   if (session) {
     const userId = Number(session.user.id);
-    const [attendance, likedMusicals, musical, watchlist] = await Promise.all([
+    const [attendance, likedMusicals, watchlist] = await Promise.all([
       getUserAttendance(userId),
       getLikedMusicals(userId),
-      getMusicalByTitle(title),
       getWatchlist(userId),
     ]);
 
@@ -160,7 +162,10 @@ export async function getServerSideProps(context: {
   }
 
   return {
-    props: { session },
+    props: superjson.serialize({
+      musical,
+      session,
+    }).json,
   };
 }
 

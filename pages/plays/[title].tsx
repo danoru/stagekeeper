@@ -125,14 +125,16 @@ export async function getServerSideProps(context: {
   req: any;
 }) {
   const { title } = context.params;
-  const session = await getSession({ req: context.req });
+  const [session, play] = await Promise.all([
+    getSession({ req: context.req }),
+    getPlayByTitle(title),
+  ]);
 
   if (session) {
     const userId = Number(session.user.id);
-    const [attendance, likedPlays, play, watchlist] = await Promise.all([
+    const [attendance, likedPlays, watchlist] = await Promise.all([
       getUserAttendance(userId),
       getLikedPlays(userId),
-      getPlayByTitle(title),
       getWatchlist(userId),
     ]);
 
@@ -148,7 +150,10 @@ export async function getServerSideProps(context: {
   }
 
   return {
-    props: { session },
+    props: superjson.serialize({
+      play,
+      session,
+    }).json,
   };
 }
 

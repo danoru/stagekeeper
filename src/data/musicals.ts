@@ -479,16 +479,18 @@ export async function getUpcomingMusicals() {
 
   const programming = await prisma.programming.findMany({
     where: {
-      NOT: {
-        musical: null,
-      },
-      startDate: {
-        gte: new Date(),
-        lte: upcomingLimit,
-      },
-      endDate: {
-        gte: new Date(),
-      },
+      type: "MUSICAL",
+      OR: [
+        {
+          AND: [
+            { startDate: { lte: new Date() } }, // Started already
+            { endDate: { gte: new Date() } }, // Still ongoing
+          ],
+        },
+        {
+          startDate: { lte: upcomingLimit, gte: new Date() }, // Starting in the next six months
+        },
+      ],
     },
     include: {
       musicals: true,

@@ -294,6 +294,8 @@ export async function getFriendsUpcomingPerformances(usernames: string[]) {
         include: { musicals: true, plays: true, theatres: true },
       },
     },
+    take: 20,
+    skip: 0,
   });
 
   return performances;
@@ -321,6 +323,8 @@ export async function getRecentPerformances(usernames: string[]) {
         startTime: "desc",
       },
     },
+    take: 20,
+    skip: 0,
   });
 
   return performances;

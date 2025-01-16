@@ -28,7 +28,7 @@ interface Params {
 }
 
 function UserMusicalsList({ attendance, user }: Props) {
-  const title = `${user.username}'s Musicals • Savry`;
+  const title = `${user.username}'s Musicals • Stagekeeper`;
   const musicalHeader = `${user.username}'S MUSICALS`;
   const style = "overline";
 

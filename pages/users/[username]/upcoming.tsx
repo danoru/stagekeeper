@@ -26,7 +26,7 @@ interface Params {
 }
 
 function UserUpcomingPage({ user }: Props) {
-  const title = `${user.username}'s Upcoming Musicals • Savry`;
+  const title = `${user.username}'s Upcoming Musicals • Stagekeeper`;
 
   return (
     <div>

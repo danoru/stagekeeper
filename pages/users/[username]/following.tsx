@@ -29,7 +29,7 @@ interface Params {
 }
 
 function UserFollowing({ user, following }: Props) {
-  const title = `${user.username}'s Friends • Savry`;
+  const title = `${user.username}'s Friends • Stagekeeper`;
 
   return (
     <div>

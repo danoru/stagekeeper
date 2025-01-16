@@ -29,7 +29,7 @@ interface Params {
 }
 
 function UserFollowers({ user, followers }: Props) {
-  const title = `${user.username}'s Followers • Savry`;
+  const title = `${user.username}'s Followers • Stagekeeper`;
 
   return (
     <div>

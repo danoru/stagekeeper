@@ -23,7 +23,7 @@ interface Params {
 }
 
 function UserLikes({ user }: Props) {
-  const title = `${user.username}'s Likes • Savry`;
+  const title = `${user.username}'s Likes • Stagekeeper`;
   const header = `${user.username}'S LIKED SHOWS`;
   const shows = user.likedShows.map((user) => user.musicals);
   const style = "overline";

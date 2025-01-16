@@ -27,7 +27,7 @@ interface Params {
 }
 
 function UserWatchlist({ watchlist, user, upcomingPerformances }: Props) {
-  const title = `${user.username}'s Watchlist • Savry`;
+  const title = `${user.username}'s Watchlist • Stagekeeper`;
   const header = `${user.username} WANTS TO WATCH ${watchlist.length} SHOWS`;
   const style = "overline";
   const shows = watchlist.map((show) =>

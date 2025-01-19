@@ -5,7 +5,7 @@ import Head from "next/head";
 import Navbar from "../src/components/layout/Navbar";
 import PropTypes from "prop-types";
 import superjson from "superjson";
-import { CacheProvider } from "@emotion/react";
+import { CacheProvider, EmotionCache } from "@emotion/react";
 import { Decimal } from "decimal.js";
 import { SessionProvider } from "next-auth/react";
 import { ThemeProvider, CssBaseline, createTheme } from "@mui/material";
@@ -16,14 +16,20 @@ const clientSideEmotionCache = createEmotionCache();
 
 const darkTheme = createTheme(darkThemeOptions);
 
-export default function App(props: AppProps) {
-  const { Component, pageProps } = props;
-  const emotionCache = clientSideEmotionCache;
+interface MyAppProps extends AppProps {
+  emotionCache?: EmotionCache;
+}
 
+export default function App({
+  Component,
+  emotionCache = clientSideEmotionCache,
+  pageProps,
+}: MyAppProps) {
   return (
     <SessionProvider>
       <CacheProvider value={emotionCache}>
         <ThemeProvider theme={darkTheme}>
+          <CssBaseline />
           <Head>
             <title>StageKeeper</title>
             <meta charSet="utf-8" />
@@ -32,7 +38,6 @@ export default function App(props: AppProps) {
               content="initial-scale=1.0, width=device-width"
             />
           </Head>
-          <CssBaseline />
           <Navbar />
           <Component {...pageProps} />
         </ThemeProvider>

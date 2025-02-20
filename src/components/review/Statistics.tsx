@@ -82,20 +82,43 @@ function Statistics({ stats }: Props) {
       ? Math.round(musicalPremiereSum / musicalPremieres.length)
       : 0;
 
-  const currentDate = new Date();
-  const currentYear = currentDate.getFullYear();
-
+  const currentYear = new Date().getFullYear();
   const musicalPremiereAverageAge = currentYear - musicalPremiereAverage;
 
-  function musicalTaste() {
-    return musicalPremiereAverageAge <= 20 ? "New School" : "Old School";
+  function musicalTaste(premiereYear: number) {
+    if (premiereYear < 1920) return "Vaudeville";
+    if (premiereYear < 1940) return "The Jazz Age";
+    if (premiereYear < 1960) return "The Golden Age";
+    if (premiereYear < 1970) return "The Post-Golden Age";
+    if (premiereYear < 2000) return "Pre-Contemporary";
+    if (premiereYear < 2020) return "Contemporary";
+    return "Current";
   }
 
-  function musicalTasteDescription() {
-    return musicalPremiereAverageAge <= 20
-      ? "This is new school."
-      : "This is old school.";
+  function musicalTasteDescription(premiereYear: number) {
+    const era = musicalTaste(premiereYear);
+    const descriptions = {
+      Vaudeville:
+        "A time of variety acts and early musical theatre, where spectacle and showmanship took center stage.",
+      "The Jazz Age":
+        "A period of experimentation and innovation, marked by syncopated rhythms and bold storytelling.",
+      "The Golden Age":
+        "Classic Broadway at its finest, where timeless show tunes and heartfelt narratives became the standard.",
+      "The Post-Golden Age":
+        "A transitional period exploring new themes, rock influences, and shifting audience expectations.",
+      "Pre-Contemporary":
+        "A mix of blockbuster hits and boundary-pushing works, setting the stage for modern musical theatre.",
+      Contemporary:
+        "Musicals that embrace diverse styles, fresh narratives, and innovative staging techniques.",
+      Current:
+        "The evolving landscape of musical theatre today, where digital influences and genre-blending are redefining the art form.",
+    };
+
+    return descriptions[era] || "An undefined era of musical theatre.";
   }
+
+  const musicalEra = musicalTaste(musicalPremiereAverage);
+  const musicalEraDescription = musicalTasteDescription(musicalPremiereAverage);
 
   // Musical Visits by Month
   const musicalMonths = stats
@@ -318,10 +341,10 @@ function Statistics({ stats }: Props) {
         </div>
         <div className={styles.centeredContent}>
           <MusicalByPremiereChart stats={stats} />
-          <h1>Your musical taste is primarily ... {musicalTaste()}!</h1>
+          <h1>Your musical taste is primarily ... {musicalEra}!</h1>
           <p>
-            {musicalTasteDescription()} The average date of the musicals you
-            have seen is {musicalPremiereAverage}. That means your average
+            {musicalEraDescription} The average premiere date of the musicals
+            you have seen is {musicalPremiereAverage}. That means your average
             musical age is {musicalPremiereAverageAge}!
           </p>
         </div>

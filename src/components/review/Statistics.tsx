@@ -10,9 +10,11 @@ interface Props {
   stats: (attendance & {
     performances: performances & { musicals: musicals; theatres: theatres };
   })[];
+  view: "allTime" | "year";
+  year?: string;
 }
 
-function Statistics({ stats }: Props) {
+function Statistics({ stats, view, year }: Props) {
   // Musical Year Comparisons
   const hasData = stats.length > 0;
 
@@ -142,16 +144,19 @@ function Statistics({ stats }: Props) {
         )
       : null;
 
+  // View helpers
+  const getYearText = () => (view === "allTime" ? "of All Time" : `of ${year}`);
+  const getAdverbText = () => (view === "allTime" ? "" : "this year");
+
   return (
     <div>
       <section>
         <div className={styles.container}>
           <div className={styles.infoboxRight}>
-            <h1>
-              First Musical of the Year ...{" "}
+            <h1>Your First Musical {getYearText()}</h1>
+            <h3>
               {firstMusical ? firstMusical.performances.musicals?.title : "N/A"}
-              !
-            </h1>
+            </h3>
             <p>
               You watched{" "}
               {firstMusical ? firstMusical.performances.musicals?.title : "N/A"}{" "}
@@ -189,13 +194,12 @@ function Statistics({ stats }: Props) {
         </div>
         <div className={styles.container}>
           <div className={styles.infoboxLeft}>
-            <h1>
-              Last Musical of the Year ...{" "}
+            <h1>Your Most Recent Musical {getYearText()}</h1>
+            <h3>
               {latestMusical
                 ? latestMusical.performances.musicals?.title
                 : "N/A"}
-              !
-            </h1>
+            </h3>
             <p>
               You watched{" "}
               {latestMusical
@@ -241,13 +245,14 @@ function Statistics({ stats }: Props) {
       <section>
         <div className={styles.container}>
           <div className={styles.infoboxRight}>
-            <h1>
-              Oldest Musical of the Year ...{" "}
+            <h1>Oldest Musical {getYearText()}</h1>
+            <h3>
+              {" "}
               {oldestMusical
                 ? oldestMusical.performances.musicals?.title
                 : "N/A"}
               !
-            </h1>
+            </h3>
             <p>
               You watched{" "}
               {oldestMusical
@@ -291,13 +296,13 @@ function Statistics({ stats }: Props) {
         </div>
         <div className={styles.container}>
           <div className={styles.infoboxLeft}>
-            <h1>
-              Newest Musical of the Year ...{" "}
+            <h1>Newest Musical {getYearText()}</h1>
+            <h3>
               {newestMusical
                 ? newestMusical.performances.musicals?.title
                 : "N/A"}
               !
-            </h1>
+            </h3>
             <p>
               You watched{" "}
               {newestMusical
@@ -349,22 +354,24 @@ function Statistics({ stats }: Props) {
           </p>
         </div>
       </section>
+
       <section>
         <div className={styles.centeredContent}>
           <LocationsChart stats={stats} />
           <h1>You visited {mostVisitedLocation || "N/A"} the most!</h1>
           <p>
-            You attended {numberOfLocations} different cities during the year,
-            but visited {mostVisitedLocation || "N/A"} the most.{" "}
+            You attended {numberOfLocations} different cities
+            {view === "year" && year ? ` in ${year}` : ""}, but visited{" "}
+            {mostVisitedLocation || "N/A"} the most.
           </p>
         </div>
         <div className={styles.centeredContent}>
           <MonthlyAttendanceChart stats={stats} />
           <h1>
             You visited the theatre the most during ...{" "}
-            {mostVisitsPerMonth || "N/A"}!
+            {mostVisitsPerMonth || "N/A"} {getAdverbText()}!
           </h1>
-          <p>Stuff about when you went throughout the year.</p>
+          <p>Stuff about when you went {getAdverbText()}.</p>
         </div>
       </section>
     </div>

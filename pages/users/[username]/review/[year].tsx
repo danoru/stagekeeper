@@ -31,7 +31,7 @@ function ReviewPage({ musicals, username, year }: Props) {
         <ReviewHeader username={username} year={year} />
         <Carousel items={musicals} />
         <Highlights highlights={musicals} />
-        <Statistics stats={musicals} />
+        <Statistics stats={musicals} view="year" year={year} />
       </div>
     </Fragment>
   );

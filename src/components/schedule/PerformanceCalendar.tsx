@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from "react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import FullCalendar from "@fullcalendar/react";
-import moment from "moment";
 import { musicals, PerformanceType, plays, programming } from "@prisma/client";
+import moment from "moment";
+import React, { useEffect, useState } from "react";
 
 interface Props {
   viewType: "show" | "theatre";
@@ -39,11 +39,7 @@ function PerformanceCalendar({ viewType, identifier, showType }: Props) {
     const duration = type === "MUSICAL" ? musicals?.duration : plays?.duration;
     const title = type === "MUSICAL" ? musicals?.title : plays?.title;
 
-    for (
-      let date = startMoment;
-      date.isSameOrBefore(endMoment);
-      date.add(1, "day")
-    ) {
+    for (let date = startMoment; date.isSameOrBefore(endMoment); date.add(1, "day")) {
       const dayName = date.format("dddd");
       const times = dayTimes[dayName] || [];
       times.forEach((time) => {
@@ -81,9 +77,7 @@ function PerformanceCalendar({ viewType, identifier, showType }: Props) {
         );
 
         if (allEvents.length > 0) {
-          const earliestDate = new Date(
-            Math.min(...allEvents.map((e) => e.start.getTime()))
-          );
+          const earliestDate = new Date(Math.min(...allEvents.map((e) => e.start.getTime())));
           setInitialDate(earliestDate);
         }
 

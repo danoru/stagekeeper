@@ -1,12 +1,12 @@
 import Alert from "@mui/material/Alert";
 import Button from "@mui/material/Button";
-import Head from "next/head";
-import Stack from "@mui/material/Stack";
 import Snackbar from "@mui/material/Snackbar";
+import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
+import Head from "next/head";
+import { useRouter } from "next/router";
 import { getSession } from "next-auth/react";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/router";
 
 function SettingsPage({ session }: any) {
   const username = session?.user?.username;
@@ -77,92 +77,84 @@ function SettingsPage({ session }: any) {
       <Stack direction="row" sx={{ justifyContent: "center" }}>
         <form onSubmit={handleSubmit}>
           <TextField
-            id="username"
-            label="Username"
             disabled
             fullWidth
+            id="username"
+            InputLabelProps={{ shrink: true }}
+            label="Username"
+            sx={{ margin: "10px 0" }}
             value={username}
             variant="outlined"
-            InputLabelProps={{ shrink: true }}
-            sx={{ margin: "10px 0" }}
           />
           <Stack direction="row">
             <TextField
               id="firstName"
-              label="Given Name"
-              variant="outlined"
-              value={userData.firstName}
-              onChange={handleChange}
               InputLabelProps={{ shrink: true }}
+              label="Given Name"
               sx={{ marginBottom: "10px" }}
+              value={userData.firstName}
+              variant="outlined"
+              onChange={handleChange}
             />
             <TextField
               id="lastName"
+              InputLabelProps={{ shrink: true }}
               label="Family Name"
+              sx={{ marginBottom: "10px" }}
               value={userData.lastName}
               variant="outlined"
               onChange={handleChange}
-              InputLabelProps={{ shrink: true }}
-              sx={{ marginBottom: "10px" }}
             />
           </Stack>
           <TextField
-            id="email"
-            label="Email Address"
             fullWidth
+            id="email"
+            InputLabelProps={{ shrink: true }}
+            label="Email Address"
+            sx={{ marginBottom: "10px" }}
             value={userData.email}
             variant="outlined"
             onChange={handleChange}
-            InputLabelProps={{ shrink: true }}
-            sx={{ marginBottom: "10px" }}
           />
           <Stack direction="row">
             <TextField
               id="location"
+              InputLabelProps={{ shrink: true }}
               label="Location"
+              sx={{ marginBottom: "10px" }}
               value={userData.location}
               variant="outlined"
               onChange={handleChange}
-              InputLabelProps={{ shrink: true }}
-              sx={{ marginBottom: "10px" }}
             />
             <TextField
               id="website"
+              InputLabelProps={{ shrink: true }}
               label="Website"
+              sx={{ marginBottom: "10px" }}
               value={userData.website}
               variant="outlined"
               onChange={handleChange}
-              InputLabelProps={{ shrink: true }}
-              sx={{ marginBottom: "10px" }}
             />
           </Stack>
           <TextField
-            id="bio"
-            label="Bio"
             fullWidth
             multiline
+            id="bio"
+            InputLabelProps={{ shrink: true }}
+            label="Bio"
             rows={4}
+            sx={{ marginBottom: "10px" }}
             value={userData.bio}
             variant="outlined"
             onChange={handleChange}
-            InputLabelProps={{ shrink: true }}
-            sx={{ marginBottom: "10px" }}
           />
-          <Button type="submit" variant="contained" disabled={saving}>
+          <Button disabled={saving} type="submit" variant="contained">
             {saving ? "Saving..." : "Save Changes"}
           </Button>
         </form>
       </Stack>
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={6000}
-        onClose={() => setSnackbarOpen(false)}
-      >
-        <Alert
-          onClose={() => setSnackbarOpen(false)}
-          severity="success"
-          sx={{ width: "100%" }}
-        >
+      <Snackbar autoHideDuration={6000} open={snackbarOpen} onClose={() => setSnackbarOpen(false)}>
+        <Alert severity="success" sx={{ width: "100%" }} onClose={() => setSnackbarOpen(false)}>
           {snackbarMessage}
         </Alert>
       </Snackbar>

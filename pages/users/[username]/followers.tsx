@@ -1,21 +1,18 @@
+import FavoriteIcon from "@mui/icons-material/Favorite";
+import TheaterComedyIcon from "@mui/icons-material/TheaterComedy";
+import WatchLaterIcon from "@mui/icons-material/WatchLater";
 import Button from "@mui/material/Button";
 import ButtonGroup from "@mui/material/ButtonGroup";
 import Divider from "@mui/material/Divider";
-import FavoriteIcon from "@mui/icons-material/Favorite";
 import Grid from "@mui/material/Grid";
-import Head from "next/head";
 import Link from "@mui/material/Link";
-import ProfileLinkBar from "../../../src/components/users/ProfileLinkBar";
 import Stack from "@mui/material/Stack";
-import superjson from "superjson";
-import {
-  findUserByUsername,
-  getUsers,
-  getFollowers,
-} from "../../../src/data/users";
-import TheaterComedyIcon from "@mui/icons-material/TheaterComedy";
-import WatchLaterIcon from "@mui/icons-material/WatchLater";
 import { users, following } from "@prisma/client";
+import Head from "next/head";
+import superjson from "superjson";
+
+import ProfileLinkBar from "../../../src/components/users/ProfileLinkBar";
+import { findUserByUsername, getUsers, getFollowers } from "../../../src/data/users";
 
 interface Props {
   user: users;
@@ -37,24 +34,17 @@ function UserFollowers({ user, followers }: Props) {
         <title>{title}</title>
       </Head>
       <Grid container>
-        <Grid item xs={12}>
+        <Grid size={{ xs: 12 }}>
           <ProfileLinkBar username={user.username} />
         </Grid>
-        <Grid item xs={12}>
-          <ButtonGroup
-            variant="outlined"
-            aria-label="Button Group"
-            sx={{ flexWrap: "wrap" }}
-          >
+        <Grid size={{ xs: 12 }}>
+          <ButtonGroup aria-label="Button Group" sx={{ flexWrap: "wrap" }} variant="outlined">
             <Button href="following">Following</Button>
             <Button href="followers">Followers</Button>
           </ButtonGroup>
         </Grid>
-        <Grid item xs={12}>
-          <Stack
-            spacing={1}
-            divider={<Divider orientation="horizontal" flexItem />}
-          >
+        <Grid size={{ xs: 12 }}>
+          <Stack divider={<Divider flexItem orientation="horizontal" />} spacing={1}>
             {followers.map((follower) => (
               <Stack
                 key={follower.users.username}
@@ -62,10 +52,7 @@ function UserFollowers({ user, followers }: Props) {
                 sx={{ alignItems: "center", paddingLeft: "10px" }}
               >
                 <div style={{ width: "25%" }}>
-                  <Link
-                    href={`/users/${follower.users.username}`}
-                    underline="none"
-                  >
+                  <Link href={`/users/${follower.users.username}`} underline="none">
                     {follower.users.username}
                   </Link>
                 </div>

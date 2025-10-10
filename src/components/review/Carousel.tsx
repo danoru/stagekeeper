@@ -1,10 +1,10 @@
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
-import Carousel from "react-material-ui-carousel";
-import moment from "moment";
 import Typography from "@mui/material/Typography";
 import { attendance, musicals, performances, theatres } from "@prisma/client";
+import moment from "moment";
+import Carousel from "react-material-ui-carousel";
 
 interface Props {
   items: (attendance & {
@@ -27,12 +27,12 @@ function MusicalCarousel({ items }: Props) {
       {items?.map((item, i) => (
         <CarouselItem
           key={i}
-          title={item.performances.musicals?.title}
-          location={item.performances.theatres.location}
-          duration={item.performances.musicals?.duration}
-          playhouse={item.performances.theatres.name}
           date={item.performances.startTime}
+          duration={item.performances.musicals?.duration}
+          location={item.performances.theatres.location}
           playbill={item.performances.musicals?.playbill}
+          playhouse={item.performances.theatres.name}
+          title={item.performances.musicals?.title}
         />
       ))}
     </Carousel>
@@ -45,22 +45,17 @@ function CarouselItem(props: CardProps) {
   return (
     <Card variant="outlined">
       <CardContent>
-        <CardMedia
-          component="img"
-          image={props.playbill}
-          title={props.title}
-          height="194"
-        />
-        <Typography gutterBottom variant="h6" component="h6" color="secondary">
+        <CardMedia component="img" height="194" image={props.playbill} title={props.title} />
+        <Typography gutterBottom color="secondary" component="h6" variant="h6">
           {props.title}
         </Typography>
-        <Typography variant="h5" color="inherit" component="h3">
+        <Typography color="inherit" component="h3" variant="h5">
           {props.playhouse}
         </Typography>
-        <Typography variant="h5" color="inherit" component="h3">
+        <Typography color="inherit" component="h3" variant="h5">
           {props.location}
         </Typography>
-        <Typography variant="h5" color="inherit" component="h3">
+        <Typography color="inherit" component="h3" variant="h5">
           {humanReadableDate}
         </Typography>
       </CardContent>

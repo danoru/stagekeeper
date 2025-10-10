@@ -1,7 +1,4 @@
-import React from "react";
-import moment from "moment";
 import { attendance, musicals, performances, theatres } from "@prisma/client";
-import { Bar } from "react-chartjs-2";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -11,6 +8,9 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
+import moment from "moment";
+import React from "react";
+import { Bar } from "react-chartjs-2";
 
 interface Props {
   stats: (attendance & {
@@ -18,14 +18,7 @@ interface Props {
   })[];
 }
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend
-);
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 export const options = {
   responsive: true,

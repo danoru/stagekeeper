@@ -1,11 +1,9 @@
-import prisma from "../../../src/data/db";
-import { NextApiRequest, NextApiResponse } from "next";
 import moment from "moment-timezone";
+import { NextApiRequest, NextApiResponse } from "next";
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
+import prisma from "../../../src/data/db";
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { userId } = req.query;
 
   if (req.method !== "GET") {
@@ -115,41 +113,28 @@ export default async function handler(
       },
     });
 
-    const attendancePerformancesNormalized = attendancePerformances.map(
-      (attendance) => {
-        const startTime = moment.tz(
-          attendance.performances.startTime,
-          "America/Los_Angeles"
-        );
-        const dayName = startTime.format("dddd");
-        const time = startTime.format("HH:mm");
-        return {
-          id: attendance.performances.id,
-          title:
-            attendance.performances.musicals?.title ||
-            attendance.performances.plays?.title,
-          duration:
-            attendance.performances.musicals?.duration ||
-            attendance.performances.plays?.duration,
-          theatre: attendance.performances.theatres.name,
-          startDate: attendance.performances.startTime,
-          endDate: attendance.performances.endTime,
-          dayTimes: { [dayName]: [time] },
-          source: "programming",
-        };
-      }
-    );
+    const attendancePerformancesNormalized = attendancePerformances.map((attendance) => {
+      const startTime = moment.tz(attendance.performances.startTime, "America/Los_Angeles");
+      const dayName = startTime.format("dddd");
+      const time = startTime.format("HH:mm");
+      return {
+        id: attendance.performances.id,
+        title: attendance.performances.musicals?.title || attendance.performances.plays?.title,
+        duration:
+          attendance.performances.musicals?.duration || attendance.performances.plays?.duration,
+        theatre: attendance.performances.theatres.name,
+        startDate: attendance.performances.startTime,
+        endDate: attendance.performances.endTime,
+        dayTimes: { [dayName]: [time] },
+        source: "programming",
+      };
+    });
 
-    const performances = [
-      ...watchlistPerformances,
-      ...attendancePerformancesNormalized,
-    ];
+    const performances = [...watchlistPerformances, ...attendancePerformancesNormalized];
 
     performances.sort((a, b) => {
       if (a?.startDate && b?.startDate) {
-        return (
-          new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
-        );
+        return new Date(a.startDate).getTime() - new Date(b.startDate).getTime();
       }
       return 0;
     });

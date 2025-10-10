@@ -1,7 +1,8 @@
 import Grid from "@mui/material/Grid";
-import ShowCard from "../cards/ShowCard";
 import Typography from "@mui/material/Typography";
 import { musicals, plays, programming } from "@prisma/client";
+
+import ShowCard from "../cards/ShowCard";
 
 interface Props {
   shows: (musicals | plays)[];
@@ -32,15 +33,13 @@ function ShowList({ shows, header, style, upcomingPerformances }: Props) {
 
   const hasUpcomingPerformance = (showId: number) => {
     return upcomingPerformances?.some(
-      (performance) =>
-        performance.musicals?.id === showId || performance.plays?.id === showId
+      (performance) => performance.musicals?.id === showId || performance.plays?.id === showId
     );
   };
 
   return (
     <Grid container>
       <Grid
-        item
         style={{
           borderBottomWidth: "1px",
           borderBottomStyle: "solid",
@@ -52,15 +51,15 @@ function ShowList({ shows, header, style, upcomingPerformances }: Props) {
           width: "75%",
         }}
       >
-        <Typography variant={typographyStyle} component="div">
+        <Typography component="div" variant={typographyStyle}>
           {styledHeader}
         </Typography>
       </Grid>
       <Grid
         container
         item
-        rowSpacing={1}
         columnSpacing={2}
+        rowSpacing={1}
         sx={{
           margin: "10px auto",
           maxWidth: "75%",
@@ -71,12 +70,10 @@ function ShowList({ shows, header, style, upcomingPerformances }: Props) {
           return (
             <ShowCard
               key={`card-${i}`}
-              name={show?.title}
-              link={`/${showType}/${show?.title
-                .replace(/\s+/g, "-")
-                .toLowerCase()}`}
-              image={show?.playbill}
               hasUpcomingPerformance={hasUpcomingPerformance(show?.id)}
+              image={show?.playbill}
+              link={`/${showType}/${show?.title.replace(/\s+/g, "-").toLowerCase()}`}
+              name={show?.title}
             />
           );
         })}

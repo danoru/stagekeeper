@@ -1,20 +1,14 @@
-import FriendRecentActivity from "../../../src/components/performances/RecentActivity";
 import Grid from "@mui/material/Grid";
+import { attendance, following, musicals, performances, users, watchlist } from "@prisma/client";
+import { getSession } from "next-auth/react";
+import superjson from "superjson";
+
+import FriendRecentActivity from "../../../src/components/performances/RecentActivity";
 import ProfileLinkBar from "../../../src/components/users/ProfileLinkBar";
 import ProfileStatBar from "../../../src/components/users/ProfileStatBar";
-import superjson from "superjson";
 import UserFollowing from "../../../src/components/users/UserFollowing";
 import UserWatchlistPreview from "../../../src/components/users/UserWatchlistPreview";
-import {
-  attendance,
-  following,
-  musicals,
-  performances,
-  users,
-  watchlist,
-} from "@prisma/client";
 import { getRecentPerformances } from "../../../src/data/performances";
-import { getSession } from "next-auth/react";
 import { getUserProfile, getFollowers } from "../../../src/data/users";
 
 interface Props {
@@ -49,29 +43,23 @@ function ProfilePage({
       <h1>Hello, {user.username}!</h1>
       <div>
         <Grid container spacing={2}>
-          <Grid item xs={12}>
+          <Grid size={{ xs: 12 }}>
             <ProfileStatBar
               attendance={attendance}
               avatarSize={avatarSize}
-              following={following}
               followers={followers}
+              following={following}
               sessionUser={sessionUser}
               user={user}
             />
             <ProfileLinkBar username={user.username} />
           </Grid>
-          <Grid item xs={8}>
-            <FriendRecentActivity
-              recentPerformances={recentPerformances}
-              trim={4}
-            />
+          <Grid size={{ xs: 8 }}>
+            <FriendRecentActivity recentPerformances={recentPerformances} trim={4} />
             <UserFollowing following={following} />
           </Grid>
-          <Grid item xs={4}>
-            <UserWatchlistPreview
-              username={user.username}
-              watchlist={watchlist}
-            />
+          <Grid size={{ xs: 4 }}>
+            <UserWatchlistPreview username={user.username} watchlist={watchlist} />
           </Grid>
         </Grid>
       </div>
@@ -79,10 +67,7 @@ function ProfilePage({
   );
 }
 
-export async function getServerSideProps(context: {
-  params: Params;
-  req: any;
-}) {
+export async function getServerSideProps(context: { params: Params; req: any }) {
   const { username } = context.params;
   const session = await getSession({ req: context.req });
   const sessionUser = session?.user || null;

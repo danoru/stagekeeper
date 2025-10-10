@@ -966,8 +966,7 @@ export function getFeaturedMusicals(year: string, username: string) {
     }
     if (username === "TommyExpress") {
       return MUSICAL_LIST.filter(
-        (musical) =>
-          musical.userAttended.TommyExpress && musical.year === "2022"
+        (musical) => musical.userAttended.TommyExpress && musical.year === "2022"
       );
     }
     if (username === "Benito") {
@@ -985,9 +984,7 @@ export function getFeaturedMusicals(year: string, username: string) {
         (musical) => musical.userAttended.Kelsey && musical.year === "2022"
       );
     } else if (username === "musicalsandmayhem") {
-      return MUSICAL_LIST.filter(
-        (musical) => musical.groupAttended && musical.year === "2022"
-      );
+      return MUSICAL_LIST.filter((musical) => musical.groupAttended && musical.year === "2022");
     }
   } else if (year === "2023") {
     if (username === "all") {
@@ -1005,8 +1002,7 @@ export function getFeaturedMusicals(year: string, username: string) {
     }
     if (username === "TommyExpress") {
       return MUSICAL_LIST.filter(
-        (musical) =>
-          musical.userAttended.TommyExpress && musical.year === "2023"
+        (musical) => musical.userAttended.TommyExpress && musical.year === "2023"
       );
     }
     if (username === "Benito") {
@@ -1024,9 +1020,7 @@ export function getFeaturedMusicals(year: string, username: string) {
         (musical) => musical.userAttended.Kelsey && musical.year === "2023"
       );
     } else if (username === "musicalsandmayhem") {
-      return MUSICAL_LIST.filter(
-        (musical) => musical.groupAttended && musical.year === "2023"
-      );
+      return MUSICAL_LIST.filter((musical) => musical.groupAttended && musical.year === "2023");
     }
   } else if (year === "2024") {
     if (username === "all") {
@@ -1044,8 +1038,7 @@ export function getFeaturedMusicals(year: string, username: string) {
     }
     if (username === "TommyExpress") {
       return MUSICAL_LIST.filter(
-        (musical) =>
-          musical.userAttended.TommyExpress && musical.year === "2024"
+        (musical) => musical.userAttended.TommyExpress && musical.year === "2024"
       );
     }
     if (username === "Benito") {
@@ -1063,9 +1056,7 @@ export function getFeaturedMusicals(year: string, username: string) {
         (musical) => musical.userAttended.Kelsey && musical.year === "2024"
       );
     } else if (username === "musicalsandmayhem") {
-      return MUSICAL_LIST.filter(
-        (musical) => musical.groupAttended && musical.year === "2024"
-      );
+      return MUSICAL_LIST.filter((musical) => musical.groupAttended && musical.year === "2024");
     }
   } else {
     if (username === "all") {
@@ -1078,9 +1069,7 @@ export function getFeaturedMusicals(year: string, username: string) {
       return MUSICAL_LIST.filter((musical) => musical.userAttended.annabanza);
     }
     if (username === "TommyExpress") {
-      return MUSICAL_LIST.filter(
-        (musical) => musical.userAttended.TommyExpress
-      );
+      return MUSICAL_LIST.filter((musical) => musical.userAttended.TommyExpress);
     }
     if (username === "Benito") {
       return MUSICAL_LIST.filter((musical) => musical.userAttended.Benito);

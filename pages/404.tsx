@@ -1,5 +1,6 @@
-import { Fragment } from "react";
 import Head from "next/head";
+import Link from "next/link";
+import { Fragment } from "react";
 
 function ErrorPage() {
   return (
@@ -9,10 +10,10 @@ function ErrorPage() {
       </Head>
       <blockquote cite="https://genius.com/Jonathan-groff-lost-in-the-woods-lyrics">
         Now I turn around and find I am lost in the woods, <br />
-        North is south, right is left, when you're gone.
+        North is south, right is left, when you&apos;re gone.
       </blockquote>
       <p>
-        Are you lost? Let's get you back on <a href="/">track</a>.
+        Are you lost? Let&apos;s get you back on <Link href="/">track</Link>.
       </p>
       <p>404 | This page could not be found.</p>
     </Fragment>

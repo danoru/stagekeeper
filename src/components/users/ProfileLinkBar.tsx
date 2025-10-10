@@ -8,17 +8,8 @@ interface Props {
 
 function ProfileLinkBar({ username }: Props) {
   return (
-    <Grid
-      container
-      item
-      xs={12}
-      style={{ justifyContent: "center", margin: "10px 0" }}
-    >
-      <ButtonGroup
-        variant="outlined"
-        aria-label="Button Group"
-        sx={{ flexWrap: "wrap" }}
-      >
+    <Grid container size={{ xs: 12 }} style={{ justifyContent: "center", margin: "10px 0" }}>
+      <ButtonGroup aria-label="Button Group" sx={{ flexWrap: "wrap" }} variant="outlined">
         <Button href={`/users/${username}`}>Profile</Button>
         {/* <Button href={`/users/${username}/activity`}>Activity</Button> */}
         <Button href={`/users/${username}/musicals`}>Musicals</Button>

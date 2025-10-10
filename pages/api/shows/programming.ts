@@ -1,22 +1,15 @@
-import prisma from "../../../src/data/db";
 import { NextApiRequest, NextApiResponse } from "next";
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
+import prisma from "../../../src/data/db";
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { title, type } = req.query;
 
   if (req.method !== "GET") {
     return res.status(405).json({ error: "Method not allowed." });
   }
 
-  if (
-    !title ||
-    typeof title !== "string" ||
-    !type ||
-    typeof type !== "string"
-  ) {
+  if (!title || typeof title !== "string" || !type || typeof type !== "string") {
     return res.status(400).json({ error: "Title and type are required." });
   }
 
@@ -60,9 +53,7 @@ export default async function handler(
         orderBy: { startDate: "asc" },
       });
     } else {
-      return res
-        .status(400)
-        .json({ error: "Invalid type. Must be 'MUSICAL' or 'PLAY'." });
+      return res.status(400).json({ error: "Invalid type. Must be 'MUSICAL' or 'PLAY'." });
     }
 
     res.status(200).json(performances);

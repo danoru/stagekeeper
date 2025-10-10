@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
-import { THEATRES_LIST } from "../src/data/theatres";
+
 import { MUSICALS_LIST } from "../src/data/musicals";
+import { THEATRES_LIST } from "../src/data/theatres";
 
 const prisma = new PrismaClient();
 

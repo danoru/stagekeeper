@@ -1,14 +1,12 @@
+import { GetServerSidePropsContext } from "next";
 import Head from "next/head";
+import { getSession } from "next-auth/react";
+import superjson from "superjson";
+
 import LoggedInHomePage from "../src/components/home/LoggedInHomePage";
 import LoggedOutHomePage from "../src/components/home/LoggedOutHomePage";
-import superjson from "superjson";
+import { getRecentPerformances, getFriendsUpcomingPerformances } from "../src/data/performances";
 import { getFollowing } from "../src/data/users";
-import {
-  getRecentPerformances,
-  getFriendsUpcomingPerformances,
-} from "../src/data/performances";
-import { GetServerSidePropsContext } from "next";
-import { getSession } from "next-auth/react";
 import styles from "../src/styles/home.module.css";
 
 interface Props {
@@ -24,14 +22,14 @@ function Home({ recentPerformances, session, upcomingPerformances }: Props) {
     <div className={styles.container}>
       <Head>
         <title>StageKeeper</title>
-        <meta name="description" content="Created with NextJS" />
-        <link rel="icon" href="/favicon.ico" />
+        <meta content="Created with NextJS" name="description" />
+        <link href="/favicon.ico" rel="icon" />
       </Head>
       {session ? (
         <LoggedInHomePage
+          recentPerformances={recentPerformances}
           sessionUser={sessionUser}
           upcomingPerformances={upcomingPerformances}
-          recentPerformances={recentPerformances}
         />
       ) : (
         <LoggedOutHomePage />

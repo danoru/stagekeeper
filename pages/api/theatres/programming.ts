@@ -1,10 +1,8 @@
-import prisma from "../../../src/data/db";
 import { NextApiRequest, NextApiResponse } from "next";
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
+import prisma from "../../../src/data/db";
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { theatreName } = req.query;
 
   if (req.method !== "GET") {

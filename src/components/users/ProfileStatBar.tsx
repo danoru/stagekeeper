@@ -1,16 +1,18 @@
-import React, { useState } from "react";
+import LinkIcon from "@mui/icons-material/Link";
+import Alert from "@mui/material/Alert";
 import Button from "@mui/material/Button";
 import Grid from "@mui/material/Grid";
-import LinkIcon from "@mui/icons-material/Link";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
-import Typography from "@mui/material/Typography";
 import Snackbar from "@mui/material/Snackbar";
-import Alert from "@mui/material/Alert";
-import UserAvatar from "./UserAvatar";
+import Typography from "@mui/material/Typography";
 import { attendance, following, performances, users } from "@prisma/client";
-import { followUser, unfollowUser } from "../../data/users";
 import moment from "moment";
+import React, { useState } from "react";
+
+import { followUser, unfollowUser } from "../../data/users";
+
+import UserAvatar from "./UserAvatar";
 
 interface Props {
   attendance: (attendance & {
@@ -40,9 +42,7 @@ function ProfileStatBar({
   const [hovered, setHovered] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">(
-    "success"
-  );
+  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">("success");
 
   function handleClick(event: React.MouseEvent<HTMLButtonElement>) {
     setAnchorEl(event.currentTarget);
@@ -72,9 +72,7 @@ function ProfileStatBar({
 
   const [isFollowing, setIsFollowing] = useState(
     followers.some(
-      (f) =>
-        f.user === Number(sessionUser?.id) &&
-        f.followingUsername === user.username
+      (f) => f.user === Number(sessionUser?.id) && f.followingUsername === user.username
     )
   );
 
@@ -103,15 +101,15 @@ function ProfileStatBar({
   }
 
   const editButton = (
-    <Button variant="outlined" size="small" href={`/settings`}>
+    <Button href={`/settings`} size="small" variant="outlined">
       Edit Profile
     </Button>
   );
 
   const followButton = (
     <Button
-      variant="outlined"
       size="small"
+      variant="outlined"
       onClick={handleFollow}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
@@ -127,32 +125,30 @@ function ProfileStatBar({
   });
 
   return (
-    <Grid container item sx={{ marginTop: "10px" }}>
-      <Grid container item xs={6} justifyContent="center" alignItems="center">
+    <Grid container sx={{ marginTop: "10px" }}>
+      <Grid container alignItems="center" justifyContent="center" size={{ xs: 6 }}>
         <UserAvatar avatarSize={avatarSize} name={fullName} />
-        <Typography variant="h5" sx={{ margin: "0 10px" }}>
+        <Typography sx={{ margin: "0 10px" }} variant="h5">
           {user.username}
         </Typography>
-        {sessionUser && sessionUser.username === user.username
-          ? editButton
-          : followButton}
-        <Grid item>
+        {sessionUser && sessionUser.username === user.username ? editButton : followButton}
+        <Grid>
           <Button
             aria-controls={open ? "basic-menu" : undefined}
-            aria-haspopup="true"
             aria-expanded={open ? "true" : undefined}
-            onClick={handleClick}
+            aria-haspopup="true"
             size="small"
+            onClick={handleClick}
           >
             ...
           </Button>
           <Menu
             anchorEl={anchorEl}
-            open={open}
-            onClose={handleClose}
             MenuListProps={{
               "aria-labelledby": "basic-button",
             }}
+            open={open}
+            onClose={handleClose}
           >
             <MenuItem onClick={copyUrlToClipboard}>
               <LinkIcon /> &nbsp; Copy profile link
@@ -160,29 +156,22 @@ function ProfileStatBar({
           </Menu>
         </Grid>
       </Grid>
-      <Grid container item xs={6} justifyContent="center">
-        <Button size="small" href={`${user.username}/musicals`}>
+      <Grid container justifyContent="center" size={{ xs: 6 }}>
+        <Button href={`${user.username}/musicals`} size="small">
           {`${attendance.length} MUSICALS`}
         </Button>
-        <Button size="small" href={`${user.username}/musicals`}>
+        <Button href={`${user.username}/musicals`} size="small">
           {`${attendanceThisYear?.length} THIS YEAR`}
         </Button>
-        <Button size="small" href={`${user.username}/following`}>
+        <Button href={`${user.username}/following`} size="small">
           {`${following?.length} FOLLOWING`}
         </Button>
-        <Button size="small" href={`${user.username}/followers`}>
+        <Button href={`${user.username}/followers`} size="small">
           {`${followers?.length} FOLLOWERS`}
         </Button>
       </Grid>
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={6000}
-        onClose={() => setSnackbarOpen(false)}
-      >
-        <Alert
-          onClose={() => setSnackbarOpen(false)}
-          severity={snackbarSeverity}
-        >
+      <Snackbar autoHideDuration={6000} open={snackbarOpen} onClose={() => setSnackbarOpen(false)}>
+        <Alert severity={snackbarSeverity} onClose={() => setSnackbarOpen(false)}>
           {snackbarMessage}
         </Alert>
       </Snackbar>

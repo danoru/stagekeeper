@@ -1,4 +1,5 @@
 import Image from "next/image";
+
 import styles from "../../styles/home.module.css";
 
 function LoggedOutHomePage() {
@@ -9,11 +10,11 @@ function LoggedOutHomePage() {
           <h1>Welcome to StageKeeper!</h1>
         </div>
         <Image
-          className={styles.heroImage}
-          src="/images/broadway.jpg"
           fill
           priority
           alt="Broadway"
+          className={styles.heroImage}
+          src="/images/broadway.jpg"
         />
         <div className={styles.heroDescription}>
           <h2>Find out what shows are on a stage near you.</h2>
@@ -21,9 +22,7 @@ function LoggedOutHomePage() {
           <h2>Keep track of what performances you have seen.</h2>
         </div>
       </div>
-      <p className={styles.description}>
-        StageKeeper is your hub for all things musical theatre.
-      </p>
+      <p className={styles.description}>StageKeeper is your hub for all things musical theatre.</p>
     </main>
   );
 }

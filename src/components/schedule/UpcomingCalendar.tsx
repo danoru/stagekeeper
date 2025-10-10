@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from "react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import FullCalendar from "@fullcalendar/react";
-import moment from "moment";
-import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import Modal from "@mui/material/Modal";
+import Typography from "@mui/material/Typography";
+import moment from "moment";
+import React, { useEffect, useState } from "react";
 
 interface Props {
   identifier: number;
@@ -41,21 +41,13 @@ function UpcomingCalendar({ identifier }: Props) {
     Sunday: ["13:00", "18:30"],
   };
 
-  function generateEventDates(
-    programming: Program,
-    dayTimes: Record<string, string[]>
-  ): Event[] {
-    const { startDate, endDate, duration, source, theatre, title } =
-      programming;
+  function generateEventDates(programming: Program, dayTimes: Record<string, string[]>): Event[] {
+    const { startDate, endDate, duration, source, theatre, title } = programming;
     const startMoment = moment(startDate);
     const endMoment = moment(endDate);
     const events: Event[] = [];
 
-    for (
-      let date = startMoment;
-      date.isSameOrBefore(endMoment);
-      date.add(1, "day")
-    ) {
+    for (let date = startMoment; date.isSameOrBefore(endMoment); date.add(1, "day")) {
       const dayName = date.format("dddd");
       const times = dayTimes[dayName] || [];
       times.forEach((time) => {
@@ -78,9 +70,7 @@ function UpcomingCalendar({ identifier }: Props) {
   useEffect(() => {
     async function fetchAndGenerateEvents() {
       try {
-        const response = await fetch(
-          `/api/user/programming?userId=${identifier}`
-        );
+        const response = await fetch(`/api/user/programming?userId=${identifier}`);
         if (!response.ok) {
           throw new Error("Failed to fetch performances.");
         }
@@ -91,9 +81,7 @@ function UpcomingCalendar({ identifier }: Props) {
         );
 
         if (allEvents.length > 0) {
-          const earliestDate = new Date(
-            Math.min(...allEvents.map((e) => e.start.getTime()))
-          );
+          const earliestDate = new Date(Math.min(...allEvents.map((e) => e.start.getTime())));
           setInitialDate(earliestDate);
         }
         setEvents(allEvents);
@@ -134,18 +122,15 @@ function UpcomingCalendar({ identifier }: Props) {
   return (
     <div style={{ margin: "0 auto", maxWidth: "75%" }}>
       <FullCalendar
-        events={events}
         eventClick={handleEventClick}
         eventDidMount={eventDidMount}
+        events={events}
         fixedWeekCount={false}
         initialDate={initialDate}
         initialView="dayGridMonth"
         plugins={[dayGridPlugin]}
       />
-      <Modal
-        open={Boolean(selectedEvent)}
-        onClose={() => setSelectedEvent(null)}
-      >
+      <Modal open={Boolean(selectedEvent)} onClose={() => setSelectedEvent(null)}>
         <Box
           sx={{
             position: "absolute",
@@ -161,12 +146,10 @@ function UpcomingCalendar({ identifier }: Props) {
         >
           {selectedEvent && (
             <>
-              <Typography variant="h6" component="h2">
+              <Typography component="h2" variant="h6">
                 {selectedEvent.title}
               </Typography>
-              <Typography variant="subtitle1">
-                {selectedEvent.theatre}
-              </Typography>
+              <Typography variant="subtitle1">{selectedEvent.theatre}</Typography>
               <Typography variant="subtitle2">
                 {moment(selectedEvent.start).format("LT")}
               </Typography>

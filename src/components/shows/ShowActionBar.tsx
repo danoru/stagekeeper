@@ -1,27 +1,20 @@
-import React, { useState } from "react";
+import FavoriteIcon from "@mui/icons-material/Favorite";
+import FavoriteBorder from "@mui/icons-material/FavoriteBorder";
+import LocalActivity from "@mui/icons-material/LocalActivity";
+import LocalActivityOutlined from "@mui/icons-material/LocalActivityOutlined";
+import WatchLater from "@mui/icons-material/WatchLater";
+import WatchLaterOutlined from "@mui/icons-material/WatchLaterOutlined";
 import Alert from "@mui/material/Alert";
 import Button from "@mui/material/Button";
 import Divider from "@mui/material/Divider";
-import FavoriteBorder from "@mui/icons-material/FavoriteBorder";
-import FavoriteIcon from "@mui/icons-material/Favorite";
 import Link from "@mui/material/Link";
-import LocalActivity from "@mui/icons-material/LocalActivity";
-import LocalActivityOutlined from "@mui/icons-material/LocalActivityOutlined";
 import Paper from "@mui/material/Paper";
 import Rating from "@mui/material/Rating";
 import Snackbar from "@mui/material/Snackbar";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import WatchLater from "@mui/icons-material/WatchLater";
-import WatchLaterOutlined from "@mui/icons-material/WatchLaterOutlined";
-import {
-  attendance,
-  likedShows,
-  musicals,
-  performances,
-  plays,
-  watchlist,
-} from "@prisma/client";
+import { attendance, likedShows, musicals, performances, plays, watchlist } from "@prisma/client";
+import React, { useState } from "react";
 
 interface Props {
   attendance: (attendance & { performances: performances })[];
@@ -32,14 +25,7 @@ interface Props {
   watchlist: watchlist[];
 }
 
-function ShowActionBar({
-  attendance,
-  likedShows,
-  musical,
-  play,
-  sessionUser,
-  watchlist,
-}: Props) {
+function ShowActionBar({ attendance, likedShows, musical, play, sessionUser, watchlist }: Props) {
   const userId = Number(sessionUser?.id);
   const musicalId = musical ? Number(musical.id) : undefined;
   const playId = play ? Number(play.id) : undefined;
@@ -47,9 +33,7 @@ function ShowActionBar({
   const [hovered, setHovered] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">(
-    "success"
-  );
+  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">("success");
 
   const performanceType = musical ? "MUSICAL" : play ? "PLAY" : null;
 
@@ -70,9 +54,7 @@ function ShowActionBar({
       ? watchlist.some(
           (w) =>
             w.user === userId &&
-            (performanceType === "MUSICAL"
-              ? w.musical === musicalId
-              : w.play === playId)
+            (performanceType === "MUSICAL" ? w.musical === musicalId : w.play === playId)
         )
       : false
   );
@@ -82,9 +64,7 @@ function ShowActionBar({
       ? likedShows.some(
           (l) =>
             l.user === userId &&
-            (performanceType === "MUSICAL"
-              ? l.musical === musicalId
-              : l.play === playId)
+            (performanceType === "MUSICAL" ? l.musical === musicalId : l.play === playId)
         )
       : false
   );
@@ -128,9 +108,7 @@ function ShowActionBar({
       if (response.ok) {
         setIsLiked(!isLiked);
         setSnackbarMessage(
-          isLiked
-            ? "Successfully removed from liked shows."
-            : "Successfully added to liked shows."
+          isLiked ? "Successfully removed from liked shows." : "Successfully added to liked shows."
         );
         setSnackbarSeverity("success");
       } else {
@@ -177,11 +155,8 @@ function ShowActionBar({
 
   const AttendanceButton = () => {
     return (
-      <Stack direction="column" alignItems="center" width="33%">
-        <Button
-          onMouseEnter={() => setHovered(true)}
-          onMouseLeave={() => setHovered(false)}
-        >
+      <Stack alignItems="center" direction="column" width="33%">
+        <Button onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}>
           <Typography variant="subtitle1">
             {hasAttended ? (
               <LocalActivity fontSize="large" />
@@ -199,18 +174,14 @@ function ShowActionBar({
 
   const LikedButton = () => {
     return (
-      <Stack direction="column" alignItems="center" width="33%">
+      <Stack alignItems="center" direction="column" width="33%">
         <Button
           onClick={handleLikes}
           onMouseEnter={() => setHovered(true)}
           onMouseLeave={() => setHovered(false)}
         >
           <Typography variant="subtitle1">
-            {isLiked ? (
-              <FavoriteIcon fontSize="large" />
-            ) : (
-              <FavoriteBorder fontSize="large" />
-            )}
+            {isLiked ? <FavoriteIcon fontSize="large" /> : <FavoriteBorder fontSize="large" />}
           </Typography>
         </Button>
         <Typography variant="subtitle1">
@@ -222,7 +193,7 @@ function ShowActionBar({
 
   const WatchlistButton = () => {
     return (
-      <Stack direction="column" alignItems="center" width="33%">
+      <Stack alignItems="center" direction="column" width="33%">
         <Button
           onClick={handleWatchlist}
           onMouseEnter={() => setHovered(true)}
@@ -261,9 +232,9 @@ function ShowActionBar({
       ) : (
         <Link href="/login" underline="none">
           <Typography
-            variant="subtitle1"
-            style={{ padding: "1vh 0", textAlign: "center" }}
             color="text.primary"
+            style={{ padding: "1vh 0", textAlign: "center" }}
+            variant="subtitle1"
           >
             Login to Log, Rate or Review
           </Typography>
@@ -273,25 +244,18 @@ function ShowActionBar({
       <Divider />
       <Button
         fullWidth
-        onClick={copyUrlToClipboard}
         sx={{
           color: "text.primary",
           padding: "1vh 0",
           textAlign: "center",
           textTransform: "none",
         }}
+        onClick={copyUrlToClipboard}
       >
         <Typography variant="subtitle1">Share</Typography>
       </Button>
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={6000}
-        onClose={() => setSnackbarOpen(false)}
-      >
-        <Alert
-          onClose={() => setSnackbarOpen(false)}
-          severity={snackbarSeverity}
-        >
+      <Snackbar autoHideDuration={6000} open={snackbarOpen} onClose={() => setSnackbarOpen(false)}>
+        <Alert severity={snackbarSeverity} onClose={() => setSnackbarOpen(false)}>
           {snackbarMessage}
         </Alert>
       </Snackbar>

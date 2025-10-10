@@ -1,13 +1,8 @@
-import DetailInfoCard from "../cards/DetailInfoCard";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
-import {
-  attendance,
-  musicals,
-  performances,
-  plays,
-  theatres,
-} from "@prisma/client";
+import { attendance, musicals, performances, plays, theatres } from "@prisma/client";
+
+import DetailInfoCard from "../cards/DetailInfoCard";
 
 interface Props {
   upcomingPerformances: (attendance & {
@@ -45,7 +40,6 @@ function FriendUpcomingActivity({ upcomingPerformances }: Props) {
   return (
     <Grid container>
       <Grid
-        item
         style={{
           borderBottomWidth: "1px",
           borderBottomStyle: "solid",
@@ -57,15 +51,14 @@ function FriendUpcomingActivity({ upcomingPerformances }: Props) {
           width: "75%",
         }}
       >
-        <Typography variant="overline" component="div">
+        <Typography component="div" variant="overline">
           UPCOMING SHOWS FROM FRIENDS
         </Typography>
       </Grid>
       <Grid
         container
-        item
-        rowSpacing={1}
         columnSpacing={2}
+        rowSpacing={1}
         sx={{
           margin: "10px auto",
           maxWidth: "75%",
@@ -93,15 +86,15 @@ function FriendUpcomingActivity({ upcomingPerformances }: Props) {
             return (
               <DetailInfoCard
                 key={`card-${i}`}
+                date={entry.performances.startTime}
                 image={image}
                 show={show}
-                theatre={entry.performances.theatres.name}
-                type={entry.performances.type}
-                date={entry.performances.startTime}
                 sx={{
                   height: "100%",
                   width: "100%",
                 }}
+                theatre={entry.performances.theatres.name}
+                type={entry.performances.type}
               />
             );
           }

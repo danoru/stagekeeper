@@ -1,6 +1,6 @@
 /* COLOR PALETTE */
 
-  /* 
+/* 
   
 midnight = #202020 = rgba(32, 32, 32, 1)
 black = #333533 = rgba(51, 53, 51, 1)
@@ -13,7 +13,6 @@ orange = #fb8500 = rgba(251, 133, 0, 1)
 rouge = #e63946 = rgba(230, 57, 70, 1)
 
 */
-
 
 .stuff {
   font-weight: 300;
@@ -45,7 +44,7 @@ rouge = #e63946 = rgba(230, 57, 70, 1)
 }
 
 @media (max-width: 600px) {
-.stuff {
-  font-size: 6px;
-}
+  .stuff {
+    font-size: 6px;
+  }
 }

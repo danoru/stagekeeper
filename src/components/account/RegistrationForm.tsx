@@ -1,15 +1,12 @@
-import React from "react";
 import Button from "@mui/material/Button";
 import Grid from "@mui/material/Grid";
 import TextField from "@mui/material/TextField";
+import { Formik, Form } from "formik";
+import React from "react";
 import * as yup from "yup";
-import { Formik, Form, Field } from "formik";
 
 const validationSchema = yup.object({
-  email: yup
-    .string()
-    .email("Enter a valid email")
-    .required("Email is required."),
+  email: yup.string().email("Enter a valid email").required("Email is required."),
   username: yup
     .string()
     .min(5, "Username must be at least 5 characters long.")
@@ -73,7 +70,7 @@ function RegistrationForm() {
 
   return (
     <Grid container justifyContent="center">
-      <Grid item xs={12} sm={8} md={5}>
+      <Grid size={{ md: 5, sm: 8, xs: 12 }}>
         <Formik
           initialValues={{
             email: "",
@@ -84,81 +81,72 @@ function RegistrationForm() {
           validationSchema={validationSchema}
           onSubmit={handleSubmit}
         >
-          {({
-            isSubmitting,
-            handleChange,
-            handleBlur,
-            values,
-            touched,
-            errors,
-          }) => (
+          {({ isSubmitting, handleChange, handleBlur, values, touched, errors }) => (
             <Form>
               <TextField
-                variant="outlined"
-                margin="normal"
                 fullWidth
-                id="email"
-                label="Email"
-                name="email"
                 autoComplete="email"
-                value={values.email}
-                onChange={handleChange}
-                onBlur={handleBlur}
                 error={touched.email && Boolean(errors.email)}
                 helperText={touched.email && errors.email}
+                id="email"
+                label="Email"
+                margin="normal"
+                name="email"
+                value={values.email}
+                variant="outlined"
+                onBlur={handleBlur}
+                onChange={handleChange}
               />
               <TextField
-                variant="outlined"
-                margin="normal"
                 fullWidth
-                id="username"
-                label="Username"
-                name="username"
                 autoComplete="username"
-                value={values.username}
-                onChange={handleChange}
-                onBlur={handleBlur}
                 error={touched.username && Boolean(errors.username)}
                 helperText={touched.username && errors.username}
+                id="username"
+                label="Username"
+                margin="normal"
+                name="username"
+                value={values.username}
+                variant="outlined"
+                onBlur={handleBlur}
+                onChange={handleChange}
               />
               <TextField
-                variant="outlined"
-                margin="normal"
                 fullWidth
-                name="password"
-                label="Password"
-                type="password"
-                id="password"
                 autoComplete="current-password"
-                value={values.password}
-                onChange={handleChange}
-                onBlur={handleBlur}
                 error={touched.password && Boolean(errors.password)}
                 helperText={touched.password && errors.password}
+                id="password"
+                label="Password"
+                margin="normal"
+                name="password"
+                type="password"
+                value={values.password}
+                variant="outlined"
+                onBlur={handleBlur}
+                onChange={handleChange}
               />
               <TextField
-                variant="outlined"
-                margin="normal"
                 fullWidth
-                name="confirmPassword"
-                label="Confirm Password"
-                type="password"
-                id="confirmPassword"
                 autoComplete="current-password"
-                value={values.confirmPassword}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                error={
-                  touched.confirmPassword && Boolean(errors.confirmPassword)
-                }
+                error={touched.confirmPassword && Boolean(errors.confirmPassword)}
                 helperText={touched.confirmPassword && errors.confirmPassword}
+                id="confirmPassword"
+                label="Confirm Password"
+                margin="normal"
+                name="confirmPassword"
+                type="password"
+                value={values.confirmPassword}
+                variant="outlined"
+                onBlur={handleBlur}
+                onChange={handleChange}
               />
               <Button
-                type="submit"
                 fullWidth
-                variant="contained"
                 color="primary"
                 disabled={isSubmitting}
+                type="submit"
+                variant="contained"
               >
                 Register
               </Button>

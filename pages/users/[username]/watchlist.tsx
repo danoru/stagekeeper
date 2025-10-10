@@ -1,12 +1,13 @@
 import Grid from "@mui/material/Grid";
+import { musicals, plays, programming, users, watchlist } from "@prisma/client";
 import Head from "next/head";
+import superjson from "superjson";
+
 import ShowList from "../../../src/components/shows/ShowList";
 import ProfileLinkBar from "../../../src/components/users/ProfileLinkBar";
-import superjson from "superjson";
-import { findUserByUsername, getUsers } from "../../../src/data/users";
 import { getUpcomingPerformances } from "../../../src/data/shows";
 import { getWatchlist } from "../../../src/data/shows";
-import { musicals, plays, programming, users, watchlist } from "@prisma/client";
+import { findUserByUsername, getUsers } from "../../../src/data/users";
 
 interface Props {
   upcomingPerformances: (programming & {
@@ -30,9 +31,7 @@ function UserWatchlist({ watchlist, user, upcomingPerformances }: Props) {
   const title = `${user.username}'s Watchlist • Stagekeeper`;
   const header = `${user.username} WANTS TO WATCH ${watchlist.length} SHOWS`;
   const style = "overline";
-  const shows = watchlist.map((show) =>
-    show.type === "MUSICAL" ? show.musicals : show.plays
-  );
+  const shows = watchlist.map((show) => (show.type === "MUSICAL" ? show.musicals : show.plays));
 
   return (
     <div>
@@ -42,10 +41,10 @@ function UserWatchlist({ watchlist, user, upcomingPerformances }: Props) {
       <Grid container>
         <ProfileLinkBar username={user.username} />
         <ShowList
-          shows={shows}
           header={header}
-          upcomingPerformances={upcomingPerformances}
+          shows={shows}
           style={style}
+          upcomingPerformances={upcomingPerformances}
         />
       </Grid>
     </div>

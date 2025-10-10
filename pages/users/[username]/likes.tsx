@@ -1,10 +1,11 @@
 import Grid from "@mui/material/Grid";
+import { likedShows, musicals, plays, users } from "@prisma/client";
 import Head from "next/head";
+import superjson from "superjson";
+
 import ShowList from "../../../src/components/shows/ShowList";
 import ProfileLinkBar from "../../../src/components/users/ProfileLinkBar";
-import superjson from "superjson";
 import { getUsers, getUserLikes } from "../../../src/data/users";
-import { likedShows, musicals, plays, users } from "@prisma/client";
 
 interface Props {
   user: users & {
@@ -35,7 +36,7 @@ function UserLikes({ user }: Props) {
       </Head>
       <Grid container>
         <ProfileLinkBar username={user.username} />
-        <ShowList shows={shows} header={header} style={style} />
+        <ShowList header={header} shows={shows} style={style} />
       </Grid>
     </div>
   );

@@ -1,12 +1,13 @@
 import Grid from "@mui/material/Grid";
-import Head from "next/head";
 import Pagination from "@mui/material/Pagination";
-import superjson from "superjson";
-import { getPaginatedTheatres } from "../../src/data/theatres";
-import { useState, useEffect } from "react";
-import { theatres } from "@prisma/client";
-import TheatreCard from "../../src/components/cards/TheatreCard";
 import Typography from "@mui/material/Typography";
+import { theatres } from "@prisma/client";
+import Head from "next/head";
+import { useState, useEffect } from "react";
+import superjson from "superjson";
+
+import TheatreCard from "../../src/components/cards/TheatreCard";
+import { getPaginatedTheatres } from "../../src/data/theatres";
 
 interface Props {
   theatres: theatres[];
@@ -20,9 +21,7 @@ function TheatresPage({ theatres: initialTheatres, theatreCount }: Props) {
 
   useEffect(() => {
     async function fetchTheatres() {
-      const response = await fetch(
-        `/api/theatres/pages?page=${page}&limit=${itemsPerPage}`
-      );
+      const response = await fetch(`/api/theatres/pages?page=${page}&limit=${itemsPerPage}`);
       const data = await response.json();
       setTheatres(data.theatres);
     }
@@ -40,19 +39,17 @@ function TheatresPage({ theatres: initialTheatres, theatreCount }: Props) {
       </Head>
       <Grid container direction="row">
         <Grid item xs={12}>
-          <Typography variant="h6" sx={{ margin: "1vh 0" }}>
+          <Typography sx={{ margin: "1vh 0" }} variant="h6">
             All Theatres
           </Typography>
         </Grid>
-        <Grid container item xs={8} sx={{ margin: "0 auto" }}>
+        <Grid container item sx={{ margin: "0 auto" }} xs={8}>
           {theatres.map((theatre, i) => (
             <TheatreCard
               key={i}
-              name={theatre.name}
-              link={`/theatres/${theatre.name
-                .replace(/\s+/g, "-")
-                .toLowerCase()}`}
               image={theatre.image}
+              link={`/theatres/${theatre.name.replace(/\s+/g, "-").toLowerCase()}`}
+              name={theatre.name}
             />
           ))}
         </Grid>
@@ -60,8 +57,8 @@ function TheatresPage({ theatres: initialTheatres, theatreCount }: Props) {
       <Pagination
         count={Math.ceil(theatreCount / itemsPerPage)}
         page={page}
-        onChange={handleChange}
         sx={{ margin: "1vh", justifyContent: "center", display: "flex" }}
+        onChange={handleChange}
       />
     </div>
   );

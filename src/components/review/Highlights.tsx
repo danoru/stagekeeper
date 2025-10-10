@@ -1,4 +1,5 @@
 import { attendance, musicals, performances, theatres } from "@prisma/client";
+
 import styles from "../../styles/highlights.module.css";
 
 interface Props {
@@ -15,8 +16,8 @@ function Highlights({ highlights }: Props) {
   }, 0);
 
   function convertTime(num: number) {
-    let hours = Math.floor(num / 60);
-    let minutes = num % 60;
+    const hours = Math.floor(num / 60);
+    const minutes = num % 60;
     return hours + " Hours & " + minutes + " Minutes";
   }
 

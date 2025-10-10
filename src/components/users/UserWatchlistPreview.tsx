@@ -2,10 +2,10 @@ import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import CardMedia from "@mui/material/CardMedia";
 import Grid from "@mui/material/Grid";
-import Image from "next/image";
 import Link from "@mui/material/Link";
 import Tooltip from "@mui/material/Tooltip";
 import { watchlist, musicals } from "@prisma/client";
+import Image from "next/image";
 
 interface WatchlistProps {
   username: string;
@@ -19,7 +19,7 @@ interface CardProps {
 
 function UserWatchlistPreview({ username, watchlist }: WatchlistProps) {
   return (
-    <Grid item>
+    <Grid>
       <Grid
         container
         sx={{
@@ -31,17 +31,17 @@ function UserWatchlistPreview({ username, watchlist }: WatchlistProps) {
           maxWidth: "50%",
         }}
       >
-        <Grid item>Watchlist</Grid>
+        <Grid>Watchlist</Grid>
         <Link href={`${username}/watchlist`} underline="none">
-          <Grid item>{watchlist?.length}</Grid>
+          <Grid>{watchlist?.length}</Grid>
         </Link>
       </Grid>
       <Grid container>
         {watchlist.slice(0, 4).map((item, i: number) => (
           <TinyCard
             key={`card-${i}`}
-            title={item.musicals.title}
             playbill={item.musicals.playbill}
+            title={item.musicals.title}
           />
         ))}
       </Grid>
@@ -53,7 +53,7 @@ function TinyCard({ title, playbill }: CardProps) {
   const musicalSlug = `/musicals/${title.replace(/\s+/g, "-").toLowerCase()}`;
   return (
     <Tooltip title={title}>
-      <Grid item sx={{ margin: "2px" }}>
+      <Grid sx={{ margin: "2px" }}>
         <Link href={musicalSlug}>
           <Card
             sx={{
@@ -84,12 +84,7 @@ function TinyCard({ title, playbill }: CardProps) {
                 transition: "filter 0.3s",
               }}
             >
-              <Image
-                src={playbill}
-                alt={title}
-                fill
-                style={{ objectFit: "cover" }}
-              />
+              <Image fill alt={title} src={playbill} style={{ objectFit: "cover" }} />
             </CardMedia>
             <Box
               className="overlay"

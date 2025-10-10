@@ -1,15 +1,10 @@
 import Grid from "@mui/material/Grid";
+import { attendance, musicals, performances, theatres, users } from "@prisma/client";
 import Head from "next/head";
-import ProfileLinkBar from "../../../src/components/users/ProfileLinkBar";
-import UpcomingCalendar from "../../../src/components/schedule/UpcomingCalendar";
 import superjson from "superjson";
-import {
-  attendance,
-  musicals,
-  performances,
-  theatres,
-  users,
-} from "@prisma/client";
+
+import UpcomingCalendar from "../../../src/components/schedule/UpcomingCalendar";
+import ProfileLinkBar from "../../../src/components/users/ProfileLinkBar";
 import { getUsers, findUserByUsername } from "../../../src/data/users";
 
 interface Props {

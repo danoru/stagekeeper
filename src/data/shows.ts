@@ -45,9 +45,7 @@ export async function getWatchlist(id: number) {
     const musicalsEntry = item.musicals
       ? { type: "musical", title: item.musicals.title, item }
       : [];
-    const playsEntry = item.plays
-      ? { type: "play", title: item.plays.title, item }
-      : [];
+    const playsEntry = item.plays ? { type: "play", title: item.plays.title, item } : [];
     return [musicalsEntry, playsEntry].flat();
   });
 

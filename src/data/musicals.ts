@@ -430,8 +430,7 @@ export async function getMusicalByTitle(musicalTitle: string) {
   });
 
   const matchedMusical = musicals.find(
-    (musical) =>
-      musical.title.replace(/\s+/g, "-").toLowerCase() === formattedTitle
+    (musical) => musical.title.replace(/\s+/g, "-").toLowerCase() === formattedTitle
   );
 
   if (matchedMusical) {

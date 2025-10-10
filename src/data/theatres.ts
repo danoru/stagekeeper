@@ -144,8 +144,7 @@ export async function getTheatreByName(theatreName: string) {
   });
 
   const matchedTheatre = theatres.find(
-    (theatre) =>
-      theatre.name.replace(/\s+/g, "-").toLowerCase() === formattedName
+    (theatre) => theatre.name.replace(/\s+/g, "-").toLowerCase() === formattedName
   );
 
   if (matchedTheatre) {

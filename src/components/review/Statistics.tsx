@@ -1,10 +1,12 @@
-import Image from "next/image";
-import moment from "moment";
-import MusicalByPremiereChart from "./MusicalByPremiere";
-import MonthlyAttendanceChart from "./MonthlyAttendance";
-import LocationsChart from "./LocationsChart";
-import styles from "../../styles/statistics.module.css";
 import { attendance, musicals, performances, theatres } from "@prisma/client";
+import moment from "moment";
+import Image from "next/image";
+
+import styles from "../../styles/statistics.module.css";
+
+import LocationsChart from "./LocationsChart";
+import MonthlyAttendanceChart from "./MonthlyAttendance";
+import MusicalByPremiereChart from "./MusicalByPremiere";
 
 interface Props {
   stats: (attendance & {
@@ -19,15 +21,11 @@ function Statistics({ stats, view, year }: Props) {
   const hasData = stats.length > 0;
 
   const firstMusical = hasData
-    ? stats.reduce((a, b) =>
-        a.performances.startTime < b.performances.startTime ? a : b
-      )
+    ? stats.reduce((a, b) => (a.performances.startTime < b.performances.startTime ? a : b))
     : null;
 
   const latestMusical = hasData
-    ? stats.reduce((a, b) =>
-        a.performances.startTime > b.performances.startTime ? a : b
-      )
+    ? stats.reduce((a, b) => (a.performances.startTime > b.performances.startTime ? a : b))
     : null;
 
   const oldestMusical = hasData
@@ -40,10 +38,8 @@ function Statistics({ stats, view, year }: Props) {
 
   const newestMusical = hasData
     ? stats.reduce((a, b) => {
-        const premiereA =
-          a.performances.musicals?.premiere ?? new Date("1066-09-12");
-        const premiereB =
-          b.performances.musicals?.premiere ?? new Date("1066-09-12");
+        const premiereA = a.performances.musicals?.premiere ?? new Date("1066-09-12");
+        const premiereB = b.performances.musicals?.premiere ?? new Date("1066-09-12");
         return premiereA > premiereB ? a : b;
       })
     : null;
@@ -75,14 +71,10 @@ function Statistics({ stats, view, year }: Props) {
     .filter((year) => year); // Filter out undefined or null years
 
   const musicalPremiereSum =
-    musicalPremieres.length > 0
-      ? musicalPremieres.reduce((a, b) => a + b, 0)
-      : 0;
+    musicalPremieres.length > 0 ? musicalPremieres.reduce((a, b) => a + b, 0) : 0;
 
   const musicalPremiereAverage =
-    musicalPremieres.length > 0
-      ? Math.round(musicalPremiereSum / musicalPremieres.length)
-      : 0;
+    musicalPremieres.length > 0 ? Math.round(musicalPremiereSum / musicalPremieres.length) : 0;
 
   const currentYear = new Date().getFullYear();
   const musicalPremiereAverageAge = currentYear - musicalPremiereAverage;
@@ -154,90 +146,54 @@ function Statistics({ stats, view, year }: Props) {
         <div className={styles.container}>
           <div className={styles.infoboxRight}>
             <h1>Your First Musical {getYearText()}</h1>
-            <h3>
-              {firstMusical ? firstMusical.performances.musicals?.title : "N/A"}
-            </h3>
+            <h3>{firstMusical ? firstMusical.performances.musicals?.title : "N/A"}</h3>
             <p>
-              You watched{" "}
-              {firstMusical ? firstMusical.performances.musicals?.title : "N/A"}{" "}
-              at the{" "}
-              {firstMusical ? firstMusical.performances.theatres.name : "N/A"}{" "}
-              in{" "}
+              You watched {firstMusical ? firstMusical.performances.musicals?.title : "N/A"} at the{" "}
+              {firstMusical ? firstMusical.performances.theatres.name : "N/A"} in{" "}
+              {firstMusical ? firstMusical.performances.theatres.location : "N/A"} on{" "}
               {firstMusical
-                ? firstMusical.performances.theatres.location
-                : "N/A"}{" "}
-              on{" "}
-              {firstMusical
-                ? moment(firstMusical.performances.startTime).format(
-                    "MMMM Do, YYYY"
-                  )
+                ? moment(firstMusical.performances.startTime).format("MMMM Do, YYYY")
                 : "N/A"}
               !
             </p>
           </div>
           <div className={styles.playbillRight}>
             <Image
-              src={
-                firstMusical ? firstMusical.performances.musicals?.playbill : ""
-              }
-              width={210}
+              alt={firstMusical ? firstMusical.performances.musicals?.title : "N/A"}
               height={280}
-              alt={
-                firstMusical ? firstMusical.performances.musicals?.title : "N/A"
-              }
+              src={firstMusical ? firstMusical.performances.musicals?.playbill : ""}
               style={{
                 borderRadius: "5%",
                 display: "block",
               }}
+              width={210}
             />
           </div>
         </div>
         <div className={styles.container}>
           <div className={styles.infoboxLeft}>
             <h1>Your Most Recent Musical {getYearText()}</h1>
-            <h3>
-              {latestMusical
-                ? latestMusical.performances.musicals?.title
-                : "N/A"}
-            </h3>
+            <h3>{latestMusical ? latestMusical.performances.musicals?.title : "N/A"}</h3>
             <p>
-              You watched{" "}
+              You watched {latestMusical ? latestMusical.performances.musicals?.title : "N/A"} at
+              the {latestMusical ? latestMusical.performances.theatres.name : "N/A"} in{" "}
+              {latestMusical ? latestMusical.performances.theatres.location : "N/A"} on{" "}
               {latestMusical
-                ? latestMusical.performances.musicals?.title
-                : "N/A"}{" "}
-              at the{" "}
-              {latestMusical ? latestMusical.performances.theatres.name : "N/A"}{" "}
-              in{" "}
-              {latestMusical
-                ? latestMusical.performances.theatres.location
-                : "N/A"}{" "}
-              on{" "}
-              {latestMusical
-                ? moment(latestMusical.performances.startTime).format(
-                    "MMMM Do, YYYY"
-                  )
+                ? moment(latestMusical.performances.startTime).format("MMMM Do, YYYY")
                 : "N/A"}
               !
             </p>
           </div>
           <div className={styles.playbillLeft}>
             <Image
-              src={
-                latestMusical
-                  ? latestMusical.performances.musicals?.playbill
-                  : ""
-              }
-              width={210}
+              alt={latestMusical ? latestMusical.performances.musicals?.title : "N/A"}
               height={280}
-              alt={
-                latestMusical
-                  ? latestMusical.performances.musicals?.title
-                  : "N/A"
-              }
+              src={latestMusical ? latestMusical.performances.musicals?.playbill : ""}
               style={{
                 borderRadius: "5%",
                 display: "block",
               }}
+              width={210}
             />
           </div>
         </div>
@@ -246,101 +202,54 @@ function Statistics({ stats, view, year }: Props) {
         <div className={styles.container}>
           <div className={styles.infoboxRight}>
             <h1>Oldest Musical {getYearText()}</h1>
-            <h3>
-              {" "}
-              {oldestMusical
-                ? oldestMusical.performances.musicals?.title
-                : "N/A"}
-              !
-            </h3>
+            <h3> {oldestMusical ? oldestMusical.performances.musicals?.title : "N/A"}!</h3>
             <p>
-              You watched{" "}
+              You watched {oldestMusical ? oldestMusical.performances.musicals?.title : "N/A"} at
+              the {oldestMusical ? oldestMusical.performances.theatres.name : "N/A"} in{" "}
+              {oldestMusical ? oldestMusical.performances.theatres.location : "N/A"} on{" "}
               {oldestMusical
-                ? oldestMusical.performances.musicals?.title
-                : "N/A"}{" "}
-              at the{" "}
-              {oldestMusical ? oldestMusical.performances.theatres.name : "N/A"}{" "}
-              in{" "}
-              {oldestMusical
-                ? oldestMusical.performances.theatres.location
-                : "N/A"}{" "}
-              on{" "}
-              {oldestMusical
-                ? moment(oldestMusical.performances.startTime).format(
-                    "MMMM Do, YYYY"
-                  )
+                ? moment(oldestMusical.performances.startTime).format("MMMM Do, YYYY")
                 : "N/A"}
               !
             </p>
           </div>
           <div className={styles.playbillRight}>
             <Image
-              src={
-                oldestMusical
-                  ? oldestMusical.performances.musicals?.playbill
-                  : ""
-              }
-              width={210}
+              alt={oldestMusical ? oldestMusical.performances.musicals?.title : "N/A"}
               height={280}
-              alt={
-                oldestMusical
-                  ? oldestMusical.performances.musicals?.title
-                  : "N/A"
-              }
+              src={oldestMusical ? oldestMusical.performances.musicals?.playbill : ""}
               style={{
                 borderRadius: "5%",
                 display: "block",
               }}
+              width={210}
             />
           </div>
         </div>
         <div className={styles.container}>
           <div className={styles.infoboxLeft}>
             <h1>Newest Musical {getYearText()}</h1>
-            <h3>
-              {newestMusical
-                ? newestMusical.performances.musicals?.title
-                : "N/A"}
-              !
-            </h3>
+            <h3>{newestMusical ? newestMusical.performances.musicals?.title : "N/A"}!</h3>
             <p>
-              You watched{" "}
+              You watched {newestMusical ? newestMusical.performances.musicals?.title : "N/A"} at
+              the {newestMusical ? newestMusical.performances.theatres.name : "N/A"} in{" "}
+              {newestMusical ? newestMusical.performances.theatres.location : "N/A"} on{" "}
               {newestMusical
-                ? newestMusical.performances.musicals?.title
-                : "N/A"}{" "}
-              at the{" "}
-              {newestMusical ? newestMusical.performances.theatres.name : "N/A"}{" "}
-              in{" "}
-              {newestMusical
-                ? newestMusical.performances.theatres.location
-                : "N/A"}{" "}
-              on{" "}
-              {newestMusical
-                ? moment(newestMusical.performances.startTime).format(
-                    "MMMM Do, YYYY"
-                  )
+                ? moment(newestMusical.performances.startTime).format("MMMM Do, YYYY")
                 : "N/A"}
               !
             </p>
           </div>
           <div className={styles.playbillLeft}>
             <Image
-              src={
-                newestMusical
-                  ? newestMusical.performances.musicals?.playbill
-                  : ""
-              }
-              width={210}
+              alt={newestMusical ? newestMusical.performances.musicals?.title : "N/A"}
               height={280}
-              alt={
-                newestMusical
-                  ? newestMusical.performances.musicals?.title
-                  : "N/A"
-              }
+              src={newestMusical ? newestMusical.performances.musicals?.playbill : ""}
               style={{
                 borderRadius: "5%",
                 display: "block",
               }}
+              width={210}
             />
           </div>
         </div>
@@ -348,9 +257,9 @@ function Statistics({ stats, view, year }: Props) {
           <MusicalByPremiereChart stats={stats} />
           <h1>Your musical taste is primarily ... {musicalEra}!</h1>
           <p>
-            {musicalEraDescription} The average premiere date of the musicals
-            you have seen is {musicalPremiereAverage}. That means your average
-            musical age is {musicalPremiereAverageAge}!
+            {musicalEraDescription} The average premiere date of the musicals you have seen is{" "}
+            {musicalPremiereAverage}. That means your average musical age is{" "}
+            {musicalPremiereAverageAge}!
           </p>
         </div>
       </section>
@@ -368,8 +277,8 @@ function Statistics({ stats, view, year }: Props) {
         <div className={styles.centeredContent}>
           <MonthlyAttendanceChart stats={stats} />
           <h1>
-            You visited the theatre the most during ...{" "}
-            {mostVisitsPerMonth || "N/A"} {getAdverbText()}!
+            You visited the theatre the most during ... {mostVisitsPerMonth || "N/A"}{" "}
+            {getAdverbText()}!
           </h1>
           <p>Stuff about when you went {getAdverbText()}.</p>
         </div>

@@ -15,7 +15,7 @@ interface Props {
 
 function ShowCard({ hasUpcomingPerformance, image, link, name }: Props) {
   return (
-    <Grid item sx={{ margin: "10px" }}>
+    <Grid sx={{ margin: "10px" }}>
       <Badge
         anchorOrigin={{
           vertical: "top",
@@ -44,7 +44,6 @@ function ShowCard({ hasUpcomingPerformance, image, link, name }: Props) {
             <CardMedia
               className="image"
               image={image}
-              title={name}
               sx={{
                 position: "absolute",
                 top: 0,
@@ -54,6 +53,7 @@ function ShowCard({ hasUpcomingPerformance, image, link, name }: Props) {
                 filter: "brightness(0.5)",
                 transition: "filter 0.3s",
               }}
+              title={name}
             />
             <Box
               className="overlay"
@@ -70,7 +70,6 @@ function ShowCard({ hasUpcomingPerformance, image, link, name }: Props) {
             />
             <Typography
               gutterBottom
-              variant="subtitle1"
               color="secondary"
               sx={{
                 position: "absolute",
@@ -79,6 +78,7 @@ function ShowCard({ hasUpcomingPerformance, image, link, name }: Props) {
                 color: "white",
                 textShadow: "0 0 5px rgba(0, 0, 0, 0.7)",
               }}
+              variant="subtitle1"
             >
               {name}
             </Typography>

@@ -1,7 +1,9 @@
 import Link from "@mui/material/Link";
 import Typography from "@mui/material/Typography";
-import FriendUpcomingActivity from "./FriendUpcomingActivity";
+
 import RecentActivity from "../performances/RecentActivity";
+
+import FriendUpcomingActivity from "./FriendUpcomingActivity";
 
 interface Props {
   recentPerformances: any;
@@ -9,11 +11,7 @@ interface Props {
   upcomingPerformances: any;
 }
 
-function LoggedInHomePage({
-  recentPerformances,
-  sessionUser,
-  upcomingPerformances,
-}: Props) {
+function LoggedInHomePage({ recentPerformances, sessionUser, upcomingPerformances }: Props) {
   return (
     <main style={{ marginTop: "20px", textAlign: "center" }}>
       <Typography variant="h6">

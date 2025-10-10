@@ -1,14 +1,15 @@
 import Grid from "@mui/material/Grid";
-import Head from "next/head";
-import MusicalCard from "../../src/components/cards/ShowCard";
 import Pagination from "@mui/material/Pagination";
-import superjson from "superjson";
 import Typography from "@mui/material/Typography";
+import { musicals, programming, seasons, theatres } from "@prisma/client";
+import Head from "next/head";
+import { useState, useEffect } from "react";
+import superjson from "superjson";
+
+import MusicalCard from "../../src/components/cards/ShowCard";
 import UpcomingShowList from "../../src/components/shows/UpcomingShowList";
 import { getPaginatedMusicals } from "../../src/data/musicals";
 import { getUpcomingMusicals } from "../../src/data/musicals";
-import { musicals, programming, seasons, theatres } from "@prisma/client";
-import { useState, useEffect } from "react";
 
 interface Props {
   musicals: musicals[];
@@ -19,20 +20,14 @@ interface Props {
   })[];
 }
 
-function MusicalsPage({
-  musicals: initialMusicals,
-  musicalCount,
-  upcomingPerformances,
-}: Props) {
+function MusicalsPage({ musicals: initialMusicals, musicalCount, upcomingPerformances }: Props) {
   const [musicals, setMusicals] = useState(initialMusicals);
   const [page, setPage] = useState(1);
   const itemsPerPage = 10;
 
   useEffect(() => {
     async function fetchMusicals() {
-      const response = await fetch(
-        `/api/musicals/pages?page=${page}&limit=${itemsPerPage}`
-      );
+      const response = await fetch(`/api/musicals/pages?page=${page}&limit=${itemsPerPage}`);
       const data = await response.json();
       setMusicals(data.musicals);
     }
@@ -50,20 +45,18 @@ function MusicalsPage({
       </Head>
       <UpcomingShowList upcomingPerformances={upcomingPerformances} />
       <Grid container direction="row">
-        <Grid item xs={12}>
-          <Typography variant="h6" sx={{ margin: "1vh 0" }}>
+        <Grid size={{ xs: 12 }}>
+          <Typography sx={{ margin: "1vh 0" }} variant="h6">
             All Musicals
           </Typography>
         </Grid>
-        <Grid container item xs={8} sx={{ margin: "0 auto" }}>
+        <Grid container size={{ xs: 8 }} sx={{ margin: "0 auto" }}>
           {musicals.map((musical, i) => (
             <MusicalCard
               key={i}
-              name={musical.title}
-              link={`/musicals/${musical.title
-                .replace(/\s+/g, "-")
-                .toLowerCase()}`}
               image={musical.playbill}
+              link={`/musicals/${musical.title.replace(/\s+/g, "-").toLowerCase()}`}
+              name={musical.title}
             />
           ))}
         </Grid>
@@ -71,8 +64,8 @@ function MusicalsPage({
       <Pagination
         count={Math.ceil(musicalCount / itemsPerPage)}
         page={page}
-        onChange={handleChange}
         sx={{ margin: "1vh", justifyContent: "center", display: "flex" }}
+        onChange={handleChange}
       />
     </div>
   );

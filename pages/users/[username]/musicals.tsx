@@ -1,18 +1,13 @@
 import Grid from "@mui/material/Grid";
-import Head from "next/head";
+import { attendance, musicals, performances, theatres, users } from "@prisma/client";
 import moment from "moment";
+import Head from "next/head";
+import superjson from "superjson";
+
 import ShowList from "../../../src/components/shows/ShowList";
 import ProfileLinkBar from "../../../src/components/users/ProfileLinkBar";
-import superjson from "superjson";
-import {
-  attendance,
-  musicals,
-  performances,
-  theatres,
-  users,
-} from "@prisma/client";
-import { getUsers, findUserByUsername } from "../../../src/data/users";
 import { getUserMusicalAttendance } from "../../../src/data/musicals";
+import { getUsers, findUserByUsername } from "../../../src/data/users";
 
 interface Props {
   user: users;
@@ -53,7 +48,7 @@ function UserMusicalsList({ attendance, user }: Props) {
       </Head>
       <Grid container>
         <ProfileLinkBar username={user.username} />
-        <ShowList shows={musicals} header={musicalHeader} style={style} />
+        <ShowList header={musicalHeader} shows={musicals} style={style} />
       </Grid>
     </div>
   );

@@ -1,27 +1,18 @@
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import CardMedia from "@mui/material/CardMedia";
-import Head from "next/head";
-import moment from "moment";
-import ShowActionBar from "../../src/components/shows/ShowActionBar";
-import PerformanceCalendar from "../../src/components/schedule/PerformanceCalendar";
 import Stack from "@mui/material/Stack";
-import superjson from "superjson";
 import Typography from "@mui/material/Typography";
-import {
-  attendance,
-  likedShows,
-  plays,
-  performances,
-  watchlist,
-} from "@prisma/client";
-import {
-  getLikedPlays,
-  getPlayByTitle,
-  getWatchlist,
-} from "../../src/data/plays";
+import { attendance, likedShows, plays, performances, watchlist } from "@prisma/client";
+import moment from "moment";
+import Head from "next/head";
 import { getSession } from "next-auth/react";
+import superjson from "superjson";
+
+import PerformanceCalendar from "../../src/components/schedule/PerformanceCalendar";
+import ShowActionBar from "../../src/components/shows/ShowActionBar";
 import { getUserAttendance } from "../../src/data/performances";
+import { getLikedPlays, getPlayByTitle, getWatchlist } from "../../src/data/plays";
 
 interface Params {
   title: string;
@@ -44,13 +35,10 @@ function PlayPage({ attendance, likedPlays, play, session, watchlist }: Props) {
     <div>
       <Head>
         <title>{title}</title>
-        <meta name="description" content="Created with NextJS" />
-        <link rel="icon" href="/favicon.ico" />
+        <meta content="Created with NextJS" name="description" />
+        <link href="/favicon.ico" rel="icon" />
       </Head>
-      <Stack
-        direction="row"
-        sx={{ justifyContent: "center", marginTop: "2vh" }}
-      >
+      <Stack direction="row" sx={{ justifyContent: "center", marginTop: "2vh" }}>
         <Card
           sx={{
             position: "relative",
@@ -63,7 +51,6 @@ function PlayPage({ attendance, likedPlays, play, session, watchlist }: Props) {
           <CardMedia
             className="image"
             image={play.playbill}
-            title={play.title}
             sx={{
               position: "absolute",
               top: 0,
@@ -71,6 +58,7 @@ function PlayPage({ attendance, likedPlays, play, session, watchlist }: Props) {
               width: "100%",
               height: "100%",
             }}
+            title={play.title}
           />
           <Box
             className="overlay"
@@ -91,14 +79,10 @@ function PlayPage({ attendance, likedPlays, play, session, watchlist }: Props) {
         >
           <Stack direction="row" spacing={2}>
             <Typography variant="h6">{play.title}</Typography>
-            <Typography variant="h6">
-              {`(${moment(play.premiere).format("YYYY")})`}
-            </Typography>
+            <Typography variant="h6">{`(${moment(play.premiere).format("YYYY")})`}</Typography>
           </Stack>
           <Stack direction="column" style={{ alignItems: "flex-start" }}>
-            <Typography variant="subtitle1">
-              Written by {play.writtenBy}
-            </Typography>
+            <Typography variant="subtitle1">Written by {play.writtenBy}</Typography>
           </Stack>
         </Stack>
         <Stack width="15%">
@@ -111,19 +95,12 @@ function PlayPage({ attendance, likedPlays, play, session, watchlist }: Props) {
           />
         </Stack>
       </Stack>
-      <PerformanceCalendar
-        viewType="show"
-        identifier={playTitle}
-        showType="PLAY"
-      />
+      <PerformanceCalendar identifier={playTitle} showType="PLAY" viewType="show" />
     </div>
   );
 }
 
-export async function getServerSideProps(context: {
-  params: Params;
-  req: any;
-}) {
+export async function getServerSideProps(context: { params: Params; req: any }) {
   const { title } = context.params;
   const [session, play] = await Promise.all([
     getSession({ req: context.req }),

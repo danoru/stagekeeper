@@ -13,7 +13,7 @@ interface Props {
 
 function TheatreCard(props: Props) {
   return (
-    <Grid item sx={{ margin: "10px" }}>
+    <Grid sx={{ margin: "10px" }}>
       <Card
         sx={{
           position: "relative",
@@ -34,7 +34,6 @@ function TheatreCard(props: Props) {
           <CardMedia
             className="image"
             image={props.image}
-            title={props.name}
             sx={{
               position: "absolute",
               top: 0,
@@ -44,6 +43,7 @@ function TheatreCard(props: Props) {
               filter: "brightness(0.5)",
               transition: "filter 0.3s",
             }}
+            title={props.name}
           />
           <Box
             className="overlay"
@@ -60,7 +60,6 @@ function TheatreCard(props: Props) {
           />
           <Typography
             gutterBottom
-            variant="subtitle1"
             color="secondary"
             sx={{
               position: "absolute",
@@ -69,6 +68,7 @@ function TheatreCard(props: Props) {
               color: "white",
               textShadow: "0 0 5px rgba(0, 0, 0, 0.7)",
             }}
+            variant="subtitle1"
           >
             {props.name}
           </Typography>

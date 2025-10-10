@@ -1,16 +1,16 @@
+import MusicNoteIcon from "@mui/icons-material/MusicNote";
+import TheaterComedyIcon from "@mui/icons-material/TheaterComedy";
 import Badge from "@mui/material/Badge";
+import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
 import Grid from "@mui/material/Grid";
-import Image from "next/image";
 import Link from "@mui/material/Link";
-import moment from "moment";
-import MusicNoteIcon from "@mui/icons-material/MusicNote";
-import TheaterComedyIcon from "@mui/icons-material/TheaterComedy";
 import Typography from "@mui/material/Typography";
-import Box from "@mui/material/Box";
 import { PerformanceType } from "@prisma/client";
+import moment from "moment";
+import Image from "next/image";
 
 interface Props {
   date: Date;
@@ -26,18 +26,14 @@ function DetailInfoCard(card: Props) {
   const showType = isMusical ? "musicals" : "plays";
   const slug = `/${showType}/${card.show.replace(/\s+/g, "-").toLowerCase()}`;
   return (
-    <Grid item sx={{ margin: "2px" }}>
+    <Grid sx={{ margin: "2px" }}>
       <Badge
         anchorOrigin={{
           vertical: "bottom",
           horizontal: "right",
         }}
         badgeContent={
-          isMusical ? (
-            <MusicNoteIcon fontSize="small" />
-          ) : (
-            <TheaterComedyIcon fontSize="small" />
-          )
+          isMusical ? <MusicNoteIcon fontSize="small" /> : <TheaterComedyIcon fontSize="small" />
         }
         color="primary"
         overlap="circular"
@@ -71,12 +67,7 @@ function DetailInfoCard(card: Props) {
                 transition: "filter 0.3s",
               }}
             >
-              <Image
-                src={card.image}
-                alt={card.show}
-                fill
-                style={{ objectFit: "cover" }}
-              />
+              <Image fill alt={card.show} src={card.image} style={{ objectFit: "cover" }} />
             </CardMedia>
             <Box
               className="overlay"
@@ -93,35 +84,35 @@ function DetailInfoCard(card: Props) {
             />
             <CardContent>
               <Typography
-                variant="h6"
                 component="div"
                 sx={{
                   position: "relative",
                   color: "white",
                   textShadow: "0 0 5px rgba(0, 0, 0, 0.7)",
                 }}
+                variant="h6"
               >
                 {card.show}
               </Typography>
               <Typography
-                variant="body1"
                 component="div"
                 sx={{
                   position: "relative",
                   color: "white",
                   textShadow: "0 0 5px rgba(0, 0, 0, 0.7)",
                 }}
+                variant="body1"
               >
                 {card.theatre}
               </Typography>
               <Typography
-                variant="body1"
                 component="div"
                 sx={{
                   position: "relative",
                   color: "white",
                   textShadow: "0 0 5px rgba(0, 0, 0, 0.7)",
                 }}
+                variant="body1"
               >
                 {moment(card.date).format("MMM DD")}
               </Typography>

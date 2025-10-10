@@ -1,5 +1,4 @@
-import React from "react";
-import { Bar } from "react-chartjs-2";
+import { attendance, musicals, performances, theatres } from "@prisma/client";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -10,7 +9,8 @@ import {
   Legend,
 } from "chart.js";
 import moment from "moment";
-import { attendance, musicals, performances, theatres } from "@prisma/client";
+import React from "react";
+import { Bar } from "react-chartjs-2";
 
 interface Props {
   stats: (attendance & {
@@ -18,14 +18,7 @@ interface Props {
   })[];
 }
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend
-);
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 export const options = {
   responsive: true,
@@ -58,9 +51,7 @@ function MonthlyAttendanceChart(props: Props) {
     "December",
   ];
 
-  const musicalMonths = stats.map((data) =>
-    moment(data.performances.startTime).format("MMMM")
-  );
+  const musicalMonths = stats.map((data) => moment(data.performances.startTime).format("MMMM"));
 
   const monthlyOccurence: Record<string, number> = {};
 

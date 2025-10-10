@@ -1,13 +1,11 @@
-import prisma from "../../../src/data/db";
-import { NextApiRequest, NextApiResponse } from "next";
 import { hash } from "bcrypt";
+import { NextApiRequest, NextApiResponse } from "next";
 import * as yup from "yup";
 
+import prisma from "../../../src/data/db";
+
 const schema = yup.object().shape({
-  email: yup
-    .string()
-    .email("Enter a valid email")
-    .required("Email is required."),
+  email: yup.string().email("Enter a valid email").required("Email is required."),
   username: yup
     .string()
     .min(5, "Username must be at least 5 characters long.")

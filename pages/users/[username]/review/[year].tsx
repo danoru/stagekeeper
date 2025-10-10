@@ -1,13 +1,14 @@
-import Carousel from "../../../../src/components/review/Carousel";
+import { attendance, musicals, performances, theatres } from "@prisma/client";
 import Head from "next/head";
+import { Fragment } from "react";
+import superjson from "superjson";
+
+import Carousel from "../../../../src/components/review/Carousel";
 import Highlights from "../../../../src/components/review/Highlights";
 import ReviewHeader from "../../../../src/components/review/ReviewHeader";
 import Statistics from "../../../../src/components/review/Statistics";
-import superjson from "superjson";
-import { attendance, musicals, performances, theatres } from "@prisma/client";
-import { Fragment } from "react";
-import { getDistinctYears, getUsers } from "../../../../src/data/users";
 import { getUserAttendanceByYear } from "../../../../src/data/performances";
+import { getDistinctYears, getUsers } from "../../../../src/data/users";
 
 interface Props {
   musicals: (attendance & {
@@ -22,10 +23,7 @@ function ReviewPage({ musicals, username, year }: Props) {
     <Fragment>
       <Head>
         <title>Year in Review • StageKeeper</title>
-        <meta
-          name="description"
-          content="See what your Year in Review looks like!"
-        />
+        <meta content="See what your Year in Review looks like!" name="description" />
       </Head>
       <div>
         <ReviewHeader username={username} year={year} />

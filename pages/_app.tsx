@@ -4,7 +4,6 @@ import { Decimal } from "decimal.js";
 import type { AppProps } from "next/app";
 import Head from "next/head";
 import { SessionProvider } from "next-auth/react";
-import PropTypes from "prop-types";
 import * as React from "react";
 import superjson from "superjson";
 
@@ -43,12 +42,6 @@ export default function App({
     </SessionProvider>
   );
 }
-
-App.propTypes = {
-  Component: PropTypes.elementType.isRequired,
-  emotionCache: PropTypes.object,
-  pageProps: PropTypes.object.isRequired,
-};
 
 superjson.registerCustom<Decimal, string>(
   {

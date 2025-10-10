@@ -5,7 +5,7 @@ import { musicals, plays, programming, seasons, theatres } from "@prisma/client"
 import moment from "moment";
 import Image from "next/image";
 import Link from "next/link";
-import Carousel from "react-material-ui-carousel";
+import SimpleCarousel from "../ui/SimpleCarousel";
 
 interface Props {
   upcomingPerformances: (programming & {
@@ -21,8 +21,11 @@ function UpcomingShowList({ upcomingPerformances }: Props) {
       <Typography sx={{ margin: "2vh 0" }} variant="h5">
         Upcoming Performances
       </Typography>
-      <Carousel sx={{ maxWidth: 300, margin: "auto" }}>
-        {upcomingPerformances.map((performance: any) => {
+      {(!upcomingPerformances || upcomingPerformances.length === 0) ? (
+        <Typography variant="body2">No upcoming performances</Typography>
+      ) : (
+        <SimpleCarousel sx={{ maxWidth: 300, margin: "auto" }}>
+          {upcomingPerformances.map((performance: any) => {
           const showType = performance.type === "MUSICAL" ? "musicals" : "plays";
           const title =
             performance.type === "MUSICAL" ? performance.musicals?.title : performance.plays?.title;
@@ -31,8 +34,8 @@ function UpcomingShowList({ upcomingPerformances }: Props) {
               ? performance.musicals?.playbill
               : performance.plays?.playbill;
           return (
-            <Link href={`/${showType}/${title?.replace(/\s+/g, "-").toLowerCase()}`}>
-              <Paper key={performance.id} className="card">
+            <Link key={performance.id} href={`/${showType}/${title?.replace(/\s+/g, "-").toLowerCase()}`}>
+              <Paper className="card">
                 <Image alt={title} height="185" src={image} width="150" />
                 <Typography variant="h6">{title}</Typography>
                 <Typography variant="body2">
@@ -44,7 +47,8 @@ function UpcomingShowList({ upcomingPerformances }: Props) {
             </Link>
           );
         })}
-      </Carousel>
+        </SimpleCarousel>
+      )}
     </Grid>
   );
 }

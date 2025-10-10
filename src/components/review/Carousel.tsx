@@ -4,7 +4,7 @@ import CardMedia from "@mui/material/CardMedia";
 import Typography from "@mui/material/Typography";
 import { attendance, musicals, performances, theatres } from "@prisma/client";
 import moment from "moment";
-import Carousel from "react-material-ui-carousel";
+import SimpleCarousel from "../ui/SimpleCarousel";
 
 interface Props {
   items: (attendance & {
@@ -23,7 +23,7 @@ interface CardProps {
 
 function MusicalCarousel({ items }: Props) {
   return (
-    <Carousel sx={{ maxWidth: 500, margin: "auto" }}>
+    <SimpleCarousel sx={{ maxWidth: 500, margin: "auto" }}>
       {items?.map((item, i) => (
         <CarouselItem
           key={i}
@@ -35,7 +35,7 @@ function MusicalCarousel({ items }: Props) {
           title={item.performances.musicals?.title}
         />
       ))}
-    </Carousel>
+    </SimpleCarousel>
   );
 }
 

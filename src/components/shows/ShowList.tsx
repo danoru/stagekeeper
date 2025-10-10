@@ -57,7 +57,6 @@ function ShowList({ shows, header, style, upcomingPerformances }: Props) {
       </Grid>
       <Grid
         container
-        item
         columnSpacing={2}
         rowSpacing={1}
         sx={{

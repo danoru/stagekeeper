@@ -38,12 +38,12 @@ function TheatresPage({ theatres: initialTheatres, theatreCount }: Props) {
         <title>Theatres • StageKeeper</title>
       </Head>
       <Grid container direction="row">
-        <Grid item xs={12}>
+        <Grid size={{ xs: 12 }}>
           <Typography sx={{ margin: "1vh 0" }} variant="h6">
             All Theatres
           </Typography>
         </Grid>
-        <Grid container item sx={{ margin: "0 auto" }} xs={8}>
+        <Grid container size={{ xs: 8 }} sx={{ margin: "0 auto" }}>
           {theatres.map((theatre, i) => (
             <TheatreCard
               key={i}

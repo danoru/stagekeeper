@@ -13,7 +13,6 @@ function UserFollowing({ following }: Props) {
   return (
     <Grid>
       <Grid
-        item
         style={{
           borderBottomWidth: "1px",
           borderBottomStyle: "solid",
@@ -31,7 +30,6 @@ function UserFollowing({ following }: Props) {
       </Grid>
       <Grid
         container
-        item
         columnSpacing={1}
         rowSpacing={1}
         sx={{

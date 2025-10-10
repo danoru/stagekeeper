@@ -16,8 +16,8 @@
     "jsxImportSource": "@emotion/react",
     "incremental": true
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
-  "exclude": ["node_modules", "**/*.jsx"],  
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".eslint.config.js", "next.config.js"],
+  "exclude": ["node_modules", ".next", "dist", "build", "**/*/.js"],
   "ts-node": {
     "compilerOptions": {
       "module": "commonjs"

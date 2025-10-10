@@ -1,14 +1,5 @@
 {
-  "name": "stagekeeper",
-  "version": "0.1.0",
-  "private": false,
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint",
-    "postinstall": "prisma generate"
-  },
+  "author": "Daniel Mendez Perdomo",
   "dependencies": {
     "@emotion/cache": "^11.10.5",
     "@emotion/react": "^11.10.5",
@@ -17,38 +8,78 @@
     "@fullcalendar/core": "^6.1.15",
     "@fullcalendar/daygrid": "^6.1.15",
     "@fullcalendar/react": "^6.1.15",
-    "@mui/icons-material": "^5.11.0",
-    "@mui/material": "^5.11.1",
+    "@mui/icons-material": "^7.3.4",
+    "@mui/material": "^7.3.4",
     "@prisma/client": "^5.16.2",
     "@supabase/ssr": "^0.4.0",
     "@supabase/supabase-js": "^2.44.3",
-    "bcrypt": "^5.1.1",
+    "bcrypt": "^6.0.0",
     "chart.js": "^4.2.0",
     "decimal.js": "^10.4.3",
     "formik": "^2.4.6",
     "moment": "^2.29.4",
     "moment-timezone": "^0.5.45",
-    "next": "13.0.7",
-    "next-auth": "^4.24.7",
-    "next-superjson-plugin": "^0.6.3",
-    "prisma": "^5.16.2",
-    "react": "18.2.0",
+    "next": "15.5.4",
+    "next-auth": "^4.24.11",
+    "next-superjson": "1.0.7",
+    "next-superjson-plugin": "0.6.3",
+    "nodemailer": "^6.9.4",
+    "react": "^19.2.0",
     "react-chartjs-2": "^5.2.0",
-    "react-dom": "18.2.0",
+    "react-dom": "^19.2.0",
     "react-material-ui-carousel": "^3.4.2",
     "superjson": "^2.2.1",
-    "typescript": "^4.9.4",
     "yup": "^1.4.0"
   },
+  "description": "StageKeeper is an application designed to help users manage and track their musical adventures effectively.",
   "devDependencies": {
-    "@types/bcrypt": "^5.0.2",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.0",
+    "@types/bcrypt": "^6.0.0",
+    "@types/jest": "^30.0.0",
     "@types/node": "18.11.17",
-    "@types/react": "18.0.26",
-    "eslint": "8.30.0",
-    "eslint-config-next": "13.0.7",
-    "ts-node": "^10.9.2"
+    "@types/react": "19.2.0",
+    "@typescript-eslint/parser": "^8.46.0",
+    "eslint": "9.37.0",
+    "eslint-config-next": "15.5.4",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-deprecation": "^3.0.0",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-jest-dom": "^5.5.0",
+    "eslint-plugin-prettier": "^5.5.4",
+    "eslint-plugin-testing-library": "^7.13.1",
+    "jest": "^30.2.0",
+    "prettier": "^3.6.2",
+    "prisma": "^5.16.2",
+    "ts-jest": "^29.4.5",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
   },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,css}": [
+      "prettier --write"
+    ]
+  },
+  "name": "stagekeeper",
   "prisma": {
     "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
-  }
+  },
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "postinstall": "prisma generate",
+    "test": "pnpm run lint && pnpm run test:format && pnpm run test:types",
+    "test:format": "pnpm run format:check",
+    "test:types": "tsc --noEmit"
+  },
+  "version": "1.0.0"
 }

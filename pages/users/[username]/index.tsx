@@ -10,6 +10,7 @@ import UserFollowing from "../../../src/components/users/UserFollowing";
 import UserWatchlistPreview from "../../../src/components/users/UserWatchlistPreview";
 import { getRecentPerformances } from "../../../src/data/performances";
 import { getUserProfile, getFollowers } from "../../../src/data/users";
+import prisma from "../../../src/data/db";
 
 interface Props {
   attendance: (attendance & {
@@ -78,14 +79,34 @@ export async function getServerSideProps(context: { params: Params; req: any }) 
   let following: following[] = [];
   let recentPerformances: any[] = [];
 
-  const user = await getUserProfile(username);
+  const user = await prisma.users.findUnique({
+    where: { username },
+    include: {
+      watchlist: { include: { musicals: true } },
+      attendance: {
+        include: { performances: true },
+        orderBy: { performances: { startTime: "desc" } },
+      },
+      following: true,
+    },
+  });
 
   if (user) {
-    watchlist = user.watchlist;
-    attendance = user.attendance;
-    followers = await getFollowers(username);
-    following = user.following;
-    recentPerformances = await getRecentPerformances([user.username]);
+    followers = await prisma.following.findMany({
+      where: { followingUsername: username },
+      include: { users: true },
+    });
+    recentPerformances = await prisma.attendance.findMany({
+      where: {
+        users: { username: { in: [user.username] } },
+        performances: { startTime: { lte: new Date() } },
+      },
+      include: {
+        performances: { include: { musicals: true, theatres: true } },
+      },
+      orderBy: { performances: { startTime: "desc" } },
+      take: 20,
+    });
   }
 
   return {

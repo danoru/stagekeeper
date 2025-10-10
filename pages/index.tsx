@@ -7,6 +7,7 @@ import LoggedInHomePage from "../src/components/home/LoggedInHomePage";
 import LoggedOutHomePage from "../src/components/home/LoggedOutHomePage";
 import { getRecentPerformances, getFriendsUpcomingPerformances } from "../src/data/performances";
 import { getFollowing } from "../src/data/users";
+import prisma from "../src/data/db";
 import styles from "../src/styles/home.module.css";
 
 interface Props {
@@ -43,16 +44,45 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
 
   if (session) {
     const userId = Number(session.user.id);
-    const following = await getFollowing(userId);
-    const followingList = following.map((user) => user.followingUsername);
-    const [upcomingPerformances, recentPerformances] = await Promise.all([
-      getFriendsUpcomingPerformances(followingList),
-      getRecentPerformances(followingList),
-    ]);
+
+    // Combine following and performances queries
+    const userData = await prisma.users.findUnique({
+      where: { id: userId },
+      include: {
+        following: {
+          include: {
+            users: true,
+          },
+        },
+        attendance: {
+          include: {
+            performances: {
+              include: { musicals: true, theatres: true },
+            },
+          },
+          orderBy: { performances: { startTime: "desc" } },
+          take: 20,
+        },
+      },
+    });
+
+    const followingList = userData?.following.map(
+      (user: { followingUsername: string }) => user.followingUsername
+    );
+    const upcomingPerformances = await prisma.attendance.findMany({
+      where: {
+        users: { username: { in: followingList } },
+        performances: { startTime: { gte: new Date() } },
+      },
+      include: {
+        performances: { include: { musicals: true, theatres: true } },
+      },
+      take: 20,
+    });
 
     return {
       props: superjson.serialize({
-        recentPerformances,
+        recentPerformances: userData?.attendance,
         session,
         upcomingPerformances,
       }).json,

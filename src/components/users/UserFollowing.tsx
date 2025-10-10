@@ -1,7 +1,7 @@
 import Button from "@mui/material/Button";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
-import { following } from "@prisma/client";
+import type { following } from "@prisma/client";
 
 import UserAvatar from "./UserAvatar";
 

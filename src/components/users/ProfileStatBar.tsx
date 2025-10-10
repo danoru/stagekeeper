@@ -6,7 +6,7 @@ import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import Snackbar from "@mui/material/Snackbar";
 import Typography from "@mui/material/Typography";
-import { attendance, following, performances, users } from "@prisma/client";
+import type { attendance, following, performances, users } from "@prisma/client";
 import moment from "moment";
 import React, { useState } from "react";
 

@@ -1,4 +1,4 @@
-import { attendance, musicals, performances, theatres } from "@prisma/client";
+import type { attendance, musicals, performances, theatres } from "@prisma/client";
 import {
   Chart as ChartJS,
   CategoryScale,

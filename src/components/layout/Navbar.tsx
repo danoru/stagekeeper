@@ -53,6 +53,10 @@ function Navbar() {
     setAnchorElNav(null);
   };
 
+  if (status === "loading") {
+    return null;
+  }
+
   return (
     <AppBar position="static">
       <Container maxWidth="xl">

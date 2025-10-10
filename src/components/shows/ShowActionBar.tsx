@@ -13,7 +13,14 @@ import Rating from "@mui/material/Rating";
 import Snackbar from "@mui/material/Snackbar";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import { attendance, likedShows, musicals, performances, plays, watchlist } from "@prisma/client";
+import type {
+  attendance,
+  likedShows,
+  musicals,
+  performances,
+  plays,
+  watchlist,
+} from "@prisma/client";
 import React, { useState } from "react";
 
 interface Props {

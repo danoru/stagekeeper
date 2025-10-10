@@ -30,7 +30,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       performances = await prisma.programming.findMany({
         where: { musical: musical.id, endDate: { gte: new Date() } },
         include: {
-          musicals: true,
+          musicals: {
+            select: { id: true, title: true, playbill: true },
+          },
         },
         orderBy: { startDate: "asc" },
       });
@@ -48,7 +50,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       performances = await prisma.programming.findMany({
         where: { play: play.id, endDate: { gte: new Date() } },
         include: {
-          plays: true,
+          plays: {
+            select: { id: true, title: true, playbill: true },
+          },
         },
         orderBy: { startDate: "asc" },
       });
@@ -56,6 +60,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ error: "Invalid type. Must be 'MUSICAL' or 'PLAY'." });
     }
 
+    // allow short public caching (CDN) for programming results
+    res.setHeader("Cache-Control", "public, max-age=60, stale-while-revalidate=120");
     res.status(200).json(performances);
   } catch (error) {
     console.error(error);

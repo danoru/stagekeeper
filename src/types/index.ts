@@ -1,4 +1,4 @@
-import { users } from "@prisma/client";
+import type { users } from "@prisma/client";
 
 export interface MUSICAL_LIST_TYPE {
   date: string;

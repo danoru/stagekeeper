@@ -9,7 +9,15 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     try {
       const user = await prisma.users.findUnique({
         where: { username: String(username) },
+        select: {
+          id: true,
+          username: true,
+          firstName: true,
+          lastName: true,
+          image: true,
+        },
       });
+      res.setHeader("Cache-Control", "public, max-age=60, stale-while-revalidate=120");
       return res.status(200).json(user);
     } catch (error) {
       return res.status(500).json({ message: "Error fetching user data." });

@@ -1,4 +1,4 @@
-import { attendance, musicals, performances, theatres } from "@prisma/client";
+import type { attendance, musicals, performances, theatres } from "@prisma/client";
 
 import styles from "../../styles/highlights.module.css";
 

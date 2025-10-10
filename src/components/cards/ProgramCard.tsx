@@ -8,7 +8,7 @@ import CardMedia from "@mui/material/CardMedia";
 import Grid from "@mui/material/Grid";
 import Link from "@mui/material/Link";
 import Typography from "@mui/material/Typography";
-import { PerformanceType } from "@prisma/client";
+import type { PerformanceType } from "@prisma/client";
 import moment from "moment";
 import Image from "next/image";
 

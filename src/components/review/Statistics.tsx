@@ -1,4 +1,4 @@
-import { attendance, musicals, performances, theatres } from "@prisma/client";
+import type { attendance, musicals, performances, theatres } from "@prisma/client";
 import moment from "moment";
 import Image from "next/image";
 
@@ -68,7 +68,7 @@ function Statistics({ stats, view, year }: Props) {
   // Musical Taste Calculations
   const musicalPremieres = stats
     .map((data) => moment(data.performances.musicals?.premiere).year())
-    .filter((year) => year); // Filter out undefined or null years
+    .filter((year) => year);
 
   const musicalPremiereSum =
     musicalPremieres.length > 0 ? musicalPremieres.reduce((a, b) => a + b, 0) : 0;

@@ -9,5 +9,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const { plays, playCount } = await getPaginatedPlays(pageNumber, limitNumber);
 
+  res.setHeader("Cache-Control", "public, max-age=60, stale-while-revalidate=30");
   res.status(200).json({ plays, playCount });
 }

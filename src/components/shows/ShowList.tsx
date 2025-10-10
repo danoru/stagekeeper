@@ -1,6 +1,6 @@
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
-import { musicals, plays, programming } from "@prisma/client";
+import type { musicals, plays, programming } from "@prisma/client";
 
 import ShowCard from "../cards/ShowCard";
 

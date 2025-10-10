@@ -15,6 +15,7 @@ export default function SimpleCarousel({ children, sx, autoplay = false, interva
   const [index, setIndex] = useState(0);
   const count = childArray.length;
   const timer = useRef<number | null>(null);
+  const raf = useRef<number | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const pointerStartX = useRef<number | null>(null);
   const pointerDeltaX = useRef<number>(0);
@@ -28,6 +29,7 @@ export default function SimpleCarousel({ children, sx, autoplay = false, interva
     }, interval);
     return () => {
       if (timer.current) window.clearInterval(timer.current);
+      if (raf.current) window.cancelAnimationFrame(raf.current);
     };
   }, [autoplay, interval, count]);
 
@@ -49,9 +51,15 @@ export default function SimpleCarousel({ children, sx, autoplay = false, interva
     if (pointerStartX.current == null) return;
     pointerDeltaX.current = e.clientX - pointerStartX.current;
     if (containerRef.current) {
-      const inner = containerRef.current.firstElementChild as HTMLElement | null;
-      if (inner)
-        inner.style.transform = `translateX(calc(-${index * 100}% + ${pointerDeltaX.current}px))`;
+      if (raf.current) {
+        return;
+      }
+      raf.current = window.requestAnimationFrame(() => {
+        const inner = containerRef.current?.firstElementChild as HTMLElement | null;
+        if (inner)
+          inner.style.transform = `translateX(calc(-${index * 100}% + ${pointerDeltaX.current}px))`;
+        raf.current = null;
+      });
     }
   }
 
@@ -63,6 +71,10 @@ export default function SimpleCarousel({ children, sx, autoplay = false, interva
     try {
       (e.target as Element).releasePointerCapture(e.pointerId);
     } catch {}
+    if (raf.current) {
+      window.cancelAnimationFrame(raf.current);
+      raf.current = null;
+    }
     const threshold = 50;
     if (delta > threshold) {
       prev();
@@ -147,8 +159,6 @@ export default function SimpleCarousel({ children, sx, autoplay = false, interva
           >
             <ChevronRightIcon />
           </IconButton>
-
-          {/* Dots */}
           <Box
             sx={{
               position: "absolute",

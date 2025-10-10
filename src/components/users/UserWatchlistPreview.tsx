@@ -4,7 +4,7 @@ import CardMedia from "@mui/material/CardMedia";
 import Grid from "@mui/material/Grid";
 import Link from "@mui/material/Link";
 import Tooltip from "@mui/material/Tooltip";
-import { watchlist, musicals } from "@prisma/client";
+import type { watchlist, musicals } from "@prisma/client";
 import Image from "next/image";
 
 interface WatchlistProps {

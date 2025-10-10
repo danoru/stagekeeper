@@ -1,6 +1,6 @@
 import dayGridPlugin from "@fullcalendar/daygrid";
 import FullCalendar from "@fullcalendar/react";
-import { musicals, PerformanceType, plays, programming } from "@prisma/client";
+import type { musicals, PerformanceType, plays, programming } from "@prisma/client";
 import moment from "moment";
 import React, { useEffect, useState } from "react";
 

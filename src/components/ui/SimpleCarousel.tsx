@@ -1,6 +1,6 @@
-import { Box, IconButton, SxProps } from "@mui/material";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import { Box, IconButton, SxProps } from "@mui/material";
 import { ReactNode, useEffect, useRef, useState, KeyboardEvent } from "react";
 
 interface Props {
@@ -95,17 +95,17 @@ export default function SimpleCarousel({ children, sx, autoplay = false, interva
 
   return (
     <Box
-      ref={containerRef}
-      tabIndex={0}
+      onBlur={() => setIsPaused(false)}
+      onFocus={() => setIsPaused(true)}
       onKeyDown={onKey}
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+      onPointerCancel={onPointerUp}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
-      onPointerCancel={onPointerUp}
-      onMouseEnter={() => setIsPaused(true)}
-      onMouseLeave={() => setIsPaused(false)}
-      onFocus={() => setIsPaused(true)}
-      onBlur={() => setIsPaused(false)}
+      ref={containerRef}
+      tabIndex={0}
       sx={{
         position: "relative",
         overflow: "hidden",
@@ -133,7 +133,6 @@ export default function SimpleCarousel({ children, sx, autoplay = false, interva
         <>
           <IconButton
             aria-label="previous"
-            onClick={prev}
             size="small"
             sx={{
               position: "absolute",
@@ -142,12 +141,12 @@ export default function SimpleCarousel({ children, sx, autoplay = false, interva
               transform: "translateY(-50%)",
               background: "rgba(255,255,255,0.7)",
             }}
+            onClick={prev}
           >
             <ChevronLeftIcon />
           </IconButton>
           <IconButton
             aria-label="next"
-            onClick={next}
             size="small"
             sx={{
               position: "absolute",
@@ -156,25 +155,25 @@ export default function SimpleCarousel({ children, sx, autoplay = false, interva
               transform: "translateY(-50%)",
               background: "rgba(255,255,255,0.7)",
             }}
+            onClick={next}
           >
             <ChevronRightIcon />
           </IconButton>
           <Box
             sx={{
-              position: "absolute",
-              left: "50%",
-              transform: "translateX(-50%)",
               bottom: 8,
               display: "flex",
               gap: 1,
+              left: "50%",
+              position: "absolute",
+              transform: "translateX(-50%)",
             }}
           >
             {childArray.map((_, i) => (
               <Box
-                key={i}
-                component="button"
                 aria-label={`Go to slide ${i + 1}`}
-                onClick={() => setIndex(i)}
+                component="button"
+                key={i}
                 sx={{
                   width: 8,
                   height: 8,
@@ -184,6 +183,7 @@ export default function SimpleCarousel({ children, sx, autoplay = false, interva
                   background: i === index ? "primary.main" : "rgba(0,0,0,0.3)",
                   cursor: "pointer",
                 }}
+                onClick={() => setIndex(i)}
               />
             ))}
           </Box>

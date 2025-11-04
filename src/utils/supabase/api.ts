@@ -1,4 +1,4 @@
-import { createServerClient, type CookieOptions, serialize } from "@supabase/ssr";
+import { createServerClient, serializeCookieHeader } from "@supabase/ssr";
 import { type NextApiRequest, type NextApiResponse } from "next";
 
 export default function createClient(req: NextApiRequest, res: NextApiResponse) {
@@ -16,7 +16,9 @@ export default function createClient(req: NextApiRequest, res: NextApiResponse) 
         setAll(cookiesToSet) {
           res.setHeader(
             "Set-Cookie",
-            cookiesToSet.map(({ name, value, options }) => serialize(name, value, options))
+            cookiesToSet.map(({ name, value, options }) =>
+              serializeCookieHeader(name, value, options)
+            )
           );
         },
       },

@@ -18,7 +18,6 @@ import UserFollowing from "../../../src/components/users/UserFollowing";
 import UserWatchlistPreview from "../../../src/components/users/UserWatchlistPreview";
 import { getRecentPerformances } from "../../../src/data/performances";
 import { getUserProfile, getFollowers } from "../../../src/data/users";
-import prisma from "../../../src/data/db";
 
 interface Props {
   attendance: (attendance & {

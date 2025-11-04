@@ -5,6 +5,7 @@ import type { attendance, musicals, performances, plays, theatres } from "@prism
 import DetailInfoCard from "../cards/DetailInfoCard";
 
 interface Props {
+  trim: number;
   upcomingPerformances: (attendance & {
     performances: performances & {
       musicals: musicals;
@@ -14,7 +15,7 @@ interface Props {
   })[];
 }
 
-function FriendUpcomingActivity({ upcomingPerformances }: Props) {
+function FriendUpcomingActivity({ trim, upcomingPerformances }: Props) {
   const uniquePerformances = new Set<string>();
   const upcoming = upcomingPerformances
     .filter((a) => {
@@ -35,12 +36,12 @@ function FriendUpcomingActivity({ upcomingPerformances }: Props) {
       }
       return false;
     })
-    .slice(0, 5);
+    .slice(0, trim);
 
   return (
-    <Grid container>
+    <>
       <Grid
-        style={{
+        sx={{
           borderBottomWidth: "1px",
           borderBottomStyle: "solid",
           borderBottomColor: "theme.palette.secondary",
@@ -100,7 +101,7 @@ function FriendUpcomingActivity({ upcomingPerformances }: Props) {
           }
         )}
       </Grid>
-    </Grid>
+    </>
   );
 }
 

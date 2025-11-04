@@ -12,6 +12,7 @@ interface Props {
 }
 
 function LoggedInHomePage({ recentPerformances, sessionUser, upcomingPerformances }: Props) {
+  const trim = 6;
   return (
     <main style={{ marginTop: "20px", textAlign: "center" }}>
       <Typography variant="h6">
@@ -21,8 +22,8 @@ function LoggedInHomePage({ recentPerformances, sessionUser, upcomingPerformance
         </Link>
         . Here&apos;s what your friends have been watching...
       </Typography>
-      <FriendUpcomingActivity upcomingPerformances={upcomingPerformances} />
-      <RecentActivity recentPerformances={recentPerformances} trim={5} />
+      <FriendUpcomingActivity upcomingPerformances={upcomingPerformances} trim={trim} />
+      <RecentActivity recentPerformances={recentPerformances} trim={trim} />
     </main>
   );
 }

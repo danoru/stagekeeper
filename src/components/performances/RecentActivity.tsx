@@ -41,9 +41,9 @@ function RecentActivity({ recentPerformances, trim }: Props) {
     .slice(0, trim);
 
   return (
-    <Grid container>
+    <>
       <Grid
-        style={{
+        sx={{
           borderBottomWidth: "1px",
           borderBottomStyle: "solid",
           borderBottomColor: "theme.palette.secondary",
@@ -103,7 +103,7 @@ function RecentActivity({ recentPerformances, trim }: Props) {
           }
         )}
       </Grid>
-    </Grid>
+    </>
   );
 }
 

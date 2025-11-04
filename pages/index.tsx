@@ -5,8 +5,6 @@ import superjson from "superjson";
 
 import LoggedInHomePage from "../src/components/home/LoggedInHomePage";
 import LoggedOutHomePage from "../src/components/home/LoggedOutHomePage";
-import { getRecentPerformances, getFriendsUpcomingPerformances } from "../src/data/performances";
-import { getFollowing } from "../src/data/users";
 import prisma from "../src/data/db";
 import styles from "../src/styles/home.module.css";
 
@@ -44,8 +42,6 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
 
   if (session) {
     const userId = Number(session.user.id);
-
-    // Combine following and performances queries
     const userData = await prisma.users.findUnique({
       where: { id: userId },
       include: {
@@ -57,7 +53,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
         attendance: {
           include: {
             performances: {
-              include: { musicals: true, theatres: true },
+              include: { musicals: true, plays: true, theatres: true },
             },
           },
           orderBy: { performances: { startTime: "desc" } },
@@ -75,7 +71,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
         performances: { startTime: { gte: new Date() } },
       },
       include: {
-        performances: { include: { musicals: true, theatres: true } },
+        performances: { include: { musicals: true, plays: true, theatres: true } },
       },
       take: 20,
     });

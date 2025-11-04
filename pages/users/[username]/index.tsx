@@ -1,5 +1,13 @@
 import Grid from "@mui/material/Grid";
-import { attendance, following, musicals, performances, users, watchlist } from "@prisma/client";
+import {
+  attendance,
+  following,
+  musicals,
+  performances,
+  plays,
+  users,
+  watchlist,
+} from "@prisma/client";
 import { getSession } from "next-auth/react";
 import superjson from "superjson";
 
@@ -21,7 +29,7 @@ interface Props {
   recentPerformances: any;
   sessionUser: any;
   user: users;
-  watchlist: (watchlist & { musicals: musicals })[];
+  watchlist: (watchlist & { musicals: musicals; plays: plays })[];
 }
 
 interface Params {
@@ -79,34 +87,14 @@ export async function getServerSideProps(context: { params: Params; req: any }) 
   let following: following[] = [];
   let recentPerformances: any[] = [];
 
-  const user = await prisma.users.findUnique({
-    where: { username },
-    include: {
-      watchlist: { include: { musicals: true } },
-      attendance: {
-        include: { performances: true },
-        orderBy: { performances: { startTime: "desc" } },
-      },
-      following: true,
-    },
-  });
+  const user = await getUserProfile(username);
 
   if (user) {
-    followers = await prisma.following.findMany({
-      where: { followingUsername: username },
-      include: { users: true },
-    });
-    recentPerformances = await prisma.attendance.findMany({
-      where: {
-        users: { username: { in: [user.username] } },
-        performances: { startTime: { lte: new Date() } },
-      },
-      include: {
-        performances: { include: { musicals: true, theatres: true } },
-      },
-      orderBy: { performances: { startTime: "desc" } },
-      take: 20,
-    });
+    watchlist = user.watchlist;
+    attendance = user.attendance;
+    followers = await getFollowers(username);
+    following = user.following;
+    recentPerformances = await getRecentPerformances([user.username]);
   }
 
   return {

@@ -1,5 +1,14 @@
 import prisma from "./db";
 
+export async function getPlays() {
+  const plays = await prisma.plays.findMany({
+    orderBy: {
+      title: "asc",
+    },
+  });
+  return plays;
+}
+
 export async function getPlayByTitle(playTitle: string) {
   const formattedTitle = playTitle.replace(/\s+/g, "-").toLowerCase();
   const plays = await prisma.plays.findMany({

@@ -4,12 +4,15 @@ import CardMedia from "@mui/material/CardMedia";
 import Grid from "@mui/material/Grid";
 import Link from "@mui/material/Link";
 import Tooltip from "@mui/material/Tooltip";
-import type { watchlist, musicals } from "@prisma/client";
+import type { musicals, plays, watchlist } from "@prisma/client";
 import Image from "next/image";
 
 interface WatchlistProps {
   username: string;
-  watchlist: (watchlist & { musicals: musicals })[];
+  watchlist: (watchlist & {
+    musicals: musicals;
+    plays: plays;
+  })[];
 }
 
 interface CardProps {

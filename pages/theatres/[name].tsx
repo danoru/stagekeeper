@@ -8,7 +8,7 @@ import superjson from "superjson";
 
 import ProgramCard from "../../src/components/cards/ProgramCard";
 import PerformanceCalendar from "../../src/components/schedule/PerformanceCalendar";
-import { getTheatreByName, getSeasons } from "../../src/data/theatres";
+import { getTheatreByName, getCurrentSeason } from "../../src/data/theatres";
 
 interface Props {
   theatre: theatres;
@@ -80,7 +80,7 @@ export async function getServerSideProps(context: { params: Params }) {
   let seasons: any = [];
 
   if (theatre) {
-    seasons = await getSeasons(theatre.id);
+    seasons = await getCurrentSeason(theatre.id);
   }
 
   return {

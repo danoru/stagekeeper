@@ -158,7 +158,7 @@ export async function getTheatreByName(theatreName: string) {
   return null;
 }
 
-export async function getSeasons(theatreId: number) {
+export async function getCurrentSeason(theatreId: number) {
   const seasons = await prisma.seasons.findMany({
     where: {
       theatre: theatreId,
@@ -171,6 +171,10 @@ export async function getSeasons(theatreId: number) {
         },
       },
     },
+    orderBy: {
+      startDate: "desc",
+    },
+    take: 1,
   });
 
   const sortedSeasons = seasons.map((season) => ({

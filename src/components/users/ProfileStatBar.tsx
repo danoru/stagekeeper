@@ -119,6 +119,8 @@ function ProfileStatBar({
   );
 
   const currentYear = moment().format("YYYY");
+  const musicalsAttended = attendance.filter((a) => a.performances.type === "MUSICAL").length;
+  const playsAttended = attendance.filter((a) => a.performances.type === "PLAY").length;
   const attendanceThisYear = attendance.filter((a) => {
     const startTime = moment(a.performances.startTime);
     return moment(startTime).format("YYYY") === currentYear;
@@ -144,11 +146,11 @@ function ProfileStatBar({
           </Button>
           <Menu
             anchorEl={anchorEl}
-            MenuListProps={{
-              "aria-labelledby": "basic-button",
-            }}
             open={open}
             onClose={handleClose}
+            slotProps={{
+              list: { "aria-labelledby": "basic-button" },
+            }}
           >
             <MenuItem onClick={copyUrlToClipboard}>
               <LinkIcon /> &nbsp; Copy profile link
@@ -158,7 +160,10 @@ function ProfileStatBar({
       </Grid>
       <Grid container justifyContent="center" size={{ xs: 6 }}>
         <Button href={`${user.username}/musicals`} size="small">
-          {`${attendance.length} MUSICALS`}
+          {`${musicalsAttended} MUSICALS`}
+        </Button>
+        <Button href={`${user.username}/plays`} size="small">
+          {`${playsAttended} PLAYS`}
         </Button>
         <Button href={`${user.username}/musicals`} size="small">
           {`${attendanceThisYear?.length} THIS YEAR`}

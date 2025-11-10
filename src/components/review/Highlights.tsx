@@ -1,19 +1,32 @@
-import type { attendance, musicals, performances, theatres } from "@prisma/client";
+import type { attendance, musicals, performances, plays, theatres } from "@prisma/client";
 
 import styles from "../../styles/highlights.module.css";
 
 interface Props {
   highlights: (attendance & {
-    performances: performances & { musicals: musicals; theatres: theatres };
+    performances: performances & { musicals: musicals; plays: plays; theatres: theatres };
   })[];
 }
 
 function Highlights({ highlights }: Props) {
-  const musicalCount = highlights.length;
+  const { musicalCount, playCount, totalDuration } = highlights.reduce(
+    (accumulator, highlight) => {
+      const { musicals, plays, type } = highlight.performances;
 
-  const totalDuration = highlights.reduce((accumulator, highlight) => {
-    return accumulator + (highlight.performances.musicals?.duration ?? 150);
-  }, 0);
+      if (type === "MUSICAL") accumulator.musicalCount += 1;
+      if (type === "PLAY") accumulator.playCount += 1;
+
+      const duration = musicals?.duration ?? plays?.duration ?? 150;
+      accumulator.totalDuration += duration;
+
+      return accumulator;
+    },
+    {
+      musicalCount: 0,
+      playCount: 0,
+      totalDuration: 0,
+    }
+  );
 
   function convertTime(num: number) {
     const hours = Math.floor(num / 60);
@@ -49,6 +62,10 @@ function Highlights({ highlights }: Props) {
       <div className={styles.info}>
         <div>
           <h1>{musicalCount} Musicals</h1>
+        </div>
+        <div className={styles.dot}></div>
+        <div>
+          <h1>{playCount} Plays</h1>
         </div>
         <div className={styles.dot}></div>
         <div>

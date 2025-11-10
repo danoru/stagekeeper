@@ -1,4 +1,4 @@
-import type { attendance, musicals, performances, theatres } from "@prisma/client";
+import type { attendance, musicals, performances, plays, theatres } from "@prisma/client";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -9,12 +9,11 @@ import {
   Legend,
 } from "chart.js";
 import moment from "moment";
-import React from "react";
 import { Bar } from "react-chartjs-2";
 
 interface Props {
   stats: (attendance & {
-    performances: performances & { musicals: musicals; theatres: theatres };
+    performances: performances & { musicals: musicals; plays: plays; theatres: theatres };
   })[];
 }
 
@@ -28,14 +27,12 @@ export const options = {
     },
     title: {
       display: true,
-      text: "Musicals by Month",
+      text: "Shows by Month",
     },
   },
 };
 
-function MonthlyAttendanceChart(props: Props) {
-  const { stats } = props;
-
+function MonthlyAttendanceChart({ stats }: Props) {
   const labels = [
     "January",
     "February",
@@ -51,33 +48,47 @@ function MonthlyAttendanceChart(props: Props) {
     "December",
   ];
 
-  const musicalMonths = stats.map((data) => moment(data.performances.startTime).format("MMMM"));
+  const monthlyOccurrences = stats.reduce<Record<string, { musical: number; play: number }>>(
+    (accumulator, stat) => {
+      const month = moment(stat.performances.startTime).format("MMMM");
+      const type = stat.performances.type;
 
-  const monthlyOccurence: Record<string, number> = {};
+      if (!accumulator[month]) {
+        accumulator[month] = { musical: 0, play: 0 };
+      }
 
-  musicalMonths.forEach((month) => {
-    if (!monthlyOccurence[month]) {
-      monthlyOccurence[month] = 1;
-    } else {
-      monthlyOccurence[month]++;
-    }
-  });
+      if (type === "MUSICAL") accumulator[month].musical += 1;
+      if (type === "PLAY") accumulator[month].play += 1;
+
+      return accumulator;
+    },
+    {}
+  );
+
+  const musicalData = labels.map((month) => monthlyOccurrences[month]?.musical ?? 0);
+
+  const playData = labels.map((month) => monthlyOccurrences[month]?.play ?? 0);
 
   const monthlyData = {
     labels,
     datasets: [
       {
         label: "# of Musicals Seen",
-        data: monthlyOccurence,
+        data: musicalData,
         backgroundColor: "rgba(216, 0, 50, 0.7)",
+      },
+      {
+        label: "# of Plays Seen",
+        data: playData,
+        backgroundColor: "rgba(255, 238, 50, 0.4)",
       },
     ],
   };
 
   return (
-    <div>
+    <>
       <Bar data={monthlyData} options={options} />
-    </div>
+    </>
   );
 }
 

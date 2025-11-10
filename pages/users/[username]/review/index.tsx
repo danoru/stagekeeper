@@ -1,9 +1,9 @@
-import { attendance, musicals, performances, theatres } from "@prisma/client";
+import { attendance, musicals, performances, plays, theatres } from "@prisma/client";
 import Head from "next/head";
 import { Fragment } from "react";
 import superjson from "superjson";
 
-import Carousel from "../../../../src/components/review/Carousel";
+import PerformanceCarousel from "../../../../src/components/review/PerformanceCarousel";
 import Highlights from "../../../../src/components/review/Highlights";
 import ReviewHeader from "../../../../src/components/review/ReviewHeader";
 import Statistics from "../../../../src/components/review/Statistics";
@@ -12,7 +12,7 @@ import { getUsers } from "../../../../src/data/users";
 
 interface Props {
   musicals: (attendance & {
-    performances: performances & { musicals: musicals; theatres: theatres };
+    performances: performances & { musicals: musicals; plays: plays; theatres: theatres };
   })[];
   username: string;
 }
@@ -26,7 +26,7 @@ function ReviewPage({ musicals, username }: Props) {
       </Head>
       <div>
         <ReviewHeader username={username} />
-        <Carousel items={musicals} />
+        <PerformanceCarousel items={musicals} />
         <Highlights highlights={musicals} />
         <Statistics stats={musicals} view="allTime" />
       </div>

@@ -12,100 +12,77 @@ interface Props {
 
 export default function SimpleCarousel({ children, sx, autoplay = false, interval = 4000 }: Props) {
   const childArray = Array.isArray(children) ? children : [children];
-  const [index, setIndex] = useState(0);
   const count = childArray.length;
-  const timer = useRef<number | null>(null);
-  const raf = useRef<number | null>(null);
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const pointerStartX = useRef<number | null>(null);
-  const pointerDeltaX = useRef<number>(0);
-  const [isPaused, setIsPaused] = useState(false);
 
+  const [index, setIndex] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragOffset, setDragOffset] = useState(0);
+
+  const dragStartX = useRef<number | null>(null);
+  const timer = useRef<number | null>(null);
+
+  // --- Autoplay ---
   useEffect(() => {
-    if (!autoplay) return undefined;
-    if (isPaused) return undefined;
+    if (!autoplay || isDragging) return;
+
     timer.current = window.setInterval(() => {
       setIndex((i) => (i + 1) % count);
     }, interval);
+
     return () => {
       if (timer.current) window.clearInterval(timer.current);
-      if (raf.current) window.cancelAnimationFrame(raf.current);
     };
-  }, [autoplay, interval, count]);
+  }, [autoplay, interval, count, isDragging]);
 
-  function prev() {
-    setIndex((i) => (i - 1 + count) % count);
-  }
+  // --- Navigation ---
+  const prev = () => setIndex((i) => (i - 1 + count) % count);
+  const next = () => setIndex((i) => (i + 1) % count);
 
-  function next() {
-    setIndex((i) => (i + 1) % count);
-  }
-
-  function onPointerDown(e: React.PointerEvent) {
-    pointerStartX.current = e.clientX;
-    pointerDeltaX.current = 0;
+  // --- Drag Handlers ---
+  const onPointerDown = (e: React.PointerEvent) => {
+    dragStartX.current = e.clientX;
+    setIsDragging(true);
     (e.target as Element).setPointerCapture(e.pointerId);
-  }
+  };
 
-  function onPointerMove(e: React.PointerEvent) {
-    if (pointerStartX.current == null) return;
-    pointerDeltaX.current = e.clientX - pointerStartX.current;
-    if (containerRef.current) {
-      if (raf.current) {
-        return;
-      }
-      raf.current = window.requestAnimationFrame(() => {
-        const inner = containerRef.current?.firstElementChild as HTMLElement | null;
-        if (inner)
-          inner.style.transform = `translateX(calc(-${index * 100}% + ${pointerDeltaX.current}px))`;
-        raf.current = null;
-      });
-    }
-  }
+  const onPointerMove = (e: React.PointerEvent) => {
+    if (dragStartX.current === null) return;
+    setDragOffset(e.clientX - dragStartX.current);
+  };
 
-  function onPointerUp(e: React.PointerEvent) {
-    if (pointerStartX.current == null) return;
-    const delta = pointerDeltaX.current;
-    pointerStartX.current = null;
-    pointerDeltaX.current = 0;
+  const onPointerUp = (e: React.PointerEvent) => {
+    if (dragStartX.current === null) return;
+
+    const delta = dragOffset;
+    dragStartX.current = null;
+    setDragOffset(0);
+    setIsDragging(false);
+
     try {
       (e.target as Element).releasePointerCapture(e.pointerId);
     } catch {}
-    if (raf.current) {
-      window.cancelAnimationFrame(raf.current);
-      raf.current = null;
-    }
-    const threshold = 50;
-    if (delta > threshold) {
-      prev();
-    } else if (delta < -threshold) {
-      next();
-    } else {
-      if (containerRef.current) {
-        const inner = containerRef.current.firstElementChild as HTMLElement | null;
-        if (inner) inner.style.transform = `translateX(-${index * 100}%)`;
-      }
-    }
-  }
 
-  function onKey(e: KeyboardEvent) {
+    const threshold = 50;
+    if (delta > threshold) prev();
+    else if (delta < -threshold) next();
+  };
+
+  // --- Keyboard Navigation ---
+  const onKey = (e: KeyboardEvent) => {
     if (e.key === "ArrowLeft") prev();
     if (e.key === "ArrowRight") next();
-  }
+  };
 
   return (
     <Box
-      onBlur={() => setIsPaused(false)}
-      onFocus={() => setIsPaused(true)}
+      tabIndex={0}
       onKeyDown={onKey}
-      onMouseEnter={() => setIsPaused(true)}
-      onMouseLeave={() => setIsPaused(false)}
-      onPointerCancel={onPointerUp}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
-      ref={containerRef}
-      tabIndex={0}
+      onPointerCancel={onPointerUp}
+      onMouseEnter={() => setIsDragging(true)}
+      onMouseLeave={() => setIsDragging(false)}
       sx={{
         position: "relative",
         overflow: "hidden",
@@ -114,26 +91,29 @@ export default function SimpleCarousel({ children, sx, autoplay = false, interva
         ...((sx as object) || {}),
       }}
     >
+      {/* Slides */}
       <Box
         sx={{
           display: "flex",
-          transition: "transform 400ms ease",
-          transform: `translateX(-${index * 100}%)`,
-          width: `${count * 100}%`,
+          width: "100%",
+          transform: `translateX(calc(${-index * 100}% + ${dragOffset}px))`,
+          transition: isDragging ? "none" : "transform 400ms ease",
         }}
       >
         {childArray.map((child, i) => (
-          <Box key={i} sx={{ width: `${100 / count}%`, flex: "0 0 auto", p: 1 }}>
+          <Box key={i} sx={{ flex: "0 0 100%", width: "100%", boxSizing: "border-box" }}>
             {child}
           </Box>
         ))}
       </Box>
 
+      {/* Arrows */}
       {count > 1 && (
         <>
           <IconButton
             aria-label="previous"
             size="small"
+            onClick={prev}
             sx={{
               position: "absolute",
               left: 8,
@@ -141,13 +121,13 @@ export default function SimpleCarousel({ children, sx, autoplay = false, interva
               transform: "translateY(-50%)",
               background: "rgba(255,255,255,0.7)",
             }}
-            onClick={prev}
           >
             <ChevronLeftIcon />
           </IconButton>
           <IconButton
             aria-label="next"
             size="small"
+            onClick={next}
             sx={{
               position: "absolute",
               right: 8,
@@ -155,35 +135,36 @@ export default function SimpleCarousel({ children, sx, autoplay = false, interva
               transform: "translateY(-50%)",
               background: "rgba(255,255,255,0.7)",
             }}
-            onClick={next}
           >
             <ChevronRightIcon />
           </IconButton>
+
+          {/* Dots */}
           <Box
             sx={{
+              position: "absolute",
               bottom: 8,
+              left: "50%",
+              transform: "translateX(-50%)",
               display: "flex",
               gap: 1,
-              left: "50%",
-              position: "absolute",
-              transform: "translateX(-50%)",
             }}
           >
             {childArray.map((_, i) => (
               <Box
-                aria-label={`Go to slide ${i + 1}`}
-                component="button"
                 key={i}
+                component="button"
+                aria-label={`Go to slide ${i + 1}`}
+                onClick={() => setIndex(i)}
                 sx={{
                   width: 8,
                   height: 8,
                   borderRadius: "50%",
-                  p: 0,
                   border: "none",
                   background: i === index ? "primary.main" : "rgba(0,0,0,0.3)",
                   cursor: "pointer",
+                  p: 0,
                 }}
-                onClick={() => setIndex(i)}
               />
             ))}
           </Box>

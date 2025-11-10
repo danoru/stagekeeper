@@ -386,7 +386,7 @@ export async function getUserAttendanceByYear(year: number | null, id: number) {
     },
     orderBy: { performances: { startTime: "asc" } },
     include: {
-      performances: { include: { musicals: true, theatres: true } },
+      performances: { include: { musicals: true, plays: true, theatres: true } },
     },
   });
   return attendance;

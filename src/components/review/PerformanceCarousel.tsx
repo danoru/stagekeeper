@@ -1,15 +1,12 @@
-import Card from "@mui/material/Card";
-import CardContent from "@mui/material/CardContent";
-import CardMedia from "@mui/material/CardMedia";
-import Typography from "@mui/material/Typography";
-import type { attendance, musicals, performances, theatres } from "@prisma/client";
+import { Box, Card, CardContent, CardMedia, Typography } from "@mui/material";
+import type { attendance, musicals, performances, plays, theatres } from "@prisma/client";
 import moment from "moment";
 
 import SimpleCarousel from "../ui/SimpleCarousel";
 
 interface Props {
   items: (attendance & {
-    performances: performances & { musicals: musicals; theatres: theatres };
+    performances: performances & { musicals: musicals; plays: plays; theatres: theatres };
   })[];
 }
 
@@ -22,19 +19,20 @@ interface CardProps {
   playbill?: string;
 }
 
-function MusicalCarousel({ items }: Props) {
+function PerformanceCarousel({ items }: Props) {
   return (
     <SimpleCarousel sx={{ maxWidth: 500, margin: "auto" }}>
       {items?.map((item, i) => (
-        <CarouselItem
-          key={i}
-          date={item.performances.startTime}
-          duration={item.performances.musicals?.duration}
-          location={item.performances.theatres.location}
-          playbill={item.performances.musicals?.playbill}
-          playhouse={item.performances.theatres.name}
-          title={item.performances.musicals?.title}
-        />
+        <Box key={i} sx={{ flex: "0 0 100%", width: "100%" }}>
+          <CarouselItem
+            date={item.performances.startTime}
+            duration={item.performances.musicals?.duration || item.performances.plays?.duration}
+            location={item.performances.theatres.location}
+            playbill={item.performances.musicals?.playbill || item.performances.plays?.playbill}
+            playhouse={item.performances.theatres.name}
+            title={item.performances.musicals?.title || item.performances.plays?.title}
+          />
+        </Box>
       ))}
     </SimpleCarousel>
   );
@@ -46,7 +44,13 @@ function CarouselItem(props: CardProps) {
   return (
     <Card variant="outlined">
       <CardContent>
-        <CardMedia component="img" height="194" image={props.playbill} title={props.title} />
+        <CardMedia
+          component="img"
+          height={194}
+          image={props.playbill || ""}
+          title={props.title}
+          sx={{ objectFit: "cover" }}
+        />
         <Typography gutterBottom color="secondary" component="h6" variant="h6">
           {props.title}
         </Typography>
@@ -64,4 +68,4 @@ function CarouselItem(props: CardProps) {
   );
 }
 
-export default MusicalCarousel;
+export default PerformanceCarousel;

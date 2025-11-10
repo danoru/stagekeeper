@@ -1,11 +1,10 @@
-import type { attendance, musicals, performances, theatres } from "@prisma/client";
+import type { attendance, performances, theatres } from "@prisma/client";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, Title } from "chart.js";
-import React from "react";
 import { Doughnut } from "react-chartjs-2";
 
 interface Props {
   stats: (attendance & {
-    performances: performances & { musicals: musicals; theatres: theatres };
+    performances: performances & { theatres: theatres };
   })[];
 }
 

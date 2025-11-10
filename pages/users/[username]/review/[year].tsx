@@ -1,9 +1,9 @@
-import { attendance, musicals, performances, theatres } from "@prisma/client";
+import { attendance, musicals, performances, plays, theatres } from "@prisma/client";
 import Head from "next/head";
 import { Fragment } from "react";
 import superjson from "superjson";
 
-import Carousel from "../../../../src/components/review/Carousel";
+import PerformanceCarousel from "../../../../src/components/review/PerformanceCarousel";
 import Highlights from "../../../../src/components/review/Highlights";
 import ReviewHeader from "../../../../src/components/review/ReviewHeader";
 import Statistics from "../../../../src/components/review/Statistics";
@@ -11,14 +11,14 @@ import { getUserAttendanceByYear } from "../../../../src/data/performances";
 import { getDistinctYears, getUsers } from "../../../../src/data/users";
 
 interface Props {
-  musicals: (attendance & {
-    performances: performances & { musicals: musicals; theatres: theatres };
+  attendance: (attendance & {
+    performances: performances & { musicals: musicals; plays: plays; theatres: theatres };
   })[];
   username: string;
   year: string;
 }
 
-function ReviewPage({ musicals, username, year }: Props) {
+function ReviewPage({ attendance, username, year }: Props) {
   return (
     <Fragment>
       <Head>
@@ -27,9 +27,9 @@ function ReviewPage({ musicals, username, year }: Props) {
       </Head>
       <div>
         <ReviewHeader username={username} year={year} />
-        <Carousel items={musicals} />
-        <Highlights highlights={musicals} />
-        <Statistics stats={musicals} view="year" year={year} />
+        <PerformanceCarousel items={attendance} />
+        <Highlights highlights={attendance} />
+        <Statistics stats={attendance} view="year" year={year} />
       </div>
     </Fragment>
   );
@@ -54,21 +54,22 @@ export async function getStaticProps(context: any) {
   const { username, year } = context.params!;
   const users = await getUsers();
   const user = users.find((user) => user.username === username);
-  let musicals: (attendance & {
+  let attendance: (attendance & {
     performances: performances & {
       musicals: musicals | null;
+      plays: plays | null;
       theatres: theatres;
     };
   })[] = [];
 
   if (user) {
     const userId = user.id;
-    musicals = await getUserAttendanceByYear(Number(year), userId);
+    attendance = await getUserAttendanceByYear(Number(year), userId);
   }
 
   return {
     props: superjson.serialize({
-      musicals,
+      attendance,
       username,
       year,
     }).json,

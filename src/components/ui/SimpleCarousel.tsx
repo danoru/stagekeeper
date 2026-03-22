@@ -116,10 +116,16 @@ export default function SimpleCarousel({ children, sx, autoplay = false, interva
             onClick={prev}
             sx={{
               position: "absolute",
-              left: 8,
+              left: 10,
               top: "50%",
               transform: "translateY(-50%)",
-              background: "rgba(255,255,255,0.7)",
+              background: "rgba(8,12,20,0.7)",
+              border: "1px solid rgba(212,175,85,0.25)",
+              color: "#D4AF55",
+              "&:hover": {
+                background: "rgba(8,12,20,0.9)",
+                borderColor: "rgba(212,175,85,0.5)",
+              },
             }}
           >
             <ChevronLeftIcon />
@@ -130,10 +136,16 @@ export default function SimpleCarousel({ children, sx, autoplay = false, interva
             onClick={next}
             sx={{
               position: "absolute",
-              right: 8,
+              right: 10,
               top: "50%",
               transform: "translateY(-50%)",
-              background: "rgba(255,255,255,0.7)",
+              background: "rgba(8,12,20,0.7)",
+              border: "1px solid rgba(212,175,85,0.25)",
+              color: "#D4AF55",
+              "&:hover": {
+                background: "rgba(8,12,20,0.9)",
+                borderColor: "rgba(212,175,85,0.5)",
+              },
             }}
           >
             <ChevronRightIcon />
@@ -157,13 +169,14 @@ export default function SimpleCarousel({ children, sx, autoplay = false, interva
                 aria-label={`Go to slide ${i + 1}`}
                 onClick={() => setIndex(i)}
                 sx={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: "50%",
+                  width: i === index ? 20 : 6,
+                  height: 6,
+                  borderRadius: "3px",
                   border: "none",
-                  background: i === index ? "primary.main" : "rgba(0,0,0,0.3)",
+                  background: i === index ? "#D4AF55" : "rgba(212,175,85,0.25)",
                   cursor: "pointer",
                   p: 0,
+                  transition: "width 0.3s, background 0.3s",
                 }}
               />
             ))}

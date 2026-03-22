@@ -10,26 +10,16 @@ export async function getPlays() {
 }
 
 export async function getPlayByTitle(playTitle: string) {
-  const formattedTitle = playTitle.replace(/\s+/g, "-").toLowerCase();
-  const plays = await prisma.plays.findMany({
-    select: {
-      title: true,
+  const titleWithSpaces = playTitle.replace(/-/g, " ");
+  const play = await prisma.plays.findFirst({
+    where: {
+      title: {
+        equals: titleWithSpaces,
+        mode: "insensitive",
+      },
     },
   });
-
-  const matchedPlay = plays.find(
-    (play) => play.title.replace(/\s+/g, "-").toLowerCase() === formattedTitle
-  );
-
-  if (matchedPlay) {
-    const play = await prisma.plays.findFirst({
-      where: {
-        title: matchedPlay.title,
-      },
-    });
-    return play;
-  }
-  return null;
+  return play;
 }
 
 export async function getLikedPlays(id: number) {

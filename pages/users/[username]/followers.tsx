@@ -1,17 +1,15 @@
-import FavoriteIcon from "@mui/icons-material/Favorite";
-import TheaterComedyIcon from "@mui/icons-material/TheaterComedy";
-import WatchLaterIcon from "@mui/icons-material/WatchLater";
-import Button from "@mui/material/Button";
-import ButtonGroup from "@mui/material/ButtonGroup";
+import Box from "@mui/material/Box";
+import Container from "@mui/material/Container";
 import Divider from "@mui/material/Divider";
-import Grid from "@mui/material/Grid";
 import Link from "@mui/material/Link";
 import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
 import { users, following } from "@prisma/client";
-import Head from "next/head";
+import { useRouter } from "next/router";
 import superjson from "superjson";
 
-import ProfileLinkBar from "../../../src/components/users/ProfileLinkBar";
+import ProfilePageWrapper from "../../../src/components/users/ProfilePageWrapper";
+import UserAvatar from "../../../src/components/users/UserAvatar";
 import { findUserByUsername, getUsers, getFollowers } from "../../../src/data/users";
 
 interface Props {
@@ -20,82 +18,141 @@ interface Props {
 }
 
 interface Params {
-  params: {
-    username: string;
-  };
+  params: { username: string };
+}
+
+function NetworkToggle({ username }: { username: string }) {
+  const router = useRouter();
+  const isFollowing = router.asPath.endsWith("/following");
+
+  return (
+    <Box
+      sx={{
+        display: "inline-flex",
+        border: "1px solid rgba(212,175,85,0.2)",
+        borderRadius: 1,
+        overflow: "hidden",
+        mb: 4,
+      }}
+    >
+      {[
+        { label: "Following", href: `/users/${username}/following` },
+        { label: "Followers", href: `/users/${username}/followers` },
+      ].map((tab) => {
+        const active = tab.label === "Followers";
+        return (
+          <Box
+            key={tab.label}
+            component="a"
+            href={tab.href}
+            sx={{
+              px: 3,
+              py: 1,
+              textDecoration: "none",
+              background: active ? "rgba(212,175,85,0.12)" : "transparent",
+              borderRight: tab.label === "Following" ? "1px solid rgba(212,175,85,0.2)" : "none",
+              transition: "background 0.2s",
+              "&:hover": { background: active ? "rgba(212,175,85,0.15)" : "rgba(212,175,85,0.05)" },
+            }}
+          >
+            <Typography
+              sx={{
+                fontFamily: '"DM Sans", sans-serif',
+                fontSize: "0.72rem",
+                fontWeight: active ? 600 : 400,
+                letterSpacing: "0.08em",
+                textTransform: "uppercase",
+                color: active ? "#D4AF55" : "rgba(232,220,200,0.5)",
+              }}
+            >
+              {tab.label}
+            </Typography>
+          </Box>
+        );
+      })}
+    </Box>
+  );
 }
 
 function UserFollowers({ user, followers }: Props) {
-  const title = `${user.username}'s Followers • Stagekeeper`;
-
   return (
-    <div>
-      <Head>
-        <title>{title}</title>
-      </Head>
-      <Grid container>
-        <Grid size={{ xs: 12 }}>
-          <ProfileLinkBar username={user.username} />
-        </Grid>
-        <Grid size={{ xs: 12 }}>
-          <ButtonGroup aria-label="Button Group" sx={{ flexWrap: "wrap" }} variant="outlined">
-            <Button href="following">Following</Button>
-            <Button href="followers">Followers</Button>
-          </ButtonGroup>
-        </Grid>
-        <Grid size={{ xs: 12 }}>
-          <Stack divider={<Divider flexItem orientation="horizontal" />} spacing={1}>
+    <ProfilePageWrapper
+      title={`${user.username}'s Followers • StageKeeper`}
+      username={user.username}
+    >
+      <Container maxWidth="md" sx={{ py: 4 }}>
+        <NetworkToggle username={user.username} />
+
+        {followers.length === 0 ? (
+          <Box
+            sx={{
+              border: "1px solid rgba(212,175,85,0.08)",
+              borderRadius: 1,
+              py: 6,
+              textAlign: "center",
+              background: "rgba(212,175,85,0.02)",
+            }}
+          >
+            <Typography
+              sx={{
+                fontFamily: '"Cormorant Garamond", serif',
+                fontStyle: "italic",
+                fontSize: "1.05rem",
+                color: "rgba(232,220,200,0.3)",
+              }}
+            >
+              No followers yet.
+            </Typography>
+          </Box>
+        ) : (
+          <Stack divider={<Divider sx={{ borderColor: "rgba(212,175,85,0.08)" }} />}>
             {followers.map((follower) => (
               <Stack
                 key={follower.users.username}
                 direction="row"
-                sx={{ alignItems: "center", paddingLeft: "10px" }}
+                alignItems="center"
+                spacing={2}
+                sx={{ py: 1.5 }}
               >
-                <div style={{ width: "25%" }}>
-                  <Link href={`/users/${follower.users.username}`} underline="none">
-                    {follower.users.username}
-                  </Link>
-                </div>
-                <div style={{ width: "25%" }}>
-                  <TheaterComedyIcon />
-                </div>
-                <div style={{ width: "25%" }}>
-                  <WatchLaterIcon />
-                </div>
-                <div style={{ width: "25%" }}>
-                  <FavoriteIcon />
-                </div>
+                <UserAvatar avatarSize="44px" name={follower.users.username} />
+                <Link
+                  href={`/users/${follower.users.username}`}
+                  underline="none"
+                  sx={{
+                    fontFamily: '"DM Sans", sans-serif',
+                    fontSize: "0.9rem",
+                    color: "#E8DCC8",
+                    fontWeight: 500,
+                    transition: "color 0.2s",
+                    "&:hover": { color: "#D4AF55" },
+                  }}
+                >
+                  {follower.users.username}
+                </Link>
               </Stack>
             ))}
           </Stack>
-        </Grid>
-      </Grid>
-    </div>
+        )}
+      </Container>
+    </ProfilePageWrapper>
   );
 }
 
 export async function getStaticPaths() {
   const users = await getUsers();
-  const paths = users.map((user) => ({
-    params: { username: user.username },
-  }));
-
   return {
-    paths,
-    fallback: false,
+    paths: users.map((user) => ({ params: { username: user.username } })),
+    fallback: "blocking",
   };
 }
 
 export async function getStaticProps({ params }: Params) {
   const { username } = params;
   const user = await findUserByUsername(username);
+  if (!user) return { notFound: true };
   const followers = await getFollowers(username);
-
   return {
-    props: superjson.serialize({
-      user,
-      followers,
-    }).json,
+    props: superjson.serialize({ user, followers }).json,
     revalidate: 1800,
   };
 }

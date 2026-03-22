@@ -57,6 +57,7 @@ model musicals {
   bookBy       String
   premiere     DateTime?      @db.Date
   likedShows   likedShows[]
+  logs         logs[]
   performances performances[]
   programming  programming[]
   watchlist    watchlist[]
@@ -85,6 +86,7 @@ model plays {
   writtenBy    String
   premiere     DateTime       @db.Date
   likedShows   likedShows[]
+  logs         logs[]
   performances performances[]
   programming  programming[]
   watchlist    watchlist[]
@@ -100,6 +102,7 @@ model programming {
   startDate DateTime        @db.Timestamptz(6)
   endDate   DateTime        @db.Timestamptz(6)
   dayTimes  Json
+  logs      logs[]
   musicals  musicals?       @relation(fields: [musical], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "showings_musical_fkey")
   plays     plays?          @relation(fields: [play], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "showings_play_fkey")
   seasons   seasons?        @relation(fields: [season], references: [id], onDelete: NoAction, onUpdate: NoAction)
@@ -123,6 +126,7 @@ model theatres {
   location     String
   image        String         @default("https://picsum.photos/649/1024")
   address      String?
+  logs         logs[]
   performances performances[]
   seasons      seasons[]
 }
@@ -144,6 +148,8 @@ model users {
   attendance attendance[]
   following  following[]
   likedShows likedShows[]
+  logs       logs[]       @relation("userLogs")
+  taggedLogs logs[]       @relation("taggedLogs")
   groups     groups?      @relation(fields: [inGroup], references: [id], onDelete: NoAction, onUpdate: NoAction)
   watchlist  watchlist[]
 }
@@ -160,10 +166,38 @@ model watchlist {
   users     users           @relation(fields: [user], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
+model logs {
+  id             Int          @id @default(autoincrement())
+  createdAt      DateTime     @default(now()) @db.Timestamptz(6)
+  user           Int
+  musical        Int?
+  play           Int?
+  theatre        Int?
+  programming    Int?
+  seenDate       DateTime?    @db.Date
+  rating         Decimal?     @db.Decimal
+  comment        String?
+  status         LogStatus    @default(APPROVED)
+  taggedBy       Int?
+
+  users          users        @relation("userLogs", fields: [user], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  tagger         users?       @relation("taggedLogs", fields: [taggedBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  musicals       musicals?    @relation(fields: [musical], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  plays          plays?       @relation(fields: [play], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  theatres       theatres?    @relation(fields: [theatre], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  programmingRef programming? @relation(fields: [programming], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
 enum Badge {
   ADMIN
   PATRON
   USER
+}
+
+enum LogStatus {
+  PENDING
+  APPROVED
+  DISMISSED
 }
 
 enum PerformanceType {

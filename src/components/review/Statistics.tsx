@@ -1,8 +1,9 @@
+import Box from "@mui/material/Box";
+import Container from "@mui/material/Container";
+import Typography from "@mui/material/Typography";
 import type { attendance, musicals, performances, plays, theatres } from "@prisma/client";
 import moment from "moment";
 import Image from "next/image";
-
-import styles from "../../styles/statistics.module.css";
 
 import LocationsChart from "./LocationsChart";
 import MonthlyAttendanceChart from "./MonthlyAttendance";
@@ -16,6 +17,179 @@ interface Props {
   year?: string;
 }
 
+// ---- Section header matching site-wide gold label style ----
+function SectionDivider({ label }: { label: string }) {
+  return (
+    <Box sx={{ display: "flex", alignItems: "center", gap: 2, my: 5 }}>
+      <Box sx={{ flex: 1, height: "1px", background: "rgba(212,175,85,0.2)" }} />
+      <Typography
+        sx={{
+          fontFamily: '"DM Sans", sans-serif',
+          fontSize: "0.6rem",
+          letterSpacing: "0.22em",
+          textTransform: "uppercase",
+          color: "#D4AF55",
+          whiteSpace: "nowrap",
+        }}
+      >
+        {label}
+      </Typography>
+      <Box sx={{ flex: 1, height: "1px", background: "rgba(212,175,85,0.2)" }} />
+    </Box>
+  );
+}
+
+// ---- Spotlight card: playbill image + info, alternating left/right layout ----
+function SpotlightCard({
+  title,
+  theatre,
+  location,
+  date,
+  playbill,
+  headline,
+  subtext,
+  reverse = false,
+}: {
+  title: string;
+  theatre: string;
+  location: string;
+  date: string;
+  playbill: string;
+  headline: string;
+  subtext: string;
+  reverse?: boolean;
+}) {
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: { xs: "column", md: reverse ? "row-reverse" : "row" },
+        gap: 4,
+        alignItems: { xs: "flex-start", md: "center" },
+        p: 4,
+        border: "1px solid rgba(212,175,85,0.1)",
+        borderRadius: 1,
+        background: "rgba(212,175,85,0.02)",
+        mb: 3,
+      }}
+    >
+      {/* Playbill */}
+      <Box sx={{ flexShrink: 0 }}>
+        <Box
+          sx={{
+            position: "relative",
+            width: 130,
+            height: 172,
+            border: "1px solid rgba(212,175,85,0.2)",
+            borderRadius: 0.5,
+            overflow: "hidden",
+          }}
+        >
+          {playbill ? (
+            <Image alt={title} fill src={playbill} style={{ objectFit: "cover" }} />
+          ) : (
+            <Box sx={{ width: "100%", height: "100%", background: "rgba(212,175,85,0.05)" }} />
+          )}
+          {/* Gold top line */}
+          <Box
+            sx={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              height: "2px",
+              background: "linear-gradient(90deg, transparent, rgba(212,175,85,0.5), transparent)",
+            }}
+          />
+        </Box>
+      </Box>
+
+      {/* Text */}
+      <Box>
+        <Typography
+          sx={{
+            fontFamily: '"DM Sans", sans-serif',
+            fontSize: "0.6rem",
+            letterSpacing: "0.18em",
+            textTransform: "uppercase",
+            color: "#D4AF55",
+            mb: 1,
+          }}
+        >
+          {headline}
+        </Typography>
+        <Typography
+          sx={{
+            fontFamily: '"Cormorant Garamond", serif',
+            fontSize: { xs: "1.6rem", md: "2.2rem" },
+            fontWeight: 600,
+            color: "#E8DCC8",
+            lineHeight: 1.1,
+            mb: 1.5,
+          }}
+        >
+          {title}
+        </Typography>
+        <Typography
+          sx={{
+            fontFamily: '"Cormorant Garamond", serif',
+            fontStyle: "italic",
+            fontSize: "1rem",
+            color: "rgba(232,220,200,0.55)",
+            lineHeight: 1.7,
+          }}
+        >
+          {subtext}
+        </Typography>
+        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2, mt: 2 }}>
+          {[theatre, location, date].map((item) => (
+            <Typography
+              key={item}
+              sx={{
+                fontFamily: '"DM Sans", sans-serif',
+                fontSize: "0.68rem",
+                letterSpacing: "0.06em",
+                color: "rgba(212,175,85,0.6)",
+              }}
+            >
+              {item}
+            </Typography>
+          ))}
+        </Box>
+      </Box>
+    </Box>
+  );
+}
+
+// ---- Chart wrapper with consistent label ----
+function ChartSection({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <Box
+      sx={{
+        p: { xs: 2, md: 4 },
+        border: "1px solid rgba(212,175,85,0.1)",
+        borderRadius: 1,
+        background: "rgba(212,175,85,0.02)",
+        mb: 3,
+      }}
+    >
+      <Typography
+        sx={{
+          fontFamily: '"DM Sans", sans-serif',
+          fontSize: "0.6rem",
+          letterSpacing: "0.22em",
+          textTransform: "uppercase",
+          color: "#D4AF55",
+          mb: 2,
+        }}
+      >
+        {label}
+      </Typography>
+      {children}
+    </Box>
+  );
+}
+
 function Statistics({ stats, view, year }: Props) {
   const hasData = stats.length > 0;
 
@@ -27,7 +201,9 @@ function Statistics({ stats, view, year }: Props) {
       stat.performances.musicals?.premiere || stat.performances.plays?.premiere || null
     ).year();
 
-  // First and Latest Performances
+  const getPlaybill = (stat: (typeof stats)[0]) =>
+    stat.performances.musicals?.playbill || stat.performances.plays?.playbill || "";
+
   const firstPerformance = hasData
     ? stats.reduce((a, b) => (a.performances.startTime < b.performances.startTime ? a : b))
     : null;
@@ -36,68 +212,53 @@ function Statistics({ stats, view, year }: Props) {
     ? stats.reduce((a, b) => (a.performances.startTime > b.performances.startTime ? a : b))
     : null;
 
-  // Oldest and Newest Premieres
   const oldestPerformance = hasData
     ? stats.reduce((a, b) => {
-        const premiereA = getPerformancePremiere(a) ?? new Date();
-        const premiereB = getPerformancePremiere(b) ?? new Date();
-        return premiereA < premiereB ? a : b;
+        const pA = getPerformancePremiere(a) ?? new Date().getFullYear();
+        const pB = getPerformancePremiere(b) ?? new Date().getFullYear();
+        return pA < pB ? a : b;
       })
     : null;
 
   const newestPerformance = hasData
     ? stats.reduce((a, b) => {
-        const premiereA = getPerformancePremiere(a) ?? new Date("1066-09-12");
-        const premiereB = getPerformancePremiere(b) ?? new Date("1066-09-12");
-        return premiereA > premiereB ? a : b;
+        const pA = getPerformancePremiere(a) ?? 1066;
+        const pB = getPerformancePremiere(b) ?? 1066;
+        return pA > pB ? a : b;
       })
     : null;
 
-  // Locations Visited
   const locationOccurrence: Record<string, number> = {};
-
   stats.forEach((stat) => {
-    const location = stat.performances.theatres.location;
-    if (!locationOccurrence[location]) {
-      locationOccurrence[location] = 1;
-    } else {
-      locationOccurrence[location]++;
-    }
+    const loc = stat.performances.theatres.location;
+    locationOccurrence[loc] = (locationOccurrence[loc] ?? 0) + 1;
   });
-
   const mostVisitedLocation =
     Object.keys(locationOccurrence).length > 0
       ? Object.keys(locationOccurrence).reduce((a, b) =>
           locationOccurrence[a] > locationOccurrence[b] ? a : b
         )
       : null;
-
   const numberOfLocations = Object.keys(locationOccurrence).length;
 
-  // Performance Premieres
-  const premieres = stats.map((stat) => getPerformancePremiere(stat)).filter((year) => year);
+  const premieres = stats.map((s) => getPerformancePremiere(s)).filter(Boolean) as number[];
+  const premiereAverage =
+    premieres.length > 0 ? Math.round(premieres.reduce((a, b) => a + b, 0) / premieres.length) : 0;
+  const averagePerformanceAge = new Date().getFullYear() - premiereAverage;
 
-  const premiereSum = premieres.length > 0 ? premieres.reduce((a, b) => a + b, 0) : 0;
-
-  const premiereAverage = premieres.length > 0 ? Math.round(premiereSum / premieres.length) : 0;
-
-  const currentYear = new Date().getFullYear();
-  const averagePerformanceAge = currentYear - premiereAverage;
-
-  // Performance Taste
-  function performanceTaste(premiereYear: number) {
-    if (premiereYear < 1920) return "Vaudeville";
-    if (premiereYear < 1940) return "The Jazz Age";
-    if (premiereYear < 1960) return "The Golden Age";
-    if (premiereYear < 1970) return "The Post-Golden Age";
-    if (premiereYear < 2000) return "Pre-Contemporary";
-    if (premiereYear < 2020) return "Contemporary";
+  function performanceTaste(y: number) {
+    if (y < 1920) return "Vaudeville";
+    if (y < 1940) return "The Jazz Age";
+    if (y < 1960) return "The Golden Age";
+    if (y < 1970) return "The Post-Golden Age";
+    if (y < 2000) return "Pre-Contemporary";
+    if (y < 2020) return "Contemporary";
     return "Current";
   }
 
-  function performanceTasteDescription(premiereYear: number) {
-    const era = performanceTaste(premiereYear);
-    const descriptions = {
+  function performanceTasteDescription(y: number) {
+    const era = performanceTaste(y);
+    const descriptions: Record<string, string> = {
       Vaudeville:
         "A time of variety acts and early theatre, where spectacle and showmanship took center stage.",
       "The Jazz Age":
@@ -119,16 +280,13 @@ function Statistics({ stats, view, year }: Props) {
   const performanceEra = performanceTaste(premiereAverage);
   const performanceEraDescription = performanceTasteDescription(premiereAverage);
 
-  // Visits by Month
   const monthlyOccurrence: Record<string, { musicals: number; plays: number }> = {};
-
   stats.forEach((stat) => {
     const month = moment(stat.performances.startTime).format("MMMM");
     if (!monthlyOccurrence[month]) monthlyOccurrence[month] = { musicals: 0, plays: 0 };
     if (stat.performances.musicals?.title) monthlyOccurrence[month].musicals++;
     if (stat.performances.plays?.title) monthlyOccurrence[month].plays++;
   });
-
   const mostVisitsPerMonth =
     Object.keys(monthlyOccurrence).length > 0
       ? Object.keys(monthlyOccurrence).reduce((a, b) =>
@@ -140,156 +298,247 @@ function Statistics({ stats, view, year }: Props) {
       : null;
 
   const getYearText = () => (view === "allTime" ? "of All Time" : `of ${year}`);
-  const getAdverbText = () => (view === "allTime" ? "" : "this year");
+  const getAdverbText = () => (view === "allTime" ? "" : `in ${year}`);
+
+  if (!hasData) {
+    return (
+      <Container maxWidth="lg" sx={{ py: 6, textAlign: "center" }}>
+        <Typography
+          sx={{
+            fontFamily: '"Cormorant Garamond", serif',
+            fontStyle: "italic",
+            fontSize: "1.1rem",
+            color: "rgba(232,220,200,0.3)",
+          }}
+        >
+          No performances recorded {view === "year" ? `for ${year}` : "yet"}.
+        </Typography>
+      </Container>
+    );
+  }
 
   return (
-    <div>
-      <section>
-        <div className={styles.container}>
-          <div className={styles.infoboxRight}>
-            <h1>Your First Performance {getYearText()}</h1>
-            <h3>{firstPerformance ? getPerformanceTitle(firstPerformance) : "N/A"}</h3>
-            <p>
-              You watched {firstPerformance ? getPerformanceTitle(firstPerformance) : "N/A"} at{" "}
-              {firstPerformance ? firstPerformance.performances.theatres.name : "N/A"} in{" "}
-              {firstPerformance ? firstPerformance.performances.theatres.location : "N/A"} on{" "}
-              {firstPerformance
-                ? moment(firstPerformance.performances.startTime).format("MMMM Do, YYYY")
-                : "N/A"}
-              !
-            </p>
-          </div>
-          <div className={styles.playbillRight}>
-            <Image
-              alt={firstPerformance ? getPerformanceTitle(firstPerformance) : "N/A"}
-              height={280}
-              src={
-                firstPerformance?.performances.musicals?.playbill ||
-                firstPerformance?.performances.plays?.playbill ||
-                ""
-              }
-              style={{ borderRadius: "5%", display: "block" }}
-              width={210}
-            />
-          </div>
-        </div>
-        <div className={styles.container}>
-          <div className={styles.infoboxLeft}>
-            <h1>Your Most Recent Performance {getYearText()}</h1>
-            <h3>{latestPerformance ? getPerformanceTitle(latestPerformance) : "N/A"}</h3>
-            <p>
-              You watched {latestPerformance ? getPerformanceTitle(latestPerformance) : "N/A"} at{" "}
-              {latestPerformance ? latestPerformance.performances.theatres.name : "N/A"} in{" "}
-              {latestPerformance ? latestPerformance.performances.theatres.location : "N/A"} on{" "}
-              {latestPerformance
-                ? moment(latestPerformance.performances.startTime).format("MMMM Do, YYYY")
-                : "N/A"}
-              !
-            </p>
-          </div>
-          <div className={styles.playbillLeft}>
-            <Image
-              alt={latestPerformance ? getPerformanceTitle(latestPerformance) : "N/A"}
-              height={280}
-              src={
-                latestPerformance?.performances.musicals?.playbill ||
-                latestPerformance?.performances.plays?.playbill ||
-                ""
-              }
-              style={{ borderRadius: "5%", display: "block" }}
-              width={210}
-            />
-          </div>
-        </div>
-      </section>
-      <section>
-        <div className={styles.container}>
-          <div className={styles.infoboxRight}>
-            <h1>Oldest Performance {getYearText()}</h1>
-            <h3> {oldestPerformance ? oldestPerformance.performances.musicals?.title : "N/A"}!</h3>
-            <p>
-              You watched{" "}
-              {oldestPerformance ? oldestPerformance.performances.musicals?.title : "N/A"} at the{" "}
-              {oldestPerformance ? oldestPerformance.performances.theatres.name : "N/A"} in{" "}
-              {oldestPerformance ? oldestPerformance.performances.theatres.location : "N/A"} on{" "}
-              {oldestPerformance
-                ? moment(oldestPerformance.performances.startTime).format("MMMM Do, YYYY")
-                : "N/A"}
-              !
-            </p>
-          </div>
-          <div className={styles.playbillRight}>
-            <Image
-              alt={oldestPerformance ? oldestPerformance.performances.musicals?.title : "N/A"}
-              height={280}
-              src={oldestPerformance ? oldestPerformance.performances.musicals?.playbill : ""}
-              style={{
-                borderRadius: "5%",
-                display: "block",
-              }}
-              width={210}
-            />
-          </div>
-        </div>
-        <div className={styles.container}>
-          <div className={styles.infoboxLeft}>
-            <h1>Newest Performance {getYearText()}</h1>
-            <h3>{newestPerformance ? newestPerformance.performances.musicals?.title : "N/A"}!</h3>
-            <p>
-              You watched{" "}
-              {newestPerformance ? newestPerformance.performances.musicals?.title : "N/A"} at the{" "}
-              {newestPerformance ? newestPerformance.performances.theatres.name : "N/A"} in{" "}
-              {newestPerformance ? newestPerformance.performances.theatres.location : "N/A"} on{" "}
-              {newestPerformance
-                ? moment(newestPerformance.performances.startTime).format("MMMM Do, YYYY")
-                : "N/A"}
-              !
-            </p>
-          </div>
-          <div className={styles.playbillLeft}>
-            <Image
-              alt={newestPerformance ? newestPerformance.performances.musicals?.title : "N/A"}
-              height={280}
-              src={newestPerformance ? newestPerformance.performances.musicals?.playbill : ""}
-              style={{
-                borderRadius: "5%",
-                display: "block",
-              }}
-              width={210}
-            />
-          </div>
-        </div>
-        <div className={styles.centeredContent}>
-          <PerformanceByPremiereChart stats={stats} />
-          <h1>Your performance taste is primarily ... {performanceEra}!</h1>
-          <p>
-            {performanceEraDescription} The average premiere date of the performances you have seen
-            is {premiereAverage}. That means your average performance age is {averagePerformanceAge}
-            !
-          </p>
-        </div>
-      </section>
+    <Container maxWidth="lg" sx={{ py: 4 }}>
+      {/* First and Latest */}
+      <SectionDivider label="Performances" />
+      <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" }, gap: 3 }}>
+        {firstPerformance && (
+          <SpotlightCard
+            date={moment(firstPerformance.performances.startTime).format("MMMM Do, YYYY")}
+            headline={`First Performance ${getYearText()}`}
+            location={firstPerformance.performances.theatres.location}
+            playbill={getPlaybill(firstPerformance)}
+            subtext={`The curtain first rose on ${getPerformanceTitle(firstPerformance)} — your opening night ${view === "year" ? `in ${year}` : "of all time"}.`}
+            theatre={firstPerformance.performances.theatres.name}
+            title={getPerformanceTitle(firstPerformance)}
+          />
+        )}
+        {latestPerformance && (
+          <SpotlightCard
+            date={moment(latestPerformance.performances.startTime).format("MMMM Do, YYYY")}
+            headline={`Most Recent Performance ${getYearText()}`}
+            location={latestPerformance.performances.theatres.location}
+            playbill={getPlaybill(latestPerformance)}
+            reverse
+            subtext={`Most recently you sat down for ${getPerformanceTitle(latestPerformance)}.`}
+            theatre={latestPerformance.performances.theatres.name}
+            title={getPerformanceTitle(latestPerformance)}
+          />
+        )}
+      </Box>
 
-      <section>
-        <div className={styles.centeredContent}>
+      {/* Oldest and Newest Premieres */}
+      <SectionDivider label="Premiere Dates" />
+      <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" }, gap: 3 }}>
+        {oldestPerformance && (
+          <SpotlightCard
+            date={moment(oldestPerformance.performances.startTime).format("MMMM Do, YYYY")}
+            headline={`Oldest Premiere ${getYearText()}`}
+            location={oldestPerformance.performances.theatres.location}
+            playbill={getPlaybill(oldestPerformance)}
+            subtext={`${getPerformanceTitle(oldestPerformance)} premiered in ${getPerformancePremiere(oldestPerformance)} — the oldest show you've seen.`}
+            theatre={oldestPerformance.performances.theatres.name}
+            title={getPerformanceTitle(oldestPerformance)}
+          />
+        )}
+        {newestPerformance && (
+          <SpotlightCard
+            date={moment(newestPerformance.performances.startTime).format("MMMM Do, YYYY")}
+            headline={`Newest Premiere ${getYearText()}`}
+            location={newestPerformance.performances.theatres.location}
+            playbill={getPlaybill(newestPerformance)}
+            reverse
+            subtext={`${getPerformanceTitle(newestPerformance)} premiered in ${getPerformancePremiere(newestPerformance)} — the newest show you've seen.`}
+            theatre={newestPerformance.performances.theatres.name}
+            title={getPerformanceTitle(newestPerformance)}
+          />
+        )}
+      </Box>
+
+      {/* Era / taste */}
+      <SectionDivider label="Your Taste" />
+      <Box
+        sx={{
+          p: 4,
+          border: "1px solid rgba(212,175,85,0.1)",
+          borderRadius: 1,
+          background: "rgba(212,175,85,0.02)",
+          mb: 3,
+          textAlign: "center",
+        }}
+      >
+        <Typography
+          sx={{
+            fontFamily: '"DM Sans", sans-serif',
+            fontSize: "0.6rem",
+            letterSpacing: "0.22em",
+            textTransform: "uppercase",
+            color: "#D4AF55",
+            mb: 2,
+          }}
+        >
+          Premiere Era
+        </Typography>
+        <Typography
+          sx={{
+            fontFamily: '"Cormorant Garamond", serif',
+            fontSize: { xs: "2rem", md: "3rem" },
+            fontWeight: 600,
+            color: "#E8DCC8",
+            lineHeight: 1,
+            mb: 2,
+          }}
+        >
+          {performanceEra}
+        </Typography>
+        <Typography
+          sx={{
+            fontFamily: '"Cormorant Garamond", serif',
+            fontStyle: "italic",
+            fontSize: "1.05rem",
+            color: "rgba(232,220,200,0.55)",
+            maxWidth: 520,
+            mx: "auto",
+            lineHeight: 1.7,
+            mb: 2,
+          }}
+        >
+          {performanceEraDescription}
+        </Typography>
+        <Typography
+          sx={{
+            fontFamily: '"DM Sans", sans-serif',
+            fontSize: "0.75rem",
+            color: "rgba(232,220,200,0.4)",
+          }}
+        >
+          Average premiere year: {premiereAverage} · Average show age: {averagePerformanceAge} years
+        </Typography>
+      </Box>
+      <ChartSection label="Shows by Premiere Year">
+        <PerformanceByPremiereChart stats={stats} />
+      </ChartSection>
+
+      {/* Locations */}
+      <SectionDivider label="Where You've Been" />
+      <Box
+        sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" }, gap: 3, mb: 3 }}
+      >
+        <Box
+          sx={{
+            p: 4,
+            border: "1px solid rgba(212,175,85,0.1)",
+            borderRadius: 1,
+            background: "rgba(212,175,85,0.02)",
+            textAlign: "center",
+          }}
+        >
+          <Typography
+            sx={{
+              fontFamily: '"DM Sans", sans-serif',
+              fontSize: "0.6rem",
+              letterSpacing: "0.22em",
+              textTransform: "uppercase",
+              color: "#D4AF55",
+              mb: 1.5,
+            }}
+          >
+            Most Visited City
+          </Typography>
+          <Typography
+            sx={{
+              fontFamily: '"Cormorant Garamond", serif',
+              fontSize: "2rem",
+              fontWeight: 600,
+              color: "#E8DCC8",
+              mb: 1,
+            }}
+          >
+            {mostVisitedLocation ?? "N/A"}
+          </Typography>
+          <Typography
+            sx={{
+              fontFamily: '"DM Sans", sans-serif',
+              fontSize: "0.75rem",
+              color: "rgba(232,220,200,0.4)",
+            }}
+          >
+            across {numberOfLocations} {numberOfLocations === 1 ? "city" : "cities"}{" "}
+            {getAdverbText()}
+          </Typography>
+        </Box>
+        <Box
+          sx={{
+            p: 4,
+            border: "1px solid rgba(212,175,85,0.1)",
+            borderRadius: 1,
+            background: "rgba(212,175,85,0.02)",
+            textAlign: "center",
+          }}
+        >
+          <Typography
+            sx={{
+              fontFamily: '"DM Sans", sans-serif',
+              fontSize: "0.6rem",
+              letterSpacing: "0.22em",
+              textTransform: "uppercase",
+              color: "#D4AF55",
+              mb: 1.5,
+            }}
+          >
+            Most Active Month
+          </Typography>
+          <Typography
+            sx={{
+              fontFamily: '"Cormorant Garamond", serif',
+              fontSize: "2rem",
+              fontWeight: 600,
+              color: "#E8DCC8",
+              mb: 1,
+            }}
+          >
+            {mostVisitsPerMonth ?? "N/A"}
+          </Typography>
+          <Typography
+            sx={{
+              fontFamily: '"DM Sans", sans-serif',
+              fontSize: "0.75rem",
+              color: "rgba(232,220,200,0.4)",
+            }}
+          >
+            your busiest month {getAdverbText()}
+          </Typography>
+        </Box>
+      </Box>
+      <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" }, gap: 3 }}>
+        <ChartSection label="Shows by City">
           <LocationsChart stats={stats} />
-          <h1>You visited {mostVisitedLocation || "N/A"} the most!</h1>
-          <p>
-            You attended {numberOfLocations} different cities
-            {view === "year" && year ? ` in ${year}` : ""}, but visited{" "}
-            {mostVisitedLocation || "N/A"} the most.
-          </p>
-        </div>
-        <div className={styles.centeredContent}>
+        </ChartSection>
+        <ChartSection label="Shows by Month">
           <MonthlyAttendanceChart stats={stats} />
-          <h1>
-            You visited the theatre the most during ... {mostVisitsPerMonth || "N/A"}{" "}
-            {getAdverbText()}!
-          </h1>
-          <p>Placeholder text about when you went {getAdverbText()}.</p>
-        </div>
-      </section>
-    </div>
+        </ChartSection>
+      </Box>
+    </Container>
   );
 }
 

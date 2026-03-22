@@ -8,7 +8,7 @@ import superjson from "superjson";
 
 import ProgramCard from "../../src/components/cards/ProgramCard";
 import PerformanceCalendar from "../../src/components/schedule/PerformanceCalendar";
-import { getTheatreByName, getCurrentSeason } from "../../src/data/theatres";
+import { getTheatreByName, getCurrentSeason, getTheatres } from "../../src/data/theatres";
 
 interface Props {
   theatre: theatres;
@@ -74,7 +74,15 @@ function TheatrePage({ theatre, seasons }: Props) {
   );
 }
 
-export async function getServerSideProps(context: { params: Params }) {
+export async function getStaticPaths() {
+  const theatres = await getTheatres();
+  const paths = theatres.map((theatre: { name: string }) => ({
+    params: { name: theatre.name.replace(/\s+/g, "-").toLowerCase() },
+  }));
+  return { paths, fallback: "blocking" };
+}
+
+export async function getStaticProps(context: { params: Params }) {
   const { name } = context.params;
   const theatre = await getTheatreByName(name);
   let seasons: any = [];
@@ -83,11 +91,16 @@ export async function getServerSideProps(context: { params: Params }) {
     seasons = await getCurrentSeason(theatre.id);
   }
 
+  if (!theatre) {
+    return { notFound: true };
+  }
+
   return {
     props: superjson.serialize({
-      theatre: theatre || null,
+      theatre,
       seasons: seasons || [],
     }).json,
+    revalidate: 3600,
   };
 }
 

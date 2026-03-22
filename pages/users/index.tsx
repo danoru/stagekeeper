@@ -1,17 +1,14 @@
-import Add from "@mui/icons-material/Add";
-import FavoriteIcon from "@mui/icons-material/Favorite";
-import TheaterComedyIcon from "@mui/icons-material/TheaterComedy";
-import WatchLaterIcon from "@mui/icons-material/WatchLater";
-import Button from "@mui/material/Button";
+import Box from "@mui/material/Box";
+import Container from "@mui/material/Container";
 import Divider from "@mui/material/Divider";
-import Grid from "@mui/material/Grid";
 import Link from "@mui/material/Link";
 import Stack from "@mui/material/Stack";
-import Tooltip from "@mui/material/Tooltip";
+import Typography from "@mui/material/Typography";
 import { users } from "@prisma/client";
 import Head from "next/head";
 import superjson from "superjson";
 
+import UserAvatar from "../../src/components/users/UserAvatar";
 import { getUsers } from "../../src/data/users";
 
 interface Props {
@@ -22,69 +19,160 @@ function UsersPage({ users }: Props) {
   const filteredUsers = users.filter((user) => user.username !== "guest");
 
   return (
-    <div>
+    <Box sx={{ background: "#080C14", minHeight: "100vh" }}>
       <Head>
-        <title>Users • StageKeeper</title>
+        <title>Members • StageKeeper</title>
       </Head>
-      <Grid container justifyContent="center">
-        <Grid size={{ xs: 12 }} sx={{ textAlign: "center" }}>
-          <h2>Musical lovers, critics and friends — find popular members.</h2>
-        </Grid>
-        <Grid size={{ xs: 8 }}>
-          <Stack divider={<Divider flexItem orientation="horizontal" />} spacing={1}>
+      <Container maxWidth="md" sx={{ py: 4 }}>
+        {/* Page header */}
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 4 }}>
+          <Typography
+            sx={{
+              fontFamily: '"DM Sans", sans-serif',
+              fontSize: "0.62rem",
+              letterSpacing: "0.22em",
+              textTransform: "uppercase",
+              color: "#D4AF55",
+              whiteSpace: "nowrap",
+            }}
+          >
+            Members
+          </Typography>
+          <Box sx={{ flex: 1, height: "1px", background: "rgba(212,175,85,0.2)" }} />
+          <Typography
+            sx={{
+              fontFamily: '"DM Sans", sans-serif',
+              fontSize: "0.62rem",
+              letterSpacing: "0.1em",
+              color: "rgba(232,220,200,0.3)",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {filteredUsers.length} {filteredUsers.length === 1 ? "member" : "members"}
+          </Typography>
+        </Box>
+
+        <Box
+          sx={{
+            border: "1px solid rgba(212,175,85,0.1)",
+            borderRadius: 1,
+            overflow: "hidden",
+          }}
+        >
+          <Stack divider={<Divider sx={{ borderColor: "rgba(212,175,85,0.08)" }} />}>
             {filteredUsers.map((user) => (
               <Stack
                 key={user.username}
                 direction="row"
-                sx={{ alignItems: "center", paddingLeft: "10px" }}
+                alignItems="center"
+                spacing={2}
+                sx={{
+                  px: 3,
+                  py: 1.75,
+                  transition: "background 0.2s",
+                  "&:hover": { background: "rgba(212,175,85,0.04)" },
+                }}
               >
-                <div style={{ width: "25%" }}>
-                  <Link href={`/users/${user.username}`} underline="none">
+                <UserAvatar avatarSize="40px" name={user.username} />
+
+                <Box sx={{ flex: 1, minWidth: 0 }}>
+                  <Link
+                    href={`/users/${user.username}`}
+                    underline="none"
+                    sx={{
+                      fontFamily: '"DM Sans", sans-serif',
+                      fontSize: "0.9rem",
+                      fontWeight: 500,
+                      color: "#E8DCC8",
+                      transition: "color 0.2s",
+                      "&:hover": { color: "#D4AF55" },
+                    }}
+                  >
                     {user.username}
                   </Link>
-                </div>
-                <div style={{ width: "25%" }}>
-                  <Link href={`/users/${user.username}/musicals`} underline="none">
-                    <Tooltip placement="top-start" title={`${user.username}'s Musicals`}>
-                      <TheaterComedyIcon />
-                    </Tooltip>
-                  </Link>
-                </div>
-                <div style={{ width: "25%" }}>
-                  <Link href={`/users/${user.username}/watchlist`} underline="none">
-                    <Tooltip placement="top-start" title={`${user.username}'s Watchlist`}>
-                      <WatchLaterIcon />
-                    </Tooltip>
-                  </Link>
-                </div>
-                <div style={{ width: "25%" }}>
-                  <Link href={`/users/${user.username}/likes`} underline="none">
-                    <Tooltip placement="top-start" title={`${user.username}'s Likes`}>
-                      <FavoriteIcon />
-                    </Tooltip>
-                  </Link>
-                </div>
-                <div style={{ width: "25%" }}>
-                  <Button disabled>
-                    <Add />
-                  </Button>
-                </div>
+                  {(user.firstName || user.lastName) && (
+                    <Typography
+                      sx={{
+                        fontFamily: '"DM Sans", sans-serif',
+                        fontSize: "0.72rem",
+                        color: "rgba(232,220,200,0.35)",
+                        mt: 0.1,
+                      }}
+                    >
+                      {[user.firstName, user.lastName].filter(Boolean).join(" ")}
+                    </Typography>
+                  )}
+                </Box>
+
+                {/* Badge chip for ADMIN / PATRON */}
+                {user.badge !== "USER" && (
+                  <Box
+                    sx={{
+                      px: 1.5,
+                      py: 0.25,
+                      border: "1px solid",
+                      borderColor:
+                        user.badge === "ADMIN" ? "rgba(207,68,68,0.4)" : "rgba(212,175,85,0.3)",
+                      borderRadius: 0.5,
+                      background:
+                        user.badge === "ADMIN" ? "rgba(207,68,68,0.08)" : "rgba(212,175,85,0.06)",
+                    }}
+                  >
+                    <Typography
+                      sx={{
+                        fontFamily: '"DM Sans", sans-serif',
+                        fontSize: "0.55rem",
+                        letterSpacing: "0.12em",
+                        textTransform: "uppercase",
+                        color: user.badge === "ADMIN" ? "#CF4444" : "#D4AF55",
+                        fontWeight: 600,
+                      }}
+                    >
+                      {user.badge}
+                    </Typography>
+                  </Box>
+                )}
+
+                {/* Quick links */}
+                <Stack direction="row" spacing={2}>
+                  {[
+                    { label: "Musicals", href: `/users/${user.username}/musicals` },
+                    { label: "Watchlist", href: `/users/${user.username}/watchlist` },
+                    { label: "Likes", href: `/users/${user.username}/likes` },
+                  ].map((link) => (
+                    <Link
+                      key={link.label}
+                      href={link.href}
+                      underline="none"
+                      sx={{
+                        fontFamily: '"DM Sans", sans-serif',
+                        fontSize: "0.62rem",
+                        letterSpacing: "0.1em",
+                        textTransform: "uppercase",
+                        color: "rgba(232,220,200,0.3)",
+                        transition: "color 0.2s",
+                        "&:hover": { color: "#D4AF55" },
+                        display: { xs: "none", sm: "block" },
+                      }}
+                    >
+                      {link.label}
+                    </Link>
+                  ))}
+                </Stack>
               </Stack>
             ))}
           </Stack>
-        </Grid>
-      </Grid>
-    </div>
+        </Box>
+      </Container>
+    </Box>
   );
 }
 
 export async function getStaticProps() {
   const users = await getUsers();
-
   return {
-    props: superjson.serialize({
-      users,
-    }).json,
+    props: superjson.serialize({ users }).json,
+    revalidate: 1800,
   };
 }
 

@@ -1,37 +1,32 @@
-import Grid from "@mui/material/Grid";
+import Box from "@mui/material/Box";
+import Container from "@mui/material/Container";
 import Pagination from "@mui/material/Pagination";
 import Typography from "@mui/material/Typography";
-import { plays, programming, seasons, theatres } from "@prisma/client";
+import { theatres } from "@prisma/client";
 import Head from "next/head";
 import { useState, useEffect } from "react";
 import superjson from "superjson";
 
-import ShowCard from "../../src/components/cards/ShowCard";
-import UpcomingShowList from "../../src/components/shows/UpcomingShowList";
-import { getPaginatedPlays } from "../../src/data/plays";
-import { getUpcomingPlays } from "../../src/data/plays";
+import TheatreCard from "../../src/components/cards/TheatreCard";
+import { getPaginatedTheatres } from "../../src/data/theatres";
 
 interface Props {
-  plays: plays[];
-  playCount: number;
-  upcomingPerformances: (programming & {
-    plays: plays;
-    seasons: seasons & { theatres: theatres };
-  })[];
+  theatres: theatres[];
+  theatreCount: number;
 }
 
-function PlaysPage({ plays: initialPlays, playCount, upcomingPerformances }: Props) {
-  const [plays, setPlays] = useState(initialPlays);
+function TheatresPage({ theatres: initialTheatres, theatreCount }: Props) {
+  const [theatres, setTheatres] = useState(initialTheatres);
   const [page, setPage] = useState(1);
-  const itemsPerPage = 10;
+  const itemsPerPage = 8;
 
   useEffect(() => {
-    async function fetchPlays() {
-      const response = await fetch(`/api/plays/pages?page=${page}&limit=${itemsPerPage}`);
+    async function fetchTheatres() {
+      const response = await fetch(`/api/theatres/pages?page=${page}&limit=${itemsPerPage}`);
       const data = await response.json();
-      setPlays(data.plays);
+      setTheatres(data.theatres);
     }
-    fetchPlays();
+    fetchTheatres();
   }, [page]);
 
   const handleChange = (event: React.ChangeEvent<unknown>, value: number) => {
@@ -39,49 +34,84 @@ function PlaysPage({ plays: initialPlays, playCount, upcomingPerformances }: Pro
   };
 
   return (
-    <div>
+    <Box sx={{ background: "#080C14", minHeight: "100vh" }}>
       <Head>
-        <title>Plays • StageKeeper</title>
+        <title>Theatres • StageKeeper</title>
       </Head>
-      <UpcomingShowList upcomingPerformances={upcomingPerformances} />
-      <Grid container direction="row">
-        <Grid size={{ xs: 12 }}>
-          <Typography sx={{ margin: "1vh 0" }} variant="h6">
-            All Plays
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 3 }}>
+          <Typography
+            sx={{
+              fontFamily: '"DM Sans", sans-serif',
+              fontSize: "0.62rem",
+              letterSpacing: "0.22em",
+              textTransform: "uppercase",
+              color: "#D4AF55",
+              whiteSpace: "nowrap",
+            }}
+          >
+            All Theatres
           </Typography>
-        </Grid>
-        <Grid container size={{ xs: 8 }} sx={{ margin: "0 auto" }}>
-          {plays.map((play, i) => (
-            <ShowCard
+          <Box sx={{ flex: 1, height: "1px", background: "rgba(212,175,85,0.2)" }} />
+          <Typography
+            sx={{
+              fontFamily: '"DM Sans", sans-serif',
+              fontSize: "0.62rem",
+              letterSpacing: "0.1em",
+              color: "rgba(232,220,200,0.3)",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {theatreCount} venues
+          </Typography>
+        </Box>
+
+        <Box sx={{ display: "flex", flexWrap: "wrap", justifyContent: "center" }}>
+          {theatres.map((theatre, i) => (
+            <TheatreCard
               key={i}
-              image={play.playbill}
-              link={`/plays/${play.title.replace(/\s+/g, "-").toLowerCase()}`}
-              name={play.title}
+              image={theatre.image}
+              link={`/theatres/${theatre.name.replace(/\s+/g, "-").toLowerCase()}`}
+              name={theatre.name}
             />
           ))}
-        </Grid>
-      </Grid>
-      <Pagination
-        count={Math.ceil(playCount / itemsPerPage)}
-        page={page}
-        sx={{ margin: "1vh", justifyContent: "center", display: "flex" }}
-        onChange={handleChange}
-      />
-    </div>
+        </Box>
+
+        <Pagination
+          count={Math.ceil(theatreCount / itemsPerPage)}
+          page={page}
+          sx={{
+            mt: 4,
+            display: "flex",
+            justifyContent: "center",
+            "& .MuiPaginationItem-root": {
+              color: "rgba(232,220,200,0.5)",
+              borderColor: "rgba(212,175,85,0.2)",
+              "&.Mui-selected": {
+                background: "rgba(212,175,85,0.15)",
+                color: "#D4AF55",
+                borderColor: "rgba(212,175,85,0.4)",
+              },
+              "&:hover": { background: "rgba(212,175,85,0.08)" },
+            },
+          }}
+          onChange={handleChange}
+        />
+      </Container>
+    </Box>
   );
 }
 
 export async function getStaticProps() {
-  const { plays, playCount } = await getPaginatedPlays(1, 10);
-  const upcomingPerformances = await getUpcomingPlays();
+  const { theatres, theatreCount } = await getPaginatedTheatres(1, 8);
 
   return {
     props: superjson.serialize({
-      plays,
-      playCount,
-      upcomingPerformances,
+      theatres,
+      theatreCount,
     }).json,
+    revalidate: 3600,
   };
 }
 
-export default PlaysPage;
+export default TheatresPage;

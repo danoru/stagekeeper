@@ -1,57 +1,60 @@
-import Grid from "@mui/material/Grid";
-import { attendance, musicals, performances, theatres, users } from "@prisma/client";
-import Head from "next/head";
+import Box from "@mui/material/Box";
+import Container from "@mui/material/Container";
+import { users } from "@prisma/client";
 import superjson from "superjson";
 
 import UpcomingCalendar from "../../../src/components/schedule/UpcomingCalendar";
-import ProfileLinkBar from "../../../src/components/users/ProfileLinkBar";
-import { getUsers, findUserByUsername } from "../../../src/data/users";
+import ProfilePageWrapper from "../../../src/components/users/ProfilePageWrapper";
+import { findUserByUsername, getUsers } from "../../../src/data/users";
 
 interface Props {
   user: users;
-  attendance: (attendance & {
-    performances: performances & { musicals: musicals; theatres: theatres };
-  })[];
 }
 
 interface Params {
-  params: {
-    username: string;
-  };
+  params: { username: string };
 }
 
 function UserUpcomingPage({ user }: Props) {
-  const title = `${user.username}'s Upcoming Musicals • Stagekeeper`;
-
   return (
-    <div>
-      <Head>
-        <title>{title}</title>
-      </Head>
-      <Grid container>
-        <ProfileLinkBar username={user.username} />
-      </Grid>
-      <UpcomingCalendar identifier={user.id} />
-    </div>
+    <ProfilePageWrapper
+      title={`${user.username}'s Upcoming • StageKeeper`}
+      username={user.username}
+    >
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 3 }}>
+          <Box
+            sx={{
+              fontFamily: '"DM Sans", sans-serif',
+              fontSize: "0.62rem",
+              letterSpacing: "0.22em",
+              textTransform: "uppercase",
+              color: "#D4AF55",
+              whiteSpace: "nowrap",
+            }}
+          >
+            Upcoming Shows
+          </Box>
+          <Box sx={{ flex: 1, height: "1px", background: "rgba(212,175,85,0.2)" }} />
+        </Box>
+        <UpcomingCalendar identifier={user.id} />
+      </Container>
+    </ProfilePageWrapper>
   );
 }
 
 export async function getStaticPaths() {
   const users = await getUsers();
-  const paths = users.map((user) => ({
-    params: { username: user.username },
-  }));
-
   return {
-    paths,
-    fallback: false,
+    paths: users.map((user) => ({ params: { username: user.username } })),
+    fallback: "blocking",
   };
 }
 
 export async function getStaticProps({ params }: Params) {
   const { username } = params;
   const user = await findUserByUsername(username);
-
+  if (!user) return { notFound: true };
   return {
     props: superjson.serialize({ user }).json,
     revalidate: 1800,

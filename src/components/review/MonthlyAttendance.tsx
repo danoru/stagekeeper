@@ -24,10 +24,22 @@ export const options = {
   plugins: {
     legend: {
       position: "top" as const,
+      labels: {
+        color: "rgba(232, 220, 200, 0.6)",
+        font: { family: "DM Sans", size: 11 },
+        boxWidth: 12,
+      },
     },
-    title: {
-      display: true,
-      text: "Shows by Month",
+    title: { display: false },
+  },
+  scales: {
+    x: {
+      ticks: { color: "rgba(232, 220, 200, 0.4)", font: { family: "DM Sans", size: 10 } },
+      grid: { color: "rgba(212, 175, 85, 0.06)" },
+    },
+    y: {
+      ticks: { color: "rgba(232, 220, 200, 0.4)", font: { family: "DM Sans", size: 10 } },
+      grid: { color: "rgba(212, 175, 85, 0.06)" },
     },
   },
 };
@@ -49,47 +61,40 @@ function MonthlyAttendanceChart({ stats }: Props) {
   ];
 
   const monthlyOccurrences = stats.reduce<Record<string, { musical: number; play: number }>>(
-    (accumulator, stat) => {
+    (acc, stat) => {
       const month = moment(stat.performances.startTime).format("MMMM");
       const type = stat.performances.type;
-
-      if (!accumulator[month]) {
-        accumulator[month] = { musical: 0, play: 0 };
-      }
-
-      if (type === "MUSICAL") accumulator[month].musical += 1;
-      if (type === "PLAY") accumulator[month].play += 1;
-
-      return accumulator;
+      if (!acc[month]) acc[month] = { musical: 0, play: 0 };
+      if (type === "MUSICAL") acc[month].musical += 1;
+      if (type === "PLAY") acc[month].play += 1;
+      return acc;
     },
     {}
   );
-
-  const musicalData = labels.map((month) => monthlyOccurrences[month]?.musical ?? 0);
-
-  const playData = labels.map((month) => monthlyOccurrences[month]?.play ?? 0);
 
   const monthlyData = {
     labels,
     datasets: [
       {
-        label: "# of Musicals Seen",
-        data: musicalData,
-        backgroundColor: "rgba(216, 0, 50, 0.7)",
+        label: "Musicals",
+        data: labels.map((m) => monthlyOccurrences[m]?.musical ?? 0),
+        backgroundColor: "rgba(212, 175, 85, 0.7)",
+        borderColor: "rgba(212, 175, 85, 1)",
+        borderWidth: 1,
+        borderRadius: 3,
       },
       {
-        label: "# of Plays Seen",
-        data: playData,
-        backgroundColor: "rgba(255, 238, 50, 0.4)",
+        label: "Plays",
+        data: labels.map((m) => monthlyOccurrences[m]?.play ?? 0),
+        backgroundColor: "rgba(207, 68, 68, 0.6)",
+        borderColor: "rgba(207, 68, 68, 1)",
+        borderWidth: 1,
+        borderRadius: 3,
       },
     ],
   };
 
-  return (
-    <>
-      <Bar data={monthlyData} options={options} />
-    </>
-  );
+  return <Bar data={monthlyData} options={options} />;
 }
 
 export default MonthlyAttendanceChart;

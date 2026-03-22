@@ -1,4 +1,5 @@
-import Grid from "@mui/material/Grid";
+import Box from "@mui/material/Box";
+import Container from "@mui/material/Container";
 import Pagination from "@mui/material/Pagination";
 import Typography from "@mui/material/Typography";
 import { musicals, programming, seasons, theatres } from "@prisma/client";
@@ -39,18 +40,42 @@ function MusicalsPage({ musicals: initialMusicals, musicalCount, upcomingPerform
   };
 
   return (
-    <div>
+    <Box sx={{ background: "#080C14", minHeight: "100vh" }}>
       <Head>
         <title>Musicals • StageKeeper</title>
       </Head>
-      <UpcomingShowList upcomingPerformances={upcomingPerformances} />
-      <Grid container direction="row">
-        <Grid size={{ xs: 12 }}>
-          <Typography sx={{ margin: "1vh 0" }} variant="h6">
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <UpcomingShowList upcomingPerformances={upcomingPerformances} />
+
+        {/* Section header */}
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 3 }}>
+          <Typography
+            sx={{
+              fontFamily: '"DM Sans", sans-serif',
+              fontSize: "0.62rem",
+              letterSpacing: "0.22em",
+              textTransform: "uppercase",
+              color: "#D4AF55",
+              whiteSpace: "nowrap",
+            }}
+          >
             All Musicals
           </Typography>
-        </Grid>
-        <Grid container size={{ xs: 8 }} sx={{ margin: "0 auto" }}>
+          <Box sx={{ flex: 1, height: "1px", background: "rgba(212,175,85,0.2)" }} />
+          <Typography
+            sx={{
+              fontFamily: '"DM Sans", sans-serif',
+              fontSize: "0.62rem",
+              letterSpacing: "0.1em",
+              color: "rgba(232,220,200,0.3)",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {musicalCount} titles
+          </Typography>
+        </Box>
+
+        <Box sx={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 0 }}>
           {musicals.map((musical, i) => (
             <MusicalCard
               key={i}
@@ -59,15 +84,30 @@ function MusicalsPage({ musicals: initialMusicals, musicalCount, upcomingPerform
               name={musical.title}
             />
           ))}
-        </Grid>
-      </Grid>
-      <Pagination
-        count={Math.ceil(musicalCount / itemsPerPage)}
-        page={page}
-        sx={{ margin: "1vh", justifyContent: "center", display: "flex" }}
-        onChange={handleChange}
-      />
-    </div>
+        </Box>
+
+        <Pagination
+          count={Math.ceil(musicalCount / itemsPerPage)}
+          page={page}
+          sx={{
+            mt: 4,
+            display: "flex",
+            justifyContent: "center",
+            "& .MuiPaginationItem-root": {
+              color: "rgba(232,220,200,0.5)",
+              borderColor: "rgba(212,175,85,0.2)",
+              "&.Mui-selected": {
+                background: "rgba(212,175,85,0.15)",
+                color: "#D4AF55",
+                borderColor: "rgba(212,175,85,0.4)",
+              },
+              "&:hover": { background: "rgba(212,175,85,0.08)" },
+            },
+          }}
+          onChange={handleChange}
+        />
+      </Container>
+    </Box>
   );
 }
 
@@ -81,6 +121,7 @@ export async function getStaticProps() {
       musicalCount,
       upcomingPerformances,
     }).json,
+    revalidate: 3600,
   };
 }
 

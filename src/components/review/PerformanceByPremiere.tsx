@@ -1,4 +1,3 @@
-import { StayCurrentLandscape } from "@mui/icons-material";
 import type { attendance, musicals, performances, plays, theatres } from "@prisma/client";
 import {
   Chart as ChartJS,
@@ -25,10 +24,22 @@ export const options = {
   plugins: {
     legend: {
       position: "top" as const,
+      labels: {
+        color: "rgba(232, 220, 200, 0.6)",
+        font: { family: "DM Sans", size: 11 },
+        boxWidth: 12,
+      },
     },
-    title: {
-      display: true,
-      text: "Shows by Premiere",
+    title: { display: false },
+  },
+  scales: {
+    x: {
+      ticks: { color: "rgba(232, 220, 200, 0.4)", font: { family: "DM Sans", size: 10 } },
+      grid: { color: "rgba(212, 175, 85, 0.06)" },
+    },
+    y: {
+      ticks: { color: "rgba(232, 220, 200, 0.4)", font: { family: "DM Sans", size: 10 } },
+      grid: { color: "rgba(212, 175, 85, 0.06)" },
     },
   },
 };
@@ -39,21 +50,17 @@ function MusicalByPremiereChart({ stats }: Props) {
       const musicalYear = stat.performances.musicals?.premiere
         ? moment(stat.performances.musicals.premiere).format("YYYY")
         : null;
-
       const playYear = stat.performances.plays?.premiere
         ? moment(stat.performances.plays.premiere).format("YYYY")
         : null;
-
       if (musicalYear) {
         if (!acc[musicalYear]) acc[musicalYear] = { musical: 0, play: 0 };
         acc[musicalYear].musical += 1;
       }
-
       if (playYear) {
         if (!acc[playYear]) acc[playYear] = { musical: 0, play: 0 };
         acc[playYear].play += 1;
       }
-
       return acc;
     },
     {}
@@ -61,31 +68,29 @@ function MusicalByPremiereChart({ stats }: Props) {
 
   const labels = Object.keys(yearlyOccurrence).sort();
 
-  const musicalPremieres = labels.map((year) => yearlyOccurrence[year].musical);
-
-  const playPremieres = labels.map((year) => yearlyOccurrence[year].play);
-
   const premiereData = {
+    labels,
     datasets: [
       {
-        label: "# of Musicals Seen",
-        data: musicalPremieres,
-        backgroundColor: "rgba(216, 0, 50, 0.7)",
+        label: "Musicals",
+        data: labels.map((y) => yearlyOccurrence[y].musical),
+        backgroundColor: "rgba(212, 175, 85, 0.7)",
+        borderColor: "rgba(212, 175, 85, 1)",
+        borderWidth: 1,
+        borderRadius: 3,
       },
       {
-        label: "# of Plays Seen",
-        data: playPremieres,
-        backgroundColor: "rgba(255, 209, 0, 0.7)",
+        label: "Plays",
+        data: labels.map((y) => yearlyOccurrence[y].play),
+        backgroundColor: "rgba(207, 68, 68, 0.6)",
+        borderColor: "rgba(207, 68, 68, 1)",
+        borderWidth: 1,
+        borderRadius: 3,
       },
     ],
-    labels,
   };
 
-  return (
-    <div>
-      <Bar data={premiereData} options={options} />
-    </div>
-  );
+  return <Bar data={premiereData} options={options} />;
 }
 
 export default MusicalByPremiereChart;

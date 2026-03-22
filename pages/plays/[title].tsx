@@ -3,33 +3,44 @@ import Card from "@mui/material/Card";
 import CardMedia from "@mui/material/CardMedia";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import { attendance, likedShows, plays, performances, watchlist } from "@prisma/client";
+import { plays } from "@prisma/client";
 import moment from "moment";
 import Head from "next/head";
-import { getSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
+import { useEffect, useState } from "react";
 import superjson from "superjson";
 
 import PerformanceCalendar from "../../src/components/schedule/PerformanceCalendar";
 import ShowActionBar from "../../src/components/shows/ShowActionBar";
-import { getUserAttendance } from "../../src/data/performances";
-import { getLikedPlays, getPlayByTitle, getWatchlist } from "../../src/data/plays";
+import { getPlayByTitle, getPlays } from "../../src/data/plays";
 
 interface Params {
   title: string;
 }
 
 interface Props {
-  attendance: (attendance & { performances: performances })[];
-  likedPlays: likedShows[];
   play: plays;
-  session: any;
-  watchlist: watchlist[];
 }
 
-function PlayPage({ attendance, likedPlays, play, session, watchlist }: Props) {
+function PlayPage({ play }: Props) {
+  const { data: session } = useSession();
   const sessionUser = session?.user;
   const playTitle = play.title;
   const title = `${playTitle} • StageKeeper`;
+
+  const [userStatus, setUserStatus] = useState<{
+    attendance: any[];
+    likedShows: any[];
+    watchlist: any[];
+  } | null>(null);
+
+  useEffect(() => {
+    if (session) {
+      fetch("/api/shows/user-status")
+        .then((r) => r.json())
+        .then(setUserStatus);
+    }
+  }, [session]);
 
   return (
     <div>
@@ -87,11 +98,11 @@ function PlayPage({ attendance, likedPlays, play, session, watchlist }: Props) {
         </Stack>
         <Stack width="15%">
           <ShowActionBar
-            attendance={attendance}
-            likedShows={likedPlays}
+            attendance={userStatus?.attendance ?? []}
+            likedShows={userStatus?.likedShows ?? []}
             play={play}
             sessionUser={sessionUser}
-            watchlist={watchlist}
+            watchlist={userStatus?.watchlist ?? []}
           />
         </Stack>
       </Stack>
@@ -100,37 +111,25 @@ function PlayPage({ attendance, likedPlays, play, session, watchlist }: Props) {
   );
 }
 
-export async function getServerSideProps(context: { params: Params; req: any }) {
+export async function getStaticPaths() {
+  const plays = await getPlays();
+  const paths = plays.map((play: { title: string }) => ({
+    params: { title: play.title.replace(/\s+/g, "-").toLowerCase() },
+  }));
+  return { paths, fallback: "blocking" };
+}
+
+export async function getStaticProps(context: { params: Params }) {
   const { title } = context.params;
-  const [session, play] = await Promise.all([
-    getSession({ req: context.req }),
-    getPlayByTitle(title),
-  ]);
+  const play = await getPlayByTitle(title);
 
-  if (session) {
-    const userId = Number(session.user.id);
-    const [attendance, likedPlays, watchlist] = await Promise.all([
-      getUserAttendance(userId),
-      getLikedPlays(userId),
-      getWatchlist(userId),
-    ]);
-
-    return {
-      props: superjson.serialize({
-        attendance,
-        likedPlays,
-        play,
-        session,
-        watchlist,
-      }).json,
-    };
+  if (!play) {
+    return { notFound: true };
   }
 
   return {
-    props: superjson.serialize({
-      play,
-      session,
-    }).json,
+    props: superjson.serialize({ play }).json,
+    revalidate: 86400,
   };
 }
 

@@ -1,62 +1,46 @@
-import Grid from "@mui/material/Grid";
 import { likedShows, musicals, plays, users } from "@prisma/client";
-import Head from "next/head";
 import superjson from "superjson";
 
 import ShowList from "../../../src/components/shows/ShowList";
-import ProfileLinkBar from "../../../src/components/users/ProfileLinkBar";
+import ProfilePageWrapper from "../../../src/components/users/ProfilePageWrapper";
 import { getUsers, getUserLikes } from "../../../src/data/users";
 
 interface Props {
   user: users & {
-    likedShows: likedShows &
-      {
-        musicals: musicals;
-        plays: plays;
-      }[];
+    likedShows: (likedShows & { musicals: musicals; plays: plays })[];
   };
 }
 
 interface Params {
-  params: {
-    username: string;
-  };
+  params: { username: string };
 }
 
 function UserLikes({ user }: Props) {
-  const title = `${user.username}'s Likes • Stagekeeper`;
-  const header = `${user.username}'S LIKED SHOWS`;
-  const shows = user.likedShows.map((user) => user.musicals);
-  const style = "overline";
+  const shows = user.likedShows.map((item) => item.musicals || item.plays).filter(Boolean);
 
   return (
-    <div>
-      <Head>
-        <title>{title}</title>
-      </Head>
-      <Grid container>
-        <ProfileLinkBar username={user.username} />
-        <ShowList header={header} shows={shows} style={style} />
-      </Grid>
-    </div>
+    <ProfilePageWrapper title={`${user.username}'s Likes • StageKeeper`} username={user.username}>
+      <ShowList
+        header={`${user.username}'s Liked Shows`}
+        shows={shows}
+        emptyMessage="No liked shows yet."
+      />
+    </ProfilePageWrapper>
   );
 }
 
 export async function getStaticPaths() {
   const users = await getUsers();
-  const paths = users.map((user) => ({
-    params: { username: user.username },
-  }));
-
   return {
-    paths,
-    fallback: false,
+    paths: users.map((user) => ({ params: { username: user.username } })),
+    fallback: "blocking",
   };
 }
 
 export async function getStaticProps({ params }: Params) {
   const { username } = params;
   const user = await getUserLikes(username);
+  if (!user) return { notFound: true };
   return {
     props: superjson.serialize({ user }).json,
     revalidate: 1800,

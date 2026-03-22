@@ -1,4 +1,5 @@
-import Grid from "@mui/material/Grid";
+import Box from "@mui/material/Box";
+import Container from "@mui/material/Container";
 import {
   attendance,
   following,
@@ -8,6 +9,7 @@ import {
   users,
   watchlist,
 } from "@prisma/client";
+import Head from "next/head";
 import { getSession } from "next-auth/react";
 import superjson from "superjson";
 
@@ -47,31 +49,40 @@ function ProfilePage({
   const avatarSize = "64px";
 
   return (
-    <div>
-      <h1>Hello, {user.username}!</h1>
-      <div>
-        <Grid container spacing={2}>
-          <Grid size={{ xs: 12 }}>
-            <ProfileStatBar
-              attendance={attendance}
-              avatarSize={avatarSize}
-              followers={followers}
-              following={following}
-              sessionUser={sessionUser}
-              user={user}
-            />
-            <ProfileLinkBar username={user.username} />
-          </Grid>
-          <Grid size={{ xs: 8 }}>
+    <Box sx={{ background: "#080C14", minHeight: "100vh" }}>
+      <Head>
+        <title>{user.username} • StageKeeper</title>
+      </Head>
+
+      {/* Profile header - full width */}
+      <ProfileStatBar
+        attendance={attendance}
+        avatarSize={avatarSize}
+        followers={followers}
+        following={following}
+        sessionUser={sessionUser}
+        user={user}
+      />
+
+      {/* Nav tabs - full width */}
+      <ProfileLinkBar username={user.username} />
+
+      {/* Content */}
+      <Container maxWidth="lg" sx={{ py: 3 }}>
+        <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 280px" }, gap: 4 }}>
+          {/* Left: recent shows + following */}
+          <Box>
             <FriendRecentActivity recentPerformances={recentPerformances} trim={4} />
             <UserFollowing following={following} />
-          </Grid>
-          <Grid size={{ xs: 4 }}>
+          </Box>
+
+          {/* Right: watchlist */}
+          <Box>
             <UserWatchlistPreview username={user.username} watchlist={watchlist} />
-          </Grid>
-        </Grid>
-      </div>
-    </div>
+          </Box>
+        </Box>
+      </Container>
+    </Box>
   );
 }
 

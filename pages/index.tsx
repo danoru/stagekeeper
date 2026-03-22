@@ -55,6 +55,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
             performances: {
               include: { musicals: true, plays: true, theatres: true },
             },
+            users: true,
           },
           orderBy: { performances: { startTime: "desc" } },
           take: 20,
@@ -72,6 +73,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
       },
       include: {
         performances: { include: { musicals: true, plays: true, theatres: true } },
+        users: true,
       },
       take: 20,
     });

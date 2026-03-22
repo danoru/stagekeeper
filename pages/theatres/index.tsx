@@ -72,6 +72,7 @@ export async function getStaticProps() {
       theatres,
       theatreCount,
     }).json,
+    revalidate: 3600,
   };
 }
 

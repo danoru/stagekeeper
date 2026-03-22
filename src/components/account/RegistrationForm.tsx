@@ -1,161 +1,225 @@
+import Alert from "@mui/material/Alert";
+import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import Grid from "@mui/material/Grid";
+import Checkbox from "@mui/material/Checkbox";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Link from "@mui/material/Link";
+import Snackbar from "@mui/material/Snackbar";
 import TextField from "@mui/material/TextField";
+import Typography from "@mui/material/Typography";
 import { Formik, Form } from "formik";
-import React from "react";
-import * as yup from "yup";
+import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
+import { useState } from "react";
+import * as Yup from "yup";
 
-const validationSchema = yup.object({
-  email: yup.string().email("Enter a valid email").required("Email is required."),
-  username: yup
-    .string()
-    .min(5, "Username must be at least 5 characters long.")
-    .required("Username is required."),
-  password: yup
-    .string()
-    .min(5, "Password must be at least 5 characters long.")
-    .required("Password is required."),
-  confirmPassword: yup
-    .string()
-    .oneOf([yup.ref("password")], "Passwords must match.")
-    .required("Password confirmation is required."),
-});
+function LoginForm() {
+  const router = useRouter();
+  const initialValues = { username: "", password: "", rememberMe: false };
+  const validationSchema = Yup.object({
+    username: Yup.string().required("Username is required."),
+    password: Yup.string().required("Password is required."),
+  });
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">("success");
 
-interface FormValues {
-  email: string;
-  username: string;
-  password: string;
-  confirmPassword: string;
-}
-
-function RegistrationForm() {
   async function handleSubmit(
-    values: FormValues,
-    {
-      setSubmitting,
-      setFieldError,
-      resetForm,
-    }: {
-      setSubmitting: (isSubmitting: boolean) => void;
-      setFieldError: (field: string, message: string) => void;
-      resetForm: () => void;
-    }
+    values: { username: string; password: string; rememberMe: boolean },
+    { setSubmitting, setErrors }: any
   ) {
-    try {
-      const res = await fetch(`/api/auth/register`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(values),
-      });
+    const response = await signIn("credentials", {
+      username: values.username,
+      password: values.password,
+      remember: values.rememberMe,
+      redirect: false,
+    });
 
-      if (res.ok) {
-        console.log("Registration successful");
-        resetForm();
-      } else {
-        const data = await res.json();
-        if (data.error === "Username already exists.") {
-          setFieldError("username", "Username already exists.");
-        } else {
-          console.error("Registration failed:", data.error);
-        }
-      }
-    } catch (error) {
-      console.error("An error occurred:", error);
-    } finally {
-      setSubmitting(false);
+    if (response?.error) {
+      setErrors({ submit: response.error });
+      setSnackbarMessage("Login failed. Your credentials do not match.");
+      setSnackbarSeverity("error");
+      setSnackbarOpen(true);
+    } else {
+      setSnackbarMessage("Login successful. Redirecting…");
+      setSnackbarOpen(true);
+      setSnackbarSeverity("success");
+      router.push("/");
+      router.refresh();
     }
+
+    setSubmitting(false);
   }
 
   return (
-    <Grid container justifyContent="center">
-      <Grid size={{ md: 5, sm: 8, xs: 12 }}>
-        <Formik
-          initialValues={{
-            email: "",
-            username: "",
-            password: "",
-            confirmPassword: "",
+    <Box
+      sx={{
+        minHeight: "100vh",
+        background: "#080C14",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        px: 2,
+      }}
+    >
+      <Box
+        sx={{
+          width: "100%",
+          maxWidth: 420,
+          background: "#0D1520",
+          border: "1px solid rgba(212,175,85,0.15)",
+          borderRadius: 1,
+          overflow: "hidden",
+        }}
+      >
+        {/* Header */}
+        <Box
+          sx={{
+            borderBottom: "1px solid rgba(212,175,85,0.12)",
+            background: "linear-gradient(180deg, #0F1A28 0%, #0D1520 100%)",
+            px: 4,
+            py: 3,
+            textAlign: "center",
           }}
-          validationSchema={validationSchema}
-          onSubmit={handleSubmit}
         >
-          {({ isSubmitting, handleChange, handleBlur, values, touched, errors }) => (
-            <Form>
-              <TextField
-                fullWidth
-                autoComplete="email"
-                error={touched.email && Boolean(errors.email)}
-                helperText={touched.email && errors.email}
-                id="email"
-                label="Email"
-                margin="normal"
-                name="email"
-                value={values.email}
-                variant="outlined"
-                onBlur={handleBlur}
-                onChange={handleChange}
-              />
-              <TextField
-                fullWidth
-                autoComplete="username"
-                error={touched.username && Boolean(errors.username)}
-                helperText={touched.username && errors.username}
-                id="username"
-                label="Username"
-                margin="normal"
-                name="username"
-                value={values.username}
-                variant="outlined"
-                onBlur={handleBlur}
-                onChange={handleChange}
-              />
-              <TextField
-                fullWidth
-                autoComplete="current-password"
-                error={touched.password && Boolean(errors.password)}
-                helperText={touched.password && errors.password}
-                id="password"
-                label="Password"
-                margin="normal"
-                name="password"
-                type="password"
-                value={values.password}
-                variant="outlined"
-                onBlur={handleBlur}
-                onChange={handleChange}
-              />
-              <TextField
-                fullWidth
-                autoComplete="current-password"
-                error={touched.confirmPassword && Boolean(errors.confirmPassword)}
-                helperText={touched.confirmPassword && errors.confirmPassword}
-                id="confirmPassword"
-                label="Confirm Password"
-                margin="normal"
-                name="confirmPassword"
-                type="password"
-                value={values.confirmPassword}
-                variant="outlined"
-                onBlur={handleBlur}
-                onChange={handleChange}
-              />
-              <Button
-                fullWidth
-                color="primary"
-                disabled={isSubmitting}
-                type="submit"
-                variant="contained"
-              >
-                Register
-              </Button>
-            </Form>
-          )}
-        </Formik>
-      </Grid>
-    </Grid>
+          {/* Gold rule + eyebrow */}
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 1.5 }}>
+            <Box sx={{ flex: 1, height: "1px", background: "rgba(212,175,85,0.3)" }} />
+            <Typography
+              sx={{
+                fontFamily: '"DM Sans", sans-serif',
+                fontSize: "0.6rem",
+                letterSpacing: "0.22em",
+                textTransform: "uppercase",
+                color: "#D4AF55",
+              }}
+            >
+              StageKeeper
+            </Typography>
+            <Box sx={{ flex: 1, height: "1px", background: "rgba(212,175,85,0.3)" }} />
+          </Box>
+          <Typography
+            sx={{
+              fontFamily: '"Cormorant Garamond", serif',
+              fontSize: "1.9rem",
+              fontWeight: 600,
+              color: "#E8DCC8",
+              lineHeight: 1,
+              letterSpacing: "0.01em",
+            }}
+          >
+            Welcome Back
+          </Typography>
+          <Typography
+            sx={{
+              fontFamily: '"Cormorant Garamond", serif',
+              fontStyle: "italic",
+              fontSize: "0.9rem",
+              color: "rgba(232,220,200,0.45)",
+              mt: 0.5,
+            }}
+          >
+            Sign in to your archive
+          </Typography>
+        </Box>
+
+        {/* Form */}
+        <Box sx={{ px: 4, py: 4 }}>
+          <Formik
+            initialValues={initialValues}
+            validationSchema={validationSchema}
+            onSubmit={handleSubmit}
+          >
+            {({ isSubmitting, errors, touched, handleChange, handleBlur, values }) => (
+              <Form>
+                <TextField
+                  autoFocus
+                  fullWidth
+                  required
+                  error={touched.username && !!errors.username}
+                  helperText={touched.username && errors.username}
+                  id="username"
+                  label="Username"
+                  margin="normal"
+                  name="username"
+                  value={values.username}
+                  variant="outlined"
+                  onBlur={handleBlur}
+                  onChange={handleChange}
+                />
+                <TextField
+                  fullWidth
+                  required
+                  autoComplete="current-password"
+                  error={touched.password && !!errors.password}
+                  helperText={touched.password && errors.password}
+                  id="password"
+                  label="Password"
+                  margin="normal"
+                  name="password"
+                  type="password"
+                  value={values.password}
+                  variant="outlined"
+                  onBlur={handleBlur}
+                  onChange={handleChange}
+                />
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={values.rememberMe}
+                      color="primary"
+                      name="rememberMe"
+                      onChange={handleChange}
+                    />
+                  }
+                  label={
+                    <Typography sx={{ fontSize: "0.82rem", color: "rgba(232,220,200,0.6)" }}>
+                      Remember me
+                    </Typography>
+                  }
+                />
+                <Button
+                  fullWidth
+                  disabled={isSubmitting}
+                  type="submit"
+                  variant="contained"
+                  sx={{ mt: 1, mb: 2.5, py: 1.25, fontSize: "0.75rem", letterSpacing: "0.1em" }}
+                >
+                  {isSubmitting ? "Signing in…" : "Sign In"}
+                </Button>
+                <Box
+                  sx={{ textAlign: "center", borderTop: "1px solid rgba(212,175,85,0.1)", pt: 2.5 }}
+                >
+                  <Link
+                    href="/register"
+                    underline="none"
+                    sx={{
+                      fontFamily: '"DM Sans", sans-serif',
+                      fontSize: "0.78rem",
+                      color: "rgba(232,220,200,0.5)",
+                      transition: "color 0.2s",
+                      "&:hover": { color: "#D4AF55" },
+                    }}
+                  >
+                    Don&apos;t have an account?{" "}
+                    <Box component="span" sx={{ color: "#D4AF55", fontWeight: 500 }}>
+                      Create one
+                    </Box>
+                  </Link>
+                </Box>
+              </Form>
+            )}
+          </Formik>
+        </Box>
+      </Box>
+
+      <Snackbar autoHideDuration={6000} open={snackbarOpen} onClose={() => setSnackbarOpen(false)}>
+        <Alert severity={snackbarSeverity} onClose={() => setSnackbarOpen(false)}>
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
+    </Box>
   );
 }
 
-export default RegistrationForm;
+export default LoginForm;

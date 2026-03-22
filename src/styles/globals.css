@@ -1,20 +1,14 @@
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap");
+
 html,
 body {
   padding: 0;
-  text-align: center;
   margin: 0;
-  font-family:
-    -apple-system,
-    BlinkMacSystemFont,
-    Segoe UI,
-    Roboto,
-    Oxygen,
-    Ubuntu,
-    Cantarell,
-    Fira Sans,
-    Droid Sans,
-    Helvetica Neue,
-    sans-serif;
+  background-color: #080c14;
+  color: #e8dcc8;
+  font-family: "DM Sans", "Helvetica Neue", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 a {
@@ -26,12 +20,144 @@ a {
   box-sizing: border-box;
 }
 
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
-  }
-  body {
-    color: white;
-    background: black;
-  }
+/* =============================================
+   FullCalendar — Concept 2 dark theme overrides
+   ============================================= */
+
+/* Toolbar: prev/next/today buttons + title */
+.fc .fc-toolbar-title {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #e8dcc8;
+  letter-spacing: 0.04em;
+}
+
+.fc .fc-button {
+  background: transparent !important;
+  background-image: none !important;
+  border: 1px solid rgba(212, 175, 85, 0.25) !important;
+  color: rgba(232, 220, 200, 0.6) !important;
+  font-family: "DM Sans", sans-serif !important;
+  font-size: 0.7rem !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+  box-shadow: none !important;
+  transition:
+    border-color 0.2s,
+    color 0.2s !important;
+  padding: 4px 12px !important;
+}
+
+.fc .fc-button:hover,
+.fc .fc-button:focus {
+  border-color: rgba(212, 175, 85, 0.5) !important;
+  color: #d4af55 !important;
+  background: rgba(212, 175, 85, 0.06) !important;
+  box-shadow: none !important;
+}
+
+.fc .fc-button-primary:not(:disabled).fc-button-active,
+.fc .fc-button-primary:not(:disabled):active {
+  background: rgba(212, 175, 85, 0.12) !important;
+  border-color: rgba(212, 175, 85, 0.4) !important;
+  color: #d4af55 !important;
+  box-shadow: none !important;
+}
+
+/* Column headers: Mon, Tue, etc. */
+.fc .fc-col-header-cell-cushion {
+  font-family: "DM Sans", sans-serif;
+  font-size: 0.62rem;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: rgba(212, 175, 85, 0.6);
+  text-decoration: none;
+  padding: 8px 4px;
+}
+
+/* Day number */
+.fc .fc-daygrid-day-number {
+  font-family: "DM Sans", sans-serif;
+  font-size: 0.75rem;
+  color: rgba(232, 220, 200, 0.45);
+  text-decoration: none;
+  padding: 4px 8px;
+}
+
+.fc .fc-day-today .fc-daygrid-day-number {
+  color: #d4af55;
+  font-weight: 600;
+}
+
+/* Today cell highlight */
+.fc .fc-day-today {
+  background: rgba(212, 175, 85, 0.05) !important;
+}
+
+/* Grid borders */
+.fc .fc-scrollgrid,
+.fc .fc-scrollgrid-section > td,
+.fc td,
+.fc th {
+  border-color: rgba(212, 175, 85, 0.1) !important;
+}
+
+/* Event pills */
+.fc .fc-daygrid-event {
+  border-radius: 3px;
+  font-family: "DM Sans", sans-serif;
+  font-size: 0.68rem;
+  border: none;
+  padding: 1px 5px;
+}
+
+.fc .fc-event-title {
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Watchlist events — gold */
+.fc .fc-event[data-source="watchlist"],
+.fc .fc-event.source-watchlist {
+  background: rgba(212, 175, 85, 0.2);
+  color: #d4af55;
+}
+
+/* Attended / programming events — green */
+.fc .fc-event[data-source="programming"],
+.fc .fc-event.source-programming {
+  background: rgba(80, 203, 120, 0.2);
+  color: #50cb78;
+}
+
+/* Default event color */
+.fc .fc-event {
+  background: rgba(212, 175, 85, 0.15);
+  color: #d4af55;
+  cursor: pointer;
+}
+
+.fc .fc-event:hover {
+  background: rgba(212, 175, 85, 0.25);
+}
+
+/* More events link */
+.fc .fc-daygrid-more-link {
+  font-family: "DM Sans", sans-serif;
+  font-size: 0.62rem;
+  color: rgba(212, 175, 85, 0.5);
+}
+
+/* Remove default background */
+.fc-theme-standard .fc-scrollgrid {
+  border-color: rgba(212, 175, 85, 0.1);
+}
+
+.fc-theme-standard td,
+.fc-theme-standard th {
+  border-color: rgba(212, 175, 85, 0.1);
 }

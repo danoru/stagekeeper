@@ -1,6 +1,7 @@
+import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
-import type { attendance, musicals, performances, plays, theatres } from "@prisma/client";
+import type { attendance, musicals, performances, plays, theatres, users } from "@prisma/client";
 
 import DetailInfoCard from "../cards/DetailInfoCard";
 
@@ -12,6 +13,7 @@ interface Props {
       plays: plays;
       theatres: theatres;
     };
+    users: users;
   })[];
 }
 
@@ -40,67 +42,102 @@ function FriendUpcomingActivity({ trim, upcomingPerformances }: Props) {
 
   return (
     <>
-      <Grid
+      <Box
         sx={{
-          borderBottomWidth: "1px",
-          borderBottomStyle: "solid",
-          borderBottomColor: "theme.palette.secondary",
           display: "flex",
-          justifyContent: "space-between",
-          lineHeight: "0",
-          margin: "0 auto",
-          width: "75%",
+          alignItems: "center",
+          gap: 2,
+          mb: 2.5,
         }}
       >
-        <Typography component="div" variant="overline">
-          UPCOMING SHOWS FROM FRIENDS
+        <Typography
+          sx={{
+            fontFamily: '"DM Sans", sans-serif',
+            fontSize: "0.62rem",
+            letterSpacing: "0.22em",
+            textTransform: "uppercase",
+            color: "#D4AF55",
+            whiteSpace: "nowrap",
+          }}
+        >
+          Upcoming From Friends
         </Typography>
-      </Grid>
-      <Grid
-        container
-        columnSpacing={2}
-        rowSpacing={1}
-        sx={{
-          margin: "10px auto",
-          maxWidth: "75%",
-        }}
-      >
-        {upcoming.map(
-          (
-            entry: attendance & {
-              performances: performances & {
-                musicals: musicals;
-                theatres: theatres;
-                plays: plays;
-              };
-            },
-
-            i: number
-          ) => {
-            const isMusical = entry.performances.type === "MUSICAL";
-            const image = isMusical
-              ? entry.performances.musicals?.playbill
-              : entry.performances.plays.playbill;
-            const show = isMusical
-              ? entry.performances.musicals?.title
-              : entry.performances.plays.title;
-            return (
-              <DetailInfoCard
-                key={`card-${i}`}
-                date={entry.performances.startTime}
-                image={image}
-                show={show}
-                sx={{
-                  height: "100%",
-                  width: "100%",
-                }}
-                theatre={entry.performances.theatres.name}
-                type={entry.performances.type}
-              />
-            );
-          }
-        )}
-      </Grid>
+        <Box sx={{ flex: 1, height: "1px", background: "rgba(212,175,85,0.2)" }} />
+      </Box>
+      {upcoming.length === 0 ? (
+        <Box
+          sx={{
+            border: "1px solid rgba(212,175,85,0.08)",
+            borderRadius: 1,
+            py: 4,
+            px: 3,
+            textAlign: "center",
+            background: "rgba(212,175,85,0.02)",
+            mb: 2,
+          }}
+        >
+          <Typography
+            sx={{
+              fontFamily: '"Cormorant Garamond", serif',
+              fontStyle: "italic",
+              fontSize: "1rem",
+              color: "rgba(232,220,200,0.3)",
+              mb: 0.5,
+            }}
+          >
+            The stage is quiet for now.
+          </Typography>
+          <Typography
+            sx={{
+              fontFamily: '"DM Sans", sans-serif',
+              fontSize: "0.7rem",
+              color: "rgba(232,220,200,0.2)",
+              letterSpacing: "0.04em",
+            }}
+          >
+            Follow friends to see their upcoming shows here.
+          </Typography>
+        </Box>
+      ) : (
+        <Grid container columnSpacing={1} rowSpacing={1} sx={{ mb: 2 }}>
+          {upcoming.map(
+            (
+              entry: attendance & {
+                performances: performances & {
+                  musicals: musicals;
+                  theatres: theatres;
+                  plays: plays;
+                };
+                users: users;
+              },
+              i: number
+            ) => {
+              const isMusical = entry.performances.type === "MUSICAL";
+              const image = isMusical
+                ? entry.performances.musicals?.playbill
+                : entry.performances.plays.playbill;
+              const show = isMusical
+                ? entry.performances.musicals?.title
+                : entry.performances.plays.title;
+              return (
+                <DetailInfoCard
+                  key={`card-${i}`}
+                  date={entry.performances.startTime}
+                  image={image}
+                  show={show}
+                  sx={{
+                    height: "100%",
+                    width: "100%",
+                  }}
+                  theatre={entry.performances.theatres.name}
+                  type={entry.performances.type}
+                  username={entry.users?.username}
+                />
+              );
+            }
+          )}
+        </Grid>
+      )}
     </>
   );
 }

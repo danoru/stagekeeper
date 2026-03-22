@@ -1,14 +1,14 @@
+import Box from "@mui/material/Box";
 import { attendance, musicals, performances, plays, theatres } from "@prisma/client";
 import Head from "next/head";
-import { Fragment } from "react";
 import superjson from "superjson";
 
-import PerformanceCarousel from "../../../../src/components/review/PerformanceCarousel";
 import Highlights from "../../../../src/components/review/Highlights";
+import PerformanceCarousel from "../../../../src/components/review/PerformanceCarousel";
 import ReviewHeader from "../../../../src/components/review/ReviewHeader";
 import Statistics from "../../../../src/components/review/Statistics";
 import { getUserAttendanceByYear } from "../../../../src/data/performances";
-import { getDistinctYears, getUsers } from "../../../../src/data/users";
+import { getDistinctYears, findUserByUsername, getUsers } from "../../../../src/data/users";
 
 interface Props {
   attendance: (attendance & {
@@ -16,22 +16,24 @@ interface Props {
   })[];
   username: string;
   year: string;
+  minYear: number;
+  maxYear: number;
 }
 
-function ReviewPage({ attendance, username, year }: Props) {
+function YearReviewPage({ attendance, username, year, minYear, maxYear }: Props) {
   return (
-    <Fragment>
+    <Box sx={{ background: "#080C14", minHeight: "100vh" }}>
       <Head>
-        <title>Year in Review • StageKeeper</title>
-        <meta content="See what your Year in Review looks like!" name="description" />
+        <title>
+          {username} — {year} Year in Review • StageKeeper
+        </title>
+        <meta content={`See your ${year} theatre year in review.`} name="description" />
       </Head>
-      <div>
-        <ReviewHeader username={username} year={year} />
-        <PerformanceCarousel items={attendance} />
-        <Highlights highlights={attendance} />
-        <Statistics stats={attendance} view="year" year={year} />
-      </div>
-    </Fragment>
+      <ReviewHeader username={username} year={year} minYear={minYear} maxYear={maxYear} />
+      <PerformanceCarousel items={attendance} />
+      <Highlights highlights={attendance} />
+      <Statistics stats={attendance} view="year" year={year} />
+    </Box>
   );
 }
 
@@ -44,36 +46,33 @@ export async function getStaticPaths() {
       params: { username: user.username, year: year.toString() },
     }))
   );
-  return {
-    paths,
-    fallback: false,
-  };
+
+  return { paths, fallback: "blocking" };
 }
 
 export async function getStaticProps(context: any) {
   const { username, year } = context.params!;
-  const users = await getUsers();
-  const user = users.find((user) => user.username === username);
-  let attendance: (attendance & {
-    performances: performances & {
-      musicals: musicals | null;
-      plays: plays | null;
-      theatres: theatres;
-    };
-  })[] = [];
+  const user = await findUserByUsername(username);
+  if (!user) return { notFound: true };
 
-  if (user) {
-    const userId = user.id;
-    attendance = await getUserAttendanceByYear(Number(year), userId);
-  }
+  const [attendance, allYears] = await Promise.all([
+    getUserAttendanceByYear(Number(year), user.id),
+    getDistinctYears(),
+  ]);
+
+  const minYear = allYears.length > 0 ? Math.min(...allYears) : Number(year);
+  const maxYear = allYears.length > 0 ? Math.max(...allYears) : Number(year);
 
   return {
     props: superjson.serialize({
       attendance,
       username,
       year,
+      minYear,
+      maxYear,
     }).json,
+    revalidate: 3600,
   };
 }
 
-export default ReviewPage;
+export default YearReviewPage;

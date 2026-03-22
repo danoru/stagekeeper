@@ -136,26 +136,16 @@ export async function getPaginatedTheatres(page: number, limit: number) {
 }
 
 export async function getTheatreByName(theatreName: string) {
-  const formattedName = theatreName.replace(/\s+/g, "-").toLowerCase();
-  const theatres = await prisma.theatres.findMany({
-    select: {
-      name: true,
+  const nameWithSpaces = theatreName.replace(/-/g, " ");
+  const theatre = await prisma.theatres.findFirst({
+    where: {
+      name: {
+        equals: nameWithSpaces,
+        mode: "insensitive",
+      },
     },
   });
-
-  const matchedTheatre = theatres.find(
-    (theatre) => theatre.name.replace(/\s+/g, "-").toLowerCase() === formattedName
-  );
-
-  if (matchedTheatre) {
-    const theatre = await prisma.theatres.findFirst({
-      where: {
-        name: matchedTheatre.name,
-      },
-    });
-    return theatre;
-  }
-  return null;
+  return theatre;
 }
 
 export async function getCurrentSeason(theatreId: number) {

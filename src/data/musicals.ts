@@ -422,26 +422,16 @@ export async function getPaginatedMusicals(page: number, limit: number) {
 }
 
 export async function getMusicalByTitle(musicalTitle: string) {
-  const formattedTitle = musicalTitle.replace(/\s+/g, "-").toLowerCase();
-  const musicals = await prisma.musicals.findMany({
-    select: {
-      title: true,
+  const titleWithSpaces = musicalTitle.replace(/-/g, " ");
+  const musical = await prisma.musicals.findFirst({
+    where: {
+      title: {
+        equals: titleWithSpaces,
+        mode: "insensitive",
+      },
     },
   });
-
-  const matchedMusical = musicals.find(
-    (musical) => musical.title.replace(/\s+/g, "-").toLowerCase() === formattedTitle
-  );
-
-  if (matchedMusical) {
-    const musical = await prisma.musicals.findFirst({
-      where: {
-        title: matchedMusical.title,
-      },
-    });
-    return musical;
-  }
-  return null;
+  return musical;
 }
 
 export async function getLikedMusicals(id: number) {

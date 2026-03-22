@@ -8,128 +8,181 @@ import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
-import { useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
+import { useRouter } from "next/router";
 import * as React from "react";
 
 function getPages(session: any) {
   if (session) {
-    return [
-      {
-        id: 1,
-        title: session.user.username,
-        link: `/users/${session.user.username}`,
-      },
+    const pages = [
+      { id: 1, title: session.user.username, link: `/users/${session.user.username}` },
       { id: 2, title: "Musicals", link: "/musicals" },
       { id: 3, title: "Plays", link: "/plays" },
       { id: 4, title: "Theatres", link: "/theatres" },
       { id: 5, title: "Users", link: "/users" },
-      // { id: 6, title: "Upcoming", link: "/upcoming" },
-      { id: 7, title: "Logout", link: "/api/auth/signout" },
     ];
+    if (session.user.badge === "ADMIN") {
+      pages.push({ id: 8, title: "Admin", link: "/admin" });
+    }
+    return pages;
   } else {
     return [
       { id: 1, title: "Login", link: "/login" },
       { id: 2, title: "Create Account", link: "/register" },
       { id: 3, title: "Musicals", link: "/musicals" },
-      { id: 2, title: "Plays", link: "/plays" },
-      { id: 4, title: "Theatres", link: "/theatres" },
-      // { id: 5, title: "Upcoming", link: "/upcoming" },
+      { id: 4, title: "Plays", link: "/plays" },
+      { id: 5, title: "Theatres", link: "/theatres" },
       { id: 6, title: "Users", link: "/users" },
     ];
   }
 }
 
+const navLinkSx = {
+  fontFamily: '"DM Sans", sans-serif',
+  fontSize: "0.72rem",
+  fontWeight: 400,
+  letterSpacing: "0.1em",
+  textTransform: "uppercase" as const,
+  px: 1.5,
+  minWidth: 0,
+  color: "rgba(232, 220, 200, 0.65)",
+  "&:hover": { color: "#D4AF55", backgroundColor: "rgba(212, 175, 85, 0.06)" },
+};
+
 function Navbar() {
   const { data: session, status } = useSession();
+  const router = useRouter();
   const pages = getPages(session);
-
   const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
 
-  const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
+  const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) =>
     setAnchorElNav(event.currentTarget);
-  };
+  const handleCloseNavMenu = () => setAnchorElNav(null);
 
-  const handleCloseNavMenu = () => {
-    setAnchorElNav(null);
-  };
-
-  if (status === "loading") {
-    return null;
+  function handleLogout() {
+    handleCloseNavMenu();
+    signOut({ redirect: false }).then(() => router.push("/"));
   }
+
+  if (status === "loading") return null;
 
   return (
     <AppBar position="static">
       <Container maxWidth="xl">
-        <Toolbar disableGutters>
+        <Toolbar disableGutters sx={{ minHeight: { xs: 56, md: 60 } }}>
+          {/* Logo desktop */}
           <Typography
             noWrap
             component="a"
             href="/"
             sx={{
-              mr: 2,
+              mr: 4,
               display: { md: "flex", xs: "none" },
-              fontFamily: "monospace",
-              fontWeight: 700,
-              letterSpacing: ".3rem",
-              color: "inherit",
+              fontFamily: '"Cormorant Garamond", Georgia, serif',
+              fontWeight: 600,
+              fontSize: "1.35rem",
+              letterSpacing: "0.12em",
+              color: "#D4AF55",
               textDecoration: "none",
+              textTransform: "uppercase",
             }}
-            variant="h6"
           >
             StageKeeper
           </Typography>
+
+          {/* Mobile hamburger */}
           <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
-            <IconButton
-              aria-controls="menu-appbar"
-              aria-haspopup="true"
-              aria-label="account of current user"
-              color="inherit"
-              size="large"
-              onClick={handleOpenNavMenu}
-            >
+            <IconButton color="inherit" size="large" onClick={handleOpenNavMenu}>
               <MenuIcon />
             </IconButton>
             <Menu
               keepMounted
               anchorEl={anchorElNav}
-              anchorOrigin={{
-                vertical: "bottom",
-                horizontal: "left",
-              }}
-              id="menu-appbar"
+              anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
               open={Boolean(anchorElNav)}
-              sx={{
-                display: { xs: "block", md: "none" },
-              }}
-              transformOrigin={{
-                vertical: "top",
-                horizontal: "left",
-              }}
+              transformOrigin={{ vertical: "top", horizontal: "left" }}
+              sx={{ display: { xs: "block", md: "none" } }}
               onClose={handleCloseNavMenu}
             >
               {pages.map((page) => (
                 <MenuItem key={page.id} onClick={handleCloseNavMenu}>
-                  <Typography textAlign="center">
-                    <a href={page.link}>{page.title}</a>
+                  <Typography
+                    component="a"
+                    href={page.link}
+                    sx={{
+                      fontFamily: '"DM Sans", sans-serif',
+                      fontSize: "0.85rem",
+                      color: "text.primary",
+                      textDecoration: "none",
+                    }}
+                  >
+                    {page.title}
                   </Typography>
                 </MenuItem>
               ))}
+              {session && (
+                <MenuItem onClick={handleLogout}>
+                  <Typography
+                    sx={{
+                      fontFamily: '"DM Sans", sans-serif',
+                      fontSize: "0.85rem",
+                      color: "text.primary",
+                    }}
+                  >
+                    Logout
+                  </Typography>
+                </MenuItem>
+              )}
             </Menu>
           </Box>
-          <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
+
+          {/* Logo mobile */}
+          <Typography
+            noWrap
+            component="a"
+            href="/"
+            sx={{
+              flexGrow: 1,
+              display: { xs: "flex", md: "none" },
+              fontFamily: '"Cormorant Garamond", Georgia, serif',
+              fontWeight: 600,
+              fontSize: "1.15rem",
+              letterSpacing: "0.1em",
+              color: "#D4AF55",
+              textDecoration: "none",
+              textTransform: "uppercase",
+            }}
+          >
+            StageKeeper
+          </Typography>
+
+          {/* Desktop links */}
+          <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" }, gap: 0.5 }}>
             {pages.map((page) => (
               <Button
                 key={page.id}
-                sx={{ my: 2, color: "white", display: "block" }}
+                component="a"
+                href={page.link}
+                sx={{
+                  ...navLinkSx,
+                  color: page.title === session?.user?.username ? "#D4AF55" : navLinkSx.color,
+                  fontWeight: page.title === session?.user?.username ? 600 : 400,
+                }}
                 onClick={handleCloseNavMenu}
               >
-                <a href={page.link}>{page.title}</a>
+                {page.title}
               </Button>
             ))}
+            {session && (
+              <Button sx={navLinkSx} onClick={handleLogout}>
+                Logout
+              </Button>
+            )}
           </Box>
         </Toolbar>
       </Container>
     </AppBar>
   );
 }
+
 export default Navbar;

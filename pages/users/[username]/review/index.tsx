@@ -1,68 +1,56 @@
+import Box from "@mui/material/Box";
 import { attendance, musicals, performances, plays, theatres } from "@prisma/client";
 import Head from "next/head";
-import { Fragment } from "react";
 import superjson from "superjson";
 
-import PerformanceCarousel from "../../../../src/components/review/PerformanceCarousel";
 import Highlights from "../../../../src/components/review/Highlights";
+import PerformanceCarousel from "../../../../src/components/review/PerformanceCarousel";
 import ReviewHeader from "../../../../src/components/review/ReviewHeader";
 import Statistics from "../../../../src/components/review/Statistics";
 import { getUserAttendanceByYear } from "../../../../src/data/performances";
-import { getUsers } from "../../../../src/data/users";
+import { findUserByUsername, getUsers } from "../../../../src/data/users";
 
 interface Props {
-  musicals: (attendance & {
+  attendance: (attendance & {
     performances: performances & { musicals: musicals; plays: plays; theatres: theatres };
   })[];
   username: string;
 }
 
-function ReviewPage({ musicals, username }: Props) {
+function AllTimeReviewPage({ attendance, username }: Props) {
   return (
-    <Fragment>
+    <Box sx={{ background: "#080C14", minHeight: "100vh" }}>
       <Head>
-        <title>All Time Statistics • StageKeeper</title>
-        <meta content="See what your All Time Statistics looks like!" name="description" />
+        <title>{username} — All Time Statistics • StageKeeper</title>
+        <meta content="See your all time theatre statistics." name="description" />
       </Head>
-      <div>
-        <ReviewHeader username={username} />
-        <PerformanceCarousel items={musicals} />
-        <Highlights highlights={musicals} />
-        <Statistics stats={musicals} view="allTime" />
-      </div>
-    </Fragment>
+      <ReviewHeader username={username} />
+      <PerformanceCarousel items={attendance} />
+      <Highlights highlights={attendance} />
+      <Statistics stats={attendance} view="allTime" />
+    </Box>
   );
 }
 
 export async function getStaticPaths() {
   const users = await getUsers();
-  const paths = users.map((user) => ({
-    params: { username: user.username },
-  }));
-
   return {
-    paths,
-    fallback: false,
+    paths: users.map((user) => ({ params: { username: user.username } })),
+    fallback: "blocking",
   };
 }
 
 export async function getStaticProps(context: any) {
   const { username } = context.params!;
-  const users = await getUsers();
-  const user = users.find((user) => user.username === username);
-  let musicals: any[] = [];
+  const user = await findUserByUsername(username);
+  if (!user) return { notFound: true };
 
-  if (user) {
-    const userId = user.id;
-    musicals = await getUserAttendanceByYear(null, userId);
-  }
+  const attendance = await getUserAttendanceByYear(null, user.id);
 
   return {
-    props: superjson.serialize({
-      musicals,
-      username,
-    }).json,
+    props: superjson.serialize({ attendance, username }).json,
+    revalidate: 3600,
   };
 }
 
-export default ReviewPage;
+export default AllTimeReviewPage;

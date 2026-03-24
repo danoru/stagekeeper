@@ -1,9 +1,4 @@
-import Box from "@mui/material/Box";
-import Card from "@mui/material/Card";
-import CardMedia from "@mui/material/CardMedia";
-import Grid from "@mui/material/Grid";
-import Link from "@mui/material/Link";
-import Typography from "@mui/material/Typography";
+import { Box, Card, CardMedia, Grid, Link, Typography } from "@mui/material";
 
 import { resolveShowImage } from "../../utils/gradients";
 

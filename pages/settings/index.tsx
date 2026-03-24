@@ -1,8 +1,4 @@
-import Alert from "@mui/material/Alert";
-import Button from "@mui/material/Button";
-import Snackbar from "@mui/material/Snackbar";
-import Stack from "@mui/material/Stack";
-import TextField from "@mui/material/TextField";
+import { Alert, Button, Snackbar, Stack, TextField } from "@mui/material";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { getSession } from "next-auth/react";

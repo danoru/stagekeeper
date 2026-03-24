@@ -1,15 +1,10 @@
+import { Box, Card, CardActionArea, CardContent, Grid, Typography } from "@mui/material";
 import LibraryMusicIcon from "@mui/icons-material/LibraryMusic";
 import PeopleIcon from "@mui/icons-material/People";
 import ScheduleIcon from "@mui/icons-material/Schedule";
 import TheaterComedyIcon from "@mui/icons-material/TheaterComedy";
 import TheatersIcon from "@mui/icons-material/Theaters";
 import ViewListIcon from "@mui/icons-material/ViewList";
-import Box from "@mui/material/Box";
-import Card from "@mui/material/Card";
-import CardActionArea from "@mui/material/CardActionArea";
-import CardContent from "@mui/material/CardContent";
-import Grid from "@mui/material/Grid";
-import Typography from "@mui/material/Typography";
 import Head from "next/head";
 import Link from "next/link";
 

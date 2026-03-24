@@ -1,9 +1,4 @@
-import Box from "@mui/material/Box";
-import Card from "@mui/material/Card";
-import Chip from "@mui/material/Chip";
-import Grid from "@mui/material/Grid";
-import Link from "@mui/material/Link";
-import Typography from "@mui/material/Typography";
+import { Box, Card, Chip, Grid, Link, Typography } from "@mui/material";
 import type { PerformanceType } from "@prisma/client";
 import moment from "moment";
 

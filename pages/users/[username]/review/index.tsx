@@ -1,4 +1,4 @@
-import Box from "@mui/material/Box";
+import { Box } from "@mui/material";
 import { attendance, musicals, performances, plays, theatres } from "@prisma/client";
 import Head from "next/head";
 import superjson from "superjson";

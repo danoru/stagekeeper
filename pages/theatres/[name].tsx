@@ -1,6 +1,4 @@
-import Grid from "@mui/material/Grid";
-import Stack from "@mui/material/Stack";
-import Typography from "@mui/material/Typography";
+import { Grid, Stack, Typography } from "@mui/material";
 import { musicals, plays, programming, seasons, theatres } from "@prisma/client";
 import moment from "moment";
 import Head from "next/head";

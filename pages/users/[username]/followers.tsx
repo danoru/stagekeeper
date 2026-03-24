@@ -1,9 +1,4 @@
-import Box from "@mui/material/Box";
-import Container from "@mui/material/Container";
-import Divider from "@mui/material/Divider";
-import Link from "@mui/material/Link";
-import Stack from "@mui/material/Stack";
-import Typography from "@mui/material/Typography";
+import { Box, Container, Divider, Link, Stack, Typography } from "@mui/material";
 import { users, following } from "@prisma/client";
 import { useRouter } from "next/router";
 import superjson from "superjson";

@@ -1,12 +1,4 @@
-import MusicNoteIcon from "@mui/icons-material/MusicNote";
-import TheaterComedyIcon from "@mui/icons-material/TheaterComedy";
-import Badge from "@mui/material/Badge";
-import Box from "@mui/material/Box";
-import Card from "@mui/material/Card";
-import Grid from "@mui/material/Grid";
-import Link from "@mui/material/Link";
-import Rating from "@mui/material/Rating";
-import Typography from "@mui/material/Typography";
+import { Box, Card, Grid, Link, Rating, Typography } from "@mui/material";
 import type { PerformanceType } from "@prisma/client";
 import moment from "moment";
 

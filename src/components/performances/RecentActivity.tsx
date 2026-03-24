@@ -1,6 +1,4 @@
-import Box from "@mui/material/Box";
-import Grid from "@mui/material/Grid";
-import Typography from "@mui/material/Typography";
+import { Box, Grid, Typography } from "@mui/material";
 import type { attendance, musicals, performances, plays, theatres, users } from "@prisma/client";
 
 import DetailInfoCard from "../cards/DetailInfoCard";

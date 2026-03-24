@@ -1,8 +1,4 @@
-import Box from "@mui/material/Box";
-import Card from "@mui/material/Card";
-import CardMedia from "@mui/material/CardMedia";
-import Stack from "@mui/material/Stack";
-import Typography from "@mui/material/Typography";
+import { Box, Card, CardMedia, Stack, Typography } from "@mui/material";
 import { musicals } from "@prisma/client";
 import moment from "moment";
 import Head from "next/head";

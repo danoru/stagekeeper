@@ -13,7 +13,7 @@ interface Props {
 }
 
 function LoggedInHomePage({ recentPerformances, sessionUser, upcomingPerformances }: Props) {
-  const trim = 6;
+  const trim = 5;
   return (
     <Box sx={{ background: "#080C14", minHeight: "100vh" }}>
       {/* Welcome bar */}

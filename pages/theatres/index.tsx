@@ -1,6 +1,4 @@
-import Grid from "@mui/material/Grid";
-import Pagination from "@mui/material/Pagination";
-import Typography from "@mui/material/Typography";
+import { Grid, Pagination, Typography } from "@mui/material";
 import { theatres } from "@prisma/client";
 import Head from "next/head";
 import { useState, useEffect } from "react";

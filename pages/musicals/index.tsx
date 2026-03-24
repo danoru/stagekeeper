@@ -1,7 +1,4 @@
-import Box from "@mui/material/Box";
-import Container from "@mui/material/Container";
-import Pagination from "@mui/material/Pagination";
-import Typography from "@mui/material/Typography";
+import { Box, Container, Pagination, Typography } from "@mui/material";
 import { musicals, programming, seasons, theatres } from "@prisma/client";
 import Head from "next/head";
 import { useState, useEffect } from "react";
@@ -24,7 +21,7 @@ interface Props {
 function MusicalsPage({ musicals: initialMusicals, musicalCount, upcomingPerformances }: Props) {
   const [musicals, setMusicals] = useState(initialMusicals);
   const [page, setPage] = useState(1);
-  const itemsPerPage = 10;
+  const itemsPerPage = 8;
 
   useEffect(() => {
     async function fetchMusicals() {
@@ -112,7 +109,7 @@ function MusicalsPage({ musicals: initialMusicals, musicalCount, upcomingPerform
 }
 
 export async function getStaticProps() {
-  const { musicals, musicalCount } = await getPaginatedMusicals(1, 10);
+  const { musicals, musicalCount } = await getPaginatedMusicals(1, 8);
   const upcomingPerformances = await getUpcomingMusicals();
 
   return {

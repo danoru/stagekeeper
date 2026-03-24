@@ -1,5 +1,4 @@
-import Box from "@mui/material/Box";
-import Container from "@mui/material/Container";
+import { Box, Container } from "@mui/material";
 import {
   attendance,
   following,
@@ -69,10 +68,10 @@ function ProfilePage({
 
       {/* Content */}
       <Container maxWidth="lg" sx={{ py: 3 }}>
-        <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 280px" }, gap: 4 }}>
+        <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 280px" }, gap: 3 }}>
           {/* Left: recent shows + following */}
           <Box>
-            <FriendRecentActivity recentPerformances={recentPerformances} trim={4} />
+            <FriendRecentActivity recentPerformances={recentPerformances} trim={3} />
             <UserFollowing following={following} />
           </Box>
 

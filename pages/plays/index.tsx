@@ -1,32 +1,35 @@
-import Box from "@mui/material/Box";
-import Container from "@mui/material/Container";
-import Pagination from "@mui/material/Pagination";
-import Typography from "@mui/material/Typography";
-import { theatres } from "@prisma/client";
+import { Box, Container, Pagination, Typography } from "@mui/material";
+import { plays, programming, seasons, theatres } from "@prisma/client";
 import Head from "next/head";
 import { useState, useEffect } from "react";
 import superjson from "superjson";
 
-import TheatreCard from "../../src/components/cards/TheatreCard";
-import { getPaginatedTheatres } from "../../src/data/theatres";
+import PlayCard from "../../src/components/cards/ShowCard";
+import UpcomingShowList from "../../src/components/shows/UpcomingShowList";
+import { getPaginatedPlays } from "../../src/data/plays";
+import { getUpcomingPlays } from "../../src/data/plays";
 
 interface Props {
-  theatres: theatres[];
-  theatreCount: number;
+  plays: plays[];
+  playCount: number;
+  upcomingPerformances: (programming & {
+    plays: plays;
+    seasons: seasons & { theatres: theatres };
+  })[];
 }
 
-function TheatresPage({ theatres: initialTheatres, theatreCount }: Props) {
-  const [theatres, setTheatres] = useState(initialTheatres);
+function PlaysPage({ plays: initialPlays, playCount, upcomingPerformances }: Props) {
+  const [plays, setPlays] = useState(initialPlays);
   const [page, setPage] = useState(1);
   const itemsPerPage = 8;
 
   useEffect(() => {
-    async function fetchTheatres() {
-      const response = await fetch(`/api/theatres/pages?page=${page}&limit=${itemsPerPage}`);
+    async function fetchPlays() {
+      const response = await fetch(`/api/plays/pages?page=${page}&limit=${itemsPerPage}`);
       const data = await response.json();
-      setTheatres(data.theatres);
+      setPlays(data.plays);
     }
-    fetchTheatres();
+    fetchPlays();
   }, [page]);
 
   const handleChange = (event: React.ChangeEvent<unknown>, value: number) => {
@@ -36,9 +39,13 @@ function TheatresPage({ theatres: initialTheatres, theatreCount }: Props) {
   return (
     <Box sx={{ background: "#080C14", minHeight: "100vh" }}>
       <Head>
-        <title>Theatres • StageKeeper</title>
+        <title>Plays • StageKeeper</title>
       </Head>
+
       <Container maxWidth="lg" sx={{ py: 4 }}>
+        <UpcomingShowList upcomingPerformances={upcomingPerformances} />
+
+        {/* Section header */}
         <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 3 }}>
           <Typography
             sx={{
@@ -50,7 +57,7 @@ function TheatresPage({ theatres: initialTheatres, theatreCount }: Props) {
               whiteSpace: "nowrap",
             }}
           >
-            All Theatres
+            All Plays
           </Typography>
           <Box sx={{ flex: 1, height: "1px", background: "rgba(212,175,85,0.2)" }} />
           <Typography
@@ -62,23 +69,23 @@ function TheatresPage({ theatres: initialTheatres, theatreCount }: Props) {
               whiteSpace: "nowrap",
             }}
           >
-            {theatreCount} venues
+            {playCount} titles
           </Typography>
         </Box>
 
-        <Box sx={{ display: "flex", flexWrap: "wrap", justifyContent: "center" }}>
-          {theatres.map((theatre, i) => (
-            <TheatreCard
+        <Box sx={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 0 }}>
+          {plays.map((play, i) => (
+            <PlayCard
               key={i}
-              image={theatre.image}
-              link={`/theatres/${theatre.name.replace(/\s+/g, "-").toLowerCase()}`}
-              name={theatre.name}
+              image={play.playbill}
+              link={`/plays/${play.title.replace(/\s+/g, "-").toLowerCase()}`}
+              name={play.title}
             />
           ))}
         </Box>
 
         <Pagination
-          count={Math.ceil(theatreCount / itemsPerPage)}
+          count={Math.ceil(playCount / itemsPerPage)}
           page={page}
           sx={{
             mt: 4,
@@ -103,15 +110,17 @@ function TheatresPage({ theatres: initialTheatres, theatreCount }: Props) {
 }
 
 export async function getStaticProps() {
-  const { theatres, theatreCount } = await getPaginatedTheatres(1, 8);
+  const { plays, playCount } = await getPaginatedPlays(1, 8);
+  const upcomingPerformances = await getUpcomingPlays();
 
   return {
     props: superjson.serialize({
-      theatres,
-      theatreCount,
+      plays,
+      playCount,
+      upcomingPerformances,
     }).json,
     revalidate: 3600,
   };
 }
 
-export default TheatresPage;
+export default PlaysPage;

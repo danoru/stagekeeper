@@ -13,10 +13,10 @@ export default function createClient(req: NextApiRequest, res: NextApiResponse) 
             value: req.cookies[name] || "",
           }));
         },
-        setAll(cookiesToSet) {
+        setAll(cookiesToSet: any) {
           res.setHeader(
             "Set-Cookie",
-            cookiesToSet.map(({ name, value, options }) =>
+            cookiesToSet.map(({ name, value, options }: any) =>
               serializeCookieHeader(name, value, options)
             )
           );

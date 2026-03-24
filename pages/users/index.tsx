@@ -137,6 +137,7 @@ function UsersPage({ users }: Props) {
                 <Stack direction="row" spacing={2}>
                   {[
                     { label: "Musicals", href: `/users/${user.username}/musicals` },
+                    { label: "Plays", href: `/users/${user.username}/plays` },
                     { label: "Watchlist", href: `/users/${user.username}/watchlist` },
                     { label: "Likes", href: `/users/${user.username}/likes` },
                   ].map((link) => (

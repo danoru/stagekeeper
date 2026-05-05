@@ -1,5 +1,5 @@
 import { Box, Card, CardMedia, Stack, Typography } from "@mui/material";
-import { musicals } from "@prisma/client";
+import { musicals, performances, theatres } from "@prisma/client";
 import moment from "moment";
 import Head from "next/head";
 import { useSession } from "next-auth/react";
@@ -8,7 +8,9 @@ import superjson from "superjson";
 
 import PerformanceCalendar from "../../src/components/schedule/PerformanceCalendar";
 import ShowActionBar from "../../src/components/shows/ShowActionBar";
+import prisma from "../../src/data/db";
 import { getMusicalByTitle, getMusicals } from "../../src/data/musicals";
+import { getTheatres } from "../../src/data/theatres";
 
 interface Params {
   title: string;
@@ -16,9 +18,11 @@ interface Params {
 
 interface Props {
   musical: musicals;
+  pastPerformances: (performances & { theatres: theatres })[];
+  theatres: theatres[];
 }
 
-function MusicalPage({ musical }: Props) {
+function MusicalPage({ musical, pastPerformances, theatres }: Props) {
   const { data: session } = useSession();
   const sessionUser = session?.user;
   const title = `${musical.title} • StageKeeper`;
@@ -32,11 +36,11 @@ function MusicalPage({ musical }: Props) {
 
   useEffect(() => {
     if (session) {
-      fetch("/api/shows/user-status")
+      fetch(`/api/shows/user-status?musicalId=${musical.id}`)
         .then((r) => r.json())
         .then(setUserStatus);
     }
-  }, [session]);
+  }, [session, musical.id]);
 
   return (
     <div>
@@ -99,7 +103,9 @@ function MusicalPage({ musical }: Props) {
             attendance={userStatus?.attendance ?? []}
             likedShows={userStatus?.likedShows ?? []}
             musical={musical}
+            pastPerformances={pastPerformances}
             sessionUser={sessionUser}
+            theatres={theatres}
             watchlist={userStatus?.watchlist ?? []}
           />
         </Stack>
@@ -125,8 +131,18 @@ export async function getStaticProps(context: { params: Params }) {
     return { notFound: true };
   }
 
+  const [pastPerformances, theatres] = await Promise.all([
+    prisma.performances.findMany({
+      where: { musical: musical.id, startTime: { lte: new Date() } },
+      include: { theatres: true },
+      orderBy: { startTime: "desc" },
+      take: 50,
+    }),
+    getTheatres(),
+  ]);
+
   return {
-    props: superjson.serialize({ musical }).json,
+    props: superjson.serialize({ musical, pastPerformances, theatres }).json,
     revalidate: 86400,
   };
 }

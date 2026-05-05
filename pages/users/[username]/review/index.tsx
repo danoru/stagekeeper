@@ -36,7 +36,7 @@ export async function getStaticPaths() {
   const users = await getUsers();
   return {
     paths: users.map((user) => ({ params: { username: user.username } })),
-    fallback: "blocking",
+    fallback: false,
   };
 }
 

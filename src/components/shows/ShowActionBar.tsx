@@ -6,14 +6,11 @@ import WatchLater from "@mui/icons-material/WatchLater";
 import WatchLaterOutlined from "@mui/icons-material/WatchLaterOutlined";
 import Alert from "@mui/material/Alert";
 import Button from "@mui/material/Button";
-import Collapse from "@mui/material/Collapse";
 import Divider from "@mui/material/Divider";
 import Link from "@mui/material/Link";
 import Paper from "@mui/material/Paper";
-import Rating from "@mui/material/Rating";
 import Snackbar from "@mui/material/Snackbar";
 import Stack from "@mui/material/Stack";
-import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import type {
   attendance,
@@ -21,42 +18,51 @@ import type {
   musicals,
   performances,
   plays,
+  theatres,
   watchlist,
 } from "@prisma/client";
+import { useRouter } from "next/router";
 import React, { useState } from "react";
 
+import LogViewingDialog from "./LogViewingDialog";
+
 interface Props {
-  attendance: (attendance & { performances: performances })[];
+  attendance: (attendance & { performances?: performances | null })[];
   likedShows: likedShows[];
   musical?: musicals;
   play?: plays;
   sessionUser: any;
   watchlist: watchlist[];
+  pastPerformances: (performances & { theatres: theatres })[];
+  theatres: theatres[];
 }
 
-function ShowActionBar({ attendance, likedShows, musical, play, sessionUser, watchlist }: Props) {
+function ShowActionBar({
+  attendance,
+  likedShows,
+  musical,
+  play,
+  sessionUser,
+  watchlist,
+  pastPerformances,
+  theatres,
+}: Props) {
+  const router = useRouter();
   const userId = Number(sessionUser?.id);
   const musicalId = musical ? Number(musical.id) : undefined;
   const playId = play ? Number(play.id) : undefined;
-  const performanceType = musical ? "MUSICAL" : play ? "PLAY" : null;
+  const performanceType: "MUSICAL" | "PLAY" | null = musical ? "MUSICAL" : play ? "PLAY" : null;
 
-  const existingAttendance = attendance?.find(
-    (a) =>
-      a.user === userId &&
-      (performanceType === "MUSICAL"
+  const myAttendanceCount = attendance.filter((a) => {
+    if (a.user !== userId) return false;
+    if (a.performances) {
+      return performanceType === "MUSICAL"
         ? a.performances.musical === musicalId
-        : a.performances.play === playId)
-  );
-
-  const [hasAttended, setHasAttended] = useState(!!existingAttendance);
-  const [attendanceId, setAttendanceId] = useState<number | null>(existingAttendance?.id ?? null);
-  const [currentRating, setCurrentRating] = useState<number | null>(
-    existingAttendance?.rating ? Number(existingAttendance.rating) : null
-  );
-  const [comment, setComment] = useState<string>(existingAttendance?.comment ?? "");
-  const [commentDraft, setCommentDraft] = useState<string>(existingAttendance?.comment ?? "");
-  const [showReviewPanel, setShowReviewPanel] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
+        : a.performances.play === playId;
+    }
+    return performanceType === "MUSICAL" ? a.musical === musicalId : a.play === playId;
+  }).length;
+  const hasAttended = myAttendanceCount > 0;
 
   const [isWatchlisted, setIsWatchlisted] = useState(
     userId
@@ -78,11 +84,11 @@ function ShowActionBar({ attendance, likedShows, musical, play, sessionUser, wat
       : false
   );
 
-  const [copied, setCopied] = useState(false);
   const [hovered, setHovered] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">("success");
+  const [logDialogOpen, setLogDialogOpen] = useState(false);
 
   function showSnackbar(message: string, severity: "success" | "error") {
     setSnackbarMessage(message);
@@ -90,78 +96,15 @@ function ShowActionBar({ attendance, likedShows, musical, play, sessionUser, wat
     setSnackbarOpen(true);
   }
 
-  async function handleAttendance() {
+  function handleOpenLogDialog() {
     if (!sessionUser) return;
-
-    if (hasAttended && attendanceId) {
-      // Remove attendance
-      const response = await fetch("/api/shows/attendance", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ attendanceId }),
-      });
-      if (response.ok) {
-        setHasAttended(false);
-        setAttendanceId(null);
-        setCurrentRating(null);
-        setComment("");
-        setCommentDraft("");
-        setShowReviewPanel(false);
-        showSnackbar("Removed from attended shows.", "success");
-      } else {
-        showSnackbar("Failed to remove attendance.", "error");
-      }
-    } else {
-      // Log attendance
-      const response = await fetch("/api/shows/attendance", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          type: performanceType,
-          musicalId,
-          playId,
-        }),
-      });
-      const data = await response.json();
-      if (response.ok) {
-        setHasAttended(true);
-        setAttendanceId(data.attendance.id);
-        setShowReviewPanel(true);
-        showSnackbar("Logged as attended! Add a rating or note below.", "success");
-      } else {
-        showSnackbar(data.error || "Failed to log attendance.", "error");
-      }
-    }
+    setLogDialogOpen(true);
   }
 
-  async function handleRating(newValue: number | null) {
-    if (!sessionUser || !hasAttended || !attendanceId) return;
-    setCurrentRating(newValue);
-    const response = await fetch("/api/shows/attendance", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ attendanceId, rating: newValue }),
-    });
-    if (!response.ok) {
-      showSnackbar("Failed to save rating.", "error");
-    }
-  }
-
-  async function handleSaveComment() {
-    if (!sessionUser || !hasAttended || !attendanceId) return;
-    setIsSaving(true);
-    const response = await fetch("/api/shows/attendance", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ attendanceId, comment: commentDraft }),
-    });
-    setIsSaving(false);
-    if (response.ok) {
-      setComment(commentDraft);
-      showSnackbar("Note saved.", "success");
-    } else {
-      showSnackbar("Failed to save note.", "error");
-    }
+  function handleLogged() {
+    showSnackbar("Logged a viewing.", "success");
+    // Refresh server data so attendance count + watchlist auto-clear reflect immediately.
+    router.replace(router.asPath, undefined, { scroll: false });
   }
 
   async function handleLikes() {
@@ -171,8 +114,6 @@ function ShowActionBar({ attendance, likedShows, musical, play, sessionUser, wat
       method,
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        user: userId,
-        method,
         type: performanceType,
         musical: musicalId,
         play: playId,
@@ -194,8 +135,6 @@ function ShowActionBar({ attendance, likedShows, musical, play, sessionUser, wat
       method,
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        user: userId,
-        method,
         type: performanceType,
         musical: musicalId,
         play: playId,
@@ -210,21 +149,23 @@ function ShowActionBar({ attendance, likedShows, musical, play, sessionUser, wat
     }
   }
 
-  const copyUrlToClipboard = () => {
+  function copyUrlToClipboard() {
     navigator.clipboard
       .writeText(window.location.href)
-      .then(() => {
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-        showSnackbar("Successfully copied.", "success");
-      })
+      .then(() => showSnackbar("Successfully copied.", "success"))
       .catch(() => showSnackbar("Failed to copy.", "error"));
-  };
+  }
+
+  const attendLabel = hasAttended
+    ? myAttendanceCount > 1
+      ? `Seen ×${myAttendanceCount}`
+      : "Attended"
+    : "Log";
 
   const AttendanceButton = () => (
     <Stack alignItems="center" direction="column" width="33%">
       <Button
-        onClick={handleAttendance}
+        onClick={handleOpenLogDialog}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
       >
@@ -237,35 +178,25 @@ function ShowActionBar({ attendance, likedShows, musical, play, sessionUser, wat
         </Typography>
       </Button>
       <Typography variant="subtitle1">
-        {hasAttended ? (hovered ? "Remove" : "Attended") : "Attend"}
+        {hovered && hasAttended ? "Log again" : attendLabel}
       </Typography>
     </Stack>
   );
 
   const LikedButton = () => (
     <Stack alignItems="center" direction="column" width="33%">
-      <Button
-        onClick={handleLikes}
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
-      >
+      <Button onClick={handleLikes}>
         <Typography variant="subtitle1">
           {isLiked ? <FavoriteIcon fontSize="large" /> : <FavoriteBorder fontSize="large" />}
         </Typography>
       </Button>
-      <Typography variant="subtitle1">
-        {isLiked ? (hovered ? "Remove" : "Liked") : "Like"}
-      </Typography>
+      <Typography variant="subtitle1">{isLiked ? "Liked" : "Like"}</Typography>
     </Stack>
   );
 
   const WatchlistButton = () => (
     <Stack alignItems="center" direction="column" width="33%">
-      <Button
-        onClick={handleWatchlist}
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
-      >
+      <Button onClick={handleWatchlist}>
         <Typography variant="subtitle1">
           {isWatchlisted ? (
             <WatchLater fontSize="large" />
@@ -274,66 +205,21 @@ function ShowActionBar({ attendance, likedShows, musical, play, sessionUser, wat
           )}
         </Typography>
       </Button>
-      <Typography variant="subtitle1">
-        {isWatchlisted ? (hovered ? "Remove" : "Watchlist") : "Watchlist"}
-      </Typography>
+      <Typography variant="subtitle1">{isWatchlisted ? "Watchlist" : "Watchlist"}</Typography>
     </Stack>
   );
+
+  const showId = musicalId ?? playId;
+  const showTitle = musical?.title ?? play?.title ?? "";
 
   return (
     <Paper sx={{ borderRadius: "1%" }}>
       {sessionUser ? (
-        <>
-          <Stack direction="row" justifyContent="center">
-            <AttendanceButton />
-            <LikedButton />
-            <WatchlistButton />
-          </Stack>
-          <Divider />
-          <Stack alignItems="center" padding="1vh 0" spacing={0.5}>
-            <Typography variant="subtitle2" color="text.secondary">
-              {hasAttended ? "Your rating" : "Rate after attending"}
-            </Typography>
-            <Rating
-              disabled={!hasAttended}
-              value={currentRating}
-              onChange={(_: React.SyntheticEvent, newValue: number | null) =>
-                handleRating(newValue)
-              }
-            />
-          </Stack>
-          <Collapse in={hasAttended}>
-            <Divider />
-            <Stack padding="1vh" spacing={1}>
-              <Typography variant="subtitle2" color="text.secondary">
-                Your note
-              </Typography>
-              <TextField
-                fullWidth
-                multiline
-                minRows={2}
-                maxRows={4}
-                placeholder="How was it? Memorable moments, cast standouts..."
-                size="small"
-                value={commentDraft}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  setCommentDraft(e.target.value)
-                }
-                inputProps={{ maxLength: 500 }}
-              />
-              <Button
-                disabled={isSaving || commentDraft === comment}
-                fullWidth
-                size="small"
-                sx={{ textTransform: "none" }}
-                variant="outlined"
-                onClick={handleSaveComment}
-              >
-                {isSaving ? "Saving…" : "Save note"}
-              </Button>
-            </Stack>
-          </Collapse>
-        </>
+        <Stack direction="row" justifyContent="center">
+          <AttendanceButton />
+          <LikedButton />
+          <WatchlistButton />
+        </Stack>
       ) : (
         <Link href="/login" underline="none">
           <Typography
@@ -358,6 +244,18 @@ function ShowActionBar({ attendance, likedShows, musical, play, sessionUser, wat
       >
         <Typography variant="subtitle1">Share</Typography>
       </Button>
+      {sessionUser && performanceType && showId != null && (
+        <LogViewingDialog
+          open={logDialogOpen}
+          pastPerformances={pastPerformances}
+          showId={showId}
+          showTitle={showTitle}
+          showType={performanceType}
+          theatres={theatres}
+          onClose={() => setLogDialogOpen(false)}
+          onLogged={handleLogged}
+        />
+      )}
       <Snackbar autoHideDuration={6000} open={snackbarOpen} onClose={() => setSnackbarOpen(false)}>
         <Alert severity={snackbarSeverity} onClose={() => setSnackbarOpen(false)}>
           {snackbarMessage}

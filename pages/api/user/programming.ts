@@ -113,22 +113,24 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       },
     });
 
-    const attendancePerformancesNormalized = attendancePerformances.map((attendance) => {
-      const startTime = moment.tz(attendance.performances.startTime, "America/Los_Angeles");
-      const dayName = startTime.format("dddd");
-      const time = startTime.format("HH:mm");
-      return {
-        id: attendance.performances.id,
-        title: attendance.performances.musicals?.title || attendance.performances.plays?.title,
-        duration:
-          attendance.performances.musicals?.duration || attendance.performances.plays?.duration,
-        theatre: attendance.performances.theatres.name,
-        startDate: attendance.performances.startTime,
-        endDate: attendance.performances.endTime,
-        dayTimes: { [dayName]: [time] },
-        source: "programming",
-      };
-    });
+    const attendancePerformancesNormalized = attendancePerformances
+      .filter((a) => a.performances != null)
+      .map((attendance) => {
+        const perf = attendance.performances!;
+        const startTime = moment.tz(perf.startTime, "America/Los_Angeles");
+        const dayName = startTime.format("dddd");
+        const time = startTime.format("HH:mm");
+        return {
+          id: perf.id,
+          title: perf.musicals?.title || perf.plays?.title,
+          duration: perf.musicals?.duration || perf.plays?.duration,
+          theatre: perf.theatres.name,
+          startDate: perf.startTime,
+          endDate: perf.endTime,
+          dayTimes: { [dayName]: [time] },
+          source: "programming",
+        };
+      });
 
     const performances = [...watchlistPerformances, ...attendancePerformancesNormalized];
 

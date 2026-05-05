@@ -28,7 +28,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         createdAt: true,
         firstName: true,
         lastName: true,
-        _count: { select: { attendance: true, logs: true } },
+        _count: { select: { attendance: true } },
       },
     });
     return res.status(200).json(users);
@@ -40,7 +40,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (!["ADMIN", "PATRON", "USER"].includes(badge)) {
       return res.status(400).json({ error: "Invalid badge value." });
     }
-    // Prevent removing own admin status
+
     if (Number(id) === Number(admin.user.id) && badge !== "ADMIN") {
       return res.status(400).json({ error: "You cannot remove your own admin status." });
     }

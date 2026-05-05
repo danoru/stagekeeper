@@ -8,10 +8,11 @@ import { resolveShowImage } from "../../utils/gradients";
 
 interface WatchlistProps {
   username: string;
-  watchlist: (watchlist & {
-    musicals: musicals;
-    plays: plays;
+  items: (watchlist & {
+    musicals: musicals | null;
+    plays: plays | null;
   })[];
+  total: number;
 }
 
 interface CardProps {
@@ -20,11 +21,9 @@ interface CardProps {
   type: "musical" | "play";
 }
 
-function UserWatchlistPreview({ username, watchlist }: WatchlistProps) {
-  if (!watchlist || watchlist.length === 0) return null;
-
-  // Get items with a valid show title (musicals or plays)
-  const items = watchlist.filter((item) => item.musicals?.title || item.plays?.title).slice(0, 4);
+function UserWatchlistPreview({ username, items, total }: WatchlistProps) {
+  const visible = items.filter((item) => item.musicals?.title || item.plays?.title);
+  if (visible.length === 0) return null;
 
   return (
     <Box>
@@ -56,15 +55,15 @@ function UserWatchlistPreview({ username, watchlist }: WatchlistProps) {
             "&:hover": { color: "#D4AF55" },
           }}
         >
-          {watchlist.length} total →
+          {total} total →
         </Link>
       </Box>
 
       <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
-        {items.map((item, i) => {
+        {visible.map((item, i) => {
           const isMusical = !!item.musicals?.title;
-          const title = isMusical ? item.musicals.title : item.plays?.title;
-          const playbill = isMusical ? item.musicals.playbill : item.plays?.playbill;
+          const title = isMusical ? item.musicals?.title : item.plays?.title;
+          const playbill = isMusical ? item.musicals?.playbill : item.plays?.playbill;
           return (
             <TinyCard
               key={`card-${i}`}

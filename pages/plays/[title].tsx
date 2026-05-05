@@ -1,5 +1,5 @@
 import { Box, Card, CardMedia, Stack, Typography } from "@mui/material";
-import { plays } from "@prisma/client";
+import { performances, plays, theatres } from "@prisma/client";
 import moment from "moment";
 import Head from "next/head";
 import { useSession } from "next-auth/react";
@@ -8,7 +8,9 @@ import superjson from "superjson";
 
 import PerformanceCalendar from "../../src/components/schedule/PerformanceCalendar";
 import ShowActionBar from "../../src/components/shows/ShowActionBar";
+import prisma from "../../src/data/db";
 import { getPlayByTitle, getPlays } from "../../src/data/plays";
+import { getTheatres } from "../../src/data/theatres";
 
 interface Params {
   title: string;
@@ -16,9 +18,11 @@ interface Params {
 
 interface Props {
   play: plays;
+  pastPerformances: (performances & { theatres: theatres })[];
+  theatres: theatres[];
 }
 
-function PlayPage({ play }: Props) {
+function PlayPage({ play, pastPerformances, theatres }: Props) {
   const { data: session } = useSession();
   const sessionUser = session?.user;
   const playTitle = play.title;
@@ -32,11 +36,11 @@ function PlayPage({ play }: Props) {
 
   useEffect(() => {
     if (session) {
-      fetch("/api/shows/user-status")
+      fetch(`/api/shows/user-status?playId=${play.id}`)
         .then((r) => r.json())
         .then(setUserStatus);
     }
-  }, [session]);
+  }, [session, play.id]);
 
   return (
     <div>
@@ -96,8 +100,10 @@ function PlayPage({ play }: Props) {
           <ShowActionBar
             attendance={userStatus?.attendance ?? []}
             likedShows={userStatus?.likedShows ?? []}
+            pastPerformances={pastPerformances}
             play={play}
             sessionUser={sessionUser}
+            theatres={theatres}
             watchlist={userStatus?.watchlist ?? []}
           />
         </Stack>
@@ -123,8 +129,18 @@ export async function getStaticProps(context: { params: Params }) {
     return { notFound: true };
   }
 
+  const [pastPerformances, theatres] = await Promise.all([
+    prisma.performances.findMany({
+      where: { play: play.id, startTime: { lte: new Date() } },
+      include: { theatres: true },
+      orderBy: { startTime: "desc" },
+      take: 50,
+    }),
+    getTheatres(),
+  ]);
+
   return {
-    props: superjson.serialize({ play }).json,
+    props: superjson.serialize({ play, pastPerformances, theatres }).json,
     revalidate: 86400,
   };
 }

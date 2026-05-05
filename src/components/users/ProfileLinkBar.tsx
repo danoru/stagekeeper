@@ -8,6 +8,7 @@ interface Props {
 
 const tabs = [
   { label: "Profile", path: "" },
+  { label: "Activity", path: "/activity" },
   { label: "Musicals", path: "/musicals" },
   { label: "Plays", path: "/plays" },
   { label: "Statistics", path: "/review" },

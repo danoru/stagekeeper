@@ -4,7 +4,7 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import type { musicals, PerformanceType, plays, programming } from "@prisma/client";
 import moment from "moment";
-import React, { useEffect, useState } from "react";
+import React from "react";
 
 interface Props {
   viewType: "show" | "theatre";
@@ -19,9 +19,9 @@ interface Event {
 }
 
 function PerformanceCalendar({ viewType, identifier, showType }: Props) {
-  const [events, setEvents] = useState<Event[]>([]);
-  const [initialDate, setInitialDate] = useState<Date | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [events, setEvents] = React.useState<Event[]>([]);
+  const [initialDate, setInitialDate] = React.useState<Date | null>(null);
+  const [loading, setLoading] = React.useState(true);
 
   const defaultDayTimes = {
     Tuesday: ["20:00"],
@@ -61,7 +61,7 @@ function PerformanceCalendar({ viewType, identifier, showType }: Props) {
     return events;
   }
 
-  useEffect(() => {
+  React.useEffect(() => {
     async function fetchAndGenerateEvents() {
       setLoading(true);
       try {

@@ -10,7 +10,9 @@ import { getUsers, findUserByUsername } from "../../../src/data/users";
 interface Props {
   user: users;
   attendance: (attendance & {
-    performances: performances & { musicals: musicals; theatres: theatres };
+    performances: (performances & { musicals: musicals | null; theatres: theatres }) | null;
+    musicals: musicals | null;
+    theatres: theatres | null;
   })[];
 }
 
@@ -21,16 +23,21 @@ interface Params {
 function UserMusicalsList({ attendance, user }: Props) {
   const currentDate = moment();
   const uniqueTitles = new Set<string>();
-  const filteredAttendance = attendance.filter((a) => {
-    const startTime = moment(a.performances.startTime);
-    const title = a.performances.musicals?.title;
-    if (startTime <= currentDate && title && !uniqueTitles.has(title)) {
-      uniqueTitles.add(title);
-      return true;
-    }
-    return false;
-  });
-  const shows = filteredAttendance.map((a) => a.performances.musicals);
+  const shows: musicals[] = [];
+
+  for (const a of attendance) {
+    const musical = a.performances?.musicals ?? a.musicals;
+    if (!musical) continue;
+    const date = a.performances?.startTime
+      ? moment(a.performances.startTime)
+      : a.seenDate
+        ? moment(a.seenDate)
+        : null;
+    if (date && date.isAfter(currentDate)) continue;
+    if (uniqueTitles.has(musical.title)) continue;
+    uniqueTitles.add(musical.title);
+    shows.push(musical);
+  }
 
   return (
     <ProfilePageWrapper
@@ -38,9 +45,9 @@ function UserMusicalsList({ attendance, user }: Props) {
       username={user.username}
     >
       <ShowList
+        emptyMessage="No musicals logged yet."
         header={`${user.username}'s Musicals`}
         shows={shows}
-        emptyMessage="No musicals logged yet."
       />
     </ProfilePageWrapper>
   );

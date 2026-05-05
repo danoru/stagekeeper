@@ -8,30 +8,35 @@ import Snackbar from "@mui/material/Snackbar";
 import Stack from "@mui/material/Stack";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
-import type { attendance, following, performances, users } from "@prisma/client";
-import moment from "moment";
+import type { following, users } from "@prisma/client";
 import React, { useState } from "react";
 
 import { followUser, unfollowUser } from "../../data/users";
 
 import UserAvatar from "./UserAvatar";
 
+interface AttendanceStats {
+  musicalsAttended: number;
+  playsAttended: number;
+  attendanceThisYear: number;
+}
+
 interface Props {
-  attendance: (attendance & {
-    performances: performances;
-  })[];
+  attendanceStats: AttendanceStats;
   avatarSize: string;
-  followers: following[];
+  followersCount: number;
   following: following[];
+  isFollowedByViewer: boolean;
   sessionUser: any | null;
-  user: users;
+  user: Pick<users, "username" | "firstName" | "lastName">;
 }
 
 function ProfileStatBar({
-  attendance,
+  attendanceStats,
   avatarSize,
   following,
-  followers,
+  followersCount,
+  isFollowedByViewer,
   sessionUser,
   user,
 }: Props) {
@@ -42,11 +47,7 @@ function ProfileStatBar({
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">("success");
 
-  const [isFollowing, setIsFollowing] = useState(
-    followers.some(
-      (f) => f.user === Number(sessionUser?.id) && f.followingUsername === user.username
-    )
-  );
+  const [isFollowing, setIsFollowing] = useState(isFollowedByViewer);
 
   function showSnackbar(message: string, severity: "success" | "error") {
     setSnackbarMessage(message);
@@ -65,11 +66,11 @@ function ProfileStatBar({
     if (!sessionUser) return;
     try {
       if (isFollowing) {
-        await unfollowUser(Number(sessionUser.id), user.username);
+        await unfollowUser(user.username);
         setIsFollowing(false);
         showSnackbar(`Unfollowed ${user.username}.`, "success");
       } else {
-        await followUser(Number(sessionUser.id), user.username);
+        await followUser(user.username);
         setIsFollowing(true);
         showSnackbar(`Following ${user.username}.`, "success");
       }
@@ -79,21 +80,22 @@ function ProfileStatBar({
     setHovered(false);
   }
 
-  const currentYear = moment().format("YYYY");
-  const musicalsAttended = attendance.filter((a) => a.performances.type === "MUSICAL").length;
-  const playsAttended = attendance.filter((a) => a.performances.type === "PLAY").length;
-  const attendanceThisYear = attendance.filter(
-    (a) => moment(a.performances.startTime).format("YYYY") === currentYear
-  ).length;
-
   const isOwnProfile = sessionUser && sessionUser.username === user.username;
 
   const stats = [
-    { value: musicalsAttended, label: "Musicals", href: `${user.username}/musicals` },
-    { value: playsAttended, label: "Plays", href: `${user.username}/plays` },
-    { value: attendanceThisYear, label: "This Year", href: `${user.username}/musicals` },
+    {
+      value: attendanceStats.musicalsAttended,
+      label: "Musicals",
+      href: `${user.username}/musicals`,
+    },
+    { value: attendanceStats.playsAttended, label: "Plays", href: `${user.username}/plays` },
+    {
+      value: attendanceStats.attendanceThisYear,
+      label: "This Year",
+      href: `${user.username}/musicals`,
+    },
     { value: following?.length ?? 0, label: "Following", href: `${user.username}/following` },
-    { value: followers?.length ?? 0, label: "Followers", href: `${user.username}/followers` },
+    { value: followersCount, label: "Followers", href: `${user.username}/followers` },
   ];
 
   return (

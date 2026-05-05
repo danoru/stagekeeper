@@ -1,40 +1,46 @@
 import { Box, Container, Pagination, Typography } from "@mui/material";
 import { musicals, programming, seasons, theatres } from "@prisma/client";
 import Head from "next/head";
-import { useState, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import superjson from "superjson";
 
 import MusicalCard from "../../src/components/cards/ShowCard";
 import UpcomingShowList from "../../src/components/shows/UpcomingShowList";
-import { getPaginatedMusicals } from "../../src/data/musicals";
-import { getUpcomingMusicals } from "../../src/data/musicals";
+import SearchBar from "../../src/components/ui/SearchBar";
+import { getMusicals, getUpcomingMusicals } from "../../src/data/musicals";
 
 interface Props {
   musicals: musicals[];
-  musicalCount: number;
   upcomingPerformances: (programming & {
     musicals: musicals;
     seasons: seasons & { theatres: theatres };
   })[];
 }
 
-function MusicalsPage({ musicals: initialMusicals, musicalCount, upcomingPerformances }: Props) {
-  const [musicals, setMusicals] = useState(initialMusicals);
+const itemsPerPage = 8;
+
+function MusicalsPage({ musicals, upcomingPerformances }: Props) {
   const [page, setPage] = useState(1);
-  const itemsPerPage = 8;
+  const [search, setSearch] = useState("");
+
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return musicals;
+    return musicals.filter((m) => m.title.toLowerCase().includes(q));
+  }, [musicals, search]);
+
+  const isSearching = search.trim().length > 0;
+  const visible = isSearching
+    ? filtered
+    : filtered.slice((page - 1) * itemsPerPage, page * itemsPerPage);
 
   useEffect(() => {
-    async function fetchMusicals() {
-      const response = await fetch(`/api/musicals/pages?page=${page}&limit=${itemsPerPage}`);
-      const data = await response.json();
-      setMusicals(data.musicals);
-    }
-    fetchMusicals();
-  }, [page]);
+    setPage(1);
+  }, [search]);
 
-  const handleChange = (event: React.ChangeEvent<unknown>, value: number) => {
-    setPage(value);
-  };
+  const countLabel = isSearching
+    ? `${filtered.length} of ${musicals.length} matching`
+    : `${musicals.length} titles`;
 
   return (
     <Box sx={{ background: "#080C14", minHeight: "100vh" }}>
@@ -45,7 +51,7 @@ function MusicalsPage({ musicals: initialMusicals, musicalCount, upcomingPerform
         <UpcomingShowList upcomingPerformances={upcomingPerformances} />
 
         {/* Section header */}
-        <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 3 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
           <Typography
             sx={{
               fontFamily: '"DM Sans", sans-serif',
@@ -68,56 +74,88 @@ function MusicalsPage({ musicals: initialMusicals, musicalCount, upcomingPerform
               whiteSpace: "nowrap",
             }}
           >
-            {musicalCount} titles
+            {countLabel}
           </Typography>
         </Box>
 
-        <Box sx={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 0 }}>
-          {musicals.map((musical, i) => (
-            <MusicalCard
-              key={i}
-              image={musical.playbill}
-              link={`/musicals/${musical.title.replace(/\s+/g, "-").toLowerCase()}`}
-              name={musical.title}
-            />
-          ))}
+        <Box sx={{ mb: 3 }}>
+          <SearchBar
+            placeholder="Search musicals…"
+            value={search}
+            onChange={setSearch}
+          />
         </Box>
 
-        <Pagination
-          count={Math.ceil(musicalCount / itemsPerPage)}
-          page={page}
-          sx={{
-            mt: 4,
-            display: "flex",
-            justifyContent: "center",
-            "& .MuiPaginationItem-root": {
-              color: "rgba(232,220,200,0.5)",
-              borderColor: "rgba(212,175,85,0.2)",
-              "&.Mui-selected": {
-                background: "rgba(212,175,85,0.15)",
-                color: "#D4AF55",
-                borderColor: "rgba(212,175,85,0.4)",
+        {visible.length === 0 ? (
+          <Box
+            sx={{
+              border: "1px solid rgba(212,175,85,0.08)",
+              borderRadius: 1,
+              py: 5,
+              px: 3,
+              textAlign: "center",
+              background: "rgba(212,175,85,0.02)",
+            }}
+          >
+            <Typography
+              sx={{
+                fontFamily: '"Cormorant Garamond", serif',
+                fontStyle: "italic",
+                fontSize: "1rem",
+                color: "rgba(232,220,200,0.35)",
+              }}
+            >
+              No musicals match &ldquo;{search}&rdquo;.
+            </Typography>
+          </Box>
+        ) : (
+          <Box sx={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 0 }}>
+            {visible.map((musical) => (
+              <MusicalCard
+                key={musical.id}
+                image={musical.playbill}
+                link={`/musicals/${musical.title.replace(/\s+/g, "-").toLowerCase()}`}
+                name={musical.title}
+              />
+            ))}
+          </Box>
+        )}
+
+        {!isSearching && filtered.length > itemsPerPage && (
+          <Pagination
+            count={Math.ceil(filtered.length / itemsPerPage)}
+            page={page}
+            sx={{
+              mt: 4,
+              display: "flex",
+              justifyContent: "center",
+              "& .MuiPaginationItem-root": {
+                color: "rgba(232,220,200,0.5)",
+                borderColor: "rgba(212,175,85,0.2)",
+                "&.Mui-selected": {
+                  background: "rgba(212,175,85,0.15)",
+                  color: "#D4AF55",
+                  borderColor: "rgba(212,175,85,0.4)",
+                },
+                "&:hover": { background: "rgba(212,175,85,0.08)" },
               },
-              "&:hover": { background: "rgba(212,175,85,0.08)" },
-            },
-          }}
-          onChange={handleChange}
-        />
+            }}
+            onChange={(_, value) => setPage(value)}
+          />
+        )}
       </Container>
     </Box>
   );
 }
 
 export async function getStaticProps() {
-  const { musicals, musicalCount } = await getPaginatedMusicals(1, 8);
-  const upcomingPerformances = await getUpcomingMusicals();
+  const [musicals, upcomingPerformances] = await Promise.all([
+    getMusicals(),
+    getUpcomingMusicals(),
+  ]);
 
   return {
-    props: superjson.serialize({
-      musicals,
-      musicalCount,
-      upcomingPerformances,
-    }).json,
+    props: superjson.serialize({ musicals, upcomingPerformances }).json,
     revalidate: 3600,
   };
 }

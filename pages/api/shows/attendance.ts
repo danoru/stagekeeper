@@ -11,54 +11,79 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   const userId = Number(session.user.id);
-  const { performanceId, musicalId, playId, type, rating, comment } = req.body;
 
   if (req.method === "POST") {
-    // Find the most recent performance for this show, or use a provided performanceId.
-    // If no performanceId supplied, look up the latest performance for this show.
-    let resolvedPerformanceId = performanceId;
+    const {
+      performanceId,
+      musicalId,
+      playId,
+      type,
+      theatreId,
+      seenDate,
+      rating,
+      comment,
+    } = req.body;
 
-    if (!resolvedPerformanceId) {
-      const latestPerformance = await prisma.performances.findFirst({
-        where: {
-          ...(type === "MUSICAL" ? { musical: musicalId } : { play: playId }),
-          startTime: { lte: new Date() },
-        },
-        orderBy: { startTime: "desc" },
+    let data: any;
+    let resolvedMusical: number | null = null;
+    let resolvedPlay: number | null = null;
+
+    if (performanceId) {
+      const perf = await prisma.performances.findUnique({
+        where: { id: Number(performanceId) },
       });
-
-      if (!latestPerformance) {
-        return res.status(404).json({ error: "No performance found for this show." });
+      if (!perf) {
+        return res.status(404).json({ error: "Performance not found." });
       }
-      resolvedPerformanceId = latestPerformance.id;
-    }
-
-    // Check if attendance already exists for this user + performance
-    const existing = await prisma.attendance.findFirst({
-      where: { user: userId, performance: resolvedPerformanceId },
-    });
-
-    if (existing) {
-      // Update rating/comment on existing record
-      const updated = await prisma.attendance.update({
-        where: { id: existing.id },
-        data: {
-          rating: rating ?? existing.rating,
-          comment: comment ?? existing.comment,
-        },
+      resolvedMusical = perf.musical ?? null;
+      resolvedPlay = perf.play ?? null;
+      data = {
+        user: userId,
+        performance: perf.id,
+        rating: rating ?? null,
+        comment: comment ?? null,
+      };
+    } else if (type === "MUSICAL" && musicalId) {
+      resolvedMusical = Number(musicalId);
+      data = {
+        user: userId,
+        musical: Number(musicalId),
+        theatre: theatreId ? Number(theatreId) : null,
+        seenDate: seenDate ? new Date(seenDate) : null,
+        rating: rating ?? null,
+        comment: comment ?? null,
+      };
+    } else if (type === "PLAY" && playId) {
+      resolvedPlay = Number(playId);
+      data = {
+        user: userId,
+        play: Number(playId),
+        theatre: theatreId ? Number(theatreId) : null,
+        seenDate: seenDate ? new Date(seenDate) : null,
+        rating: rating ?? null,
+        comment: comment ?? null,
+      };
+    } else {
+      return res.status(400).json({
+        error: "Provide performanceId, or type with musicalId/playId.",
       });
-      return res.status(200).json({ message: "Attendance updated.", attendance: updated });
     }
 
     try {
-      const attendance = await prisma.attendance.create({
-        data: {
-          user: userId,
-          performance: resolvedPerformanceId,
-          rating: rating ?? null,
-          comment: comment ?? null,
-        },
-      });
+      const attendance = await prisma.attendance.create({ data });
+
+      // Auto-clear matching watchlist row(s) for this show.
+      if (resolvedMusical != null) {
+        await prisma.watchlist.deleteMany({
+          where: { user: userId, musical: resolvedMusical },
+        });
+      }
+      if (resolvedPlay != null) {
+        await prisma.watchlist.deleteMany({
+          where: { user: userId, play: resolvedPlay },
+        });
+      }
+
       return res.status(200).json({ message: "Attendance logged.", attendance });
     } catch (error) {
       console.error(error);
@@ -67,13 +92,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   if (req.method === "PATCH") {
-    const { attendanceId } = req.body;
+    const { attendanceId, rating, comment, seenDate, theatreId } = req.body;
     if (!attendanceId) {
       return res.status(400).json({ error: "attendanceId is required." });
     }
 
     const existing = await prisma.attendance.findFirst({
-      where: { id: attendanceId, user: userId },
+      where: { id: Number(attendanceId), user: userId },
     });
     if (!existing) {
       return res.status(404).json({ error: "Attendance record not found." });
@@ -81,10 +106,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     try {
       const updated = await prisma.attendance.update({
-        where: { id: attendanceId },
+        where: { id: existing.id },
         data: {
           rating: rating !== undefined ? rating : existing.rating,
           comment: comment !== undefined ? comment : existing.comment,
+          seenDate:
+            seenDate !== undefined
+              ? seenDate
+                ? new Date(seenDate)
+                : null
+              : existing.seenDate,
+          theatre:
+            theatreId !== undefined
+              ? theatreId
+                ? Number(theatreId)
+                : null
+              : existing.theatre,
         },
       });
       return res.status(200).json({ message: "Attendance updated.", attendance: updated });
@@ -102,7 +139,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     try {
       await prisma.attendance.deleteMany({
-        where: { id: attendanceId, user: userId },
+        where: { id: Number(attendanceId), user: userId },
       });
       return res.status(200).json({ message: "Attendance removed." });
     } catch (error) {

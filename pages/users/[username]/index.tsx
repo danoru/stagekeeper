@@ -1,13 +1,5 @@
 import { Box, Container } from "@mui/material";
-import {
-  attendance,
-  following,
-  musicals,
-  performances,
-  plays,
-  users,
-  watchlist,
-} from "@prisma/client";
+import { following, musicals, plays, users, watchlist } from "@prisma/client";
 import Head from "next/head";
 import { getSession } from "next-auth/react";
 import superjson from "superjson";
@@ -18,18 +10,22 @@ import ProfileStatBar from "../../../src/components/users/ProfileStatBar";
 import UserFollowing from "../../../src/components/users/UserFollowing";
 import UserWatchlistPreview from "../../../src/components/users/UserWatchlistPreview";
 import { getRecentPerformances } from "../../../src/data/performances";
-import { getUserProfile, getFollowers } from "../../../src/data/users";
+import { getUserProfile } from "../../../src/data/users";
 
 interface Props {
-  attendance: (attendance & {
-    performances: performances;
-  })[];
-  followers: following[];
+  attendanceStats: {
+    musicalsAttended: number;
+    playsAttended: number;
+    attendanceThisYear: number;
+  };
   following: following[];
+  followersCount: number;
+  isFollowedByViewer: boolean;
   recentPerformances: any;
   sessionUser: any;
   user: users;
-  watchlist: (watchlist & { musicals: musicals; plays: plays })[];
+  watchlistPreview: (watchlist & { musicals: musicals | null; plays: plays | null })[];
+  watchlistTotal: number;
 }
 
 interface Params {
@@ -37,13 +33,15 @@ interface Params {
 }
 
 function ProfilePage({
-  attendance,
-  followers,
+  attendanceStats,
+  followersCount,
   following,
+  isFollowedByViewer,
   recentPerformances,
   sessionUser,
   user,
-  watchlist,
+  watchlistPreview,
+  watchlistTotal,
 }: Props) {
   const avatarSize = "64px";
 
@@ -55,10 +53,11 @@ function ProfilePage({
 
       {/* Profile header - full width */}
       <ProfileStatBar
-        attendance={attendance}
+        attendanceStats={attendanceStats}
         avatarSize={avatarSize}
-        followers={followers}
+        followersCount={followersCount}
         following={following}
+        isFollowedByViewer={isFollowedByViewer}
         sessionUser={sessionUser}
         user={user}
       />
@@ -77,7 +76,11 @@ function ProfilePage({
 
           {/* Right: watchlist */}
           <Box>
-            <UserWatchlistPreview username={user.username} watchlist={watchlist} />
+            <UserWatchlistPreview
+              items={watchlistPreview}
+              total={watchlistTotal}
+              username={user.username}
+            />
           </Box>
         </Box>
       </Container>
@@ -89,32 +92,27 @@ export async function getServerSideProps(context: { params: Params; req: any }) 
   const { username } = context.params;
   const session = await getSession({ req: context.req });
   const sessionUser = session?.user || null;
+  const viewerId = sessionUser ? Number(sessionUser.id) : undefined;
 
-  let watchlist: watchlist[] = [];
-  let attendance: attendance[] = [];
-  let followers: following[] = [];
-  let following: following[] = [];
-  let recentPerformances: any[] = [];
+  const profile = await getUserProfile(username, viewerId);
 
-  const user = await getUserProfile(username);
-
-  if (user) {
-    watchlist = user.watchlist;
-    attendance = user.attendance;
-    followers = await getFollowers(username);
-    following = user.following;
-    recentPerformances = await getRecentPerformances([user.username]);
+  if (!profile) {
+    return { notFound: true };
   }
+
+  const recentPerformances = await getRecentPerformances([profile.user.username]);
 
   return {
     props: superjson.serialize({
-      attendance,
-      following,
-      followers,
+      attendanceStats: profile.attendanceStats,
+      following: profile.following,
+      followersCount: profile.followersCount,
+      isFollowedByViewer: profile.isFollowedByViewer,
       recentPerformances,
       sessionUser,
-      user,
-      watchlist,
+      user: profile.user,
+      watchlistPreview: profile.watchlistPreview,
+      watchlistTotal: profile.watchlistTotal,
     }).json,
   };
 }

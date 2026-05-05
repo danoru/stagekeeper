@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 
-// next-auth v4 uses different cookie names per environment
 const SESSION_COOKIE =
   process.env.NODE_ENV === "production"
     ? "__Secure-next-auth.session-token"

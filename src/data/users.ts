@@ -7,21 +7,90 @@ export function getUsers() {
   return users;
 }
 
-export async function getUserProfile(username: string) {
+export async function getUserProfile(username: string, viewerId?: number) {
   const user = await prisma.users.findUnique({
-    where: {
-      username,
-    },
-    include: {
-      watchlist: { include: { musicals: true } },
-      attendance: {
-        include: { performances: true, users: true },
-        orderBy: { performances: { startTime: "desc" } },
-      },
-      following: true,
+    where: { username },
+    select: {
+      id: true,
+      username: true,
+      firstName: true,
+      lastName: true,
+      location: true,
+      website: true,
+      bio: true,
+      image: true,
+      badge: true,
+      createdAt: true,
     },
   });
-  return user;
+
+  if (!user) return null;
+
+  const currentYear = new Date().getUTCFullYear();
+  const yearStart = new Date(Date.UTC(currentYear, 0, 1));
+  const yearEnd = new Date(Date.UTC(currentYear + 1, 0, 1));
+
+  const [
+    musicalsAttended,
+    playsAttended,
+    attendanceThisYear,
+    following,
+    followersCount,
+    viewerFollow,
+    watchlistPreview,
+    watchlistTotal,
+  ] = await Promise.all([
+    prisma.attendance.count({
+      where: {
+        user: user.id,
+        OR: [{ performances: { type: "MUSICAL" } }, { musical: { not: null } }],
+      },
+    }),
+    prisma.attendance.count({
+      where: {
+        user: user.id,
+        OR: [{ performances: { type: "PLAY" } }, { play: { not: null } }],
+      },
+    }),
+    prisma.attendance.count({
+      where: {
+        user: user.id,
+        OR: [
+          { performances: { startTime: { gte: yearStart, lt: yearEnd } } },
+          { seenDate: { gte: yearStart, lt: yearEnd } },
+        ],
+      },
+    }),
+    prisma.following.findMany({
+      where: { user: user.id },
+      orderBy: { followingUsername: "asc" },
+    }),
+    prisma.following.count({ where: { followingUsername: username } }),
+    viewerId
+      ? prisma.following.findUnique({
+          where: {
+            user_followingUsername: { user: viewerId, followingUsername: username },
+          },
+        })
+      : Promise.resolve(null),
+    prisma.watchlist.findMany({
+      where: { user: user.id },
+      include: { musicals: true, plays: true },
+      orderBy: { createdAt: "desc" },
+      take: 4,
+    }),
+    prisma.watchlist.count({ where: { user: user.id } }),
+  ]);
+
+  return {
+    user,
+    following,
+    followersCount,
+    isFollowedByViewer: viewerFollow !== null,
+    attendanceStats: { musicalsAttended, playsAttended, attendanceThisYear },
+    watchlistPreview,
+    watchlistTotal,
+  };
 }
 
 export async function findUserByUsername(username: string) {
@@ -69,7 +138,7 @@ export async function getFollowing(user: number) {
   return following;
 }
 
-export async function followUser(user: number, followingUsername: string) {
+export async function followUser(followingUsername: string) {
   try {
     await fetch("/api/user/follow", {
       method: "POST",
@@ -77,7 +146,6 @@ export async function followUser(user: number, followingUsername: string) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        user,
         followingUsername,
         action: "follow",
       }),
@@ -87,7 +155,7 @@ export async function followUser(user: number, followingUsername: string) {
   }
 }
 
-export async function unfollowUser(user: number, followingUsername: string) {
+export async function unfollowUser(followingUsername: string) {
   try {
     await fetch("/api/user/follow", {
       method: "POST",
@@ -95,7 +163,6 @@ export async function unfollowUser(user: number, followingUsername: string) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        user,
         followingUsername,
         action: "unfollow",
       }),

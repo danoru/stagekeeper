@@ -451,12 +451,14 @@ export async function getLikedMusicals(id: number) {
 
 export async function getUserMusicalAttendance(id: number) {
   const attendance = await prisma.attendance.findMany({
-    where: { NOT: { performances: { musical: null } }, user: id },
-    orderBy: { performances: { musicals: { title: "asc" } } },
+    where: {
+      user: id,
+      OR: [{ performances: { musical: { not: null } } }, { musical: { not: null } }],
+    },
     include: {
-      performances: {
-        include: { musicals: true, theatres: true },
-      },
+      performances: { include: { musicals: true, theatres: true } },
+      musicals: true,
+      theatres: true,
     },
   });
   return attendance;

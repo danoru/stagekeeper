@@ -52,12 +52,14 @@ export async function getPaginatedPlays(page: number, limit: number) {
 
 export async function getUserPlayAttendance(id: number) {
   const attendance = await prisma.attendance.findMany({
-    where: { NOT: { performances: { play: null } }, user: id },
-    orderBy: { performances: { plays: { title: "asc" } } },
+    where: {
+      user: id,
+      OR: [{ performances: { play: { not: null } } }, { play: { not: null } }],
+    },
     include: {
-      performances: {
-        include: { plays: true, theatres: true },
-      },
+      performances: { include: { plays: true, theatres: true } },
+      plays: true,
+      theatres: true,
     },
   });
   return attendance;

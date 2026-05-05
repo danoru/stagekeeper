@@ -343,6 +343,29 @@ export async function getUserAttendance(id: number) {
   return attendance;
 }
 
+export async function getUserAttendanceHistory(id: number) {
+  const attendance = await prisma.attendance.findMany({
+    where: { user: id },
+    include: {
+      performances: {
+        include: { musicals: true, plays: true, theatres: true },
+      },
+      musicals: true,
+      plays: true,
+      theatres: true,
+    },
+  });
+
+  return attendance.sort((a, b) => {
+    const dateA = a.seenDate ?? a.performances?.startTime ?? null;
+    const dateB = b.seenDate ?? b.performances?.startTime ?? null;
+    if (!dateA && !dateB) return 0;
+    if (!dateA) return 1;
+    if (!dateB) return -1;
+    return new Date(dateB).getTime() - new Date(dateA).getTime();
+  });
+}
+
 export async function getUserAttendanceById(user: number, musical: number) {
   const attendance = await prisma.attendance.findFirst({
     where: {

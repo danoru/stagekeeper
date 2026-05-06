@@ -18,10 +18,11 @@ function getPages(session: any) {
   if (session) {
     const pages = [
       { id: 1, title: session.user.username, link: `/users/${session.user.username}` },
-      { id: 2, title: "Musicals", link: "/musicals" },
-      { id: 3, title: "Plays", link: "/plays" },
-      { id: 4, title: "Theatres", link: "/theatres" },
-      { id: 5, title: "Users", link: "/users" },
+      { id: 2, title: "Groups", link: "/groups" },
+      { id: 3, title: "Musicals", link: "/musicals" },
+      { id: 4, title: "Plays", link: "/plays" },
+      { id: 5, title: "Theatres", link: "/theatres" },
+      { id: 6, title: "Users", link: "/users" },
     ];
     if (session.user.badge === "ADMIN") {
       pages.push({ id: 8, title: "Admin", link: "/admin" });

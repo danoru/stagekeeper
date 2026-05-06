@@ -133,6 +133,8 @@ function GroupDetailPage({
   );
 }
 
+export const config = { maxDuration: 30 };
+
 export async function getServerSideProps(context: GetServerSidePropsContext) {
   const session = await getSession(context);
   if (!session) {

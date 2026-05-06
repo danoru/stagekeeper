@@ -70,6 +70,8 @@ function GroupSettingsPage({ group, isOwner, viewerId }: Props) {
   );
 }
 
+export const config = { maxDuration: 30 };
+
 export async function getServerSideProps(context: GetServerSidePropsContext) {
   const session = await getSession(context);
   if (!session) {

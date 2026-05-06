@@ -46,9 +46,77 @@ model following {
 }
 
 model groups {
-  id    Int     @id(map: "group_pkey") @default(autoincrement())
-  name  String
-  users users[]
+  id         Int                @id(map: "group_pkey") @default(autoincrement())
+  createdAt  DateTime           @default(now()) @db.Timestamptz(6)
+  name       String
+  visibility GroupVisibility    @default(PRIVATE)
+  members    groupMembership[]
+  plans      groupPlan[]
+
+  @@index([visibility])
+}
+
+model groupMembership {
+  group    Int
+  user     Int
+  role     GroupRole @default(MEMBER)
+  joinedAt DateTime  @default(now()) @db.Timestamptz(6)
+  groups   groups    @relation(fields: [group], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users    users     @relation(fields: [user], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([group, user])
+  @@index([user])
+  @@index([group])
+}
+
+model groupPlan {
+  id           Int              @id @default(autoincrement())
+  createdAt    DateTime         @default(now()) @db.Timestamptz(6)
+  group        Int
+  programming  Int
+  createdBy    Int
+  note         String?
+  status       PlanStatus       @default(POLLING)
+  selectedDate Int?
+  groups       groups           @relation(fields: [group], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  programmings programming      @relation(fields: [programming], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users        users            @relation(fields: [createdBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  selected     groupPlanDate?   @relation("PlanSelectedDate", fields: [selectedDate], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  dates        groupPlanDate[]  @relation("PlanCandidateDates")
+
+  @@index([group])
+  @@index([programming])
+  @@index([createdBy])
+  @@index([status])
+}
+
+model groupPlanDate {
+  id           Int                     @id @default(autoincrement())
+  createdAt    DateTime                @default(now()) @db.Timestamptz(6)
+  plan         Int
+  startTime    DateTime                @db.Timestamptz(6)
+  proposedBy   Int
+  plans        groupPlan               @relation("PlanCandidateDates", fields: [plan], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users        users                   @relation(fields: [proposedBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  selectedFor  groupPlan[]             @relation("PlanSelectedDate")
+  availability groupPlanAvailability[]
+
+  @@unique([plan, startTime], map: "groupPlanDate_unique_per_plan")
+  @@index([plan])
+  @@index([proposedBy])
+}
+
+model groupPlanAvailability {
+  planDate  Int
+  user      Int
+  status    Availability
+  updatedAt DateTime      @default(now()) @db.Timestamptz(6)
+  dates     groupPlanDate @relation(fields: [planDate], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users     users         @relation(fields: [user], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([planDate, user])
+  @@index([user])
+  @@index([planDate])
 }
 
 model likedShows {
@@ -131,6 +199,7 @@ model programming {
   musicals  musicals?       @relation(fields: [musical], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "showings_musical_fkey")
   plays     plays?          @relation(fields: [play], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "showings_play_fkey")
   seasons   seasons?        @relation(fields: [season], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  groupPlans groupPlan[]
 
   @@index([musical])
   @@index([play])
@@ -174,12 +243,14 @@ model users {
   website    String?
   bio        String?
   image      String?
-  badge      Badge        @default(USER)
-  inGroup    Int?
+  badge      Badge             @default(USER)
   attendance attendance[]
   following  following[]
   likedShows likedShows[]
-  groups     groups?      @relation(fields: [inGroup], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  memberships groupMembership[]
+  plansCreated groupPlan[]
+  datesProposed groupPlanDate[]
+  availability groupPlanAvailability[]
   watchlist  watchlist[]
 }
 
@@ -203,6 +274,30 @@ enum Badge {
   ADMIN
   PATRON
   USER
+}
+
+enum GroupRole {
+  OWNER
+  MEMBER
+}
+
+enum PlanStatus {
+  POLLING
+  CONFIRMED
+  CANCELED
+}
+
+enum Availability {
+  UNAVAILABLE
+  AVAILABLE
+  PREFER
+  GOING
+}
+
+enum GroupVisibility {
+  PRIVATE
+  PUBLIC_REQUEST
+  PUBLIC_OPEN
 }
 
 enum PerformanceType {

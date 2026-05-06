@@ -21,7 +21,7 @@ import type { ProgrammingOption } from "./GroupPlans";
 interface Props {
   groupId: number;
   programmingOptions: ProgrammingOption[];
-  onCreated: () => void;
+  onResult: (result: { ok: true } | { ok: false; error: string }) => void;
 }
 
 const CANDIDATE_CAP = 90;
@@ -120,7 +120,7 @@ function combinedShowtimes(programmings: ProgrammingOption[]): Date[] {
   return out.sort((a, b) => a.getTime() - b.getTime());
 }
 
-function CreatePlanForm({ groupId, programmingOptions, onCreated }: Props) {
+function CreatePlanForm({ groupId, programmingOptions, onResult }: Props) {
   const router = useRouter();
   const [show, setShow] = useState<ShowChoice | null>(null);
   const [theatre, setTheatre] = useState<TheatreChoice | null>(null);
@@ -209,11 +209,13 @@ function CreatePlanForm({ groupId, programmingOptions, onCreated }: Props) {
       });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
-        setError(body.error ?? "Failed to create plan.");
+        const message = body.error ?? "Failed to create plan.";
+        setError(message);
+        onResult({ ok: false, error: message });
         return;
       }
-      onCreated();
-      router.replace(router.asPath);
+      await router.replace(router.asPath, undefined, { scroll: false });
+      onResult({ ok: true });
     } finally {
       setBusy(false);
     }

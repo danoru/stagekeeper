@@ -10,9 +10,10 @@ import {
   isGroupMember,
   isGroupOwner,
   reopenPlan,
+  updatePlanNote,
 } from "../../../../../../src/data/groups";
 
-type Action = "confirm" | "cancel" | "reopen";
+type Action = "confirm" | "cancel" | "reopen" | "updateNote";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const session = await getServerSession(req, res, authOptions);
@@ -49,9 +50,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (!canMutate) {
       return res.status(403).json({ error: "Only the proposer or owner can change status." });
     }
-    const { action, planDateId } = req.body ?? {} as {
+    const { action, planDateId, note } = req.body ?? {} as {
       action?: Action;
       planDateId?: number;
+      note?: string | null;
     };
 
     if (action === "confirm") {
@@ -78,7 +80,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(200).json({ plan: updated });
     }
 
-    return res.status(400).json({ error: "action must be confirm, cancel, or reopen." });
+    if (action === "updateNote") {
+      if (note != null && typeof note !== "string") {
+        return res.status(400).json({ error: "note must be a string." });
+      }
+      const trimmed = typeof note === "string" ? note.trim() : "";
+      if (trimmed.length > 500) {
+        return res.status(400).json({ error: "note must be 500 characters or fewer." });
+      }
+      const updated = await updatePlanNote(planId, trimmed || null);
+      return res.status(200).json({ plan: updated });
+    }
+
+    return res.status(400).json({ error: "action must be confirm, cancel, reopen, or updateNote." });
   }
 
   res.setHeader("Allow", ["DELETE", "PATCH"]);

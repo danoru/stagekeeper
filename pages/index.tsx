@@ -21,7 +21,6 @@ function Home({ recentPerformances, session, upcomingPerformances }: Props) {
     <div className={styles.container}>
       <Head>
         <title>StageKeeper</title>
-        <meta content="Created with NextJS" name="description" />
         <link href="/favicon.ico" rel="icon" />
       </Head>
       {session ? (

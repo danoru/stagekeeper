@@ -26,6 +26,8 @@ function PlanCard({ groupId, plan, viewerId, isOwner }: Props) {
   const [busy, setBusy] = useState(false);
   const [adding, setAdding] = useState(false);
   const [newDate, setNewDate] = useState("");
+  const [editingNote, setEditingNote] = useState(false);
+  const [noteDraft, setNoteDraft] = useState(plan.note ?? "");
   const [error, setError] = useState<string | null>(null);
 
   const prog = plan.programmings;
@@ -142,6 +144,33 @@ function PlanCard({ groupId, plan, viewerId, isOwner }: Props) {
     }
   }
 
+  async function saveNote() {
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await fetch(`/api/groups/${groupId}/plans/${plan.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "updateNote", note: noteDraft }),
+      });
+      if (res.ok) {
+        setEditingNote(false);
+        refresh();
+      } else {
+        const body = await res.json().catch(() => ({}));
+        setError(body.error ?? "Failed to update note.");
+      }
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function cancelEditNote() {
+    setNoteDraft(plan.note ?? "");
+    setEditingNote(false);
+    setError(null);
+  }
+
   async function deletePlan() {
     if (!confirm("Delete this plan entirely?")) return;
     setBusy(true);
@@ -253,20 +282,77 @@ function PlanCard({ groupId, plan, viewerId, isOwner }: Props) {
         )}
       </Stack>
 
-      {plan.note && (
-        <Typography
-          sx={{
-            fontFamily: '"Cormorant Garamond", serif',
-            fontStyle: "italic",
-            fontSize: "0.85rem",
-            color: "rgba(232,220,200,0.6)",
-            mb: 2,
-            pl: 1.5,
-            borderLeft: "2px solid rgba(212,175,85,0.2)",
-          }}
-        >
-          &ldquo;{plan.note}&rdquo;
-        </Typography>
+      {editingNote ? (
+        <Box sx={{ mb: 2 }}>
+          <TextField
+            fullWidth
+            inputProps={{ maxLength: 500 }}
+            multiline
+            onChange={(e) => setNoteDraft(e.target.value)}
+            placeholder="Add a note (optional)"
+            rows={2}
+            size="small"
+            sx={{ mb: 1 }}
+            value={noteDraft}
+          />
+          <Stack direction="row" spacing={1}>
+            <Button
+              disabled={busy}
+              onClick={saveNote}
+              size="small"
+              sx={{ fontSize: "0.65rem" }}
+              variant="outlined"
+            >
+              Save
+            </Button>
+            <Button
+              disabled={busy}
+              onClick={cancelEditNote}
+              size="small"
+              sx={{ fontSize: "0.65rem", color: "rgba(232,220,200,0.5)" }}
+            >
+              Cancel
+            </Button>
+          </Stack>
+        </Box>
+      ) : (
+        (plan.note || canMutate) && (
+          <Box sx={{ mb: 2 }}>
+            {plan.note && (
+              <Typography
+                sx={{
+                  fontFamily: '"Cormorant Garamond", serif',
+                  fontStyle: "italic",
+                  fontSize: "0.85rem",
+                  color: "rgba(232,220,200,0.6)",
+                  pl: 1.5,
+                  borderLeft: "2px solid rgba(212,175,85,0.2)",
+                }}
+              >
+                &ldquo;{plan.note}&rdquo;
+              </Typography>
+            )}
+            {canMutate && (
+              <Button
+                onClick={() => setEditingNote(true)}
+                size="small"
+                sx={{
+                  fontFamily: '"DM Sans", sans-serif',
+                  fontSize: "0.6rem",
+                  letterSpacing: "0.1em",
+                  textTransform: "uppercase",
+                  color: "rgba(212,175,85,0.7)",
+                  mt: plan.note ? 0.5 : 0,
+                  ml: plan.note ? 1.5 : 0,
+                  px: 0,
+                  minWidth: 0,
+                }}
+              >
+                {plan.note ? "Edit note" : "+ Add note"}
+              </Button>
+            )}
+          </Box>
+        )
       )}
 
       <Stack spacing={1}>

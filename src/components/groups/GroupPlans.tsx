@@ -1,4 +1,4 @@
-import { Box, Button, Stack, Typography } from "@mui/material";
+import { Alert, Box, Button, Snackbar, Stack, Typography } from "@mui/material";
 import type {
   Availability,
   groupPlan,
@@ -50,6 +50,20 @@ interface Props {
 
 function GroupPlans({ groupId, plans, programmingOptions, viewerId, isOwner }: Props) {
   const [creating, setCreating] = useState(false);
+  const [snackbar, setSnackbar] = useState<{
+    open: boolean;
+    message: string;
+    severity: "success" | "error";
+  }>({ open: false, message: "", severity: "success" });
+
+  function handleCreateResult(result: { ok: true } | { ok: false; error: string }) {
+    if (result.ok) {
+      setCreating(false);
+      setSnackbar({ open: true, message: "Plan proposed.", severity: "success" });
+    } else {
+      setSnackbar({ open: true, message: result.error, severity: "error" });
+    }
+  }
 
   return (
     <>
@@ -91,7 +105,7 @@ function GroupPlans({ groupId, plans, programmingOptions, viewerId, isOwner }: P
         <Box sx={{ mb: 2.5 }}>
           <CreatePlanForm
             groupId={groupId}
-            onCreated={() => setCreating(false)}
+            onResult={handleCreateResult}
             programmingOptions={programmingOptions}
           />
         </Box>
@@ -143,6 +157,21 @@ function GroupPlans({ groupId, plans, programmingOptions, viewerId, isOwner }: P
           ))}
         </Stack>
       )}
+
+      <Snackbar
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        autoHideDuration={5000}
+        onClose={() => setSnackbar((s) => ({ ...s, open: false }))}
+        open={snackbar.open}
+      >
+        <Alert
+          onClose={() => setSnackbar((s) => ({ ...s, open: false }))}
+          severity={snackbar.severity}
+          variant="filled"
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </>
   );
 }

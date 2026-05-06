@@ -265,6 +265,13 @@ export async function createPlanWithDates(args: {
   });
 }
 
+export async function updatePlanNote(planId: number, note: string | null) {
+  return prisma.groupPlan.update({
+    where: { id: planId },
+    data: { note },
+  });
+}
+
 export async function addCandidateDate(args: {
   planId: number;
   startTime: Date;

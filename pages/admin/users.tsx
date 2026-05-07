@@ -1,6 +1,7 @@
 import {
   Alert,
   Box,
+  Button,
   Chip,
   MenuItem,
   Paper,
@@ -15,6 +16,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import AdminGuard from "../../src/components/admin/AdminGuard";
+import ResetUserPasswordDialog from "../../src/components/admin/ResetUserPasswordDialog";
 
 type AdminUser = {
   id: number;
@@ -24,7 +26,7 @@ type AdminUser = {
   createdAt: string;
   firstName: string | null;
   lastName: string | null;
-  _count: { attendance: number; logs: number };
+  _count: { attendance: number };
 };
 
 const BADGE_COLORS: Record<string, "error" | "warning" | "default"> = {
@@ -36,6 +38,7 @@ const BADGE_COLORS: Record<string, "error" | "warning" | "default"> = {
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [search, setSearch] = useState("");
+  const [resetTarget, setResetTarget] = useState<{ id: number; username: string } | null>(null);
   const [snackbar, setSnackbar] = useState<{
     open: boolean;
     message: string;
@@ -129,21 +132,32 @@ export default function AdminUsersPage() {
                   </Typography>
                   <br />
                   <Typography variant="caption" color="text.secondary">
-                    {user._count.attendance + user._count.logs} shows logged · joined{" "}
+                    {user._count.attendance} shows logged · joined{" "}
                     {new Date(user.createdAt).toLocaleDateString()}
                   </Typography>
                 </Box>
 
-                <Select
-                  size="small"
-                  value={user.badge}
-                  onChange={(e) => handleBadgeChange(user.id, e.target.value)}
-                  sx={{ minWidth: 110 }}
-                >
-                  <MenuItem value="USER">User</MenuItem>
-                  <MenuItem value="PATRON">Patron</MenuItem>
-                  <MenuItem value="ADMIN">Admin</MenuItem>
-                </Select>
+                <Stack direction="row" spacing={1} alignItems="center">
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    onClick={() =>
+                      setResetTarget({ id: user.id, username: user.username })
+                    }
+                  >
+                    Reset password
+                  </Button>
+                  <Select
+                    size="small"
+                    value={user.badge}
+                    onChange={(e) => handleBadgeChange(user.id, e.target.value)}
+                    sx={{ minWidth: 110 }}
+                  >
+                    <MenuItem value="USER">User</MenuItem>
+                    <MenuItem value="PATRON">Patron</MenuItem>
+                    <MenuItem value="ADMIN">Admin</MenuItem>
+                  </Select>
+                </Stack>
               </Stack>
             ))}
             {filtered.length === 0 && (
@@ -154,6 +168,14 @@ export default function AdminUsersPage() {
           </Stack>
         </Paper>
       </Box>
+
+      <ResetUserPasswordDialog
+        open={!!resetTarget}
+        user={resetTarget}
+        onClose={() => setResetTarget(null)}
+        onSuccess={(username) => showSnackbar(`Password updated for ${username}.`, "success")}
+        onError={(message) => showSnackbar(message, "error")}
+      />
 
       <Snackbar
         open={snackbar.open}

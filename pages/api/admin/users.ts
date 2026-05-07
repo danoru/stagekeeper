@@ -1,3 +1,4 @@
+import { hash } from "bcrypt";
 import { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth";
 
@@ -56,6 +57,26 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
   }
 
-  res.setHeader("Allow", ["GET", "PUT"]);
+  if (req.method === "PATCH") {
+    const { id, password } = req.body;
+    if (!id) return res.status(400).json({ error: "ID is required." });
+    if (typeof password !== "string" || password.length < 5) {
+      return res.status(400).json({ error: "Password must be at least 5 characters long." });
+    }
+
+    try {
+      const hashed = await hash(password, 10);
+      const user = await prisma.users.update({
+        where: { id: Number(id) },
+        data: { password: hashed },
+        select: { id: true, username: true },
+      });
+      return res.status(200).json(user);
+    } catch (e) {
+      return res.status(500).json({ error: "Failed to reset password." });
+    }
+  }
+
+  res.setHeader("Allow", ["GET", "PUT", "PATCH"]);
   return res.status(405).json({ error: `Method ${req.method} not allowed.` });
 }

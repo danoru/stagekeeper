@@ -162,50 +162,49 @@ function ShowActionBar({
       : "Attended"
     : "Log";
 
+  const actionButtonSx = {
+    minWidth: 0,
+    px: { xs: 0.5, sm: 1 },
+    py: 1,
+    "& .MuiSvgIcon-root": { fontSize: { xs: 26, md: 30 } },
+  };
+  const actionLabelSx = {
+    fontSize: { xs: "0.7rem", md: "0.85rem" },
+    textAlign: "center" as const,
+    lineHeight: 1.2,
+  };
+
   const AttendanceButton = () => (
-    <Stack alignItems="center" direction="column" width="33%">
+    <Stack alignItems="center" direction="column" sx={{ flex: 1, minWidth: 0 }}>
       <Button
+        sx={actionButtonSx}
         onClick={handleOpenLogDialog}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
       >
-        <Typography variant="subtitle1">
-          {hasAttended ? (
-            <LocalActivity fontSize="large" />
-          ) : (
-            <LocalActivityOutlined fontSize="large" />
-          )}
-        </Typography>
+        {hasAttended ? <LocalActivity /> : <LocalActivityOutlined />}
       </Button>
-      <Typography variant="subtitle1">
+      <Typography sx={actionLabelSx}>
         {hovered && hasAttended ? "Log again" : attendLabel}
       </Typography>
     </Stack>
   );
 
   const LikedButton = () => (
-    <Stack alignItems="center" direction="column" width="33%">
-      <Button onClick={handleLikes}>
-        <Typography variant="subtitle1">
-          {isLiked ? <FavoriteIcon fontSize="large" /> : <FavoriteBorder fontSize="large" />}
-        </Typography>
+    <Stack alignItems="center" direction="column" sx={{ flex: 1, minWidth: 0 }}>
+      <Button sx={actionButtonSx} onClick={handleLikes}>
+        {isLiked ? <FavoriteIcon /> : <FavoriteBorder />}
       </Button>
-      <Typography variant="subtitle1">{isLiked ? "Liked" : "Like"}</Typography>
+      <Typography sx={actionLabelSx}>{isLiked ? "Liked" : "Like"}</Typography>
     </Stack>
   );
 
   const WatchlistButton = () => (
-    <Stack alignItems="center" direction="column" width="33%">
-      <Button onClick={handleWatchlist}>
-        <Typography variant="subtitle1">
-          {isWatchlisted ? (
-            <WatchLater fontSize="large" />
-          ) : (
-            <WatchLaterOutlined fontSize="large" />
-          )}
-        </Typography>
+    <Stack alignItems="center" direction="column" sx={{ flex: 1, minWidth: 0 }}>
+      <Button sx={actionButtonSx} onClick={handleWatchlist}>
+        {isWatchlisted ? <WatchLater /> : <WatchLaterOutlined />}
       </Button>
-      <Typography variant="subtitle1">{isWatchlisted ? "Watchlist" : "Watchlist"}</Typography>
+      <Typography sx={actionLabelSx}>Watchlist</Typography>
     </Stack>
   );
 

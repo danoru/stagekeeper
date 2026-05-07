@@ -16,7 +16,6 @@ function LoggedInHomePage({ recentPerformances, sessionUser, upcomingPerformance
   const trim = 5;
   return (
     <Box sx={{ background: "#080C14", minHeight: "100vh" }}>
-      {/* Welcome bar */}
       <Box
         sx={{
           borderBottom: "1px solid rgba(212,175,85,0.12)",
@@ -50,8 +49,7 @@ function LoggedInHomePage({ recentPerformances, sessionUser, upcomingPerformance
         </Typography>
       </Box>
 
-      {/* Feed content */}
-      <Box sx={{ maxWidth: 1200, mx: "auto", px: 3, py: 4 }}>
+      <Box sx={{ maxWidth: 1200, mx: "auto", px: { xs: 1.5, md: 3 }, py: 4 }}>
         <FriendUpcomingActivity upcomingPerformances={upcomingPerformances} trim={trim} />
         <RecentActivity recentPerformances={recentPerformances} trim={trim} />
       </Box>

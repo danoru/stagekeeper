@@ -97,7 +97,7 @@ function FriendUpcomingActivity({ trim, upcomingPerformances }: Props) {
           </Typography>
         </Box>
       ) : (
-        <Grid container columnSpacing={1} rowSpacing={1} sx={{ mb: 2 }}>
+        <Grid container columnSpacing={1} rowSpacing={1} sx={{ mb: 2, justifyContent: "center" }}>
           {upcoming.map(
             (
               entry: attendance & {

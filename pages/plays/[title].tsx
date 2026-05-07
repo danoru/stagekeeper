@@ -49,13 +49,23 @@ function PlayPage({ play, pastPerformances, theatres }: Props) {
         <meta content="Created with NextJS" name="description" />
         <link href="/favicon.ico" rel="icon" />
       </Head>
-      <Stack direction="row" sx={{ justifyContent: "center", marginTop: "2vh" }}>
+      <Stack
+        alignItems={{ xs: "center", md: "flex-start" }}
+        direction={{ xs: "column", md: "row" }}
+        spacing={{ xs: 2, md: 0 }}
+        sx={{
+          justifyContent: "center",
+          marginTop: "2vh",
+          px: { xs: 2, md: 0 },
+        }}
+      >
         <Card
           sx={{
             position: "relative",
             height: "270px",
             width: "211.5px",
-            marginRight: "2vw",
+            flexShrink: 0,
+            marginRight: { xs: 0, md: "2vw" },
             overflow: "hidden",
           }}
         >
@@ -86,17 +96,22 @@ function PlayPage({ play, pastPerformances, theatres }: Props) {
         </Card>
         <Stack
           direction="column"
-          style={{ alignItems: "flex-start", marginRight: "2vw", width: "50%" }}
+          sx={{
+            alignItems: { xs: "center", md: "flex-start" },
+            marginRight: { xs: 0, md: "2vw" },
+            textAlign: { xs: "center", md: "left" },
+            width: { xs: "100%", md: "50%" },
+          }}
         >
-          <Stack direction="row" spacing={2}>
+          <Stack direction="row" spacing={2} sx={{ flexWrap: "wrap", justifyContent: "inherit" }}>
             <Typography variant="h6">{play.title}</Typography>
             <Typography variant="h6">{`(${moment(play.premiere).format("YYYY")})`}</Typography>
           </Stack>
-          <Stack direction="column" style={{ alignItems: "flex-start" }}>
+          <Stack direction="column" sx={{ alignItems: "inherit" }}>
             <Typography variant="subtitle1">Written by {play.writtenBy}</Typography>
           </Stack>
         </Stack>
-        <Stack width="15%">
+        <Stack sx={{ width: { xs: "100%", sm: "260px", md: "15%" }, maxWidth: "100%" }}>
           <ShowActionBar
             attendance={userStatus?.attendance ?? []}
             likedShows={userStatus?.likedShows ?? []}

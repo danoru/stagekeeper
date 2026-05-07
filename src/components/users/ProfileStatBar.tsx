@@ -193,7 +193,10 @@ function ProfileStatBar({
               background: "rgba(212,175,85,0.04)",
               border: "1px solid rgba(212,175,85,0.1)",
               borderRadius: 1,
-              overflow: "hidden",
+              overflowX: { xs: "auto", sm: "hidden" },
+              overflowY: "hidden",
+              maxWidth: "100%",
+              "&::-webkit-scrollbar": { display: "none" },
             }}
           >
             {stats.map((stat) => (
@@ -207,6 +210,7 @@ function ProfileStatBar({
                   textAlign: "center",
                   textDecoration: "none",
                   cursor: "pointer",
+                  flexShrink: 0,
                   transition: "background 0.2s",
                   "&:hover": { background: "rgba(212,175,85,0.08)" },
                   "&:hover .stat-n": { color: "#D4AF55" },

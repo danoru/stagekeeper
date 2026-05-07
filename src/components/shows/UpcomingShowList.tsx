@@ -81,14 +81,31 @@ function UpcomingShowList({ upcomingPerformances }: Props) {
                     sx={{
                       position: "absolute",
                       inset: 0,
-                      backgroundImage: `url(${value})`,
-                      backgroundSize: "contain",
-                      backgroundRepeat: "no-repeat",
-                      backgroundPosition: "center",
-                      filter: "brightness(0.65)",
                       transition: "filter 0.3s",
                     }}
-                  />
+                  >
+                    <Box
+                      sx={{
+                        position: "absolute",
+                        inset: 0,
+                        backgroundImage: `url(${value})`,
+                        backgroundSize: "cover",
+                        backgroundPosition: "center",
+                        filter: "blur(28px) brightness(0.45) saturate(1.1)",
+                        transform: "scale(1.15)",
+                      }}
+                    />
+                    <Box
+                      sx={{
+                        position: "absolute",
+                        inset: 0,
+                        backgroundImage: `url(${value})`,
+                        backgroundSize: "contain",
+                        backgroundRepeat: "no-repeat",
+                        backgroundPosition: "center",
+                      }}
+                    />
+                  </Box>
                 )}
 
                 {/* Vignette */}

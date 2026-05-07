@@ -130,6 +130,8 @@ model likedShows {
   plays     plays?          @relation(fields: [play], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "showings_play_fkey")
   users     users           @relation(fields: [user], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
+  @@unique([user, musical])
+  @@unique([user, play])
   @@index([user])
   @@index([musical])
   @@index([play])
@@ -265,6 +267,8 @@ model watchlist {
   plays     plays?          @relation(fields: [play], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "showings_play_fkey")
   users     users           @relation(fields: [user], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
+  @@unique([user, musical])
+  @@unique([user, play])
   @@index([user])
   @@index([musical])
   @@index([play])

@@ -14,15 +14,23 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
   const { type, musical, play } = req.body;
 
   if (req.method === "POST") {
+    if (type === "MUSICAL" ? !musical : !play) {
+      return res.status(400).json({ error: "Missing show identifier." });
+    }
     try {
-      await prisma.likedShows.create({
-        data: {
-          user: userId,
-          type,
-          musical: type === "MUSICAL" ? musical : null,
-          play: type === "PLAY" ? play : null,
-        },
-      });
+      if (type === "MUSICAL") {
+        await prisma.likedShows.upsert({
+          where: { user_musical: { user: userId, musical } },
+          create: { user: userId, type, musical, play: null },
+          update: {},
+        });
+      } else {
+        await prisma.likedShows.upsert({
+          where: { user_play: { user: userId, play } },
+          create: { user: userId, type, musical: null, play },
+          update: {},
+        });
+      }
       return res.status(200).json({ message: "Added to liked shows." });
     } catch (error) {
       console.error(error);

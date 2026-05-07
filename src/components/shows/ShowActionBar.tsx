@@ -22,7 +22,7 @@ import type {
   watchlist,
 } from "@prisma/client";
 import { useRouter } from "next/router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import LogViewingDialog from "./LogViewingDialog";
 
@@ -64,25 +64,30 @@ function ShowActionBar({
   }).length;
   const hasAttended = myAttendanceCount > 0;
 
-  const [isWatchlisted, setIsWatchlisted] = useState(
-    userId
-      ? watchlist.some(
-          (w) =>
-            w.user === userId &&
-            (performanceType === "MUSICAL" ? w.musical === musicalId : w.play === playId)
-        )
-      : false
-  );
+  const [isWatchlisted, setIsWatchlisted] = useState(false);
+  const [isLiked, setIsLiked] = useState(false);
 
-  const [isLiked, setIsLiked] = useState(
-    userId
-      ? likedShows.some(
-          (l) =>
-            l.user === userId &&
-            (performanceType === "MUSICAL" ? l.musical === musicalId : l.play === playId)
-        )
-      : false
-  );
+  useEffect(() => {
+    if (!userId) {
+      setIsWatchlisted(false);
+      setIsLiked(false);
+      return;
+    }
+    setIsWatchlisted(
+      watchlist.some(
+        (w) =>
+          w.user === userId &&
+          (performanceType === "MUSICAL" ? w.musical === musicalId : w.play === playId)
+      )
+    );
+    setIsLiked(
+      likedShows.some(
+        (l) =>
+          l.user === userId &&
+          (performanceType === "MUSICAL" ? l.musical === musicalId : l.play === playId)
+      )
+    );
+  }, [userId, watchlist, likedShows, performanceType, musicalId, playId]);
 
   const [hovered, setHovered] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -103,7 +108,6 @@ function ShowActionBar({
 
   function handleLogged() {
     showSnackbar("Logged a viewing.", "success");
-    // Refresh server data so attendance count + watchlist auto-clear reflect immediately.
     router.replace(router.asPath, undefined, { scroll: false });
   }
 

@@ -35,6 +35,7 @@ function GroupSettingsPanel({ group, isOwner, viewerId }: Props) {
   const [busy, setBusy] = useState(false);
   const [inviteToken, setInviteToken] = useState(group.inviteToken);
   const [copied, setCopied] = useState(false);
+  const ownerCount = group.members.filter((m) => m.role === "OWNER").length;
 
   const inviteUrl =
     typeof window === "undefined" ? "" : `${window.location.origin}/groups/join/${inviteToken}`;
@@ -126,6 +127,30 @@ function GroupSettingsPanel({ group, isOwner, viewerId }: Props) {
       const removed = group.members.find((m) => m.users.username === username);
       if (removed?.user === viewerId) {
         router.push("/groups");
+        return;
+      }
+      refresh();
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleRole(username: string, role: "OWNER" | "MEMBER") {
+    const verb = role === "OWNER" ? "Make" : "Remove";
+    const suffix =
+      role === "OWNER" ? "an owner? Owners can manage members and settings." : "as an owner?";
+    if (!confirm(`${verb} ${username} ${suffix}`)) return;
+    setBusy(true);
+    setMemberError(null);
+    try {
+      const res = await fetch(`/api/groups/${group.id}/members`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, role }),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        setMemberError(body.error ?? "Failed to change role.");
         return;
       }
       refresh();
@@ -258,6 +283,8 @@ function GroupSettingsPanel({ group, isOwner, viewerId }: Props) {
           {group.members.map((m) => {
             const isSelf = m.user === viewerId;
             const canRemove = (isOwner || isSelf) && !(m.role === "OWNER" && !isSelf);
+            const canPromote = isOwner && m.role === "MEMBER";
+            const canDemote = isOwner && m.role === "OWNER" && ownerCount > 1;
             return (
               <Stack
                 key={m.user}
@@ -308,6 +335,32 @@ function GroupSettingsPanel({ group, isOwner, viewerId }: Props) {
                     </Typography>
                   )}
                 </Box>
+                {canPromote && (
+                  <Button
+                    disabled={busy}
+                    size="small"
+                    sx={{ color: "#D4AF55", fontSize: "0.7rem", whiteSpace: "nowrap" }}
+                    variant="text"
+                    onClick={() => handleRole(m.users.username, "OWNER")}
+                  >
+                    Make owner
+                  </Button>
+                )}
+                {canDemote && (
+                  <Button
+                    disabled={busy}
+                    size="small"
+                    sx={{
+                      color: "rgba(232,220,200,0.6)",
+                      fontSize: "0.7rem",
+                      whiteSpace: "nowrap",
+                    }}
+                    variant="text"
+                    onClick={() => handleRole(m.users.username, "MEMBER")}
+                  >
+                    {isSelf ? "Step down" : "Remove owner"}
+                  </Button>
+                )}
                 {canRemove && (
                   <Button
                     color="error"

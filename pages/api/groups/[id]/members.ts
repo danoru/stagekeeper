@@ -40,6 +40,48 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(201).json({ membership });
   }
 
+  // PATCH { username, role } — owners promote members to co-owner or demote
+  // other owners. The last owner can't be demoted (hand off first).
+  if (req.method === "PATCH") {
+    if (!(await isGroupOwner(groupId, userId))) {
+      return res.status(403).json({ error: "Only an owner can change roles." });
+    }
+    const { username, role } = req.body ?? {};
+    if (!username || typeof username !== "string") {
+      return res.status(400).json({ error: "username is required." });
+    }
+    if (role !== "OWNER" && role !== "MEMBER") {
+      return res.status(400).json({ error: "role must be OWNER or MEMBER." });
+    }
+
+    const target = await prisma.users.findUnique({ where: { username } });
+    if (!target) return res.status(404).json({ error: "User not found." });
+    const targetMembership = await getGroupMembership(groupId, target.id);
+    if (!targetMembership) {
+      return res.status(404).json({ error: "Membership not found." });
+    }
+    if (targetMembership.role === role) {
+      return res.status(200).json({ membership: targetMembership });
+    }
+
+    if (role === "MEMBER") {
+      const ownerCount = await prisma.groupMembership.count({
+        where: { group: groupId, role: "OWNER" },
+      });
+      if (ownerCount <= 1) {
+        return res.status(409).json({
+          error: "A group needs at least one owner. Make someone else an owner first.",
+        });
+      }
+    }
+
+    const membership = await prisma.groupMembership.update({
+      where: { group_user: { group: groupId, user: target.id } },
+      data: { role },
+    });
+    return res.status(200).json({ membership });
+  }
+
   if (req.method === "DELETE") {
     const { username } = req.body ?? {};
     if (!username || typeof username !== "string") {
@@ -66,7 +108,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
       if (ownerCount <= 1) {
         return res.status(409).json({
-          error: "Promote another member to owner before leaving.",
+          error: "Make another member an owner before leaving.",
         });
       }
     }
@@ -77,6 +119,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(204).end();
   }
 
-  res.setHeader("Allow", ["POST", "DELETE"]);
+  res.setHeader("Allow", ["POST", "PATCH", "DELETE"]);
   return res.status(405).json({ error: "Method not allowed." });
 }

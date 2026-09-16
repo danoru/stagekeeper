@@ -7,7 +7,7 @@ import type {
   PlanStatus,
   programming,
 } from "@prisma/client";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import type { ShowSummary, TheatreSummary } from "../../data/performances";
 
@@ -34,6 +34,30 @@ export type Plan = groupPlan & {
   dates: DateRow[];
 };
 
+/**
+ * A plan is over once its showtime has passed: the picked date if one was chosen,
+ * otherwise the last candidate date, otherwise the end of the show's run.
+ * Canceled plans are history as well.
+ */
+export function isPastPlan(plan: Plan, now: Date = new Date()): boolean {
+  if (plan.status === "CANCELED") return true;
+  // Dates arrive as ISO strings after superjson's `.json` half.
+  if (plan.selected) return new Date(plan.selected.startTime) < now;
+  if (plan.dates.length > 0) {
+    return plan.dates.every((d) => new Date(d.startTime) < now);
+  }
+  return new Date(plan.programmings.endDate) < now;
+}
+
+/** Sort key for a plan: its picked date, else its last candidate, else the run's end. */
+function planTime(plan: Plan): number {
+  if (plan.selected) return new Date(plan.selected.startTime).getTime();
+  if (plan.dates.length > 0) {
+    return Math.max(...plan.dates.map((d) => new Date(d.startTime).getTime()));
+  }
+  return new Date(plan.programmings.endDate).getTime();
+}
+
 interface Props {
   groupId: number;
   plans: Plan[];
@@ -44,6 +68,16 @@ interface Props {
 
 function GroupPlans({ groupId, plans, programmingOptions, viewerId, isOwner }: Props) {
   const [creating, setCreating] = useState(false);
+  const [showPast, setShowPast] = useState(false);
+  const { upcoming, past } = useMemo(() => {
+    const now = new Date();
+    const upcoming: Plan[] = [];
+    const past: Plan[] = [];
+    for (const plan of plans) (isPastPlan(plan, now) ? past : upcoming).push(plan);
+    // Most recent outing first.
+    past.sort((a, b) => planTime(b) - planTime(a));
+    return { upcoming, past };
+  }, [plans]);
   const [snackbar, setSnackbar] = useState<{
     open: boolean;
     message: string;
@@ -105,7 +139,7 @@ function GroupPlans({ groupId, plans, programmingOptions, viewerId, isOwner }: P
         </Box>
       )}
 
-      {plans.length === 0 ? (
+      {upcoming.length === 0 ? (
         <Box
           sx={{
             border: "1px solid rgba(212,175,85,0.08)",
@@ -125,7 +159,7 @@ function GroupPlans({ groupId, plans, programmingOptions, viewerId, isOwner }: P
               mb: 0.5,
             }}
           >
-            No plans yet.
+            {past.length > 0 ? "Nothing on the calendar." : "No plans yet."}
           </Typography>
           <Typography
             sx={{
@@ -140,7 +174,7 @@ function GroupPlans({ groupId, plans, programmingOptions, viewerId, isOwner }: P
         </Box>
       ) : (
         <Stack spacing={2}>
-          {plans.map((plan) => (
+          {upcoming.map((plan) => (
             <PlanCard
               key={plan.id}
               groupId={groupId}
@@ -150,6 +184,53 @@ function GroupPlans({ groupId, plans, programmingOptions, viewerId, isOwner }: P
             />
           ))}
         </Stack>
+      )}
+
+      {past.length > 0 && (
+        <Box sx={{ mt: 4 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: showPast ? 2.5 : 0 }}>
+            <Typography
+              sx={{
+                fontFamily: '"DM Sans", sans-serif',
+                fontSize: "0.62rem",
+                letterSpacing: "0.22em",
+                textTransform: "uppercase",
+                color: "rgba(232,220,200,0.35)",
+                whiteSpace: "nowrap",
+              }}
+            >
+              Past outings
+            </Typography>
+            <Box sx={{ flex: 1, height: "1px", background: "rgba(232,220,200,0.08)" }} />
+            <Button
+              size="small"
+              sx={{
+                fontFamily: '"DM Sans", sans-serif',
+                fontSize: "0.62rem",
+                letterSpacing: "0.12em",
+                textTransform: "uppercase",
+                color: "rgba(232,220,200,0.45)",
+              }}
+              onClick={() => setShowPast((v) => !v)}
+            >
+              {showPast ? "Hide" : `Show ${past.length}`}
+            </Button>
+          </Box>
+          {showPast && (
+            <Stack spacing={2} sx={{ opacity: 0.8 }}>
+              {past.map((plan) => (
+                <PlanCard
+                  key={plan.id}
+                  isPast
+                  groupId={groupId}
+                  isOwner={isOwner}
+                  plan={plan}
+                  viewerId={viewerId}
+                />
+              ))}
+            </Stack>
+          )}
+        </Box>
       )}
 
       <Snackbar

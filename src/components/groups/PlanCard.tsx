@@ -12,6 +12,8 @@ interface Props {
   plan: Plan;
   viewerId: number;
   isOwner: boolean;
+  /** Showtime has passed: read-only card, no voting or date changes. */
+  isPast?: boolean;
 }
 
 const STATUSES: { value: Availability; label: string; color: string; help: string }[] = [
@@ -21,7 +23,7 @@ const STATUSES: { value: Availability; label: string; color: string; help: strin
   { value: "UNAVAILABLE", label: "Can't go", color: "#CF4444", help: "Not free" },
 ];
 
-function PlanCard({ groupId, plan, viewerId, isOwner }: Props) {
+function PlanCard({ groupId, plan, viewerId, isOwner, isPast = false }: Props) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [adding, setAdding] = useState(false);
@@ -93,13 +95,13 @@ function PlanCard({ groupId, plan, viewerId, isOwner }: Props) {
     }
   }
 
-  async function reopen() {
+  async function setPlanAction(action: "reopen" | "cancel") {
     setBusy(true);
     try {
       const res = await fetch(`/api/groups/${groupId}/plans/${plan.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "reopen" }),
+        body: JSON.stringify({ action }),
       });
       if (res.ok) refresh();
     } finally {
@@ -107,14 +109,22 @@ function PlanCard({ groupId, plan, viewerId, isOwner }: Props) {
     }
   }
 
+  function reopen() {
+    return setPlanAction("reopen");
+  }
+
+  function cancelPlan() {
+    if (!confirm("Cancel this plan? It moves to past outings and can be reopened later.")) return;
+    return setPlanAction("cancel");
+  }
+
   async function removeDate(planDateId: number) {
     if (!confirm("Remove this date from the poll?")) return;
     setBusy(true);
     try {
-      const res = await fetch(
-        `/api/groups/${groupId}/plans/${plan.id}/dates/${planDateId}`,
-        { method: "DELETE" }
-      );
+      const res = await fetch(`/api/groups/${groupId}/plans/${plan.id}/dates/${planDateId}`, {
+        method: "DELETE",
+      });
       if (res.ok) refresh();
     } finally {
       setBusy(false);
@@ -236,13 +246,15 @@ function PlanCard({ groupId, plan, viewerId, isOwner }: Props) {
             }}
           >
             {theatre} ·{" "}
-            {plan.status === "POLLING"
-              ? "Polling"
+            {plan.status === "CANCELED"
+              ? "Canceled"
               : plan.status === "CONFIRMED" && plan.selected
-                ? `Confirmed for ${moment(plan.selected.startTime).format(
-                    "ddd, MMM D · h:mm A"
+                ? `${isPast ? "Went" : "Confirmed for"} ${moment(plan.selected.startTime).format(
+                    "ddd, MMM D, YYYY · h:mm A"
                   )}`
-                : "Canceled"}
+                : isPast
+                  ? "Never locked in"
+                  : "Polling"}
           </Typography>
           <Typography
             sx={{
@@ -257,7 +269,7 @@ function PlanCard({ groupId, plan, viewerId, isOwner }: Props) {
         </Box>
         {canMutate && (
           <Stack direction="row" spacing={1}>
-            {plan.status === "CONFIRMED" && (
+            {(plan.status === "CANCELED" || (plan.status === "CONFIRMED" && !isPast)) && (
               <Button
                 disabled={busy}
                 onClick={reopen}
@@ -266,6 +278,17 @@ function PlanCard({ groupId, plan, viewerId, isOwner }: Props) {
                 variant="text"
               >
                 Reopen
+              </Button>
+            )}
+            {plan.status !== "CANCELED" && !isPast && (
+              <Button
+                disabled={busy}
+                size="small"
+                sx={{ fontSize: "0.65rem", color: "rgba(232,220,200,0.6)" }}
+                variant="text"
+                onClick={cancelPlan}
+              >
+                Cancel
               </Button>
             )}
             <Button
@@ -356,23 +379,31 @@ function PlanCard({ groupId, plan, viewerId, isOwner }: Props) {
       )}
 
       <Stack spacing={1}>
-        {plan.dates.map((date) => (
-          <DateRow
-            key={date.id}
-            busy={busy}
-            canMutateDate={canMutate || date.proposedBy === viewerId}
-            isSelected={plan.selectedDate === date.id}
-            onClearStatus={() => clearStatus(date.id)}
-            onConfirm={canMutate && plan.status === "POLLING" ? () => confirmDate(date.id) : null}
-            onRemove={() => removeDate(date.id)}
-            onSetStatus={(status) => setStatus(date.id, status)}
-            planDate={date}
-            viewerId={viewerId}
-          />
-        ))}
+        {plan.dates
+          // Once it's history, only the date that actually happened matters.
+          .filter((date) => !isPast || !plan.selectedDate || plan.selectedDate === date.id)
+          .map((date) => (
+            <DateRow
+              key={date.id}
+              busy={busy}
+              canMutateDate={!isPast && (canMutate || date.proposedBy === viewerId)}
+              isSelected={plan.selectedDate === date.id}
+              onClearStatus={() => clearStatus(date.id)}
+              onConfirm={
+                canMutate && plan.status === "POLLING" && !isPast
+                  ? () => confirmDate(date.id)
+                  : null
+              }
+              onRemove={() => removeDate(date.id)}
+              onSetStatus={(status) => setStatus(date.id, status)}
+              planDate={date}
+              readOnly={isPast}
+              viewerId={viewerId}
+            />
+          ))}
       </Stack>
 
-      {plan.status === "POLLING" && (
+      {plan.status === "POLLING" && !isPast && (
         <Box sx={{ mt: 1.5 }}>
           {adding ? (
             <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
@@ -434,6 +465,7 @@ interface DateRowProps {
   onClearStatus: () => void;
   onConfirm: (() => void) | null;
   onRemove: () => void;
+  readOnly?: boolean;
 }
 
 function DateRow({
@@ -446,6 +478,7 @@ function DateRow({
   onClearStatus,
   onConfirm,
   onRemove,
+  readOnly = false,
 }: DateRowProps) {
   const myVote = planDate.availability.find((a) => a.user === viewerId);
 
@@ -458,9 +491,7 @@ function DateRow({
   return (
     <Box
       sx={{
-        border: isSelected
-          ? "1px solid rgba(123,201,123,0.5)"
-          : "1px solid rgba(212,175,85,0.08)",
+        border: isSelected ? "1px solid rgba(123,201,123,0.5)" : "1px solid rgba(212,175,85,0.08)",
         borderRadius: 1,
         p: 1.5,
         background: isSelected ? "rgba(123,201,123,0.04)" : "transparent",
@@ -548,33 +579,35 @@ function DateRow({
         </Stack>
       </Stack>
 
-      <Stack direction="row" spacing={0.75} sx={{ mb: 1.25, flexWrap: "wrap", rowGap: 0.75 }}>
-        {STATUSES.map((s) => {
-          const active = myVote?.status === s.value;
-          return (
-            <Button
-              key={s.value}
-              disabled={busy}
-              onClick={() => (active ? onClearStatus() : onSetStatus(s.value))}
-              size="small"
-              sx={{
-                fontFamily: '"DM Sans", sans-serif',
-                fontSize: "0.6rem",
-                letterSpacing: "0.1em",
-                textTransform: "uppercase",
-                color: active ? s.color : "rgba(232,220,200,0.5)",
-                border: "1px solid",
-                borderColor: active ? s.color : "rgba(212,175,85,0.15)",
-                background: active ? `${s.color}15` : "transparent",
-                "&:hover": { borderColor: s.color, background: `${s.color}10` },
-              }}
-              title={s.help}
-            >
-              {s.label}
-            </Button>
-          );
-        })}
-      </Stack>
+      {!readOnly && (
+        <Stack direction="row" spacing={0.75} sx={{ mb: 1.25, flexWrap: "wrap", rowGap: 0.75 }}>
+          {STATUSES.map((s) => {
+            const active = myVote?.status === s.value;
+            return (
+              <Button
+                key={s.value}
+                disabled={busy}
+                onClick={() => (active ? onClearStatus() : onSetStatus(s.value))}
+                size="small"
+                sx={{
+                  fontFamily: '"DM Sans", sans-serif',
+                  fontSize: "0.6rem",
+                  letterSpacing: "0.1em",
+                  textTransform: "uppercase",
+                  color: active ? s.color : "rgba(232,220,200,0.5)",
+                  border: "1px solid",
+                  borderColor: active ? s.color : "rgba(212,175,85,0.15)",
+                  background: active ? `${s.color}15` : "transparent",
+                  "&:hover": { borderColor: s.color, background: `${s.color}10` },
+                }}
+                title={s.help}
+              >
+                {s.label}
+              </Button>
+            );
+          })}
+        </Stack>
+      )}
 
       <Stack direction="row" flexWrap="wrap" spacing={2}>
         {STATUSES.map((s) => {

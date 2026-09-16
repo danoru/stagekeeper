@@ -36,10 +36,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const date = await prisma.groupPlanDate.findUnique({
     where: { id: dateId },
-    select: { plan: true },
+    select: { plan: true, startTime: true },
   });
   if (!date || date.plan !== planId) {
     return res.status(404).json({ error: "Date not found." });
+  }
+  if (date.startTime < new Date()) {
+    return res.status(409).json({ error: "That showtime has already passed." });
   }
 
   if (req.method === "POST") {

@@ -1,4 +1,7 @@
+import type { musicals, PerformanceType, plays, Prisma, theatres } from "@prisma/client";
+
 import prisma from "./db";
+import { publicUserSelect } from "./users";
 
 export const PERFORMANCE_LIST = [
   {
@@ -277,140 +280,178 @@ export async function getPerformances() {
   return performances;
 }
 
-export async function getFriendsUpcomingPerformances(usernames: string[]) {
-  const performances = await prisma.attendance.findMany({
-    where: {
-      users: {
-        username: {
-          in: usernames,
-        },
-      },
-      performances: {
-        startTime: { gte: new Date() },
-      },
-    },
-    include: {
-      performances: {
-        include: { musicals: true, plays: true, theatres: true },
-      },
-    },
-    take: 20,
-    skip: 0,
-  });
+// Every attendance row is loaded with both the legacy `performances` relation and the
+// unified show/theatre/seenDate columns, then normalized so page code can read
+// `row.performances.{type,startTime,musicals,plays,theatres}` regardless of which path
+// created the row.
+export const attendanceInclude = {
+  performances: { include: { musicals: true, plays: true, theatres: true } },
+  musicals: true,
+  plays: true,
+  theatres: true,
+  users: { select: publicUserSelect },
+} satisfies Prisma.attendanceInclude;
 
-  return performances;
+type RawAttendance = Prisma.attendanceGetPayload<{ include: typeof attendanceInclude }>;
+
+export type NormalizedPerformance = {
+  id: number | null;
+  type: PerformanceType;
+  startTime: Date;
+  endTime: Date;
+  musical: number | null;
+  play: number | null;
+  theatre: number | null;
+  createdAt: Date;
+  musicals: musicals | null;
+  plays: plays | null;
+  theatres: theatres;
+};
+
+export type NormalizedAttendance = Omit<RawAttendance, "performances"> & {
+  performances: NormalizedPerformance;
+  isUpcoming: boolean;
+};
+
+const UNKNOWN_THEATRE: theatres = {
+  id: 0,
+  name: "Unknown theatre",
+  link: null,
+  location: "",
+  image: "",
+  address: null,
+  status: "APPROVED",
+  createdBy: null,
+};
+
+function startOfToday() {
+  const d = new Date();
+  d.setUTCHours(0, 0, 0, 0);
+  return d;
 }
 
-export async function getRecentPerformances(usernames: string[]) {
-  const performances = await prisma.attendance.findMany({
-    where: {
-      users: {
-        username: {
-          in: usernames,
-        },
-      },
-      performances: {
-        startTime: { lte: new Date() },
-      },
-    },
-    include: {
-      performances: {
-        include: { musicals: true, plays: true, theatres: true },
-      },
-    },
-    orderBy: {
-      performances: {
-        startTime: "desc",
-      },
-    },
-    take: 20,
-    skip: 0,
-  });
-
-  return performances;
-}
-
-export async function getUserAttendance(id: number) {
-  const attendance = await prisma.attendance.findMany({
-    where: { user: id },
-    orderBy: { performances: { musicals: { title: "asc" } } },
-    include: {
-      performances: {
-        include: { musicals: true, plays: true, theatres: true },
-      },
-    },
-  });
-  return attendance;
-}
-
-export async function getUserAttendanceHistory(id: number) {
-  const attendance = await prisma.attendance.findMany({
-    where: { user: id },
-    include: {
-      performances: {
-        include: { musicals: true, plays: true, theatres: true },
-      },
-      musicals: true,
-      plays: true,
-      theatres: true,
-    },
-  });
-
-  return attendance.sort((a, b) => {
-    const dateA = a.seenDate ?? a.performances?.startTime ?? null;
-    const dateB = b.seenDate ?? b.performances?.startTime ?? null;
-    if (!dateA && !dateB) return 0;
-    if (!dateA) return 1;
-    if (!dateB) return -1;
-    return new Date(dateB).getTime() - new Date(dateA).getTime();
-  });
-}
-
-export async function getUserAttendanceById(user: number, musical: number) {
-  const attendance = await prisma.attendance.findFirst({
-    where: {
-      user,
-      performances: {
-        musical,
-      },
-    },
-
-    include: {
-      performances: {
-        include: {
-          musicals: true,
-          theatres: true,
-        },
-      },
-    },
-  });
-  return attendance;
-}
-
-export async function getUserAttendanceByYear(year: number | null, id: number) {
-  let dateFilter = {};
-
-  if (year) {
-    const startOfYear = new Date(year, 0, 1);
-    const endOfYear = new Date(year + 1, 0, 1);
-    dateFilter = {
-      startTime: {
-        gte: startOfYear,
-        lt: endOfYear,
-      },
+export function normalizeAttendance(row: RawAttendance): NormalizedAttendance | null {
+  const today = startOfToday();
+  if (row.performances) {
+    const perf = row.performances;
+    const startTime = row.seenDate ?? perf.startTime;
+    return {
+      ...row,
+      performances: { ...perf, startTime },
+      isUpcoming: row.going && startTime >= today,
     };
   }
 
-  const attendance = await prisma.attendance.findMany({
-    where: {
-      user: id,
+  const type: PerformanceType | null = row.musical ? "MUSICAL" : row.play ? "PLAY" : null;
+  const show = type === "MUSICAL" ? row.musicals : row.plays;
+  if (!type || !show) return null;
 
-      performances: dateFilter,
+  // Rows without a date sort to the beginning of time so they never masquerade as recent.
+  const startTime = row.seenDate ?? new Date(0);
+  return {
+    ...row,
+    performances: {
+      id: null,
+      type,
+      startTime,
+      endTime: startTime,
+      musical: row.musical,
+      play: row.play,
+      theatre: row.theatre,
+      createdAt: row.createdAt,
+      musicals: type === "MUSICAL" ? row.musicals : null,
+      plays: type === "PLAY" ? row.plays : null,
+      theatres: row.theatres ?? UNKNOWN_THEATRE,
     },
-    orderBy: { performances: { startTime: "asc" } },
-    include: {
-      performances: { include: { musicals: true, plays: true, theatres: true } },
+    isUpcoming: row.going && startTime >= today,
+  };
+}
+
+export function normalizeAttendanceRows(rows: RawAttendance[]) {
+  return rows.map(normalizeAttendance).filter((r): r is NormalizedAttendance => r !== null);
+}
+
+function byStartTimeDesc(a: NormalizedAttendance, b: NormalizedAttendance) {
+  return b.performances.startTime.getTime() - a.performances.startTime.getTime();
+}
+
+function byStartTimeAsc(a: NormalizedAttendance, b: NormalizedAttendance) {
+  return a.performances.startTime.getTime() - b.performances.startTime.getTime();
+}
+
+// Shows the given users have marked "going" with a date today or later.
+export async function getFriendsUpcomingPerformances(usernames: string[], take = 20) {
+  if (usernames.length === 0) return [];
+  const rows = await prisma.attendance.findMany({
+    where: {
+      users: { username: { in: usernames } },
+      going: true,
+      seenDate: { gte: startOfToday() },
     },
+    include: attendanceInclude,
+    orderBy: { seenDate: "asc" },
+    take,
   });
-  return attendance;
+  return normalizeAttendanceRows(rows).sort(byStartTimeAsc);
+}
+
+// Past attendance (not future "going" rows), newest first.
+export async function getRecentPerformances(usernames: string[], take = 20) {
+  if (usernames.length === 0) return [];
+  const rows = await prisma.attendance.findMany({
+    where: {
+      users: { username: { in: usernames } },
+      OR: [{ going: false }, { seenDate: { lt: startOfToday() } }],
+    },
+    include: attendanceInclude,
+    orderBy: { createdAt: "desc" },
+    take: take * 3,
+  });
+  return normalizeAttendanceRows(rows).sort(byStartTimeDesc).slice(0, take);
+}
+
+export async function getUserAttendance(id: number) {
+  const rows = await prisma.attendance.findMany({
+    where: { user: id },
+    include: attendanceInclude,
+  });
+  return normalizeAttendanceRows(rows).sort((a, b) =>
+    (a.performances.musicals?.title ?? a.performances.plays?.title ?? "").localeCompare(
+      b.performances.musicals?.title ?? b.performances.plays?.title ?? ""
+    )
+  );
+}
+
+export async function getUserAttendanceHistory(id: number) {
+  const rows = await prisma.attendance.findMany({
+    where: { user: id },
+    include: attendanceInclude,
+  });
+  return normalizeAttendanceRows(rows).sort(byStartTimeDesc);
+}
+
+export async function getUserUpcoming(id: number) {
+  const rows = await prisma.attendance.findMany({
+    where: { user: id, going: true, seenDate: { gte: startOfToday() } },
+    include: attendanceInclude,
+    orderBy: { seenDate: "asc" },
+  });
+  return normalizeAttendanceRows(rows);
+}
+
+export async function getUserAttendanceByYear(year: number | null, id: number) {
+  const rows = await prisma.attendance.findMany({
+    where: { user: id },
+    include: attendanceInclude,
+  });
+  const today = startOfToday();
+  return normalizeAttendanceRows(rows)
+    .filter((row) => {
+      if (row.isUpcoming) return false;
+      if (row.performances.startTime.getTime() === 0) return false;
+      if (year === null) return true;
+      return row.performances.startTime.getUTCFullYear() === year;
+    })
+    .filter((row) => row.performances.startTime <= today || !row.going)
+    .sort(byStartTimeAsc);
 }

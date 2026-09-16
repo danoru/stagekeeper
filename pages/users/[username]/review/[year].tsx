@@ -1,5 +1,6 @@
 import { Box } from "@mui/material";
 import { attendance, musicals, performances, plays, theatres } from "@prisma/client";
+import { GetServerSidePropsContext } from "next";
 import Head from "next/head";
 import superjson from "superjson";
 
@@ -8,7 +9,7 @@ import PerformanceCarousel from "../../../../src/components/review/PerformanceCa
 import ReviewHeader from "../../../../src/components/review/ReviewHeader";
 import Statistics from "../../../../src/components/review/Statistics";
 import { getUserAttendanceByYear } from "../../../../src/data/performances";
-import { getDistinctYears, findUserByUsername, getUsers } from "../../../../src/data/users";
+import { getDistinctYears, findUserByUsername } from "../../../../src/data/users";
 
 interface Props {
   attendance: (attendance & {
@@ -29,7 +30,7 @@ function YearReviewPage({ attendance, username, year, minYear, maxYear }: Props)
         </title>
         <meta content={`See your ${year} theatre year in review.`} name="description" />
       </Head>
-      <ReviewHeader username={username} year={year} minYear={minYear} maxYear={maxYear} />
+      <ReviewHeader maxYear={maxYear} minYear={minYear} username={username} year={year} />
       <PerformanceCarousel items={attendance} />
       <Highlights highlights={attendance} />
       <Statistics stats={attendance} view="year" year={year} />
@@ -37,21 +38,9 @@ function YearReviewPage({ attendance, username, year, minYear, maxYear }: Props)
   );
 }
 
-export async function getStaticPaths() {
-  const users = await getUsers();
-  const years = await getDistinctYears();
-
-  const paths = users.flatMap((user) =>
-    years.map((year) => ({
-      params: { username: user.username, year: year.toString() },
-    }))
-  );
-
-  return { paths, fallback: "blocking" };
-}
-
-export async function getStaticProps(context: any) {
-  const { username, year } = context.params!;
+export async function getServerSideProps(context: GetServerSidePropsContext) {
+  const username = String(context.params?.username);
+  const year = String(context.params?.year);
   const user = await findUserByUsername(username);
   if (!user) return { notFound: true };
 
@@ -71,7 +60,6 @@ export async function getStaticProps(context: any) {
       minYear,
       maxYear,
     }).json,
-    revalidate: 3600,
   };
 }
 

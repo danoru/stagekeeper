@@ -1,8 +1,8 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth";
 
-import { authOptions } from "../auth/[...nextauth]";
 import prisma from "../../../src/data/db";
+import { authOptions } from "../auth/[...nextauth]";
 
 async function requireAdmin(req: NextApiRequest, res: NextApiResponse) {
   const session = await getServerSession(req, res, authOptions);
@@ -61,6 +61,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           premiere: premiere ? new Date(premiere) : null,
           duration: duration ? Number(duration) : null,
           playbill: playbill || "https://picsum.photos/649/1024",
+          // An admin edit counts as review.
+          status: "APPROVED",
         },
       });
       return res.status(200).json(musical);

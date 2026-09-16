@@ -1,35 +1,14 @@
 import { Box, Grid, Typography } from "@mui/material";
-import type { attendance, musicals, performances, plays, theatres, users } from "@prisma/client";
 
+import type { NormalizedAttendance } from "../../data/performances";
 import DetailInfoCard from "../cards/DetailInfoCard";
 
-type Entry = attendance & {
-  performances:
-    | (performances & {
-        musicals: musicals | null;
-        plays: plays | null;
-        theatres: theatres;
-      })
-    | null;
-  users: users | null;
-};
-
 interface Props {
-  upcoming: Entry[];
+  upcoming: NormalizedAttendance[];
 }
 
 function GroupUpcomingFeed({ upcoming }: Props) {
-  const seen = new Set<string>();
-  const cards = upcoming.filter((entry) => {
-    const perf = entry.performances;
-    if (!perf) return false;
-    const title = perf.type === "MUSICAL" ? perf.musicals?.title : perf.plays?.title;
-    if (!title) return false;
-    const key = `${perf.type}-${title}-${perf.startTime}`;
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  });
+  const cards = upcoming;
 
   return (
     <>
@@ -79,13 +58,13 @@ function GroupUpcomingFeed({ upcoming }: Props) {
               letterSpacing: "0.04em",
             }}
           >
-            When members log a future show, it will surface here.
+            When a member marks a show as "going", it will surface here.
           </Typography>
         </Box>
       ) : (
-        <Grid columnSpacing={1} container rowSpacing={1}>
+        <Grid container columnSpacing={1} rowSpacing={1}>
           {cards.map((entry, i) => {
-            const perf = entry.performances!;
+            const perf = entry.performances;
             const isMusical = perf.type === "MUSICAL";
             const image = isMusical ? perf.musicals?.playbill : perf.plays?.playbill;
             const show = isMusical ? perf.musicals?.title : perf.plays?.title;

@@ -4,15 +4,12 @@ export async function getUpcomingPerformances() {
   const upcomingLimit = new Date();
   upcomingLimit.setMonth(upcomingLimit.getMonth() + 6);
 
+  // Runs that are currently on, plus anything opening in the next six months.
+  const now = new Date();
   const programming = await prisma.programming.findMany({
     where: {
-      startDate: {
-        gte: new Date(),
-        lte: upcomingLimit,
-      },
-      endDate: {
-        gte: new Date(),
-      },
+      startDate: { lte: upcomingLimit },
+      endDate: { gte: now },
     },
     include: {
       musicals: true,

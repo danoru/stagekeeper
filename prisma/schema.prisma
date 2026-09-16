@@ -21,6 +21,7 @@ model attendance {
   play         Int?
   theatre      Int?
   seenDate     DateTime?     @db.Date
+  going        Boolean       @default(false)
   performances performances? @relation(fields: [performance], references: [id], onDelete: NoAction, onUpdate: NoAction)
   users        users?        @relation(fields: [user], references: [id], onDelete: NoAction, onUpdate: NoAction)
   musicals     musicals?     @relation(fields: [musical], references: [id], onDelete: NoAction, onUpdate: NoAction)
@@ -34,6 +35,7 @@ model attendance {
   @@index([play])
   @@index([theatre])
   @@index([seenDate])
+  @@index([going, seenDate])
 }
 
 model following {
@@ -46,12 +48,13 @@ model following {
 }
 
 model groups {
-  id         Int                @id(map: "group_pkey") @default(autoincrement())
-  createdAt  DateTime           @default(now()) @db.Timestamptz(6)
-  name       String
-  visibility GroupVisibility    @default(PRIVATE)
-  members    groupMembership[]
-  plans      groupPlan[]
+  id          Int               @id(map: "group_pkey") @default(autoincrement())
+  createdAt   DateTime          @default(now()) @db.Timestamptz(6)
+  name        String
+  visibility  GroupVisibility   @default(PRIVATE)
+  inviteToken String            @unique @default(uuid())
+  members     groupMembership[]
+  plans       groupPlan[]
 
   @@index([visibility])
 }
@@ -70,19 +73,19 @@ model groupMembership {
 }
 
 model groupPlan {
-  id           Int              @id @default(autoincrement())
-  createdAt    DateTime         @default(now()) @db.Timestamptz(6)
+  id           Int             @id @default(autoincrement())
+  createdAt    DateTime        @default(now()) @db.Timestamptz(6)
   group        Int
   programming  Int
   createdBy    Int
   note         String?
-  status       PlanStatus       @default(POLLING)
+  status       PlanStatus      @default(POLLING)
   selectedDate Int?
-  groups       groups           @relation(fields: [group], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  programmings programming      @relation(fields: [programming], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  users        users            @relation(fields: [createdBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  selected     groupPlanDate?   @relation("PlanSelectedDate", fields: [selectedDate], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  dates        groupPlanDate[]  @relation("PlanCandidateDates")
+  groups       groups          @relation(fields: [group], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  programmings programming     @relation(fields: [programming], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users        users           @relation(fields: [createdBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  selected     groupPlanDate?  @relation("PlanSelectedDate", fields: [selectedDate], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  dates        groupPlanDate[] @relation("PlanCandidateDates")
 
   @@index([group])
   @@index([programming])
@@ -146,11 +149,16 @@ model musicals {
   lyricsBy     String
   bookBy       String
   premiere     DateTime?      @db.Date
+  status       ContentStatus  @default(APPROVED)
+  createdBy    Int?
+  creator      users?         @relation("MusicalCreator", fields: [createdBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
   attendance   attendance[]
   likedShows   likedShows[]
   performances performances[]
   programming  programming[]
   watchlist    watchlist[]
+
+  @@index([status])
 }
 
 model performances {
@@ -180,27 +188,32 @@ model plays {
   playbill     String         @default("https://picsum.photos/649/1024")
   duration     Int?
   writtenBy    String
-  premiere     DateTime       @db.Date
+  premiere     DateTime?      @db.Date
+  status       ContentStatus  @default(APPROVED)
+  createdBy    Int?
+  creator      users?         @relation("PlayCreator", fields: [createdBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
   attendance   attendance[]
   likedShows   likedShows[]
   performances performances[]
   programming  programming[]
   watchlist    watchlist[]
+
+  @@index([status])
 }
 
 model programming {
-  id        Int             @id @default(autoincrement())
-  createdAt DateTime        @default(now()) @db.Timestamptz(6)
-  type      PerformanceType
-  play      Int?
-  musical   Int?
-  season    Int?
-  startDate DateTime        @db.Timestamptz(6)
-  endDate   DateTime        @db.Timestamptz(6)
-  dayTimes  Json
-  musicals  musicals?       @relation(fields: [musical], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "showings_musical_fkey")
-  plays     plays?          @relation(fields: [play], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "showings_play_fkey")
-  seasons   seasons?        @relation(fields: [season], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  id         Int             @id @default(autoincrement())
+  createdAt  DateTime        @default(now()) @db.Timestamptz(6)
+  type       PerformanceType
+  play       Int?
+  musical    Int?
+  season     Int?
+  startDate  DateTime        @db.Timestamptz(6)
+  endDate    DateTime        @db.Timestamptz(6)
+  dayTimes   Json
+  musicals   musicals?       @relation(fields: [musical], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "showings_musical_fkey")
+  plays      plays?          @relation(fields: [play], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "showings_play_fkey")
+  seasons    seasons?        @relation(fields: [season], references: [id], onDelete: NoAction, onUpdate: NoAction)
   groupPlans groupPlan[]
 
   @@index([musical])
@@ -228,32 +241,43 @@ model theatres {
   location     String
   image        String         @default("https://picsum.photos/649/1024")
   address      String?
+  status       ContentStatus  @default(APPROVED)
+  createdBy    Int?
+  creator      users?         @relation("TheatreCreator", fields: [createdBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
   attendance   attendance[]
   performances performances[]
   seasons      seasons[]
+
+  @@index([status])
 }
 
 model users {
-  id         Int          @id @default(autoincrement())
-  createdAt  DateTime     @default(now()) @db.Timestamptz(6)
-  username   String       @unique @db.Citext
-  email      String       @unique @db.Citext
-  password   String
-  firstName  String?
-  lastName   String?
-  location   String?
-  website    String?
-  bio        String?
-  image      String?
-  badge      Badge             @default(USER)
-  attendance attendance[]
-  following  following[]
-  likedShows likedShows[]
-  memberships groupMembership[]
-  plansCreated groupPlan[]
-  datesProposed groupPlanDate[]
-  availability groupPlanAvailability[]
-  watchlist  watchlist[]
+  id                   Int                     @id @default(autoincrement())
+  createdAt            DateTime                @default(now()) @db.Timestamptz(6)
+  username             String                  @unique @db.Citext
+  email                String                  @unique @db.Citext
+  password             String
+  firstName            String?
+  lastName             String?
+  location             String?
+  website              String?
+  bio                  String?
+  image                String?
+  badge                Badge                   @default(USER)
+  onboardedAt          DateTime?               @db.Timestamptz(6)
+  passwordResetToken   String?                 @unique
+  passwordResetExpires DateTime?               @db.Timestamptz(6)
+  musicalsCreated      musicals[]              @relation("MusicalCreator")
+  playsCreated         plays[]                 @relation("PlayCreator")
+  theatresCreated      theatres[]              @relation("TheatreCreator")
+  attendance           attendance[]
+  following            following[]
+  likedShows           likedShows[]
+  memberships          groupMembership[]
+  plansCreated         groupPlan[]
+  datesProposed        groupPlanDate[]
+  availability         groupPlanAvailability[]
+  watchlist            watchlist[]
 }
 
 model watchlist {
@@ -278,6 +302,11 @@ enum Badge {
   ADMIN
   PATRON
   USER
+}
+
+enum ContentStatus {
+  PENDING
+  APPROVED
 }
 
 enum GroupRole {

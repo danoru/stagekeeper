@@ -7,10 +7,10 @@ import { useEffect, useState } from "react";
 import superjson from "superjson";
 
 import PerformanceCalendar from "../../src/components/schedule/PerformanceCalendar";
+import PendingNotice from "../../src/components/shows/PendingNotice";
 import ShowActionBar from "../../src/components/shows/ShowActionBar";
 import prisma from "../../src/data/db";
 import { getPlayByTitle, getPlays } from "../../src/data/plays";
-import { getTheatres } from "../../src/data/theatres";
 
 interface Params {
   title: string;
@@ -19,10 +19,9 @@ interface Params {
 interface Props {
   play: plays;
   pastPerformances: (performances & { theatres: theatres })[];
-  theatres: theatres[];
 }
 
-function PlayPage({ play, pastPerformances, theatres }: Props) {
+function PlayPage({ play, pastPerformances }: Props) {
   const { data: session } = useSession();
   const sessionUser = session?.user;
   const playTitle = play.title;
@@ -33,6 +32,8 @@ function PlayPage({ play, pastPerformances, theatres }: Props) {
     likedShows: any[];
     watchlist: any[];
   } | null>(null);
+  // Bumped after any log/like/watchlist action so the action bar reflects it immediately.
+  const [statusVersion, setStatusVersion] = useState(0);
 
   useEffect(() => {
     if (session) {
@@ -40,7 +41,7 @@ function PlayPage({ play, pastPerformances, theatres }: Props) {
         .then((r) => r.json())
         .then(setUserStatus);
     }
-  }, [session, play.id]);
+  }, [session, play.id, statusVersion]);
 
   return (
     <div>
@@ -105,10 +106,15 @@ function PlayPage({ play, pastPerformances, theatres }: Props) {
         >
           <Stack direction="row" spacing={2} sx={{ flexWrap: "wrap", justifyContent: "inherit" }}>
             <Typography variant="h6">{play.title}</Typography>
-            <Typography variant="h6">{`(${moment(play.premiere).format("YYYY")})`}</Typography>
+            {play.premiere && (
+              <Typography variant="h6">{`(${moment(play.premiere).format("YYYY")})`}</Typography>
+            )}
           </Stack>
           <Stack direction="column" sx={{ alignItems: "inherit" }}>
-            <Typography variant="subtitle1">Written by {play.writtenBy}</Typography>
+            {play.writtenBy && (
+              <Typography variant="subtitle1">Written by {play.writtenBy}</Typography>
+            )}
+            {play.status === "PENDING" && <PendingNotice />}
           </Stack>
         </Stack>
         <Stack sx={{ width: { xs: "100%", sm: "260px", md: "15%" }, maxWidth: "100%" }}>
@@ -118,8 +124,8 @@ function PlayPage({ play, pastPerformances, theatres }: Props) {
             pastPerformances={pastPerformances}
             play={play}
             sessionUser={sessionUser}
-            theatres={theatres}
             watchlist={userStatus?.watchlist ?? []}
+            onStatusChange={() => setStatusVersion((v) => v + 1)}
           />
         </Stack>
       </Stack>
@@ -144,18 +150,15 @@ export async function getStaticProps(context: { params: Params }) {
     return { notFound: true };
   }
 
-  const [pastPerformances, theatres] = await Promise.all([
-    prisma.performances.findMany({
-      where: { play: play.id, startTime: { lte: new Date() } },
-      include: { theatres: true },
-      orderBy: { startTime: "desc" },
-      take: 50,
-    }),
-    getTheatres(),
-  ]);
+  const pastPerformances = await prisma.performances.findMany({
+    where: { play: play.id, startTime: { lte: new Date() } },
+    include: { theatres: true },
+    orderBy: { startTime: "desc" },
+    take: 50,
+  });
 
   return {
-    props: superjson.serialize({ play, pastPerformances, theatres }).json,
+    props: superjson.serialize({ play, pastPerformances }).json,
     revalidate: 86400,
   };
 }

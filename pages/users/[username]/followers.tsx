@@ -1,19 +1,16 @@
 import { Box, Container, Divider, Link, Stack, Typography } from "@mui/material";
 import { users, following } from "@prisma/client";
+import { GetServerSidePropsContext } from "next";
 import { useRouter } from "next/router";
 import superjson from "superjson";
 
 import ProfilePageWrapper from "../../../src/components/users/ProfilePageWrapper";
 import UserAvatar from "../../../src/components/users/UserAvatar";
-import { findUserByUsername, getUsers, getFollowers } from "../../../src/data/users";
+import { findUserByUsername, getFollowers } from "../../../src/data/users";
 
 interface Props {
   user: users;
   followers: (following & { users: users })[];
-}
-
-interface Params {
-  params: { username: string };
 }
 
 function NetworkToggle({ username }: { username: string }) {
@@ -104,15 +101,14 @@ function UserFollowers({ user, followers }: Props) {
             {followers.map((follower) => (
               <Stack
                 key={follower.users.username}
-                direction="row"
                 alignItems="center"
+                direction="row"
                 spacing={2}
                 sx={{ py: 1.5 }}
               >
                 <UserAvatar avatarSize="44px" name={follower.users.username} />
                 <Link
                   href={`/users/${follower.users.username}`}
-                  underline="none"
                   sx={{
                     fontFamily: '"DM Sans", sans-serif',
                     fontSize: "0.9rem",
@@ -121,6 +117,7 @@ function UserFollowers({ user, followers }: Props) {
                     transition: "color 0.2s",
                     "&:hover": { color: "#D4AF55" },
                   }}
+                  underline="none"
                 >
                   {follower.users.username}
                 </Link>
@@ -133,22 +130,13 @@ function UserFollowers({ user, followers }: Props) {
   );
 }
 
-export async function getStaticPaths() {
-  const users = await getUsers();
-  return {
-    paths: users.map((user) => ({ params: { username: user.username } })),
-    fallback: "blocking",
-  };
-}
-
-export async function getStaticProps({ params }: Params) {
-  const { username } = params;
+export async function getServerSideProps({ params }: GetServerSidePropsContext) {
+  const username = String(params?.username);
   const user = await findUserByUsername(username);
   if (!user) return { notFound: true };
   const followers = await getFollowers(username);
   return {
     props: superjson.serialize({ user, followers }).json,
-    revalidate: 1800,
   };
 }
 

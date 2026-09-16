@@ -1,8 +1,8 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth";
 
-import { authOptions } from "../auth/[...nextauth]";
 import prisma from "../../../src/data/db";
+import { authOptions } from "../auth/[...nextauth]";
 
 export default async function handle(req: NextApiRequest, res: NextApiResponse) {
   const session = await getServerSession(req, res, authOptions);
@@ -11,23 +11,30 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
   }
 
   const userId = Number(session.user.id);
-  const { type, musical, play } = req.body;
+  const { type } = req.body ?? {};
+  const musical = req.body?.musical != null ? Number(req.body.musical) : undefined;
+  const play = req.body?.play != null ? Number(req.body.play) : undefined;
+
+  if (type !== "MUSICAL" && type !== "PLAY") {
+    return res.status(400).json({ error: "type must be MUSICAL or PLAY." });
+  }
+  const showId = type === "MUSICAL" ? musical : play;
+  if (!showId) {
+    return res.status(400).json({ error: "Missing show identifier." });
+  }
 
   if (req.method === "POST") {
-    if (type === "MUSICAL" ? !musical : !play) {
-      return res.status(400).json({ error: "Missing show identifier." });
-    }
     try {
       if (type === "MUSICAL") {
         await prisma.likedShows.upsert({
-          where: { user_musical: { user: userId, musical } },
-          create: { user: userId, type, musical, play: null },
+          where: { user_musical: { user: userId, musical: showId } },
+          create: { user: userId, type, musical: showId, play: null },
           update: {},
         });
       } else {
         await prisma.likedShows.upsert({
-          where: { user_play: { user: userId, play } },
-          create: { user: userId, type, musical: null, play },
+          where: { user_play: { user: userId, play: showId } },
+          create: { user: userId, type, musical: null, play: showId },
           update: {},
         });
       }
@@ -40,11 +47,13 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
 
   if (req.method === "DELETE") {
     try {
+      // Scope strictly to the one show: an undefined `play`/`musical` inside an OR would
+      // match every row of this type.
       await prisma.likedShows.deleteMany({
         where: {
           user: userId,
           type,
-          OR: [{ musical }, { play }],
+          ...(type === "MUSICAL" ? { musical: showId } : { play: showId }),
         },
       });
       return res.status(200).json({ message: "Removed from liked shows." });

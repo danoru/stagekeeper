@@ -1,226 +1,132 @@
-import {
-  Alert,
-  Box,
-  Button,
-  Checkbox,
-  FormControlLabel,
-  Link,
-  Snackbar,
-  TextField,
-  Typography,
-} from "@mui/material";
+import Alert from "@mui/material/Alert";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Link from "@mui/material/Link";
+import Snackbar from "@mui/material/Snackbar";
+import TextField from "@mui/material/TextField";
 import { Formik, Form } from "formik";
-import { useRouter } from "next/navigation";
+import { useRouter } from "next/router";
 import { signIn } from "next-auth/react";
 import { useState } from "react";
 import * as Yup from "yup";
 
+import AuthCard, { authFooterLinkSx, authFooterSx } from "./AuthCard";
+
+// Only follow same-origin redirects so a crafted link can't bounce users off-site.
+export function safeCallbackUrl(raw: unknown, fallback = "/") {
+  if (typeof raw !== "string" || !raw.startsWith("/") || raw.startsWith("//")) return fallback;
+  return raw;
+}
+
 function LoginForm() {
   const router = useRouter();
-  const initialValues = { username: "", password: "", rememberMe: false };
+  const callbackUrl = safeCallbackUrl(router.query.callbackUrl);
+  const initialValues = { username: "", password: "" };
   const validationSchema = Yup.object({
     username: Yup.string().required("Username is required."),
     password: Yup.string().required("Password is required."),
   });
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">("success");
 
   async function handleSubmit(
-    values: { username: string; password: string; rememberMe: boolean },
-    { setSubmitting, setErrors }: any
+    values: { username: string; password: string },
+    { setSubmitting }: { setSubmitting: (b: boolean) => void }
   ) {
     const response = await signIn("credentials", {
-      username: values.username,
+      username: values.username.trim(),
       password: values.password,
-      remember: values.rememberMe,
       redirect: false,
     });
 
     if (response?.error) {
-      setErrors({ submit: response.error });
-      setSnackbarMessage("Login failed. Your credentials do not match.");
-      setSnackbarSeverity("error");
+      setSnackbarMessage(
+        response.error === "CredentialsSignin"
+          ? "Login failed. Your credentials do not match."
+          : response.error
+      );
       setSnackbarOpen(true);
-    } else {
-      setSnackbarMessage("Login successful. Redirecting…");
-      setSnackbarOpen(true);
-      setSnackbarSeverity("success");
-      router.push("/");
-      router.refresh();
+      setSubmitting(false);
+      return;
     }
-
-    setSubmitting(false);
+    router.push(callbackUrl);
   }
 
   return (
-    <Box
-      sx={{
-        minHeight: "100vh",
-        background: "#080C14",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        px: 2,
-      }}
-    >
-      <Box
-        sx={{
-          width: "100%",
-          maxWidth: 420,
-          background: "#0D1520",
-          border: "1px solid rgba(212,175,85,0.15)",
-          borderRadius: 1,
-          overflow: "hidden",
-        }}
+    <AuthCard subtitle="Sign in to your archive" title="Welcome Back">
+      <Formik
+        initialValues={initialValues}
+        validationSchema={validationSchema}
+        onSubmit={handleSubmit}
       >
-        {/* Header */}
-        <Box
-          sx={{
-            borderBottom: "1px solid rgba(212,175,85,0.12)",
-            background: "linear-gradient(180deg, #0F1A28 0%, #0D1520 100%)",
-            px: 4,
-            py: 3,
-            textAlign: "center",
-          }}
-        >
-          {/* Gold rule + eyebrow */}
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 1.5 }}>
-            <Box sx={{ flex: 1, height: "1px", background: "rgba(212,175,85,0.3)" }} />
-            <Typography
-              sx={{
-                fontFamily: '"DM Sans", sans-serif',
-                fontSize: "0.6rem",
-                letterSpacing: "0.22em",
-                textTransform: "uppercase",
-                color: "#D4AF55",
-              }}
+        {({ isSubmitting, errors, touched, handleChange, handleBlur, values }) => (
+          <Form>
+            <TextField
+              autoFocus
+              fullWidth
+              required
+              autoComplete="username"
+              error={touched.username && !!errors.username}
+              helperText={touched.username && errors.username}
+              id="username"
+              label="Username"
+              margin="normal"
+              name="username"
+              value={values.username}
+              variant="outlined"
+              onBlur={handleBlur}
+              onChange={handleChange}
+            />
+            <TextField
+              fullWidth
+              required
+              autoComplete="current-password"
+              error={touched.password && !!errors.password}
+              helperText={touched.password && errors.password}
+              id="password"
+              label="Password"
+              margin="normal"
+              name="password"
+              type="password"
+              value={values.password}
+              variant="outlined"
+              onBlur={handleBlur}
+              onChange={handleChange}
+            />
+            <Button
+              fullWidth
+              disabled={isSubmitting}
+              sx={{ mt: 2, mb: 2.5, py: 1.25, fontSize: "0.75rem", letterSpacing: "0.1em" }}
+              type="submit"
+              variant="contained"
             >
-              StageKeeper
-            </Typography>
-            <Box sx={{ flex: 1, height: "1px", background: "rgba(212,175,85,0.3)" }} />
-          </Box>
-          <Typography
-            sx={{
-              fontFamily: '"Cormorant Garamond", serif',
-              fontSize: "1.9rem",
-              fontWeight: 600,
-              color: "#E8DCC8",
-              lineHeight: 1,
-              letterSpacing: "0.01em",
-            }}
-          >
-            Welcome Back
-          </Typography>
-          <Typography
-            sx={{
-              fontFamily: '"Cormorant Garamond", serif',
-              fontStyle: "italic",
-              fontSize: "0.9rem",
-              color: "rgba(232,220,200,0.45)",
-              mt: 0.5,
-            }}
-          >
-            Sign in to your archive
-          </Typography>
-        </Box>
-
-        {/* Form */}
-        <Box sx={{ px: 4, py: 4 }}>
-          <Formik
-            initialValues={initialValues}
-            validationSchema={validationSchema}
-            onSubmit={handleSubmit}
-          >
-            {({ isSubmitting, errors, touched, handleChange, handleBlur, values }) => (
-              <Form>
-                <TextField
-                  autoFocus
-                  fullWidth
-                  required
-                  error={touched.username && !!errors.username}
-                  helperText={touched.username && errors.username}
-                  id="username"
-                  label="Username"
-                  margin="normal"
-                  name="username"
-                  value={values.username}
-                  variant="outlined"
-                  onBlur={handleBlur}
-                  onChange={handleChange}
-                />
-                <TextField
-                  fullWidth
-                  required
-                  autoComplete="current-password"
-                  error={touched.password && !!errors.password}
-                  helperText={touched.password && errors.password}
-                  id="password"
-                  label="Password"
-                  margin="normal"
-                  name="password"
-                  type="password"
-                  value={values.password}
-                  variant="outlined"
-                  onBlur={handleBlur}
-                  onChange={handleChange}
-                />
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={values.rememberMe}
-                      color="primary"
-                      name="rememberMe"
-                      onChange={handleChange}
-                    />
-                  }
-                  label={
-                    <Typography sx={{ fontSize: "0.82rem", color: "rgba(232,220,200,0.6)" }}>
-                      Remember me
-                    </Typography>
-                  }
-                />
-                <Button
-                  fullWidth
-                  disabled={isSubmitting}
-                  type="submit"
-                  variant="contained"
-                  sx={{ mt: 1, mb: 2.5, py: 1.25, fontSize: "0.75rem", letterSpacing: "0.1em" }}
-                >
-                  {isSubmitting ? "Signing in…" : "Sign In"}
-                </Button>
-                <Box
-                  sx={{ textAlign: "center", borderTop: "1px solid rgba(212,175,85,0.1)", pt: 2.5 }}
-                >
-                  <Link
-                    href="/register"
-                    underline="none"
-                    sx={{
-                      fontFamily: '"DM Sans", sans-serif',
-                      fontSize: "0.78rem",
-                      color: "rgba(232,220,200,0.5)",
-                      transition: "color 0.2s",
-                      "&:hover": { color: "#D4AF55" },
-                    }}
-                  >
-                    Don&apos;t have an account?{" "}
-                    <Box component="span" sx={{ color: "#D4AF55", fontWeight: 500 }}>
-                      Create one
-                    </Box>
-                  </Link>
+              {isSubmitting ? "Signing in…" : "Sign In"}
+            </Button>
+            <Box sx={authFooterSx}>
+              <Link
+                href={`/register${callbackUrl !== "/" ? `?callbackUrl=${encodeURIComponent(callbackUrl)}` : ""}`}
+                sx={authFooterLinkSx}
+                underline="none"
+              >
+                Don&apos;t have an account?{" "}
+                <Box component="span" sx={{ color: "#D4AF55", fontWeight: 500 }}>
+                  Create one
                 </Box>
-              </Form>
-            )}
-          </Formik>
-        </Box>
-      </Box>
+              </Link>
+              <Link href="/forgot-password" sx={authFooterLinkSx} underline="none">
+                Forgot your password?
+              </Link>
+            </Box>
+          </Form>
+        )}
+      </Formik>
 
       <Snackbar autoHideDuration={6000} open={snackbarOpen} onClose={() => setSnackbarOpen(false)}>
-        <Alert severity={snackbarSeverity} onClose={() => setSnackbarOpen(false)}>
+        <Alert severity="error" onClose={() => setSnackbarOpen(false)}>
           {snackbarMessage}
         </Alert>
       </Snackbar>
-    </Box>
+    </AuthCard>
   );
 }
 

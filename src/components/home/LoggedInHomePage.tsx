@@ -2,17 +2,24 @@ import Box from "@mui/material/Box";
 import Link from "@mui/material/Link";
 import Typography from "@mui/material/Typography";
 
+import type { NormalizedAttendance } from "../../data/performances";
 import RecentActivity from "../performances/RecentActivity";
 
 import FriendUpcomingActivity from "./FriendUpcomingActivity";
 
 interface Props {
-  recentPerformances: any;
+  myUpcoming: NormalizedAttendance[];
+  recentPerformances: NormalizedAttendance[];
   sessionUser: string;
-  upcomingPerformances: any;
+  upcomingPerformances: NormalizedAttendance[];
 }
 
-function LoggedInHomePage({ recentPerformances, sessionUser, upcomingPerformances }: Props) {
+function LoggedInHomePage({
+  myUpcoming,
+  recentPerformances,
+  sessionUser,
+  upcomingPerformances,
+}: Props) {
   const trim = 5;
   return (
     <Box sx={{ background: "#080C14", minHeight: "100vh" }}>
@@ -35,13 +42,13 @@ function LoggedInHomePage({ recentPerformances, sessionUser, upcomingPerformance
           Welcome back,{" "}
           <Link
             href={`/users/${sessionUser}`}
-            underline="none"
             sx={{
               color: "#D4AF55",
               fontStyle: "normal",
               fontWeight: 600,
               "&:hover": { color: "#E8CC80" },
             }}
+            underline="none"
           >
             {sessionUser}
           </Link>
@@ -50,7 +57,16 @@ function LoggedInHomePage({ recentPerformances, sessionUser, upcomingPerformance
       </Box>
 
       <Box sx={{ maxWidth: 1200, mx: "auto", px: { xs: 1.5, md: 3 }, py: 4 }}>
-        <FriendUpcomingActivity upcomingPerformances={upcomingPerformances} trim={trim} />
+        <FriendUpcomingActivity trim={trim} upcomingPerformances={upcomingPerformances} />
+        {myUpcoming.length > 0 && (
+          <FriendUpcomingActivity
+            emptyHint=""
+            emptyTitle=""
+            title="Your Upcoming Shows"
+            trim={trim}
+            upcomingPerformances={myUpcoming}
+          />
+        )}
         <RecentActivity recentPerformances={recentPerformances} trim={trim} />
       </Box>
     </Box>

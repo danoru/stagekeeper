@@ -1,8 +1,8 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth";
 
-import { authOptions } from "../auth/[...nextauth]";
 import prisma from "../../../src/data/db";
+import { authOptions } from "../auth/[...nextauth]";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "POST") {
@@ -26,17 +26,31 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(400).json({ error: "Cannot follow yourself." });
   }
 
+  // Resolve to the canonical username so "bob" and "Bob" are the same follow.
+  const target = await prisma.users.findUnique({
+    where: { username: followingUsername },
+    select: { username: true },
+  });
+  if (!target) {
+    return res.status(404).json({ error: "User not found." });
+  }
+
   try {
     if (action === "follow") {
-      await prisma.following.create({
-        data: { user: userId, followingUsername },
+      await prisma.following.upsert({
+        where: {
+          user_followingUsername: { user: userId, followingUsername: target.username },
+        },
+        create: { user: userId, followingUsername: target.username },
+        update: {},
       });
       return res.status(200).json({ message: "Successfully followed user." });
     }
     if (action === "unfollow") {
-      await prisma.following.delete({
+      await prisma.following.deleteMany({
         where: {
-          user_followingUsername: { user: userId, followingUsername },
+          user: userId,
+          followingUsername: { equals: target.username, mode: "insensitive" },
         },
       });
       return res.status(200).json({ message: "Successfully unfollowed user." });

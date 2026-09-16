@@ -7,10 +7,10 @@ import { useEffect, useState } from "react";
 import superjson from "superjson";
 
 import PerformanceCalendar from "../../src/components/schedule/PerformanceCalendar";
+import PendingNotice from "../../src/components/shows/PendingNotice";
 import ShowActionBar from "../../src/components/shows/ShowActionBar";
 import prisma from "../../src/data/db";
 import { getMusicalByTitle, getMusicals } from "../../src/data/musicals";
-import { getTheatres } from "../../src/data/theatres";
 
 interface Params {
   title: string;
@@ -19,10 +19,9 @@ interface Params {
 interface Props {
   musical: musicals;
   pastPerformances: (performances & { theatres: theatres })[];
-  theatres: theatres[];
 }
 
-function MusicalPage({ musical, pastPerformances, theatres }: Props) {
+function MusicalPage({ musical, pastPerformances }: Props) {
   const { data: session } = useSession();
   const sessionUser = session?.user;
   const title = `${musical.title} • StageKeeper`;
@@ -33,6 +32,8 @@ function MusicalPage({ musical, pastPerformances, theatres }: Props) {
     likedShows: any[];
     watchlist: any[];
   } | null>(null);
+  // Bumped after any log/like/watchlist action so the action bar reflects it immediately.
+  const [statusVersion, setStatusVersion] = useState(0);
 
   useEffect(() => {
     if (session) {
@@ -40,7 +41,7 @@ function MusicalPage({ musical, pastPerformances, theatres }: Props) {
         .then((r) => r.json())
         .then(setUserStatus);
     }
-  }, [session, musical.id]);
+  }, [session, musical.id, statusVersion]);
 
   return (
     <div>
@@ -105,12 +106,21 @@ function MusicalPage({ musical, pastPerformances, theatres }: Props) {
         >
           <Stack direction="row" spacing={2} sx={{ flexWrap: "wrap", justifyContent: "inherit" }}>
             <Typography variant="h6">{musical.title}</Typography>
-            <Typography variant="h6">{`(${moment(musical.premiere).format("YYYY")})`}</Typography>
+            {musical.premiere && (
+              <Typography variant="h6">{`(${moment(musical.premiere).format("YYYY")})`}</Typography>
+            )}
           </Stack>
           <Stack direction="column" sx={{ alignItems: "inherit" }}>
-            <Typography variant="subtitle1">Music by {musical.musicBy}</Typography>
-            <Typography variant="subtitle1">Lyrics by {musical.lyricsBy}</Typography>
-            <Typography variant="subtitle1">Book by {musical.bookBy}</Typography>
+            {musical.musicBy && (
+              <Typography variant="subtitle1">Music by {musical.musicBy}</Typography>
+            )}
+            {musical.lyricsBy && (
+              <Typography variant="subtitle1">Lyrics by {musical.lyricsBy}</Typography>
+            )}
+            {musical.bookBy && (
+              <Typography variant="subtitle1">Book by {musical.bookBy}</Typography>
+            )}
+            {musical.status === "PENDING" && <PendingNotice />}
           </Stack>
         </Stack>
         <Stack sx={{ width: { xs: "100%", sm: "260px", md: "15%" }, maxWidth: "100%" }}>
@@ -120,8 +130,8 @@ function MusicalPage({ musical, pastPerformances, theatres }: Props) {
             musical={musical}
             pastPerformances={pastPerformances}
             sessionUser={sessionUser}
-            theatres={theatres}
             watchlist={userStatus?.watchlist ?? []}
+            onStatusChange={() => setStatusVersion((v) => v + 1)}
           />
         </Stack>
       </Stack>
@@ -146,18 +156,15 @@ export async function getStaticProps(context: { params: Params }) {
     return { notFound: true };
   }
 
-  const [pastPerformances, theatres] = await Promise.all([
-    prisma.performances.findMany({
-      where: { musical: musical.id, startTime: { lte: new Date() } },
-      include: { theatres: true },
-      orderBy: { startTime: "desc" },
-      take: 50,
-    }),
-    getTheatres(),
-  ]);
+  const pastPerformances = await prisma.performances.findMany({
+    where: { musical: musical.id, startTime: { lte: new Date() } },
+    include: { theatres: true },
+    orderBy: { startTime: "desc" },
+    take: 50,
+  });
 
   return {
-    props: superjson.serialize({ musical, pastPerformances, theatres }).json,
+    props: superjson.serialize({ musical, pastPerformances }).json,
     revalidate: 86400,
   };
 }

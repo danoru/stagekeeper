@@ -4,9 +4,11 @@ const tsPlugin = require("@typescript-eslint/eslint-plugin");
 const tsParser = require("@typescript-eslint/parser");
 
 module.exports = [
+  // Global ignores must be their own entry: an `ignores` next to `files` only narrows that
+  // block, so build output was being linted.
+  { ignores: [".next/**", "node_modules/**", "dist/**", "build/**", "next-env.d.ts"] },
   {
     files: ["**/*.ts", "**/*.tsx"],
-    ignores: [".next/", "node_modules/", "dist/", "build/"],
     languageOptions: {
       parser: tsParser,
       parserOptions: {

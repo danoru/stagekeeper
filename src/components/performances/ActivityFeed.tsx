@@ -31,11 +31,14 @@ interface Resolved {
 function resolve(entry: ActivityEntry): Resolved {
   if (entry.performances) {
     const isMusical = entry.performances.type === "MUSICAL";
+    const theatre = entry.performances.theatres;
+    const start = entry.performances.startTime;
     return {
       show: isMusical ? entry.performances.musicals : entry.performances.plays,
       isMusical,
-      theatreName: entry.performances.theatres?.name ?? null,
-      date: entry.performances.startTime,
+      // Normalized rows use id 0 / epoch 0 as "unknown".
+      theatreName: theatre && theatre.id !== 0 ? theatre.name : null,
+      date: start && new Date(start).getTime() > 0 ? start : null,
     };
   }
 
@@ -341,13 +344,13 @@ function ActivityRow({ entry }: { entry: ActivityEntry }) {
             readOnly
             precision={0.5}
             size="small"
-            value={rating}
             sx={{
               "& .MuiRating-iconFilled": { color: "#D4AF55" },
               "& .MuiRating-iconEmpty": { color: "rgba(212,175,85,0.2)" },
               fontSize: "0.85rem",
               mb: entry.comment ? 0.75 : 0,
             }}
+            value={rating}
           />
         )}
         {entry.comment && (

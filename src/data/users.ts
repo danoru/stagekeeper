@@ -1,8 +1,29 @@
+import { Prisma } from "@prisma/client";
+
 import prisma from "./db";
+
+// The only user columns that may ever reach the client. Never `include: { users: true }`
+// on a query whose result is serialized into page props — that ships password hashes.
+export const publicUserSelect = {
+  id: true,
+  username: true,
+  firstName: true,
+  lastName: true,
+  location: true,
+  website: true,
+  bio: true,
+  image: true,
+  badge: true,
+  createdAt: true,
+  onboardedAt: true,
+} satisfies Prisma.usersSelect;
+
+export type PublicUser = Prisma.usersGetPayload<{ select: typeof publicUserSelect }>;
 
 export function getUsers() {
   const users = prisma.users.findMany({
     orderBy: { username: "asc" },
+    select: publicUserSelect,
   });
   return users;
 }
@@ -29,6 +50,10 @@ export async function getUserProfile(username: string, viewerId?: number) {
   const currentYear = new Date().getUTCFullYear();
   const yearStart = new Date(Date.UTC(currentYear, 0, 1));
   const yearEnd = new Date(Date.UTC(currentYear + 1, 0, 1));
+  const today = new Date();
+  today.setUTCHours(0, 0, 0, 0);
+  // "Going" rows only count once the date has passed.
+  const attended = { OR: [{ going: false }, { seenDate: { lt: today } }] };
 
   const [
     musicalsAttended,
@@ -43,21 +68,29 @@ export async function getUserProfile(username: string, viewerId?: number) {
     prisma.attendance.count({
       where: {
         user: user.id,
-        OR: [{ performances: { type: "MUSICAL" } }, { musical: { not: null } }],
+        AND: [
+          attended,
+          { OR: [{ performances: { type: "MUSICAL" } }, { musical: { not: null } }] },
+        ],
       },
     }),
     prisma.attendance.count({
       where: {
         user: user.id,
-        OR: [{ performances: { type: "PLAY" } }, { play: { not: null } }],
+        AND: [attended, { OR: [{ performances: { type: "PLAY" } }, { play: { not: null } }] }],
       },
     }),
     prisma.attendance.count({
       where: {
         user: user.id,
-        OR: [
-          { performances: { startTime: { gte: yearStart, lt: yearEnd } } },
-          { seenDate: { gte: yearStart, lt: yearEnd } },
+        AND: [
+          attended,
+          {
+            OR: [
+              { performances: { startTime: { gte: yearStart, lt: yearEnd } } },
+              { seenDate: { gte: yearStart, lt: yearEnd } },
+            ],
+          },
         ],
       },
     }),
@@ -65,11 +98,14 @@ export async function getUserProfile(username: string, viewerId?: number) {
       where: { user: user.id },
       orderBy: { followingUsername: "asc" },
     }),
-    prisma.following.count({ where: { followingUsername: username } }),
+    prisma.following.count({
+      where: { followingUsername: { equals: user.username, mode: "insensitive" } },
+    }),
     viewerId
-      ? prisma.following.findUnique({
+      ? prisma.following.findFirst({
           where: {
-            user_followingUsername: { user: viewerId, followingUsername: username },
+            user: viewerId,
+            followingUsername: { equals: user.username, mode: "insensitive" },
           },
         })
       : Promise.resolve(null),
@@ -98,6 +134,7 @@ export async function findUserByUsername(username: string) {
     where: {
       username,
     },
+    select: publicUserSelect,
   });
   return user;
 }
@@ -107,6 +144,7 @@ export async function findUserByUserId(id: number) {
     where: {
       id,
     },
+    select: publicUserSelect,
   });
   return user;
 }
@@ -114,10 +152,10 @@ export async function findUserByUserId(id: number) {
 export async function getFollowers(username: string) {
   const followers = await prisma.following.findMany({
     where: {
-      followingUsername: username,
+      followingUsername: { equals: username, mode: "insensitive" },
     },
     include: {
-      users: true,
+      users: { select: publicUserSelect },
     },
     orderBy: { users: { username: "asc" } },
   });
@@ -130,7 +168,7 @@ export async function getFollowing(user: number) {
       user,
     },
     include: {
-      users: true,
+      users: { select: publicUserSelect },
     },
     orderBy: { users: { username: "asc" } },
   });
@@ -173,16 +211,16 @@ export async function unfollowUser(followingUsername: string) {
 }
 
 export async function getDistinctYears() {
-  const performances = await prisma.performances.findMany({
-    select: {
-      startTime: true,
-    },
-  });
-
-  const years = performances
-    .map((performance) => new Date(performance.startTime).getFullYear())
-    .filter((year, index, self) => self.indexOf(year) === index);
-  return years;
+  const rows = await prisma.$queryRaw<{ year: number }[]>`
+    SELECT DISTINCT EXTRACT(YEAR FROM d)::int AS year
+    FROM (
+      SELECT "seenDate"::timestamptz AS d FROM "attendance" WHERE "seenDate" IS NOT NULL
+      UNION ALL
+      SELECT p."startTime" FROM "attendance" a JOIN "performances" p ON p.id = a."performance"
+    ) dates
+    ORDER BY year DESC
+  `;
+  return rows.map((r) => r.year);
 }
 
 export async function getUserLikes(username: string) {
@@ -190,12 +228,14 @@ export async function getUserLikes(username: string) {
     where: {
       username,
     },
-    include: {
+    select: {
+      ...publicUserSelect,
       likedShows: {
         include: {
           musicals: true,
+          plays: true,
         },
-        orderBy: { musicals: { title: "asc" } },
+        orderBy: { createdAt: "desc" },
       },
     },
   });

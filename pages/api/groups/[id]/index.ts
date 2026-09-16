@@ -1,9 +1,14 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth";
 
-import { authOptions } from "../../auth/[...nextauth]";
 import prisma from "../../../../src/data/db";
-import { getGroupById, isGroupMember, isGroupOwner } from "../../../../src/data/groups";
+import {
+  deleteGroup,
+  getGroupById,
+  isGroupMember,
+  isGroupOwner,
+} from "../../../../src/data/groups";
+import { authOptions } from "../../auth/[...nextauth]";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const session = await getServerSession(req, res, authOptions);
@@ -49,10 +54,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (!(await isGroupOwner(groupId, userId))) {
       return res.status(403).json({ error: "Only the owner can delete a group." });
     }
-    await prisma.$transaction([
-      prisma.groupMembership.deleteMany({ where: { group: groupId } }),
-      prisma.groups.delete({ where: { id: groupId } }),
-    ]);
+    await deleteGroup(groupId);
     return res.status(204).end();
   }
 

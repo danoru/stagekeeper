@@ -1,41 +1,24 @@
 import { Box, Grid, Typography } from "@mui/material";
-import type { attendance, musicals, performances, plays, theatres, users } from "@prisma/client";
 
+import type { NormalizedAttendance } from "../../data/performances";
 import DetailInfoCard from "../cards/DetailInfoCard";
 
 interface Props {
-  recentPerformances: (attendance & {
-    performances: performances & {
-      musicals: musicals;
-      plays: plays;
-      theatres: theatres;
-    };
-    users: users;
-  })[];
+  recentPerformances: NormalizedAttendance[];
   trim: number;
 }
 
 function RecentActivity({ recentPerformances, trim }: Props) {
-  const uniquePerformances = new Set<string>();
+  const seen = new Set<string>();
   const recent = recentPerformances
     .filter((a) => {
-      const type = a.performances.type;
-      let title: string | undefined;
-      if (type === "MUSICAL") {
-        title = a.performances.musicals?.title;
-      } else if (type === "PLAY") {
-        title = a.performances.plays?.title;
-      }
-
-      const date = a.performances.startTime;
-      if (!title || !date) return false;
-
-      const uniqueKey = `${type}-${title}-${date}`;
-      if (!uniquePerformances.has(uniqueKey)) {
-        uniquePerformances.add(uniqueKey);
-        return true;
-      }
-      return false;
+      const perf = a.performances;
+      const show = perf.type === "MUSICAL" ? perf.musicals : perf.plays;
+      if (!show) return false;
+      const uniqueKey = `${perf.type}-${show.title}-${new Date(perf.startTime).getTime()}`;
+      if (seen.has(uniqueKey)) return false;
+      seen.add(uniqueKey);
+      return true;
     })
     .slice(0, trim);
 
@@ -100,43 +83,24 @@ function RecentActivity({ recentPerformances, trim }: Props) {
         </Box>
       ) : (
         <Grid container columnSpacing={1} rowSpacing={1} sx={{ mb: 2, justifyContent: "center" }}>
-          {recent.map(
-            (
-              entry: attendance & {
-                performances: performances & {
-                  musicals: musicals;
-                  theatres: theatres;
-                  plays: plays;
-                };
-              },
-
-              i: number
-            ) => {
-              const isMusical = entry.performances.type === "MUSICAL";
-              const image = isMusical
-                ? entry.performances.musicals.playbill
-                : entry.performances.plays.playbill;
-              const show = isMusical
-                ? entry.performances.musicals.title
-                : entry.performances.plays.title;
-              return (
-                <DetailInfoCard
-                  key={`card-${i}`}
-                  comment={entry.comment}
-                  date={entry.performances.startTime}
-                  image={image}
-                  rating={entry.rating ? Number(entry.rating) : null}
-                  show={show}
-                  sx={{
-                    height: "100%",
-                    width: "100%",
-                  }}
-                  theatre={entry.performances.theatres.name}
-                  type={entry.performances.type}
-                />
-              );
-            }
-          )}
+          {recent.map((entry) => {
+            const perf = entry.performances;
+            const show = perf.type === "MUSICAL" ? perf.musicals : perf.plays;
+            if (!show) return null;
+            return (
+              <DetailInfoCard
+                key={`card-${entry.id}`}
+                comment={entry.comment}
+                date={perf.startTime}
+                image={show.playbill}
+                rating={entry.rating ? Number(entry.rating) : null}
+                show={show.title}
+                sx={{ height: "100%", width: "100%" }}
+                theatre={perf.theatres.name}
+                type={perf.type}
+              />
+            );
+          })}
         </Grid>
       )}
     </>

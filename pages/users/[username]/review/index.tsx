@@ -1,5 +1,6 @@
 import { Box } from "@mui/material";
 import { attendance, musicals, performances, plays, theatres } from "@prisma/client";
+import { GetServerSidePropsContext } from "next";
 import Head from "next/head";
 import superjson from "superjson";
 
@@ -8,7 +9,7 @@ import PerformanceCarousel from "../../../../src/components/review/PerformanceCa
 import ReviewHeader from "../../../../src/components/review/ReviewHeader";
 import Statistics from "../../../../src/components/review/Statistics";
 import { getUserAttendanceByYear } from "../../../../src/data/performances";
-import { findUserByUsername, getUsers } from "../../../../src/data/users";
+import { findUserByUsername } from "../../../../src/data/users";
 
 interface Props {
   attendance: (attendance & {
@@ -32,16 +33,8 @@ function AllTimeReviewPage({ attendance, username }: Props) {
   );
 }
 
-export async function getStaticPaths() {
-  const users = await getUsers();
-  return {
-    paths: users.map((user) => ({ params: { username: user.username } })),
-    fallback: false,
-  };
-}
-
-export async function getStaticProps(context: any) {
-  const { username } = context.params!;
+export async function getServerSideProps(context: GetServerSidePropsContext) {
+  const username = String(context.params?.username);
   const user = await findUserByUsername(username);
   if (!user) return { notFound: true };
 
@@ -49,7 +42,6 @@ export async function getStaticProps(context: any) {
 
   return {
     props: superjson.serialize({ attendance, username }).json,
-    revalidate: 3600,
   };
 }
 

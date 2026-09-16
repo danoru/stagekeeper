@@ -1,13 +1,12 @@
 import { Box, Container, Divider, Link, Stack, Typography } from "@mui/material";
-import { users } from "@prisma/client";
 import Head from "next/head";
 import superjson from "superjson";
 
 import UserAvatar from "../../src/components/users/UserAvatar";
-import { getUsers } from "../../src/data/users";
+import { getUsers, type PublicUser } from "../../src/data/users";
 
 interface Props {
-  users: users[];
+  users: PublicUser[];
 }
 
 function UsersPage({ users }: Props) {
@@ -58,8 +57,8 @@ function UsersPage({ users }: Props) {
             {filteredUsers.map((user) => (
               <Stack
                 key={user.username}
-                direction="row"
                 alignItems="center"
+                direction="row"
                 spacing={2}
                 sx={{
                   px: 3,
@@ -73,7 +72,6 @@ function UsersPage({ users }: Props) {
                 <Box sx={{ flex: 1, minWidth: 0 }}>
                   <Link
                     href={`/users/${user.username}`}
-                    underline="none"
                     sx={{
                       fontFamily: '"DM Sans", sans-serif',
                       fontSize: "0.9rem",
@@ -82,6 +80,7 @@ function UsersPage({ users }: Props) {
                       transition: "color 0.2s",
                       "&:hover": { color: "#D4AF55" },
                     }}
+                    underline="none"
                   >
                     {user.username}
                   </Link>
@@ -139,7 +138,6 @@ function UsersPage({ users }: Props) {
                     <Link
                       key={link.label}
                       href={link.href}
-                      underline="none"
                       sx={{
                         fontFamily: '"DM Sans", sans-serif',
                         fontSize: "0.62rem",
@@ -150,6 +148,7 @@ function UsersPage({ users }: Props) {
                         "&:hover": { color: "#D4AF55" },
                         display: { xs: "none", sm: "block" },
                       }}
+                      underline="none"
                     >
                       {link.label}
                     </Link>
@@ -164,11 +163,10 @@ function UsersPage({ users }: Props) {
   );
 }
 
-export async function getStaticProps() {
+export async function getServerSideProps() {
   const users = await getUsers();
   return {
     props: superjson.serialize({ users }).json,
-    revalidate: 1800,
   };
 }
 

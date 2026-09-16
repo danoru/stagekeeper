@@ -16,6 +16,14 @@ interface Props {
   sx: any;
 }
 
+// Undated manual logs carry epoch 0; show nothing rather than "Jan 1, 1970".
+function formatCardDate(date: Date) {
+  const m = moment(date);
+  if (m.year() < 1971) return "";
+  const fmt = m.year() === moment().year() ? "MMM D" : "MMM D, YYYY";
+  return ` · ${m.format(fmt)}`;
+}
+
 function DetailInfoCard(card: Props) {
   const isMusical = card.type === "MUSICAL";
   const showType = isMusical ? "musicals" : "plays";
@@ -42,7 +50,7 @@ function DetailInfoCard(card: Props) {
           },
         }}
       >
-        <Link href={slug} underline="none" sx={{ display: "block", height: "100%" }}>
+        <Link href={slug} sx={{ display: "block", height: "100%" }} underline="none">
           {/* Background */}
           {isGradient ? (
             <Box
@@ -132,7 +140,8 @@ function DetailInfoCard(card: Props) {
                 mb: 0.25,
               }}
             >
-              {card.theatre} · {moment(card.date).format("MMM D")}
+              {card.theatre}
+              {formatCardDate(card.date)}
             </Typography>
             {card.username && (
               <Typography
@@ -151,13 +160,13 @@ function DetailInfoCard(card: Props) {
               <Rating
                 readOnly
                 size="small"
-                value={card.rating}
                 sx={{
                   "& .MuiRating-iconFilled": { color: "#D4AF55" },
                   "& .MuiRating-iconEmpty": { color: "rgba(212,175,85,0.2)" },
                   fontSize: "0.75rem",
                   mb: 0.25,
                 }}
+                value={card.rating}
               />
             )}
             {card.comment && (

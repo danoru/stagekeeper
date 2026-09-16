@@ -1,19 +1,16 @@
 import { musicals, plays, programming, users, watchlist } from "@prisma/client";
+import { GetServerSidePropsContext } from "next";
 import superjson from "superjson";
 
 import ShowList from "../../../src/components/shows/ShowList";
 import ProfilePageWrapper from "../../../src/components/users/ProfilePageWrapper";
 import { getUpcomingPerformances, getWatchlist } from "../../../src/data/shows";
-import { findUserByUsername, getUsers } from "../../../src/data/users";
+import { findUserByUsername } from "../../../src/data/users";
 
 interface Props {
   upcomingPerformances: (programming & { musicals: musicals; plays: plays })[];
   user: users;
   watchlist: (watchlist & { musicals: musicals; plays: plays })[];
-}
-
-interface Params {
-  params: { username: string };
 }
 
 function UserWatchlist({ watchlist, user, upcomingPerformances }: Props) {
@@ -27,25 +24,17 @@ function UserWatchlist({ watchlist, user, upcomingPerformances }: Props) {
       username={user.username}
     >
       <ShowList
+        emptyMessage="Nothing on the watchlist yet."
         header={`${user.username}'s Watchlist`}
         shows={shows}
         upcomingPerformances={upcomingPerformances}
-        emptyMessage="Nothing on the watchlist yet."
       />
     </ProfilePageWrapper>
   );
 }
 
-export async function getStaticPaths() {
-  const users = await getUsers();
-  return {
-    paths: users.map((user) => ({ params: { username: user.username } })),
-    fallback: "blocking",
-  };
-}
-
-export async function getStaticProps({ params }: Params) {
-  const { username } = params;
+export async function getServerSideProps({ params }: GetServerSidePropsContext) {
+  const username = String(params?.username);
   const user = await findUserByUsername(username);
   if (!user) return { notFound: true };
   const [watchlist, upcomingPerformances] = await Promise.all([
@@ -54,7 +43,6 @@ export async function getStaticProps({ params }: Params) {
   ]);
   return {
     props: superjson.serialize({ watchlist, upcomingPerformances, user }).json,
-    revalidate: 1800,
   };
 }
 

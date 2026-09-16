@@ -1,8 +1,41 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth";
+import * as yup from "yup";
 
-import { authOptions } from "../auth/[...nextauth]";
 import prisma from "../../../src/data/db";
+import { publicUserSelect } from "../../../src/data/users";
+import { authOptions } from "../auth/[...nextauth]";
+
+const optionalText = (max: number) =>
+  yup
+    .string()
+    .trim()
+    .max(max, `Must be ${max} characters or fewer.`)
+    .transform((v) => (v === "" ? null : v))
+    .nullable();
+
+const profileSchema = yup.object({
+  firstName: optionalText(60),
+  lastName: optionalText(60),
+  email: yup.string().trim().email("Enter a valid email.").required("Email is required."),
+  location: optionalText(100),
+  // Stored as a full URL so it renders as a safe, clickable link.
+  website: yup
+    .string()
+    .trim()
+    .transform((v) => (v === "" ? null : v))
+    .nullable()
+    .test("http-url", "Website must start with http:// or https://", (v) => {
+      if (v == null) return true;
+      try {
+        const url = new URL(v);
+        return url.protocol === "http:" || url.protocol === "https:";
+      } catch {
+        return false;
+      }
+    }),
+  bio: optionalText(500),
+});
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { username } = req.query;
@@ -11,18 +44,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     try {
       const user = await prisma.users.findUnique({
         where: { username: String(username) },
-        select: {
-          id: true,
-          username: true,
-          firstName: true,
-          lastName: true,
-          image: true,
-        },
+        select: publicUserSelect,
       });
+      if (!user) return res.status(404).json({ error: "User not found." });
       res.setHeader("Cache-Control", "public, max-age=60, stale-while-revalidate=120");
       return res.status(200).json(user);
-    } catch (error) {
-      return res.status(500).json({ message: "Error fetching user data." });
+    } catch {
+      return res.status(500).json({ error: "Error fetching user data." });
     }
   }
 
@@ -35,16 +63,23 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       return res.status(403).json({ error: "Forbidden." });
     }
 
-    const { firstName, lastName, email, location, website, bio } = req.body;
-
     try {
+      const data = await profileSchema.validate(req.body, { stripUnknown: true });
       const updatedUser = await prisma.users.update({
         where: { id: Number(session.user.id) },
-        data: { firstName, lastName, email, location, website, bio },
+        data,
+        select: publicUserSelect,
       });
       return res.status(200).json(updatedUser);
-    } catch (error) {
-      return res.status(500).json({ message: "Error updating user data." });
+    } catch (e: any) {
+      if (e instanceof yup.ValidationError) {
+        return res.status(400).json({ error: e.errors.join(", ") });
+      }
+      if (e?.code === "P2002") {
+        return res.status(409).json({ error: "That email is already in use." });
+      }
+      console.error(e);
+      return res.status(500).json({ error: "Error updating user data." });
     }
   }
 

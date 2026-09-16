@@ -1,3 +1,5 @@
+import EventAvailable from "@mui/icons-material/EventAvailable";
+import EventAvailableOutlined from "@mui/icons-material/EventAvailableOutlined";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorder from "@mui/icons-material/FavoriteBorder";
 import LocalActivity from "@mui/icons-material/LocalActivity";
@@ -24,28 +26,29 @@ import type {
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 
-import LogViewingDialog from "./LogViewingDialog";
+import LogShowDialog, { type LogMode } from "./LogShowDialog";
 
 interface Props {
   attendance: (attendance & { performances?: performances | null })[];
   likedShows: likedShows[];
   musical?: musicals;
+  /** Called after anything that changes the viewer's relationship to this show. */
+  onStatusChange?: () => void;
   play?: plays;
   sessionUser: any;
   watchlist: watchlist[];
   pastPerformances: (performances & { theatres: theatres })[];
-  theatres: theatres[];
 }
 
 function ShowActionBar({
   attendance,
   likedShows,
   musical,
+  onStatusChange,
   play,
   sessionUser,
   watchlist,
   pastPerformances,
-  theatres,
 }: Props) {
   const router = useRouter();
   const userId = Number(sessionUser?.id);
@@ -53,7 +56,9 @@ function ShowActionBar({
   const playId = play ? Number(play.id) : undefined;
   const performanceType: "MUSICAL" | "PLAY" | null = musical ? "MUSICAL" : play ? "PLAY" : null;
 
-  const myAttendanceCount = attendance.filter((a) => {
+  const today = new Date();
+  today.setUTCHours(0, 0, 0, 0);
+  const mine = attendance.filter((a) => {
     if (a.user !== userId) return false;
     if (a.performances) {
       return performanceType === "MUSICAL"
@@ -61,8 +66,12 @@ function ShowActionBar({
         : a.performances.play === playId;
     }
     return performanceType === "MUSICAL" ? a.musical === musicalId : a.play === playId;
-  }).length;
+  });
+  const isUpcoming = (a: attendance) =>
+    a.going && a.seenDate != null && new Date(a.seenDate) >= today;
+  const myAttendanceCount = mine.filter((a) => !isUpcoming(a)).length;
   const hasAttended = myAttendanceCount > 0;
+  const isGoing = mine.some(isUpcoming);
 
   const [isWatchlisted, setIsWatchlisted] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
@@ -94,6 +103,7 @@ function ShowActionBar({
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">("success");
   const [logDialogOpen, setLogDialogOpen] = useState(false);
+  const [logMode, setLogMode] = useState<LogMode>("seen");
 
   function showSnackbar(message: string, severity: "success" | "error") {
     setSnackbarMessage(message);
@@ -101,13 +111,16 @@ function ShowActionBar({
     setSnackbarOpen(true);
   }
 
-  function handleOpenLogDialog() {
+  function handleOpenLogDialog(mode: LogMode) {
     if (!sessionUser) return;
+    setLogMode(mode);
     setLogDialogOpen(true);
   }
 
-  function handleLogged() {
-    showSnackbar("Logged a viewing.", "success");
+  function handleLogged({ mode }: { mode: LogMode }) {
+    showSnackbar(mode === "going" ? "You're going!" : "Logged a viewing.", "success");
+    setIsWatchlisted(false);
+    onStatusChange?.();
     router.replace(router.asPath, undefined, { scroll: false });
   }
 
@@ -126,6 +139,7 @@ function ShowActionBar({
     const data = await response.json();
     if (response.ok) {
       setIsLiked(!isLiked);
+      onStatusChange?.();
       showSnackbar(isLiked ? "Removed from liked shows." : "Added to liked shows.", "success");
     } else {
       showSnackbar(data.error || "Failed to update liked shows.", "error");
@@ -147,6 +161,7 @@ function ShowActionBar({
     const data = await response.json();
     if (response.ok) {
       setIsWatchlisted(!isWatchlisted);
+      onStatusChange?.();
       showSnackbar(isWatchlisted ? "Removed from watchlist." : "Added to watchlist.", "success");
     } else {
       showSnackbar(data.error || "Failed to update watchlist.", "error");
@@ -182,7 +197,7 @@ function ShowActionBar({
     <Stack alignItems="center" direction="column" sx={{ flex: 1, minWidth: 0 }}>
       <Button
         sx={actionButtonSx}
-        onClick={handleOpenLogDialog}
+        onClick={() => handleOpenLogDialog("seen")}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
       >
@@ -191,6 +206,15 @@ function ShowActionBar({
       <Typography sx={actionLabelSx}>
         {hovered && hasAttended ? "Log again" : attendLabel}
       </Typography>
+    </Stack>
+  );
+
+  const GoingButton = () => (
+    <Stack alignItems="center" direction="column" sx={{ flex: 1, minWidth: 0 }}>
+      <Button sx={actionButtonSx} onClick={() => handleOpenLogDialog("going")}>
+        {isGoing ? <EventAvailable /> : <EventAvailableOutlined />}
+      </Button>
+      <Typography sx={actionLabelSx}>{isGoing ? "Going" : "I'm going"}</Typography>
     </Stack>
   );
 
@@ -220,6 +244,7 @@ function ShowActionBar({
       {sessionUser ? (
         <Stack direction="row" justifyContent="center">
           <AttendanceButton />
+          <GoingButton />
           <LikedButton />
           <WatchlistButton />
         </Stack>
@@ -248,13 +273,11 @@ function ShowActionBar({
         <Typography variant="subtitle1">Share</Typography>
       </Button>
       {sessionUser && performanceType && showId != null && (
-        <LogViewingDialog
+        <LogShowDialog
+          initialMode={logMode}
           open={logDialogOpen}
           pastPerformances={pastPerformances}
-          showId={showId}
-          showTitle={showTitle}
-          showType={performanceType}
-          theatres={theatres}
+          preset={{ id: showId, title: showTitle, type: performanceType }}
           onClose={() => setLogDialogOpen(false)}
           onLogged={handleLogged}
         />

@@ -95,6 +95,7 @@ function UpcomingCalendar({ identifier }: Props) {
   const colorMapping: Record<string, string> = {
     watchlist: "#D4AF55",
     programming: "#50CB78",
+    going: "#50CB78",
   };
 
   function eventDidMount(info: any) {

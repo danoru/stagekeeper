@@ -1,6 +1,10 @@
+import { randomUUID } from "crypto";
+
 import { Availability, GroupRole, PlanStatus } from "@prisma/client";
 
 import prisma from "./db";
+import { attendanceInclude, normalizeAttendanceRows } from "./performances";
+import { publicUserSelect } from "./users";
 
 export async function getUserGroups(userId: number) {
   const memberships = await prisma.groupMembership.findMany({
@@ -20,10 +24,43 @@ export async function getGroupById(groupId: number) {
     where: { id: groupId },
     include: {
       members: {
-        include: { users: true },
+        include: { users: { select: publicUserSelect } },
         orderBy: [{ role: "asc" }, { joinedAt: "asc" }],
       },
     },
+  });
+}
+
+export async function getGroupByInviteToken(token: string) {
+  return prisma.groups.findUnique({
+    where: { inviteToken: token },
+    include: {
+      _count: { select: { members: true } },
+      members: {
+        where: { role: "OWNER" },
+        include: { users: { select: { username: true } } },
+        take: 1,
+      },
+    },
+  });
+}
+
+export async function joinGroupByInvite(token: string, userId: number) {
+  const group = await prisma.groups.findUnique({ where: { inviteToken: token } });
+  if (!group) return null;
+  await prisma.groupMembership.upsert({
+    where: { group_user: { group: group.id, user: userId } },
+    create: { group: group.id, user: userId, role: "MEMBER" },
+    update: {},
+  });
+  return group;
+}
+
+export async function rotateInviteToken(groupId: number) {
+  return prisma.groups.update({
+    where: { id: groupId },
+    data: { inviteToken: randomUUID() },
+    select: { id: true, inviteToken: true },
   });
 }
 
@@ -43,6 +80,7 @@ export async function isGroupOwner(groupId: number, userId: number) {
   return membership?.role === GroupRole.OWNER;
 }
 
+// Shows any member has marked "going" with a date today or later.
 export async function getGroupUpcomingAttendance(groupId: number, take = 20) {
   const memberIds = await prisma.groupMembership.findMany({
     where: { group: groupId },
@@ -51,18 +89,15 @@ export async function getGroupUpcomingAttendance(groupId: number, take = 20) {
   const ids = memberIds.map((m) => m.user);
   if (ids.length === 0) return [];
 
-  return prisma.attendance.findMany({
-    where: {
-      user: { in: ids },
-      performances: { startTime: { gte: new Date() } },
-    },
-    include: {
-      performances: { include: { musicals: true, plays: true, theatres: true } },
-      users: true,
-    },
-    orderBy: { performances: { startTime: "asc" } },
+  const today = new Date();
+  today.setUTCHours(0, 0, 0, 0);
+  const rows = await prisma.attendance.findMany({
+    where: { user: { in: ids }, going: true, seenDate: { gte: today } },
+    include: attendanceInclude,
+    orderBy: { seenDate: "asc" },
     take,
   });
+  return normalizeAttendanceRows(rows);
 }
 
 export async function getGroupWatchlistOverlap(groupId: number) {
@@ -358,6 +393,33 @@ export async function deletePlan(planId: number) {
   });
 }
 
+// Plans, their candidate dates and availability all point at the group with NoAction
+// FKs, so they have to go first.
+export async function deleteGroup(groupId: number) {
+  return prisma.$transaction(async (tx) => {
+    const plans = await tx.groupPlan.findMany({ where: { group: groupId }, select: { id: true } });
+    const planIds = plans.map((p) => p.id);
+    if (planIds.length > 0) {
+      const dates = await tx.groupPlanDate.findMany({
+        where: { plan: { in: planIds } },
+        select: { id: true },
+      });
+      const dateIds = dates.map((d) => d.id);
+      if (dateIds.length > 0) {
+        await tx.groupPlanAvailability.deleteMany({ where: { planDate: { in: dateIds } } });
+      }
+      await tx.groupPlan.updateMany({
+        where: { id: { in: planIds } },
+        data: { selectedDate: null },
+      });
+      await tx.groupPlanDate.deleteMany({ where: { plan: { in: planIds } } });
+      await tx.groupPlan.deleteMany({ where: { id: { in: planIds } } });
+    }
+    await tx.groupMembership.deleteMany({ where: { group: groupId } });
+    await tx.groups.delete({ where: { id: groupId } });
+  });
+}
+
 export type GroupActivityEvent =
   | {
       kind: "attendance";
@@ -507,9 +569,7 @@ export async function getGroupActivityFeed(
     }
   }
 
-  return events
-    .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
-    .slice(0, take);
+  return events.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime()).slice(0, take);
 }
 
 export async function getUpcomingProgrammingForPicker(take = 100) {

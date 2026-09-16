@@ -132,7 +132,36 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         };
       });
 
-    const performances = [...watchlistPerformances, ...attendancePerformancesNormalized];
+    // "I'm going" rows: a single day on the calendar.
+    const goingRows = await prisma.attendance.findMany({
+      where: { user: Number(userId), going: true, seenDate: { gte: firstDayOfMonth } },
+      include: {
+        musicals: { select: { title: true, duration: true } },
+        plays: { select: { title: true, duration: true } },
+        theatres: { select: { name: true } },
+      },
+    });
+    const goingNormalized = goingRows
+      .filter((a) => a.seenDate != null)
+      .map((a) => {
+        const day = moment.utc(a.seenDate);
+        return {
+          id: -a.id,
+          title: a.musicals?.title || a.plays?.title,
+          duration: a.musicals?.duration || a.plays?.duration,
+          theatre: a.theatres?.name ?? "",
+          startDate: day.toDate(),
+          endDate: day.toDate(),
+          dayTimes: { [day.format("dddd")]: ["19:30"] },
+          source: "going",
+        };
+      });
+
+    const performances = [
+      ...watchlistPerformances,
+      ...attendancePerformancesNormalized,
+      ...goingNormalized,
+    ];
 
     performances.sort((a, b) => {
       if (a?.startDate && b?.startDate) {

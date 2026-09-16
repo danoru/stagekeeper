@@ -7,6 +7,7 @@ import superjson from "superjson";
 import GroupMembers from "../../../src/components/groups/GroupMembers";
 import GroupPlans from "../../../src/components/groups/GroupPlans";
 import GroupUpcomingFeed from "../../../src/components/groups/GroupUpcomingFeed";
+import InviteLinkButton from "../../../src/components/groups/InviteLinkButton";
 import WatchlistOverlap from "../../../src/components/groups/WatchlistOverlap";
 import WatchlistProgramming from "../../../src/components/groups/WatchlistProgramming";
 import {
@@ -85,7 +86,8 @@ function GroupDetailPage({
             </Typography>
           </Box>
 
-          <Stack direction="row" spacing={2}>
+          <Stack alignItems="center" direction="row" spacing={2}>
+            <InviteLinkButton inviteToken={group.inviteToken} />
             <Link
               href={`/groups/${group.id}/settings`}
               sx={{
@@ -152,15 +154,14 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     return { notFound: true };
   }
 
-  const [group, upcoming, overlap, watchlistRuns, plans, programmingOptions] =
-    await Promise.all([
-      getGroupById(groupId),
-      getGroupUpcomingAttendance(groupId),
-      getGroupWatchlistOverlap(groupId),
-      getGroupWatchlistProgramming(groupId),
-      getGroupPlans(groupId),
-      getUpcomingProgrammingForPicker(),
-    ]);
+  const [group, upcoming, overlap, watchlistRuns, plans, programmingOptions] = await Promise.all([
+    getGroupById(groupId),
+    getGroupUpcomingAttendance(groupId),
+    getGroupWatchlistOverlap(groupId),
+    getGroupWatchlistProgramming(groupId),
+    getGroupPlans(groupId),
+    getUpcomingProgrammingForPicker(),
+  ]);
 
   if (!group) return { notFound: true };
 

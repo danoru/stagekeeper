@@ -1,16 +1,23 @@
-import { Box, Card, CardActionArea, CardContent, Grid, Typography } from "@mui/material";
 import LibraryMusicIcon from "@mui/icons-material/LibraryMusic";
+import PendingActionsIcon from "@mui/icons-material/PendingActions";
 import PeopleIcon from "@mui/icons-material/People";
 import ScheduleIcon from "@mui/icons-material/Schedule";
 import TheaterComedyIcon from "@mui/icons-material/TheaterComedy";
 import TheatersIcon from "@mui/icons-material/Theaters";
 import ViewListIcon from "@mui/icons-material/ViewList";
+import { Box, Card, CardActionArea, CardContent, Grid, Typography } from "@mui/material";
 import Head from "next/head";
 import Link from "next/link";
 
 import AdminGuard from "../../src/components/admin/AdminGuard";
 
 const sections = [
+  {
+    title: "Pending Submissions",
+    description: "Approve, merge, or edit shows and theatres members have added.",
+    href: "/admin/pending",
+    icon: <PendingActionsIcon sx={{ fontSize: 40 }} />,
+  },
   {
     title: "Musicals",
     description: "Add, edit, and manage musicals in the database.",
@@ -56,10 +63,10 @@ export default function AdminDashboard() {
         <title>Admin • StageKeeper</title>
       </Head>
       <Box sx={{ maxWidth: 900, mx: "auto", mt: 4, px: 2 }}>
-        <Typography variant="h4" gutterBottom>
+        <Typography gutterBottom variant="h4">
           Admin Dashboard
         </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
+        <Typography color="text.secondary" sx={{ mb: 4 }} variant="body2">
           Manage all StageKeeper data from one place.
         </Typography>
         <Grid container spacing={3}>
@@ -73,10 +80,10 @@ export default function AdminDashboard() {
                 >
                   <CardContent>
                     <Box sx={{ color: "primary.main", mb: 1 }}>{section.icon}</Box>
-                    <Typography variant="h6" gutterBottom>
+                    <Typography gutterBottom variant="h6">
                       {section.title}
                     </Typography>
-                    <Typography variant="body2" color="text.secondary">
+                    <Typography color="text.secondary" variant="body2">
                       {section.description}
                     </Typography>
                   </CardContent>

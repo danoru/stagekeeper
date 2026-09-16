@@ -1,19 +1,22 @@
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import { Box, Button, Divider, Stack, TextField, Typography } from "@mui/material";
-import type { GroupRole, users } from "@prisma/client";
+import type { GroupRole } from "@prisma/client";
 import { useRouter } from "next/router";
 import { useState } from "react";
 
+import type { PublicUser } from "../../data/users";
 import UserAvatar from "../users/UserAvatar";
 
 interface Member {
   user: number;
   role: GroupRole;
-  users: users;
+  users: PublicUser;
 }
 
 interface Group {
   id: number;
   name: string;
+  inviteToken: string;
   members: Member[];
 }
 
@@ -30,6 +33,33 @@ function GroupSettingsPanel({ group, isOwner, viewerId }: Props) {
   const [newMember, setNewMember] = useState("");
   const [memberError, setMemberError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [inviteToken, setInviteToken] = useState(group.inviteToken);
+  const [copied, setCopied] = useState(false);
+
+  const inviteUrl =
+    typeof window === "undefined" ? "" : `${window.location.origin}/groups/join/${inviteToken}`;
+
+  async function copyInvite() {
+    try {
+      await navigator.clipboard.writeText(inviteUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setCopied(false);
+    }
+  }
+
+  async function handleRotateInvite() {
+    setBusy(true);
+    try {
+      const res = await fetch(`/api/groups/${group.id}/invite`, { method: "POST" });
+      if (!res.ok) return;
+      const body = await res.json();
+      setInviteToken(body.inviteToken);
+    } finally {
+      setBusy(false);
+    }
+  }
 
   function refresh() {
     router.replace(router.asPath);
@@ -145,9 +175,9 @@ function GroupSettingsPanel({ group, isOwner, viewerId }: Props) {
             <TextField
               fullWidth
               inputProps={{ maxLength: 60 }}
-              onChange={(e) => setName(e.target.value)}
               size="small"
               value={name}
+              onChange={(e) => setName(e.target.value)}
             />
             <Button
               disabled={busy || !name.trim() || name.trim() === group.name}
@@ -164,6 +194,51 @@ function GroupSettingsPanel({ group, isOwner, viewerId }: Props) {
           )}
         </Box>
       )}
+
+      <Box>
+        <Typography
+          sx={{
+            fontFamily: '"DM Sans", sans-serif',
+            fontSize: "0.62rem",
+            letterSpacing: "0.22em",
+            textTransform: "uppercase",
+            color: "#D4AF55",
+            mb: 1,
+          }}
+        >
+          Invite Link
+        </Typography>
+        <Typography sx={{ fontSize: "0.8rem", color: "rgba(232,220,200,0.5)", mb: 1.5 }}>
+          Anyone with this link can join the group. Share it in your group chat.
+        </Typography>
+        <Box sx={{ display: "flex", gap: 1.5, alignItems: "center" }}>
+          <TextField
+            fullWidth
+            inputProps={{ readOnly: true, onFocus: (e) => e.currentTarget.select() }}
+            size="small"
+            value={inviteUrl}
+          />
+          <Button
+            startIcon={<ContentCopyIcon fontSize="small" />}
+            sx={{ whiteSpace: "nowrap" }}
+            variant="outlined"
+            onClick={copyInvite}
+          >
+            {copied ? "Copied" : "Copy"}
+          </Button>
+        </Box>
+        {isOwner && (
+          <Button
+            disabled={busy}
+            size="small"
+            sx={{ mt: 1, color: "rgba(232,220,200,0.5)" }}
+            variant="text"
+            onClick={handleRotateInvite}
+          >
+            Reset link
+          </Button>
+        )}
+      </Box>
 
       <Box>
         <Typography
@@ -237,9 +312,9 @@ function GroupSettingsPanel({ group, isOwner, viewerId }: Props) {
                   <Button
                     color="error"
                     disabled={busy}
-                    onClick={() => handleRemove(m.users.username)}
                     size="small"
                     variant="text"
+                    onClick={() => handleRemove(m.users.username)}
                   >
                     {isSelf ? "Leave" : "Remove"}
                   </Button>
@@ -250,14 +325,14 @@ function GroupSettingsPanel({ group, isOwner, viewerId }: Props) {
         </Stack>
 
         {isOwner && (
-          <Box component="form" onSubmit={handleAddMember} sx={{ mt: 2 }}>
+          <Box component="form" sx={{ mt: 2 }} onSubmit={handleAddMember}>
             <Box sx={{ display: "flex", gap: 1.5 }}>
               <TextField
                 fullWidth
-                onChange={(e) => setNewMember(e.target.value)}
                 placeholder="Username"
                 size="small"
                 value={newMember}
+                onChange={(e) => setNewMember(e.target.value)}
               />
               <Button disabled={busy || !newMember.trim()} type="submit" variant="outlined">
                 Add
@@ -286,7 +361,7 @@ function GroupSettingsPanel({ group, isOwner, viewerId }: Props) {
           >
             Danger Zone
           </Typography>
-          <Button color="error" disabled={busy} onClick={handleDelete} variant="outlined">
+          <Button color="error" disabled={busy} variant="outlined" onClick={handleDelete}>
             Delete Group
           </Button>
         </Box>

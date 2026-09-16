@@ -1,179 +1,306 @@
-import { Alert, Button, Snackbar, Stack, TextField } from "@mui/material";
+import {
+  Alert,
+  Box,
+  Button,
+  Container,
+  Divider,
+  Snackbar,
+  Stack,
+  TextField,
+  Typography,
+} from "@mui/material";
+import { GetServerSidePropsContext } from "next";
 import Head from "next/head";
-import { useRouter } from "next/router";
 import { getSession } from "next-auth/react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import superjson from "superjson";
 
-function SettingsPage({ session }: any) {
-  const username = session?.user?.username;
-  const router = useRouter();
+import prisma from "../../src/data/db";
+import { PASSWORD_MIN_LENGTH } from "../../src/utils/validation";
 
-  const [userData, setUserData] = useState({
-    username: username,
-    firstName: "",
-    lastName: "",
-    email: "",
-    location: "",
-    website: "",
-    bio: "",
-  });
+interface ProfileFields {
+  firstName: string;
+  lastName: string;
+  email: string;
+  location: string;
+  website: string;
+  bio: string;
+}
 
-  const [loading, setLoading] = useState(true);
+interface Props {
+  username: string;
+  profile: ProfileFields;
+}
+
+const sectionLabelSx = {
+  fontFamily: '"DM Sans", sans-serif',
+  fontSize: "0.62rem",
+  letterSpacing: "0.22em",
+  textTransform: "uppercase",
+  color: "#D4AF55",
+  mb: 2,
+};
+
+function SettingsPage({ username, profile }: Props) {
+  const [userData, setUserData] = useState<ProfileFields>(profile);
   const [saving, setSaving] = useState(false);
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbar, setSnackbar] = useState<{
+    message: string;
+    severity: "success" | "error";
+  } | null>(null);
 
-  useEffect(() => {
-    if (username) {
-      fetch(`/api/user/${username}`)
-        .then((response) => response.json())
-        .then((data) => {
-          setUserData(data);
-          setLoading(false);
-        });
-    }
-  }, [username]);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [changingPassword, setChangingPassword] = useState(false);
 
-  async function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const { id, value } = e.target;
-    setUserData((prevState) => ({
-      ...prevState,
-      [id]: value,
-    }));
+    setUserData((prev) => ({ ...prev, [id]: value }));
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
-
-    const response = await fetch(`/api/user/${username}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(userData),
-    });
-
-    if (response.ok) {
-      setSnackbarMessage("User data updated successfully!");
-      setSnackbarOpen(true);
-      router.reload();
-    } else {
-      console.error("Failed to update user data.");
+    try {
+      const response = await fetch(`/api/user/${username}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(userData),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (response.ok) {
+        setSnackbar({ message: "Profile saved.", severity: "success" });
+      } else {
+        setSnackbar({ message: data.error ?? "Failed to save profile.", severity: "error" });
+      }
+    } finally {
+      setSaving(false);
     }
+  }
 
-    setSaving(false);
+  const passwordMismatch = confirmPassword.length > 0 && confirmPassword !== newPassword;
+  const passwordTooShort = newPassword.length > 0 && newPassword.length < PASSWORD_MIN_LENGTH;
+
+  async function handlePasswordChange(e: React.FormEvent) {
+    e.preventDefault();
+    if (passwordMismatch || passwordTooShort) return;
+    setChangingPassword(true);
+    try {
+      const response = await fetch("/api/user/password", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ currentPassword, newPassword }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (response.ok) {
+        setSnackbar({ message: "Password updated.", severity: "success" });
+        setCurrentPassword("");
+        setNewPassword("");
+        setConfirmPassword("");
+      } else {
+        setSnackbar({ message: data.error ?? "Failed to update password.", severity: "error" });
+      }
+    } finally {
+      setChangingPassword(false);
+    }
   }
 
   return (
-    <div>
+    <Box sx={{ background: "#080C14", minHeight: "100vh" }}>
       <Head>
         <title>Account Settings • StageKeeper</title>
       </Head>
-      <Stack direction="row" sx={{ justifyContent: "center" }}>
-        <form onSubmit={handleSubmit}>
-          <TextField
-            disabled
-            fullWidth
-            id="username"
-            InputLabelProps={{ shrink: true }}
-            label="Username"
-            sx={{ margin: "10px 0" }}
-            value={username}
-            variant="outlined"
-          />
-          <Stack direction="row">
+      <Container maxWidth="sm" sx={{ py: 4 }}>
+        <Stack
+          divider={<Divider sx={{ borderColor: "rgba(212,175,85,0.08)" }} />}
+          spacing={4}
+          sx={{
+            border: "1px solid rgba(212,175,85,0.1)",
+            borderRadius: 1,
+            p: { xs: 2.5, sm: 4 },
+            background: "rgba(212,175,85,0.02)",
+          }}
+        >
+          <Box component="form" onSubmit={handleSubmit}>
+            <Typography sx={sectionLabelSx}>Profile</Typography>
             <TextField
-              id="firstName"
+              disabled
+              fullWidth
+              id="username"
               InputLabelProps={{ shrink: true }}
-              label="Given Name"
-              sx={{ marginBottom: "10px" }}
-              value={userData.firstName}
-              variant="outlined"
+              label="Username"
+              margin="dense"
+              value={username}
+            />
+            <Stack direction={{ xs: "column", sm: "row" }} spacing={{ xs: 0, sm: 1.5 }}>
+              <TextField
+                fullWidth
+                id="firstName"
+                InputLabelProps={{ shrink: true }}
+                label="Given Name"
+                margin="dense"
+                value={userData.firstName}
+                onChange={handleChange}
+              />
+              <TextField
+                fullWidth
+                id="lastName"
+                InputLabelProps={{ shrink: true }}
+                label="Family Name"
+                margin="dense"
+                value={userData.lastName}
+                onChange={handleChange}
+              />
+            </Stack>
+            <TextField
+              fullWidth
+              required
+              id="email"
+              InputLabelProps={{ shrink: true }}
+              label="Email Address"
+              margin="dense"
+              type="email"
+              value={userData.email}
               onChange={handleChange}
             />
+            <Stack direction={{ xs: "column", sm: "row" }} spacing={{ xs: 0, sm: 1.5 }}>
+              <TextField
+                fullWidth
+                id="location"
+                InputLabelProps={{ shrink: true }}
+                label="Location"
+                margin="dense"
+                value={userData.location}
+                onChange={handleChange}
+              />
+              <TextField
+                fullWidth
+                id="website"
+                InputLabelProps={{ shrink: true }}
+                label="Website"
+                margin="dense"
+                placeholder="https://"
+                value={userData.website}
+                onChange={handleChange}
+              />
+            </Stack>
             <TextField
-              id="lastName"
+              fullWidth
+              multiline
+              id="bio"
               InputLabelProps={{ shrink: true }}
-              label="Family Name"
-              sx={{ marginBottom: "10px" }}
-              value={userData.lastName}
-              variant="outlined"
+              label="Bio"
+              margin="dense"
+              rows={3}
+              value={userData.bio}
               onChange={handleChange}
             />
-          </Stack>
-          <TextField
-            fullWidth
-            id="email"
-            InputLabelProps={{ shrink: true }}
-            label="Email Address"
-            sx={{ marginBottom: "10px" }}
-            value={userData.email}
-            variant="outlined"
-            onChange={handleChange}
-          />
-          <Stack direction="row">
+            <Button disabled={saving} sx={{ mt: 2 }} type="submit" variant="contained">
+              {saving ? "Saving…" : "Save Changes"}
+            </Button>
+          </Box>
+
+          <Box component="form" onSubmit={handlePasswordChange}>
+            <Typography sx={sectionLabelSx}>Change Password</Typography>
             <TextField
-              id="location"
-              InputLabelProps={{ shrink: true }}
-              label="Location"
-              sx={{ marginBottom: "10px" }}
-              value={userData.location}
-              variant="outlined"
-              onChange={handleChange}
+              fullWidth
+              required
+              autoComplete="current-password"
+              label="Current password"
+              margin="dense"
+              type="password"
+              value={currentPassword}
+              onChange={(e) => setCurrentPassword(e.target.value)}
             />
             <TextField
-              id="website"
-              InputLabelProps={{ shrink: true }}
-              label="Website"
-              sx={{ marginBottom: "10px" }}
-              value={userData.website}
-              variant="outlined"
-              onChange={handleChange}
+              fullWidth
+              required
+              autoComplete="new-password"
+              error={passwordTooShort}
+              helperText={passwordTooShort ? `At least ${PASSWORD_MIN_LENGTH} characters.` : " "}
+              label="New password"
+              margin="dense"
+              type="password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
             />
-          </Stack>
-          <TextField
-            fullWidth
-            multiline
-            id="bio"
-            InputLabelProps={{ shrink: true }}
-            label="Bio"
-            rows={4}
-            sx={{ marginBottom: "10px" }}
-            value={userData.bio}
-            variant="outlined"
-            onChange={handleChange}
-          />
-          <Button disabled={saving} type="submit" variant="contained">
-            {saving ? "Saving..." : "Save Changes"}
-          </Button>
-        </form>
-      </Stack>
-      <Snackbar autoHideDuration={6000} open={snackbarOpen} onClose={() => setSnackbarOpen(false)}>
-        <Alert severity="success" sx={{ width: "100%" }} onClose={() => setSnackbarOpen(false)}>
-          {snackbarMessage}
+            <TextField
+              fullWidth
+              required
+              autoComplete="new-password"
+              error={passwordMismatch}
+              helperText={passwordMismatch ? "Passwords must match." : " "}
+              label="Confirm new password"
+              margin="dense"
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+            />
+            <Button
+              disabled={
+                changingPassword ||
+                !currentPassword ||
+                !newPassword ||
+                passwordMismatch ||
+                passwordTooShort
+              }
+              sx={{ mt: 1 }}
+              type="submit"
+              variant="outlined"
+            >
+              {changingPassword ? "Updating…" : "Update Password"}
+            </Button>
+          </Box>
+        </Stack>
+      </Container>
+      <Snackbar autoHideDuration={6000} open={snackbar !== null} onClose={() => setSnackbar(null)}>
+        <Alert
+          severity={snackbar?.severity ?? "success"}
+          sx={{ width: "100%" }}
+          onClose={() => setSnackbar(null)}
+        >
+          {snackbar?.message}
         </Alert>
       </Snackbar>
-    </div>
+    </Box>
   );
 }
 
-export async function getServerSideProps(context: any) {
+export async function getServerSideProps(context: GetServerSidePropsContext) {
   const session = await getSession(context);
-
   if (!session) {
-    return {
-      redirect: {
-        destination: "/login",
-        permanent: false,
-      },
-    };
+    return { redirect: { destination: "/login?callbackUrl=/settings", permanent: false } };
+  }
+
+  const user = await prisma.users.findUnique({
+    where: { id: Number(session.user.id) },
+    select: {
+      username: true,
+      firstName: true,
+      lastName: true,
+      email: true,
+      location: true,
+      website: true,
+      bio: true,
+    },
+  });
+  if (!user) {
+    return { redirect: { destination: "/login", permanent: false } };
   }
 
   return {
-    props: {
-      session,
-    },
+    props: superjson.serialize({
+      username: user.username,
+      profile: {
+        firstName: user.firstName ?? "",
+        lastName: user.lastName ?? "",
+        email: user.email,
+        location: user.location ?? "",
+        website: user.website ?? "",
+        bio: user.bio ?? "",
+      },
+    }).json,
   };
 }
 

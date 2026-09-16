@@ -1,8 +1,8 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth";
 
-import { authOptions } from "../auth/[...nextauth]";
 import prisma from "../../../src/data/db";
+import { authOptions } from "../auth/[...nextauth]";
 
 async function requireAdmin(req: NextApiRequest, res: NextApiResponse) {
   const session = await getServerSession(req, res, authOptions);
@@ -25,13 +25,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (req.method === "POST") {
     const { title, writtenBy, premiere, duration, playbill } = req.body;
     if (!title) return res.status(400).json({ error: "Title is required." });
-    if (!premiere) return res.status(400).json({ error: "Premiere date is required." });
     try {
       const play = await prisma.plays.create({
         data: {
           title,
           writtenBy: writtenBy || "",
-          premiere: new Date(premiere),
+          premiere: premiere ? new Date(premiere) : null,
           duration: duration ? Number(duration) : null,
           playbill: playbill || "https://picsum.photos/649/1024",
         },
@@ -53,9 +52,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         data: {
           title,
           writtenBy: writtenBy || "",
-          premiere: new Date(premiere),
+          premiere: premiere ? new Date(premiere) : null,
           duration: duration ? Number(duration) : null,
           playbill: playbill || "https://picsum.photos/649/1024",
+          // An admin edit counts as review.
+          status: "APPROVED",
         },
       });
       return res.status(200).json(play);

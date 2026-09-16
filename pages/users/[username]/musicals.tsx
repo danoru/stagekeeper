@@ -1,11 +1,12 @@
 import { attendance, musicals, performances, theatres, users } from "@prisma/client";
 import moment from "moment";
+import { GetServerSidePropsContext } from "next";
 import superjson from "superjson";
 
 import ShowList from "../../../src/components/shows/ShowList";
 import ProfilePageWrapper from "../../../src/components/users/ProfilePageWrapper";
 import { getUserMusicalAttendance } from "../../../src/data/musicals";
-import { getUsers, findUserByUsername } from "../../../src/data/users";
+import { findUserByUsername } from "../../../src/data/users";
 
 interface Props {
   user: users;
@@ -14,10 +15,6 @@ interface Props {
     musicals: musicals | null;
     theatres: theatres | null;
   })[];
-}
-
-interface Params {
-  params: { username: string };
 }
 
 function UserMusicalsList({ attendance, user }: Props) {
@@ -53,22 +50,13 @@ function UserMusicalsList({ attendance, user }: Props) {
   );
 }
 
-export async function getStaticPaths() {
-  const users = await getUsers();
-  return {
-    paths: users.map((user) => ({ params: { username: user.username } })),
-    fallback: "blocking",
-  };
-}
-
-export async function getStaticProps({ params }: Params) {
-  const { username } = params;
+export async function getServerSideProps({ params }: GetServerSidePropsContext) {
+  const username = String(params?.username);
   const user = await findUserByUsername(username);
   if (!user) return { notFound: true };
   const attendance = await getUserMusicalAttendance(user.id);
   return {
     props: superjson.serialize({ attendance, user }).json,
-    revalidate: 1800,
   };
 }
 

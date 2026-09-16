@@ -71,5 +71,6 @@ dist/
 # Local
 # =====================
 .claude/
+docs/
 docs/local/
 *.local.md

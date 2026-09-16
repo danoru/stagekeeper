@@ -1,3 +1,4 @@
+import DownloadIcon from "@mui/icons-material/Download";
 import LibraryMusicIcon from "@mui/icons-material/LibraryMusic";
 import PendingActionsIcon from "@mui/icons-material/PendingActions";
 import PeopleIcon from "@mui/icons-material/People";
@@ -47,6 +48,12 @@ const sections = [
     description: "Add shows to a season's programming schedule.",
     href: "/admin/programming",
     icon: <ScheduleIcon sx={{ fontSize: 40 }} />,
+  },
+  {
+    title: "Import Seasons",
+    description: "Pull each theatre's season page and review shows before adding them.",
+    href: "/admin/import",
+    icon: <DownloadIcon sx={{ fontSize: 40 }} />,
   },
   {
     title: "Users",

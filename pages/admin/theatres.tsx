@@ -25,6 +25,7 @@ const EMPTY_FORM = {
   location: "",
   address: "",
   link: "",
+  seasonUrl: "",
   image: "",
 };
 
@@ -57,6 +58,7 @@ export default function AdminTheatresPage() {
       location: theatre.location || "",
       address: theatre.address || "",
       link: theatre.link || "",
+      seasonUrl: theatre.seasonUrl || "",
       image: theatre.image || "",
     });
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -158,6 +160,14 @@ export default function AdminTheatresPage() {
                     size="small"
                     value={form.link}
                     onChange={(e) => setForm({ ...form, link: e.target.value })}
+                  />
+                  <TextField
+                    fullWidth
+                    helperText="Page the season importer reads; defaults to the website URL."
+                    label="Season page URL"
+                    size="small"
+                    value={form.seasonUrl}
+                    onChange={(e) => setForm({ ...form, seasonUrl: e.target.value })}
                   />
                   <TextField
                     fullWidth

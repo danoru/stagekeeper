@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth";
 
@@ -23,7 +24,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   if (req.method === "POST") {
-    const { name, location, address, link, image } = req.body;
+    const { name, location, address, link, image, seasonUrl } = req.body;
     if (!name) return res.status(400).json({ error: "Name is required." });
     if (!location) return res.status(400).json({ error: "Location is required." });
     try {
@@ -33,6 +34,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           location,
           address: address || null,
           link: link || null,
+          seasonUrl: seasonUrl || null,
           image: image || "https://picsum.photos/649/1024",
         },
       });
@@ -43,7 +45,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   if (req.method === "PUT") {
-    const { id, name, location, address, link, image } = req.body;
+    const { id, name, location, address, link, image, seasonUrl, scrapeConfig } = req.body;
     if (!id) return res.status(400).json({ error: "ID is required." });
     try {
       const theatre = await prisma.theatres.update({
@@ -53,6 +55,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           location,
           address: address || null,
           link: link || null,
+          seasonUrl: seasonUrl || null,
+          ...(scrapeConfig !== undefined ? { scrapeConfig: scrapeConfig ?? Prisma.DbNull } : {}),
           image: image || "https://picsum.photos/649/1024",
           // An admin edit counts as review.
           status: "APPROVED",
@@ -64,6 +68,24 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
   }
 
-  res.setHeader("Allow", ["GET", "POST", "PUT"]);
+  // PATCH { id, seasonUrl?, scrapeConfig? } — importer settings only.
+  if (req.method === "PATCH") {
+    const { id, seasonUrl, scrapeConfig } = req.body;
+    if (!id) return res.status(400).json({ error: "ID is required." });
+    try {
+      const theatre = await prisma.theatres.update({
+        where: { id: Number(id) },
+        data: {
+          ...(seasonUrl !== undefined ? { seasonUrl: seasonUrl || null } : {}),
+          ...(scrapeConfig !== undefined ? { scrapeConfig: scrapeConfig ?? Prisma.DbNull } : {}),
+        },
+      });
+      return res.status(200).json(theatre);
+    } catch (e) {
+      return res.status(500).json({ error: "Failed to update theatre." });
+    }
+  }
+
+  res.setHeader("Allow", ["GET", "POST", "PUT", "PATCH"]);
   return res.status(405).json({ error: `Method ${req.method} not allowed.` });
 }

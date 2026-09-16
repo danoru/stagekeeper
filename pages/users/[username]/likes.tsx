@@ -2,7 +2,7 @@ import { likedShows, musicals, plays, users } from "@prisma/client";
 import { GetServerSidePropsContext } from "next";
 import superjson from "superjson";
 
-import ShowList from "../../../src/components/shows/ShowList";
+import ShowList, { type ShowListItem } from "../../../src/components/shows/ShowList";
 import ProfilePageWrapper from "../../../src/components/users/ProfilePageWrapper";
 import { getUserLikes } from "../../../src/data/users";
 
@@ -13,7 +13,10 @@ interface Props {
 }
 
 function UserLikes({ user }: Props) {
-  const shows = user.likedShows.map((item) => item.musicals || item.plays).filter(Boolean);
+  const shows: ShowListItem[] = user.likedShows.flatMap((item) => {
+    const show = item.type === "MUSICAL" ? item.musicals : item.plays;
+    return show ? [{ ...show, type: item.type }] : [];
+  });
 
   return (
     <ProfilePageWrapper title={`${user.username}'s Likes • StageKeeper`} username={user.username}>

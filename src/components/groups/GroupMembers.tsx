@@ -1,13 +1,13 @@
 import { Box, Link, Stack, Typography } from "@mui/material";
 import type { GroupRole } from "@prisma/client";
 
-import type { PublicUser } from "../../data/users";
+import type { FeedUser } from "../../data/performances";
 import UserAvatar from "../users/UserAvatar";
 
 interface Member {
   user: number;
   role: GroupRole;
-  users: PublicUser;
+  users: FeedUser;
 }
 
 interface Props {

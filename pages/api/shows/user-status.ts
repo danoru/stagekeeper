@@ -1,8 +1,8 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth";
 
-import { authOptions } from "../auth/[...nextauth]";
 import prisma from "../../../src/data/db";
+import { authOptions } from "../auth/[...nextauth]";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "GET") {
@@ -28,26 +28,29 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           user: userId,
           OR: [showFilter, { performances: showFilter }],
         },
-        include: { performances: true },
+        select: {
+          id: true,
+          user: true,
+          musical: true,
+          play: true,
+          seenDate: true,
+          going: true,
+          performances: { select: { musical: true, play: true } },
+        },
       }),
-      prisma.likedShows.findMany({ where: { user: userId, ...showFilter } }),
-      prisma.watchlist.findMany({ where: { user: userId, ...showFilter } }),
+      prisma.likedShows.findMany({
+        where: { user: userId, ...showFilter },
+        select: { id: true, user: true, musical: true, play: true },
+      }),
+      prisma.watchlist.findMany({
+        where: { user: userId, ...showFilter },
+        select: { id: true, user: true, musical: true, play: true },
+      }),
     ]);
 
     res.setHeader("Cache-Control", "private, no-store");
     return res.status(200).json({ attendance, likedShows, watchlist });
   }
 
-  // Fallback: full history (no current callers, kept for safety).
-  const [attendance, likedShows, watchlist] = await Promise.all([
-    prisma.attendance.findMany({
-      where: { user: userId },
-      include: { performances: true },
-    }),
-    prisma.likedShows.findMany({ where: { user: userId } }),
-    prisma.watchlist.findMany({ where: { user: userId } }),
-  ]);
-
-  res.setHeader("Cache-Control", "private, no-store");
-  return res.status(200).json({ attendance, likedShows, watchlist });
+  return res.status(400).json({ error: "musicalId or playId is required." });
 }

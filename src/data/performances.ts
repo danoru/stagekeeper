@@ -1,7 +1,6 @@
-import type { musicals, PerformanceType, plays, Prisma, theatres } from "@prisma/client";
+import type { PerformanceType, Prisma } from "@prisma/client";
 
 import prisma from "./db";
-import { publicUserSelect } from "./users";
 
 export const PERFORMANCE_LIST = [
   {
@@ -284,15 +283,52 @@ export async function getPerformances() {
 // unified show/theatre/seenDate columns, then normalized so page code can read
 // `row.performances.{type,startTime,musicals,plays,theatres}` regardless of which path
 // created the row.
+// Only what feed cards, the activity list and the review charts actually read.
+export const showSummarySelect = {
+  id: true,
+  title: true,
+  playbill: true,
+  premiere: true,
+  duration: true,
+} satisfies Prisma.musicalsSelect & Prisma.playsSelect;
+
+export const theatreSummarySelect = {
+  id: true,
+  name: true,
+  location: true,
+} satisfies Prisma.theatresSelect;
+
+export const feedUserSelect = {
+  id: true,
+  username: true,
+  image: true,
+} satisfies Prisma.usersSelect;
+
 export const attendanceInclude = {
-  performances: { include: { musicals: true, plays: true, theatres: true } },
-  musicals: true,
-  plays: true,
-  theatres: true,
-  users: { select: publicUserSelect },
+  performances: {
+    select: {
+      id: true,
+      type: true,
+      startTime: true,
+      endTime: true,
+      musical: true,
+      play: true,
+      theatre: true,
+      musicals: { select: showSummarySelect },
+      plays: { select: showSummarySelect },
+      theatres: { select: theatreSummarySelect },
+    },
+  },
+  musicals: { select: showSummarySelect },
+  plays: { select: showSummarySelect },
+  theatres: { select: theatreSummarySelect },
+  users: { select: feedUserSelect },
 } satisfies Prisma.attendanceInclude;
 
 type RawAttendance = Prisma.attendanceGetPayload<{ include: typeof attendanceInclude }>;
+export type ShowSummary = Prisma.musicalsGetPayload<{ select: typeof showSummarySelect }>;
+export type TheatreSummary = Prisma.theatresGetPayload<{ select: typeof theatreSummarySelect }>;
+export type FeedUser = Prisma.usersGetPayload<{ select: typeof feedUserSelect }>;
 
 export type NormalizedPerformance = {
   id: number | null;
@@ -302,10 +338,9 @@ export type NormalizedPerformance = {
   musical: number | null;
   play: number | null;
   theatre: number | null;
-  createdAt: Date;
-  musicals: musicals | null;
-  plays: plays | null;
-  theatres: theatres;
+  musicals: ShowSummary | null;
+  plays: ShowSummary | null;
+  theatres: TheatreSummary;
 };
 
 export type NormalizedAttendance = Omit<RawAttendance, "performances"> & {
@@ -313,16 +348,7 @@ export type NormalizedAttendance = Omit<RawAttendance, "performances"> & {
   isUpcoming: boolean;
 };
 
-const UNKNOWN_THEATRE: theatres = {
-  id: 0,
-  name: "Unknown theatre",
-  link: null,
-  location: "",
-  image: "",
-  address: null,
-  status: "APPROVED",
-  createdBy: null,
-};
+const UNKNOWN_THEATRE: TheatreSummary = { id: 0, name: "Unknown theatre", location: "" };
 
 function startOfToday() {
   const d = new Date();
@@ -358,7 +384,6 @@ export function normalizeAttendance(row: RawAttendance): NormalizedAttendance | 
       musical: row.musical,
       play: row.play,
       theatre: row.theatre,
-      createdAt: row.createdAt,
       musicals: type === "MUSICAL" ? row.musicals : null,
       plays: type === "PLAY" ? row.plays : null,
       theatres: row.theatres ?? UNKNOWN_THEATRE,
@@ -440,18 +465,36 @@ export async function getUserUpcoming(id: number) {
 }
 
 export async function getUserAttendanceByYear(year: number | null, id: number) {
+  const today = startOfToday();
+  // Stats need a date, so undated manual logs are excluded at the DB rather than after load.
+  const dated: Prisma.attendanceWhereInput = year
+    ? {
+        OR: [
+          {
+            seenDate: {
+              gte: new Date(Date.UTC(year, 0, 1)),
+              lt: new Date(Date.UTC(year + 1, 0, 1)),
+            },
+          },
+          {
+            seenDate: null,
+            performances: {
+              startTime: {
+                gte: new Date(Date.UTC(year, 0, 1)),
+                lt: new Date(Date.UTC(year + 1, 0, 1)),
+              },
+            },
+          },
+        ],
+      }
+    : { OR: [{ seenDate: { not: null } }, { performance: { not: null } }] };
+
   const rows = await prisma.attendance.findMany({
-    where: { user: id },
+    where: {
+      user: id,
+      AND: [dated, { OR: [{ going: false }, { seenDate: { lt: today } }] }],
+    },
     include: attendanceInclude,
   });
-  const today = startOfToday();
-  return normalizeAttendanceRows(rows)
-    .filter((row) => {
-      if (row.isUpcoming) return false;
-      if (row.performances.startTime.getTime() === 0) return false;
-      if (year === null) return true;
-      return row.performances.startTime.getUTCFullYear() === year;
-    })
-    .filter((row) => row.performances.startTime <= today || !row.going)
-    .sort(byStartTimeAsc);
+  return normalizeAttendanceRows(rows).sort(byStartTimeAsc);
 }

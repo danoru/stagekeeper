@@ -1,20 +1,18 @@
 import { Box, Container, Pagination, Typography } from "@mui/material";
-import { musicals, programming, seasons, theatres } from "@prisma/client";
 import Head from "next/head";
 import { useEffect, useMemo, useState } from "react";
 import superjson from "superjson";
 
 import MusicalCard from "../../src/components/cards/ShowCard";
+import type { ShowListItem } from "../../src/components/shows/ShowList";
 import UpcomingShowList from "../../src/components/shows/UpcomingShowList";
 import SearchBar from "../../src/components/ui/SearchBar";
-import { getMusicals, getUpcomingMusicals } from "../../src/data/musicals";
+import { getMusicals } from "../../src/data/musicals";
+import { getUpcomingRuns, type UpcomingRun } from "../../src/data/shows";
 
 interface Props {
-  musicals: musicals[];
-  upcomingPerformances: (programming & {
-    musicals: musicals;
-    seasons: seasons & { theatres: theatres };
-  })[];
+  musicals: Omit<ShowListItem, "type">[];
+  upcomingPerformances: UpcomingRun[];
 }
 
 const itemsPerPage = 8;
@@ -79,11 +77,7 @@ function MusicalsPage({ musicals, upcomingPerformances }: Props) {
         </Box>
 
         <Box sx={{ mb: 3 }}>
-          <SearchBar
-            placeholder="Search musicals…"
-            value={search}
-            onChange={setSearch}
-          />
+          <SearchBar placeholder="Search musicals…" value={search} onChange={setSearch} />
         </Box>
 
         {visible.length === 0 ? (
@@ -151,7 +145,7 @@ function MusicalsPage({ musicals, upcomingPerformances }: Props) {
 export async function getStaticProps() {
   const [musicals, upcomingPerformances] = await Promise.all([
     getMusicals(),
-    getUpcomingMusicals(),
+    getUpcomingRuns("MUSICAL"),
   ]);
 
   return {

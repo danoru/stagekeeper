@@ -1,41 +1,18 @@
-import { attendance, musicals, performances, theatres, users } from "@prisma/client";
-import moment from "moment";
+import { users } from "@prisma/client";
 import { GetServerSidePropsContext } from "next";
 import superjson from "superjson";
 
-import ShowList from "../../../src/components/shows/ShowList";
+import ShowList, { type ShowListItem } from "../../../src/components/shows/ShowList";
 import ProfilePageWrapper from "../../../src/components/users/ProfilePageWrapper";
-import { getUserMusicalAttendance } from "../../../src/data/musicals";
+import { getUserSeenShows } from "../../../src/data/shows";
 import { findUserByUsername } from "../../../src/data/users";
 
 interface Props {
+  shows: ShowListItem[];
   user: users;
-  attendance: (attendance & {
-    performances: (performances & { musicals: musicals | null; theatres: theatres }) | null;
-    musicals: musicals | null;
-    theatres: theatres | null;
-  })[];
 }
 
-function UserMusicalsList({ attendance, user }: Props) {
-  const currentDate = moment();
-  const uniqueTitles = new Set<string>();
-  const shows: musicals[] = [];
-
-  for (const a of attendance) {
-    const musical = a.performances?.musicals ?? a.musicals;
-    if (!musical) continue;
-    const date = a.performances?.startTime
-      ? moment(a.performances.startTime)
-      : a.seenDate
-        ? moment(a.seenDate)
-        : null;
-    if (date && date.isAfter(currentDate)) continue;
-    if (uniqueTitles.has(musical.title)) continue;
-    uniqueTitles.add(musical.title);
-    shows.push(musical);
-  }
-
+function UserMusicalsList({ shows, user }: Props) {
   return (
     <ProfilePageWrapper
       title={`${user.username}'s Musicals • StageKeeper`}
@@ -54,9 +31,9 @@ export async function getServerSideProps({ params }: GetServerSidePropsContext) 
   const username = String(params?.username);
   const user = await findUserByUsername(username);
   if (!user) return { notFound: true };
-  const attendance = await getUserMusicalAttendance(user.id);
+  const shows = await getUserSeenShows(user.id, "MUSICAL");
   return {
-    props: superjson.serialize({ attendance, user }).json,
+    props: superjson.serialize({ shows, user }).json,
   };
 }
 

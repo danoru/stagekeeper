@@ -4,13 +4,13 @@ import type { GroupRole } from "@prisma/client";
 import { useRouter } from "next/router";
 import { useState } from "react";
 
-import type { PublicUser } from "../../data/users";
+import type { FeedUser } from "../../data/performances";
 import UserAvatar from "../users/UserAvatar";
 
 interface Member {
   user: number;
   role: GroupRole;
-  users: PublicUser;
+  users: FeedUser;
 }
 
 interface Group {

@@ -1,10 +1,22 @@
 import { randomUUID } from "crypto";
 
-import { Availability, GroupRole, PlanStatus } from "@prisma/client";
+import { Availability, GroupRole, PlanStatus, type Prisma } from "@prisma/client";
 
 import prisma from "./db";
-import { attendanceInclude, normalizeAttendanceRows } from "./performances";
-import { publicUserSelect } from "./users";
+import {
+  attendanceInclude,
+  feedUserSelect,
+  normalizeAttendanceRows,
+  showSummarySelect,
+  theatreSummarySelect,
+} from "./performances";
+
+// A programming run with just enough of its show and venue to render a card or picker row.
+const programmingSummaryInclude = {
+  musicals: { select: showSummarySelect },
+  plays: { select: showSummarySelect },
+  seasons: { select: { id: true, name: true, theatres: { select: theatreSummarySelect } } },
+} satisfies Prisma.programmingInclude;
 
 export async function getUserGroups(userId: number) {
   const memberships = await prisma.groupMembership.findMany({
@@ -24,7 +36,7 @@ export async function getGroupById(groupId: number) {
     where: { id: groupId },
     include: {
       members: {
-        include: { users: { select: publicUserSelect } },
+        select: { user: true, role: true, joinedAt: true, users: { select: feedUserSelect } },
         orderBy: [{ role: "asc" }, { joinedAt: "asc" }],
       },
     },
@@ -110,10 +122,13 @@ export async function getGroupWatchlistOverlap(groupId: number) {
 
   const rows = await prisma.watchlist.findMany({
     where: { user: { in: ids } },
-    include: {
-      musicals: true,
-      plays: true,
-      users: { select: { id: true, username: true, image: true } },
+    select: {
+      type: true,
+      musical: true,
+      play: true,
+      musicals: { select: { title: true, playbill: true } },
+      plays: { select: { title: true, playbill: true } },
+      users: { select: feedUserSelect },
     },
     orderBy: { createdAt: "desc" },
   });
@@ -160,7 +175,7 @@ export async function getGroupWatchlistProgramming(groupId: number) {
 
   const watchlistRows = await prisma.watchlist.findMany({
     where: { user: { in: ids } },
-    include: { users: { select: { id: true, username: true, image: true } } },
+    select: { type: true, musical: true, play: true, users: { select: feedUserSelect } },
   });
   if (watchlistRows.length === 0) return [];
 
@@ -205,22 +220,14 @@ export async function getGroupWatchlistProgramming(groupId: number) {
       ? Promise.resolve([])
       : prisma.programming.findMany({
           where: { type: "MUSICAL", musical: { in: musicalIds }, ...dateWindow },
-          include: {
-            musicals: true,
-            plays: true,
-            seasons: { include: { theatres: true } },
-          },
+          include: programmingSummaryInclude,
           orderBy: { startDate: "asc" },
         }),
     playIds.length === 0
       ? Promise.resolve([])
       : prisma.programming.findMany({
           where: { type: "PLAY", play: { in: playIds }, ...dateWindow },
-          include: {
-            musicals: true,
-            plays: true,
-            seasons: { include: { theatres: true } },
-          },
+          include: programmingSummaryInclude,
           orderBy: { startDate: "asc" },
         }),
   ]);
@@ -236,19 +243,15 @@ export async function getGroupWatchlistProgramming(groupId: number) {
 
 const PLAN_INCLUDE = {
   programmings: {
-    include: {
-      musicals: true,
-      plays: true,
-      seasons: { include: { theatres: true } },
-    },
+    include: programmingSummaryInclude,
   },
   users: { select: { id: true, username: true, image: true } },
   selected: true,
   dates: {
     include: {
-      users: { select: { id: true, username: true, image: true } },
+      users: { select: feedUserSelect },
       availability: {
-        include: { users: { select: { id: true, username: true, image: true } } },
+        include: { users: { select: feedUserSelect } },
       },
     },
     orderBy: { startTime: "asc" as const },
@@ -471,13 +474,7 @@ export async function getGroupActivityFeed(
   const [attendance, plans] = await Promise.all([
     prisma.attendance.findMany({
       where: { user: { in: memberIds } },
-      include: {
-        performances: { include: { musicals: true, plays: true, theatres: true } },
-        musicals: true,
-        plays: true,
-        theatres: true,
-        users: { select: { id: true, username: true } },
-      },
+      include: attendanceInclude,
       orderBy: { createdAt: "desc" },
       take,
     }),
@@ -486,11 +483,7 @@ export async function getGroupActivityFeed(
       include: {
         groups: true,
         programmings: {
-          include: {
-            musicals: true,
-            plays: true,
-            seasons: { include: { theatres: true } },
-          },
+          include: programmingSummaryInclude,
         },
         selected: true,
         users: { select: { id: true, username: true } },
@@ -583,11 +576,7 @@ export async function getUpcomingProgrammingForPicker(take = 100) {
         { startDate: { lte: limit, gte: now } },
       ],
     },
-    include: {
-      musicals: true,
-      plays: true,
-      seasons: { include: { theatres: true } },
-    },
+    include: programmingSummaryInclude,
     orderBy: { startDate: "asc" },
     take,
   });

@@ -113,11 +113,11 @@ export const THEATRES_LIST = [
   },
 ];
 
+// Card-ready list for /theatres and static-path generation.
 export async function getTheatres() {
   const theatres = await prisma.theatres.findMany({
-    orderBy: {
-      name: "asc",
-    },
+    select: { id: true, name: true, image: true },
+    orderBy: { name: "asc" },
   });
   return theatres;
 }
@@ -155,9 +155,13 @@ export async function getCurrentSeason(theatreId: number) {
     },
     include: {
       programming: {
-        include: {
-          musicals: true,
-          plays: true,
+        select: {
+          id: true,
+          type: true,
+          startDate: true,
+          endDate: true,
+          musicals: { select: { title: true, playbill: true } },
+          plays: { select: { title: true, playbill: true } },
         },
       },
     },

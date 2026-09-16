@@ -1,27 +1,32 @@
 import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
-import type { musicals, plays, programming } from "@prisma/client";
+import type { PerformanceType } from "@prisma/client";
 
 import ShowCard from "../cards/ShowCard";
 
+export interface ShowListItem {
+  id: number;
+  title: string;
+  playbill: string;
+  type: PerformanceType;
+}
+
+export function showKey(type: PerformanceType, id: number) {
+  return `${type}-${id}`;
+}
+
 interface Props {
-  shows: (musicals | plays)[];
+  shows: ShowListItem[];
   header: string;
   style?: string;
-  upcomingPerformances?: (programming & {
-    musicals?: musicals;
-    plays?: plays;
-  })[];
+  /** `showKey(...)` values for shows with a run on now or soon; they get a "Soon" badge. */
+  upcomingShowKeys?: string[];
   emptyMessage?: string;
 }
 
-function ShowList({ shows, header, upcomingPerformances, emptyMessage }: Props) {
-  const hasUpcomingPerformance = (showId: number) => {
-    return upcomingPerformances?.some(
-      (performance) => performance.musicals?.id === showId || performance.plays?.id === showId
-    );
-  };
+function ShowList({ shows, header, upcomingShowKeys, emptyMessage }: Props) {
+  const upcoming = new Set(upcomingShowKeys ?? []);
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
@@ -82,13 +87,12 @@ function ShowList({ shows, header, upcomingPerformances, emptyMessage }: Props) 
 
       {/* Cards */}
       <Box sx={{ display: "flex", flexWrap: "wrap", justifyContent: "center" }}>
-        {shows?.map((show, i) => {
-          if (!show) return null;
-          const showType = "musicBy" in show ? "musicals" : "plays";
+        {shows.map((show) => {
+          const showType = show.type === "MUSICAL" ? "musicals" : "plays";
           return (
             <ShowCard
-              key={`card-${i}`}
-              hasUpcomingPerformance={hasUpcomingPerformance(show.id)}
+              key={showKey(show.type, show.id)}
+              hasUpcomingPerformance={upcoming.has(showKey(show.type, show.id))}
               image={show.playbill}
               link={`/${showType}/${show.title.replace(/\s+/g, "-").toLowerCase()}`}
               name={show.title}

@@ -1,23 +1,19 @@
-import { musicals, plays, programming, users, watchlist } from "@prisma/client";
+import { users } from "@prisma/client";
 import { GetServerSidePropsContext } from "next";
 import superjson from "superjson";
 
-import ShowList from "../../../src/components/shows/ShowList";
+import ShowList, { type ShowListItem } from "../../../src/components/shows/ShowList";
 import ProfilePageWrapper from "../../../src/components/users/ProfilePageWrapper";
-import { getUpcomingPerformances, getWatchlist } from "../../../src/data/shows";
+import { getUpcomingShowKeys, getWatchlist } from "../../../src/data/shows";
 import { findUserByUsername } from "../../../src/data/users";
 
 interface Props {
-  upcomingPerformances: (programming & { musicals: musicals; plays: plays })[];
+  upcomingShowKeys: string[];
   user: users;
-  watchlist: (watchlist & { musicals: musicals; plays: plays })[];
+  watchlist: ShowListItem[];
 }
 
-function UserWatchlist({ watchlist, user, upcomingPerformances }: Props) {
-  const shows = watchlist
-    .map((show) => (show.type === "MUSICAL" ? show.musicals : show.plays))
-    .filter(Boolean);
-
+function UserWatchlist({ watchlist, user, upcomingShowKeys }: Props) {
   return (
     <ProfilePageWrapper
       title={`${user.username}'s Watchlist • StageKeeper`}
@@ -26,8 +22,8 @@ function UserWatchlist({ watchlist, user, upcomingPerformances }: Props) {
       <ShowList
         emptyMessage="Nothing on the watchlist yet."
         header={`${user.username}'s Watchlist`}
-        shows={shows}
-        upcomingPerformances={upcomingPerformances}
+        shows={watchlist}
+        upcomingShowKeys={upcomingShowKeys}
       />
     </ProfilePageWrapper>
   );
@@ -37,12 +33,12 @@ export async function getServerSideProps({ params }: GetServerSidePropsContext) 
   const username = String(params?.username);
   const user = await findUserByUsername(username);
   if (!user) return { notFound: true };
-  const [watchlist, upcomingPerformances] = await Promise.all([
+  const [watchlist, upcomingShowKeys] = await Promise.all([
     getWatchlist(user.id),
-    getUpcomingPerformances(),
+    getUpcomingShowKeys(),
   ]);
   return {
-    props: superjson.serialize({ watchlist, upcomingPerformances, user }).json,
+    props: superjson.serialize({ watchlist, upcomingShowKeys, user }).json,
   };
 }
 

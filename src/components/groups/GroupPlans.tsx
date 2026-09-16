@@ -4,14 +4,12 @@ import type {
   groupPlan,
   groupPlanAvailability,
   groupPlanDate,
-  musicals,
-  plays,
   PlanStatus,
   programming,
-  seasons,
-  theatres,
 } from "@prisma/client";
 import { useState } from "react";
+
+import type { ShowSummary, TheatreSummary } from "../../data/performances";
 
 import CreatePlanForm from "./CreatePlanForm";
 import PlanCard from "./PlanCard";
@@ -23,21 +21,17 @@ type DateRow = groupPlanDate & {
   })[];
 };
 
+export type ProgrammingOption = programming & {
+  musicals: ShowSummary | null;
+  plays: ShowSummary | null;
+  seasons: { id: number; name: string; theatres: TheatreSummary } | null;
+};
+
 export type Plan = groupPlan & {
-  programmings: programming & {
-    musicals: musicals | null;
-    plays: plays | null;
-    seasons: (seasons & { theatres: theatres }) | null;
-  };
+  programmings: ProgrammingOption;
   users: { id: number; username: string; image: string | null };
   selected: groupPlanDate | null;
   dates: DateRow[];
-};
-
-export type ProgrammingOption = programming & {
-  musicals: musicals | null;
-  plays: plays | null;
-  seasons: (seasons & { theatres: theatres }) | null;
 };
 
 interface Props {
@@ -82,7 +76,6 @@ function GroupPlans({ groupId, plans, programmingOptions, viewerId, isOwner }: P
         </Typography>
         <Box sx={{ flex: 1, height: "1px", background: "rgba(212,175,85,0.2)" }} />
         <Button
-          onClick={() => setCreating((c) => !c)}
           size="small"
           sx={{
             fontFamily: '"DM Sans", sans-serif',
@@ -96,6 +89,7 @@ function GroupPlans({ groupId, plans, programmingOptions, viewerId, isOwner }: P
               background: "rgba(212,175,85,0.06)",
             },
           }}
+          onClick={() => setCreating((c) => !c)}
         >
           {creating ? "Cancel" : "Propose a show"}
         </Button>
@@ -105,8 +99,8 @@ function GroupPlans({ groupId, plans, programmingOptions, viewerId, isOwner }: P
         <Box sx={{ mb: 2.5 }}>
           <CreatePlanForm
             groupId={groupId}
-            onResult={handleCreateResult}
             programmingOptions={programmingOptions}
+            onResult={handleCreateResult}
           />
         </Box>
       )}
@@ -161,13 +155,13 @@ function GroupPlans({ groupId, plans, programmingOptions, viewerId, isOwner }: P
       <Snackbar
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
         autoHideDuration={5000}
-        onClose={() => setSnackbar((s) => ({ ...s, open: false }))}
         open={snackbar.open}
+        onClose={() => setSnackbar((s) => ({ ...s, open: false }))}
       >
         <Alert
-          onClose={() => setSnackbar((s) => ({ ...s, open: false }))}
           severity={snackbar.severity}
           variant="filled"
+          onClose={() => setSnackbar((s) => ({ ...s, open: false }))}
         >
           {snackbar.message}
         </Alert>

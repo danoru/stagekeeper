@@ -1,20 +1,18 @@
 import { Box, Container, Pagination, Typography } from "@mui/material";
-import { plays, programming, seasons, theatres } from "@prisma/client";
 import Head from "next/head";
 import { useEffect, useMemo, useState } from "react";
 import superjson from "superjson";
 
 import PlayCard from "../../src/components/cards/ShowCard";
+import type { ShowListItem } from "../../src/components/shows/ShowList";
 import UpcomingShowList from "../../src/components/shows/UpcomingShowList";
 import SearchBar from "../../src/components/ui/SearchBar";
-import { getPlays, getUpcomingPlays } from "../../src/data/plays";
+import { getPlays } from "../../src/data/plays";
+import { getUpcomingRuns, type UpcomingRun } from "../../src/data/shows";
 
 interface Props {
-  plays: plays[];
-  upcomingPerformances: (programming & {
-    plays: plays;
-    seasons: seasons & { theatres: theatres };
-  })[];
+  plays: Omit<ShowListItem, "type">[];
+  upcomingPerformances: UpcomingRun[];
 }
 
 const itemsPerPage = 8;
@@ -146,7 +144,7 @@ function PlaysPage({ plays, upcomingPerformances }: Props) {
 }
 
 export async function getStaticProps() {
-  const [plays, upcomingPerformances] = await Promise.all([getPlays(), getUpcomingPlays()]);
+  const [plays, upcomingPerformances] = await Promise.all([getPlays(), getUpcomingRuns("PLAY")]);
 
   return {
     props: superjson.serialize({ plays, upcomingPerformances }).json,

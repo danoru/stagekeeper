@@ -111,7 +111,12 @@ export async function getUserProfile(username: string, viewerId?: number) {
       : Promise.resolve(null),
     prisma.watchlist.findMany({
       where: { user: user.id },
-      include: { musicals: true, plays: true },
+      select: {
+        id: true,
+        type: true,
+        musicals: { select: { title: true, playbill: true } },
+        plays: { select: { title: true, playbill: true } },
+      },
       orderBy: { createdAt: "desc" },
       take: 4,
     }),
@@ -231,9 +236,10 @@ export async function getUserLikes(username: string) {
     select: {
       ...publicUserSelect,
       likedShows: {
-        include: {
-          musicals: true,
-          plays: true,
+        select: {
+          type: true,
+          musicals: { select: { id: true, title: true, playbill: true } },
+          plays: { select: { id: true, title: true, playbill: true } },
         },
         orderBy: { createdAt: "desc" },
       },

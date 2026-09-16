@@ -1,19 +1,15 @@
 import Box from "@mui/material/Box";
 import Chip from "@mui/material/Chip";
 import Typography from "@mui/material/Typography";
-import type { musicals, plays, programming, seasons, theatres } from "@prisma/client";
 import moment from "moment";
 import Link from "next/link";
 
+import type { UpcomingRun } from "../../data/shows";
 import { resolveShowImage } from "../../utils/gradients";
 import SimpleCarousel from "../ui/SimpleCarousel";
 
 interface Props {
-  upcomingPerformances: (programming & {
-    musicals?: musicals;
-    plays?: plays;
-    seasons: seasons & { theatres: theatres };
-  })[];
+  upcomingPerformances: UpcomingRun[];
 }
 
 function UpcomingShowList({ upcomingPerformances }: Props) {
@@ -41,7 +37,7 @@ function UpcomingShowList({ upcomingPerformances }: Props) {
       </Box>
 
       <SimpleCarousel autoplay interval={5000} sx={{ maxWidth: 520, mx: "auto" }}>
-        {upcomingPerformances.map((performance: any) => {
+        {upcomingPerformances.map((performance) => {
           const isMusical = performance.type === "MUSICAL";
           const showType = isMusical ? "musicals" : "plays";
           const title = isMusical ? performance.musicals?.title : performance.plays?.title;

@@ -399,11 +399,11 @@ export const MUSICALS_LIST = [
   },
 ];
 
+// Card-ready list for /musicals; detail pages load the full row themselves.
 export async function getMusicals() {
   const musicals = await prisma.musicals.findMany({
-    orderBy: {
-      title: "asc",
-    },
+    select: { id: true, title: true, playbill: true },
+    orderBy: { title: "asc" },
   });
   return musicals;
 }
@@ -432,84 +432,4 @@ export async function getMusicalByTitle(musicalTitle: string) {
     },
   });
   return musical;
-}
-
-export async function getLikedMusicals(id: number) {
-  const likedMusicals = await prisma.likedShows.findMany({
-    where: {
-      user: id,
-    },
-    include: {
-      musicals: true,
-    },
-    orderBy: {
-      musicals: { title: "asc" },
-    },
-  });
-  return likedMusicals;
-}
-
-export async function getUserMusicalAttendance(id: number) {
-  const attendance = await prisma.attendance.findMany({
-    where: {
-      user: id,
-      OR: [{ performances: { musical: { not: null } } }, { musical: { not: null } }],
-    },
-    include: {
-      performances: { include: { musicals: true, theatres: true } },
-      musicals: true,
-      theatres: true,
-    },
-  });
-  return attendance;
-}
-
-export async function getUpcomingMusicals() {
-  const upcomingLimit = new Date();
-  upcomingLimit.setMonth(upcomingLimit.getMonth() + 6);
-
-  const programming = await prisma.programming.findMany({
-    where: {
-      type: "MUSICAL",
-      OR: [
-        {
-          AND: [
-            { startDate: { lte: new Date() } }, // Started already
-            { endDate: { gte: new Date() } }, // Still ongoing
-          ],
-        },
-        {
-          startDate: { lte: upcomingLimit, gte: new Date() }, // Starting in the next six months
-        },
-      ],
-    },
-    include: {
-      musicals: true,
-      seasons: {
-        include: {
-          theatres: true,
-        },
-      },
-    },
-    orderBy: {
-      startDate: "asc",
-    },
-  });
-
-  return programming;
-}
-
-export async function getWatchlist(id: number) {
-  const watchlist = await prisma.watchlist.findMany({
-    where: {
-      user: id,
-    },
-    include: {
-      musicals: true,
-    },
-    orderBy: {
-      musicals: { title: "asc" },
-    },
-  });
-  return watchlist;
 }

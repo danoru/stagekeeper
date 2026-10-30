@@ -23,6 +23,8 @@ import type { ProgrammingOption } from "./GroupPlans";
 interface Props {
   groupId: number;
   programmingOptions: ProgrammingOption[];
+  /** "MUSICAL-12": start with this show (and its theatre, if there's only one) picked. */
+  initialShowKey?: string | null;
   onResult: (result: { ok: true } | { ok: false; error: string }) => void;
 }
 
@@ -98,10 +100,16 @@ function combinedShowtimes(programmings: ProgrammingOption[]): Date[] {
   return out.sort((a, b) => a.getTime() - b.getTime());
 }
 
-function CreatePlanForm({ groupId, programmingOptions, onResult }: Props) {
+function CreatePlanForm({ groupId, programmingOptions, initialShowKey, onResult }: Props) {
   const router = useRouter();
-  const [show, setShow] = useState<ShowChoice | null>(null);
-  const [theatre, setTheatre] = useState<TheatreChoice | null>(null);
+  const [show, setShow] = useState<ShowChoice | null>(
+    () => groupShows(programmingOptions).find((s) => s.key === initialShowKey) ?? null
+  );
+  const [theatre, setTheatre] = useState<TheatreChoice | null>(() => {
+    if (!show) return null;
+    const options = theatresForShow(programmingOptions, show);
+    return options.length === 1 ? options[0] : null;
+  });
   const [picked, setPicked] = useState<Set<string>>(new Set());
   const [customInput, setCustomInput] = useState("");
   const [customs, setCustoms] = useState<string[]>([]);

@@ -146,7 +146,9 @@ function PlayPage({ play, pastPerformances, productions }: Props) {
         isAdmin={isAdmin}
         loggedIn={!!session}
         productions={productions}
+        showKey={`PLAY-${play.id}`}
         showTitle={play.title}
+        visits={(userStatus?.attendance ?? []) as Visit[]}
       />
       <PerformanceCalendar identifier={playTitle} showType="PLAY" viewType="show" />
     </div>

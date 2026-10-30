@@ -64,10 +64,19 @@ interface Props {
   programmingOptions: ProgrammingOption[];
   viewerId: number;
   isOwner: boolean;
+  /** "MUSICAL-12": open the propose form with this show already picked. */
+  initialShowKey?: string | null;
 }
 
-function GroupPlans({ groupId, plans, programmingOptions, viewerId, isOwner }: Props) {
-  const [creating, setCreating] = useState(false);
+function GroupPlans({
+  groupId,
+  plans,
+  programmingOptions,
+  viewerId,
+  isOwner,
+  initialShowKey,
+}: Props) {
+  const [creating, setCreating] = useState(Boolean(initialShowKey));
   const [showPast, setShowPast] = useState(false);
   const { upcoming, past } = useMemo(() => {
     const now = new Date();
@@ -133,6 +142,7 @@ function GroupPlans({ groupId, plans, programmingOptions, viewerId, isOwner }: P
         <Box sx={{ mb: 2.5 }}>
           <CreatePlanForm
             groupId={groupId}
+            initialShowKey={initialShowKey}
             programmingOptions={programmingOptions}
             onResult={handleCreateResult}
           />

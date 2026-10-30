@@ -4,6 +4,11 @@ import moment from "moment";
 import { useState } from "react";
 
 import type { ProductionCredit, ShowProduction } from "../../data/people";
+import { productionForVisit } from "../../utils/productions";
+import { formatRating, mean } from "../../utils/ratings";
+import { openRunCutoff } from "../../utils/schedule";
+import PlanWithGroup from "../shows/PlanWithGroup";
+import { pastVisits, type Visit } from "../shows/YourVisits";
 
 import { CATEGORY_LABELS, describePart } from "./creditText";
 import SuggestCreditsDialog from "./SuggestCreditsDialog";
@@ -11,10 +16,72 @@ import SuggestCreditsDialog from "./SuggestCreditsDialog";
 interface Props {
   productions: ShowProduction[];
   showTitle: string;
+  /** "MUSICAL-12" | "PLAY-34", for the group plan shortcut. */
+  showKey: string;
+  /** The viewer's visits to this show, to pin "you saw this" to a production. */
+  visits: Visit[];
   /** Viewer has seen the show (or is an admin), so they can suggest credits. */
   canSuggest: boolean;
   isAdmin: boolean;
   loggedIn: boolean;
+}
+
+interface YourRun {
+  visits: number;
+  rating: number | null;
+}
+
+/** Your visits grouped by production, so two runs of the same show get separate ratings. */
+function yourRuns(visits: Visit[], productions: ShowProduction[]): Map<number, YourRun> {
+  const runs = productions.map(({ production }) => ({
+    id: production.id,
+    theatreId: production.seasons?.theatres.id ?? null,
+    startDate: production.startDate,
+    endDate: production.endDate,
+  }));
+  const grouped = new Map<number, { visits: number; ratings: number[] }>();
+  for (const v of pastVisits(visits)) {
+    const id = productionForVisit(
+      {
+        theatreId: v.theatres?.id ?? v.performances?.theatres?.id ?? null,
+        date: v.seenDate ?? v.performances?.startTime ?? null,
+      },
+      runs
+    );
+    if (id == null) continue;
+    const entry = grouped.get(id) ?? { visits: 0, ratings: [] };
+    entry.visits += 1;
+    if (v.rating != null) entry.ratings.push(Number(v.rating));
+    grouped.set(id, entry);
+  }
+  return new Map(
+    [...grouped].map(([id, e]) => [id, { visits: e.visits, rating: mean(e.ratings) }])
+  );
+}
+
+const statSx = { fontSize: "0.75rem", color: "rgba(232,220,200,0.55)" };
+
+function RunStats({ item, yours }: { item: ShowProduction; yours?: YourRun }) {
+  const { average, raters, seenBy } = item.stats;
+  const parts: string[] = [];
+  if (average != null) {
+    parts.push(`★ ${formatRating(average)} from ${raters} ${raters === 1 ? "person" : "people"}`);
+  }
+  if (seenBy > 0) parts.push(`seen by ${seenBy}`);
+  if (parts.length === 0 && !yours) return null;
+
+  return (
+    <Stack alignItems="center" direction="row" spacing={1.5} sx={{ flexWrap: "wrap", mt: 0.25 }}>
+      {parts.length > 0 && <Typography sx={statSx}>{parts.join(" · ")}</Typography>}
+      {yours && (
+        <Typography sx={{ ...statSx, color: "#50CB78" }}>
+          {yours.rating != null
+            ? `You: ★ ${formatRating(yours.rating)}${yours.visits > 1 ? ` over ${yours.visits} visits` : ""}`
+            : `You saw this${yours.visits > 1 ? ` ${yours.visits} times` : ""}`}
+        </Typography>
+      )}
+    </Stack>
+  );
 }
 
 const eyebrowSx = {
@@ -77,12 +144,23 @@ function CreditList({ credits }: { credits: ProductionCredit[] }) {
   );
 }
 
-function Productions({ productions, showTitle, canSuggest, isAdmin, loggedIn }: Props) {
+function Productions({
+  productions,
+  showTitle,
+  showKey,
+  visits,
+  canSuggest,
+  isAdmin,
+  loggedIn,
+}: Props) {
   const [expanded, setExpanded] = useState(false);
   const [suggestFor, setSuggestFor] = useState<ShowProduction | null>(null);
 
   if (productions.length === 0) return null;
   const visible = expanded ? productions : productions.slice(0, SHOWN_PRODUCTIONS);
+  const yours = yourRuns(visits, productions);
+  const cutoff = openRunCutoff();
+  const hasOpenRun = productions.some((p) => new Date(p.production.endDate) >= cutoff);
 
   return (
     <Box sx={{ mt: 4, px: { xs: 2, md: 4 } }}>
@@ -91,6 +169,7 @@ function Productions({ productions, showTitle, canSuggest, isAdmin, loggedIn }: 
           Productions
         </Typography>
         <Box sx={{ flex: 1, height: "1px", background: "rgba(212,175,85,0.2)" }} />
+        {loggedIn && hasOpenRun && <PlanWithGroup showKey={showKey} />}
       </Box>
 
       <Stack spacing={2}>
@@ -120,6 +199,7 @@ function Productions({ productions, showTitle, canSuggest, isAdmin, loggedIn }: 
                   <Typography sx={{ fontSize: "0.78rem", color: "rgba(232,220,200,0.5)" }}>
                     {runLabel(item.production)}
                   </Typography>
+                  <RunStats item={item} yours={yours.get(item.production.id)} />
                 </Box>
                 {canSuggest && (
                   <Button size="small" variant="outlined" onClick={() => setSuggestFor(item)}>

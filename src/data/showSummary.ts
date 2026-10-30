@@ -19,8 +19,24 @@ export interface FriendGoing {
 }
 
 export interface ShowSummary {
-  community: { average: number | null; raters: number; seenBy: number };
+  community: {
+    average: number | null;
+    raters: number;
+    seenBy: number;
+    watchlisted: number;
+    /** People per half-star (index 0 = ½★ … 9 = 5★), from each person's mean rating. */
+    histogram: number[];
+  };
   friends: { seen: FriendSeen[]; going: FriendGoing[] };
+}
+
+function histogramOf(perPerson: number[]): number[] {
+  const buckets = Array<number>(10).fill(0);
+  for (const r of perPerson) {
+    const halfStars = Math.min(10, Math.max(1, Math.round(r * 2)));
+    buckets[halfStars - 1] += 1;
+  }
+  return buckets;
 }
 
 type ShowRef = { musical: number } | { play: number };
@@ -35,7 +51,7 @@ export async function getShowSummary(show: ShowRef, viewerId: number | null): Pr
   // A "going" row counts as a viewing once its date has passed.
   const happened = { OR: [{ going: false }, { seenDate: { lt: today } }] };
 
-  const [rated, viewers] = await Promise.all([
+  const [rated, viewers, watchlisted] = await Promise.all([
     prisma.attendance.groupBy({
       by: ["user"],
       where: { AND: [forShow, { rating: { not: null } }] },
@@ -45,6 +61,7 @@ export async function getShowSummary(show: ShowRef, viewerId: number | null): Pr
       by: ["user"],
       where: { AND: [forShow, happened] },
     }),
+    prisma.watchlist.count({ where: show }),
   ]);
 
   const perPerson = rated
@@ -52,7 +69,13 @@ export async function getShowSummary(show: ShowRef, viewerId: number | null): Pr
     .filter((v): v is number => v != null);
 
   const summary: ShowSummary = {
-    community: { average: mean(perPerson), raters: perPerson.length, seenBy: viewers.length },
+    community: {
+      average: mean(perPerson),
+      raters: perPerson.length,
+      seenBy: viewers.length,
+      watchlisted,
+      histogram: histogramOf(perPerson),
+    },
     friends: { seen: [], going: [] },
   };
   if (viewerId == null) return summary;

@@ -161,7 +161,9 @@ function MusicalPage({ musical, pastPerformances, productions }: Props) {
         isAdmin={isAdmin}
         loggedIn={!!session}
         productions={productions}
+        showKey={`MUSICAL-${musical.id}`}
         showTitle={musical.title}
+        visits={(userStatus?.attendance ?? []) as Visit[]}
       />
       <PerformanceCalendar identifier={musicalTitle} showType="MUSICAL" viewType="show" />
     </div>

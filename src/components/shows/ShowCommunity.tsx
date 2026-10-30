@@ -54,7 +54,9 @@ function ShowCommunity({ musicalId, playId, version }: Props) {
 
   if (!summary) return null;
   const { community, friends } = summary;
-  if (community.seenBy === 0 && friends.going.length === 0) return null;
+  if (community.seenBy === 0 && community.watchlisted === 0 && friends.going.length === 0) {
+    return null;
+  }
 
   return (
     <Box sx={{ mt: 4, px: { xs: 2, md: 4 } }}>
@@ -94,10 +96,18 @@ function ShowCommunity({ musicalId, playId, version }: Props) {
               <Typography sx={{ fontSize: "0.75rem", color: "rgba(232,220,200,0.55)" }}>
                 {`from ${community.raters} ${community.raters === 1 ? "person" : "people"} · seen by ${community.seenBy}`}
               </Typography>
+              {community.raters >= 2 && <Histogram buckets={community.histogram} />}
             </>
           ) : (
             <Typography sx={{ fontSize: "0.8rem", color: "rgba(232,220,200,0.55)" }}>
-              {`Seen by ${community.seenBy} ${community.seenBy === 1 ? "person" : "people"} · no ratings yet`}
+              {community.seenBy > 0
+                ? `Seen by ${community.seenBy} ${community.seenBy === 1 ? "person" : "people"} · no ratings yet`
+                : "No one has logged it yet"}
+            </Typography>
+          )}
+          {community.watchlisted > 0 && (
+            <Typography sx={{ mt: 0.5, fontSize: "0.75rem", color: "rgba(232,220,200,0.55)" }}>
+              {`On ${community.watchlisted} ${community.watchlisted === 1 ? "watchlist" : "watchlists"}`}
             </Typography>
           )}
         </Box>
@@ -105,6 +115,48 @@ function ShowCommunity({ musicalId, playId, version }: Props) {
         {friends.seen.length > 0 && <FriendsSeen friends={friends.seen} />}
         {friends.going.length > 0 && <FriendsGoing friends={friends.going} />}
       </Stack>
+    </Box>
+  );
+}
+
+function Histogram({ buckets }: { buckets: number[] }) {
+  const max = Math.max(...buckets, 1);
+  const label = (i: number) => formatRating((i + 1) / 2);
+  return (
+    <Box
+      aria-label={`Ratings: ${buckets
+        .map((n, i) => (n ? `${n} at ${label(i)} stars` : null))
+        .filter(Boolean)
+        .join(", ")}`}
+      role="img"
+      sx={{ mt: 1.5, width: 200 }}
+    >
+      <Box sx={{ display: "flex", alignItems: "flex-end", gap: "3px", height: 40 }}>
+        {buckets.map((n, i) => (
+          <Tooltip key={i} title={`${label(i)} ★ · ${n} ${n === 1 ? "person" : "people"}`}>
+            <Box
+              sx={{
+                flex: 1,
+                height: `${Math.max(n ? 8 : 2, (n / max) * 100)}%`,
+                borderRadius: "2px 2px 0 0",
+                background: n ? "rgba(212,175,85,0.7)" : "rgba(212,175,85,0.15)",
+              }}
+            />
+          </Tooltip>
+        ))}
+      </Box>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          fontSize: "0.65rem",
+          color: "rgba(232,220,200,0.4)",
+          mt: 0.25,
+        }}
+      >
+        <span>½★</span>
+        <span>5★</span>
+      </Box>
     </Box>
   );
 }

@@ -36,6 +36,8 @@ interface Props {
   plans: Plans;
   programmingOptions: ProgOptions;
   viewerId: number;
+  /** Set when arriving from a show page's "Plan with a group"; opens the form on that show. */
+  proposeShowKey: string | null;
 }
 
 function GroupDetailPage({
@@ -47,6 +49,7 @@ function GroupDetailPage({
   plans,
   programmingOptions,
   viewerId,
+  proposeShowKey,
 }: Props) {
   return (
     <Box sx={{ background: "#080C14", minHeight: "100vh" }}>
@@ -112,6 +115,7 @@ function GroupDetailPage({
         <Box sx={{ mb: 5 }}>
           <GroupPlans
             groupId={group.id}
+            initialShowKey={proposeShowKey}
             isOwner={isOwner}
             plans={plans}
             programmingOptions={programmingOptions}
@@ -175,6 +179,11 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
       plans,
       programmingOptions,
       viewerId: userId,
+      proposeShowKey:
+        typeof context.query.propose === "string" &&
+        /^(MUSICAL|PLAY)-\d+$/.test(context.query.propose)
+          ? context.query.propose
+          : null,
     }).json,
   };
 }

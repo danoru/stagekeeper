@@ -1,5 +1,7 @@
 import type { CreditCategory, Prisma } from "@prisma/client";
 
+import { productionForVisit, type RunRef } from "../utils/productions";
+import { mean } from "../utils/ratings";
 import { openRunCutoff, theatreToday } from "../utils/schedule";
 import { slugify } from "../utils/slug";
 
@@ -105,14 +107,16 @@ export async function getPersonCredits(personId: number, viewerId: number | null
   };
 }
 
-function calendarDay(d: Date) {
-  return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+function asRun(p: Production): RunRef {
+  return {
+    id: p.id,
+    theatreId: p.seasons?.theatres.id ?? null,
+    startDate: p.startDate,
+    endDate: p.endDate,
+  };
 }
 
-/**
- * Productions the viewer has a past visit for: same show, same theatre, dated inside the run.
- * Visits without a theatre or date can't be pinned to a production and are skipped.
- */
+/** Productions the viewer has a past visit for (see utils/productions.ts for the rule). */
 async function getSeenProductionIds(viewerId: number, productions: Production[]) {
   const musicalIds = productions.flatMap((p) => (p.musicals ? [p.musicals.id] : []));
   const playIds = productions.flatMap((p) => (p.plays ? [p.plays.id] : []));
@@ -138,22 +142,20 @@ async function getSeenProductionIds(viewerId: number, productions: Production[])
   });
 
   const seen = new Set<number>();
-  for (const p of productions) {
-    const theatreId = p.seasons?.theatres.id;
-    if (theatreId == null) continue;
-    const start = calendarDay(p.startDate);
-    const end = calendarDay(p.endDate);
-    const hit = visits.some((v) => {
-      const musical = v.musical ?? v.performances?.musical ?? null;
-      const play = v.play ?? v.performances?.play ?? null;
-      const theatre = v.theatre ?? v.performances?.theatre ?? null;
-      const date = v.seenDate ?? v.performances?.startTime ?? null;
-      const sameShow = p.musicals ? musical === p.musicals.id : play === p.plays?.id;
-      if (!sameShow || theatre !== theatreId || !date) return false;
-      const day = calendarDay(date);
-      return day >= start && day <= end;
-    });
-    if (hit) seen.add(p.id);
+  for (const v of visits) {
+    const musical = v.musical ?? v.performances?.musical ?? null;
+    const play = v.play ?? v.performances?.play ?? null;
+    const runs = productions
+      .filter((p) => (p.musicals ? p.musicals.id === musical : p.plays?.id === play))
+      .map(asRun);
+    const id = productionForVisit(
+      {
+        theatreId: v.theatre ?? v.performances?.theatre ?? null,
+        date: v.seenDate ?? v.performances?.startTime ?? null,
+      },
+      runs
+    );
+    if (id != null) seen.add(id);
   }
   return seen;
 }
@@ -200,30 +202,85 @@ export interface ProductionCredit extends CreditPart {
   person: { name: string; slug: string };
 }
 
-/** Every run of a show, newest first, with its approved credits. */
+export interface ProductionStats {
+  /** Mean of each attendee's mean rating for this run, so repeat visits count once. */
+  average: number | null;
+  raters: number;
+  seenBy: number;
+}
+
+/** Every run of a show, newest first, with its approved credits and audience stats. */
 export async function getShowProductions(show: { musical: number } | { play: number }) {
-  const runs = await prisma.programming.findMany({
-    where: show,
-    select: {
-      ...productionSelect,
-      credits: {
-        where: { status: "APPROVED" },
-        select: {
-          id: true,
-          category: true,
-          role: true,
-          character: true,
-          people: { select: { name: true, slug: true } },
+  const [runs, visits] = await Promise.all([
+    prisma.programming.findMany({
+      where: show,
+      select: {
+        ...productionSelect,
+        credits: {
+          where: { status: "APPROVED" },
+          select: {
+            id: true,
+            category: true,
+            role: true,
+            character: true,
+            people: { select: { name: true, slug: true } },
+          },
+          orderBy: creditOrder,
         },
-        orderBy: creditOrder,
       },
-    },
-    orderBy: { startDate: "desc" },
+      orderBy: { startDate: "desc" },
+    }),
+    prisma.attendance.findMany({
+      where: {
+        AND: [
+          { OR: [show, { performances: show }] },
+          { OR: [{ going: false }, { seenDate: { lt: theatreToday() } }] },
+        ],
+      },
+      select: {
+        user: true,
+        rating: true,
+        theatre: true,
+        seenDate: true,
+        performances: { select: { theatre: true, startTime: true } },
+      },
+    }),
+  ]);
+
+  // Pin each visit to a run, then collect per-person ratings for each run.
+  const refs = runs.map(asRun);
+  const byRun = new Map<number, Map<number, number[]>>();
+  for (const v of visits) {
+    if (v.user == null) continue;
+    const runId = productionForVisit(
+      {
+        theatreId: v.theatre ?? v.performances?.theatre ?? null,
+        date: v.seenDate ?? v.performances?.startTime ?? null,
+      },
+      refs
+    );
+    if (runId == null) continue;
+    const people = byRun.get(runId) ?? new Map<number, number[]>();
+    const ratings = people.get(v.user) ?? [];
+    if (v.rating != null) ratings.push(Number(v.rating));
+    people.set(v.user, ratings);
+    byRun.set(runId, people);
+  }
+
+  return runs.map(({ credits, ...production }) => {
+    const people = byRun.get(production.id) ?? new Map<number, number[]>();
+    const perPerson = [...people.values()].map(mean).filter((v): v is number => v != null);
+    const stats: ProductionStats = {
+      average: mean(perPerson),
+      raters: perPerson.length,
+      seenBy: people.size,
+    };
+    return {
+      production,
+      stats,
+      credits: credits.map(({ people, ...c }): ProductionCredit => ({ ...c, person: people })),
+    };
   });
-  return runs.map(({ credits, ...production }) => ({
-    production,
-    credits: credits.map(({ people, ...c }): ProductionCredit => ({ ...c, person: people })),
-  }));
 }
 
 export type ShowProduction = Awaited<ReturnType<typeof getShowProductions>>[number];

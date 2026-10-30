@@ -102,6 +102,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     if (action !== "approve") return res.status(400).json({ error: "Unknown action." });
+    if (candidate.state === "APPROVED")
+      return res.status(409).json({ error: "This run was already approved." });
 
     const { type, musicalId, playId, newShow, seasonId, newSeason, startDate, endDate } = req.body;
     if (type !== "MUSICAL" && type !== "PLAY")
@@ -130,6 +132,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
 
       const result = await prisma.$transaction(async (tx) => {
+        // Claim the candidate first so a double-submitted approve can't create two runs.
+        const claimed = await tx.importCandidates.updateMany({
+          where: { id: candidate.id, state: { not: "APPROVED" } },
+          data: { state: "APPROVED" },
+        });
+        if (claimed.count === 0) throw new Error("This run was already approved.");
+
         let season = Number(seasonId) || null;
         if (!season) {
           if (!newSeason?.name || !newSeason?.startDate || !newSeason?.endDate)

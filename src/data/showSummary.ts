@@ -2,7 +2,7 @@ import { mean } from "../utils/ratings";
 import { theatreToday } from "../utils/schedule";
 
 import prisma from "./db";
-import { getMutualFollowIds } from "./privacy";
+import { getGoingVisibleIds } from "./privacy";
 
 export interface FriendSeen {
   username: string;
@@ -82,15 +82,15 @@ export async function getShowSummary(show: ShowRef, viewerId: number | null): Pr
 
   const byId = new Map(friends.map((f) => [f.id, f]));
   const seen = new Map<number, { ratings: number[]; visits: number; last: Date | null }>();
-  // Going dates are only shared between mutual follows (see privacy.ts).
-  const mutual = await getMutualFollowIds(viewerId);
+  // Going dates are only shared with mutual follows and groupmates (see privacy.ts).
+  const visible = await getGoingVisibleIds(viewerId);
 
   for (const row of rows) {
     const friend = row.user != null ? byId.get(row.user) : undefined;
     if (!friend) continue;
     const date = row.seenDate ?? row.performances?.startTime ?? null;
     if (row.going && date && date >= today) {
-      if (!mutual.has(friend.id)) continue;
+      if (!visible.has(friend.id)) continue;
       summary.friends.going.push({
         username: friend.username,
         image: friend.image,

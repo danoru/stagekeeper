@@ -42,7 +42,7 @@ function UserUpcomingPage({ canSeeGoing, going, user }: Props) {
               py: 3,
             }}
           >
-            {`${user.username}'s plans are visible to people they follow back. Follow each other to see where they're going.`}
+            {`${user.username}'s plans are visible to people they follow back and people in their groups.`}
           </Typography>
         )}
         <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 3, mt: 4 }}>

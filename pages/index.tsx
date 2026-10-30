@@ -11,7 +11,7 @@ import {
   getRecentPerformances,
   getUserUpcoming,
 } from "../src/data/performances";
-import { getMutualFollowIds } from "../src/data/privacy";
+import { getFollowedGoingVisibleIds } from "../src/data/privacy";
 import styles from "../src/styles/home.module.css";
 
 interface Props {
@@ -60,12 +60,12 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
       return { redirect: { destination: "/welcome", permanent: false } };
     }
 
-    // Going dates are only shared between mutual follows.
-    const mutualIds = await getMutualFollowIds(userId);
+    // Going dates are only shared with mutual follows and groupmates.
+    const friendIds = await getFollowedGoingVisibleIds(userId);
 
     const [recentPerformances, upcomingPerformances, myUpcoming] = await Promise.all([
       getRecentPerformances([username]),
-      getFriendsUpcomingPerformances([...mutualIds]),
+      getFriendsUpcomingPerformances(friendIds),
       getUserUpcoming(userId),
     ]);
 

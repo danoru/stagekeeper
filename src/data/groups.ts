@@ -12,7 +12,6 @@ import {
   showSummarySelect,
   theatreSummarySelect,
 } from "./performances";
-import { getMutualFollowIds, hideGoingExcept } from "./privacy";
 
 // A programming run with just enough of its show and venue to render a card or picker row.
 const programmingSummaryInclude = {
@@ -95,17 +94,14 @@ export async function isGroupOwner(groupId: number, userId: number) {
   return membership?.role === GroupRole.OWNER;
 }
 
-// Shows members have marked "going" with a date today or later, limited to the viewer and
-// members who are mutual follows with them (going dates aren't shared group-wide).
-export async function getGroupUpcomingAttendance(groupId: number, viewerId: number, take = 20) {
-  const [memberIds, mutual] = await Promise.all([
-    prisma.groupMembership.findMany({
-      where: { group: groupId },
-      select: { user: true },
-    }),
-    getMutualFollowIds(viewerId),
-  ]);
-  const ids = memberIds.map((m) => m.user).filter((id) => id === viewerId || mutual.has(id));
+// Shows any member has marked "going" with a date today or later. Going dates are shared
+// with groupmates (see privacy.ts), and only members can load a group page.
+export async function getGroupUpcomingAttendance(groupId: number, take = 20) {
+  const memberIds = await prisma.groupMembership.findMany({
+    where: { group: groupId },
+    select: { user: true },
+  });
+  const ids = memberIds.map((m) => m.user);
   if (ids.length === 0) return [];
 
   const today = theatreToday();
@@ -477,10 +473,9 @@ export async function getGroupActivityFeed(
   });
   const memberIds = Array.from(new Set(memberRows.map((m) => m.user)));
 
-  const mutual = await getMutualFollowIds(viewerId);
   const [attendance, plans] = await Promise.all([
     prisma.attendance.findMany({
-      where: { user: { in: memberIds }, ...hideGoingExcept([viewerId, ...mutual]) },
+      where: { user: { in: memberIds } },
       include: attendanceInclude,
       orderBy: { createdAt: "desc" },
       take,

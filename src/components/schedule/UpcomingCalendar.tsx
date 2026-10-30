@@ -6,6 +6,8 @@ import Typography from "@mui/material/Typography";
 import moment from "moment";
 import React, { useEffect, useState } from "react";
 
+import { expandRun, resolveDayTimes } from "../../utils/schedule";
+
 interface Props {
   identifier: number;
 }
@@ -33,39 +35,17 @@ function UpcomingCalendar({ identifier }: Props) {
   const [initialDate, setInitialDate] = useState<Date>(new Date());
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
 
-  const defaultDayTimes = {
-    Tuesday: ["20:00"],
-    Wednesday: ["20:00"],
-    Thursday: ["20:00"],
-    Friday: ["20:00"],
-    Saturday: ["14:00", "20:00"],
-    Sunday: ["13:00", "18:30"],
-  };
-
-  function generateEventDates(programming: Program, dayTimes: Record<string, string[]>): Event[] {
-    const { startDate, endDate, duration, source, theatre, title } = programming;
-    const startMoment = moment(startDate);
-    const endMoment = moment(endDate);
-    const events: Event[] = [];
-
-    for (let date = startMoment; date.isSameOrBefore(endMoment); date.add(1, "day")) {
-      const dayName = date.format("dddd");
-      const times = dayTimes[dayName] || [];
-      times.forEach((time) => {
-        const [hour, minute] = time.split(":").map(Number);
-        const startTime = moment(date).set({ hour, minute });
-        const endTime = moment(startTime).add(duration || 150, "minutes");
-        events.push({
-          start: startTime.toDate(),
-          end: endTime.toDate(),
-          theatre,
-          title,
-          source,
-        });
-      });
-    }
-
-    return events;
+  function generateEventDates(programming: Program): Event[] {
+    const { duration, source, theatre, title } = programming;
+    return expandRun(programming, resolveDayTimes(programming.dayTimes)).map((start) => ({
+      start,
+      end: moment(start)
+        .add(Number(duration) || 150, "minutes")
+        .toDate(),
+      theatre,
+      title,
+      source,
+    }));
   }
 
   useEffect(() => {
@@ -75,9 +55,7 @@ function UpcomingCalendar({ identifier }: Props) {
         if (!response.ok) throw new Error("Failed to fetch performances.");
         const programmingData: Program[] = await response.json();
 
-        const allEvents = programmingData.flatMap((program) =>
-          generateEventDates(program, program.dayTimes || defaultDayTimes)
-        );
+        const allEvents = programmingData.flatMap((program) => generateEventDates(program));
 
         if (allEvents.length > 0) {
           const earliestDate = new Date(Math.min(...allEvents.map((e) => e.start.getTime())));

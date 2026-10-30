@@ -2,6 +2,7 @@ import moment from "moment-timezone";
 import { NextApiRequest, NextApiResponse } from "next";
 
 import prisma from "../../../src/data/db";
+import { openRunCutoff, THEATRE_TZ } from "../../../src/utils/schedule";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { userId } = req.query;
@@ -10,20 +11,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).json({ error: "Method not allowed." });
   }
 
-  if (!userId || typeof userId !== "string") {
+  const user = Number(userId);
+  if (typeof userId !== "string" || !Number.isInteger(user)) {
     return res.status(400).json({ error: "User ID is required." });
   }
+
+  const cutoff = openRunCutoff();
 
   try {
     const watchlist = await prisma.watchlist.findMany({
       where: {
-        user: Number(userId),
+        user,
         OR: [
           {
             musicals: {
               programming: {
                 some: {
-                  endDate: { gte: new Date() },
+                  endDate: { gte: cutoff },
                 },
               },
             },
@@ -32,7 +36,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             plays: {
               programming: {
                 some: {
-                  endDate: { gte: new Date() },
+                  endDate: { gte: cutoff },
                 },
               },
             },
@@ -68,7 +72,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const watchlistPerformances = watchlist.flatMap((watchItem) => {
       return [
         ...(watchItem.musicals?.programming
-          .filter((program) => program.endDate && program.endDate >= new Date())
+          .filter((program) => program.endDate && program.endDate >= cutoff)
           .map((program) => ({
             id: program.id,
             title: program.musicals?.title,
@@ -80,7 +84,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             source: "watchlist",
           })) || []),
         ...(watchItem.plays?.programming
-          .filter((program) => program.endDate && program.endDate >= new Date())
+          .filter((program) => program.endDate && program.endDate >= cutoff)
           .map((program) => ({
             id: program.id,
             title: program.plays?.title,
@@ -99,7 +103,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const attendancePerformances = await prisma.attendance.findMany({
       where: {
-        user: Number(userId),
+        user,
         performances: { startTime: { gte: firstDayOfMonth } },
       },
       select: {
@@ -117,16 +121,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       .filter((a) => a.performances != null)
       .map((attendance) => {
         const perf = attendance.performances!;
-        const startTime = moment.tz(perf.startTime, "America/Los_Angeles");
+        const startTime = moment.tz(perf.startTime, THEATRE_TZ);
         const dayName = startTime.format("dddd");
         const time = startTime.format("HH:mm");
+        // The calendar expands run dates as calendar days, so send the theatre-local day.
+        const day = moment.utc(startTime.format("YYYY-MM-DD")).toDate();
         return {
           id: perf.id,
           title: perf.musicals?.title || perf.plays?.title,
           duration: perf.musicals?.duration || perf.plays?.duration,
           theatre: perf.theatres.name,
-          startDate: perf.startTime,
-          endDate: perf.endTime,
+          startDate: day,
+          endDate: day,
           dayTimes: { [dayName]: [time] },
           source: "programming",
         };
@@ -134,7 +140,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // "I'm going" rows: a single day on the calendar.
     const goingRows = await prisma.attendance.findMany({
-      where: { user: Number(userId), going: true, seenDate: { gte: firstDayOfMonth } },
+      where: { user, going: true, seenDate: { gte: firstDayOfMonth } },
       include: {
         musicals: { select: { title: true, duration: true } },
         plays: { select: { title: true, duration: true } },

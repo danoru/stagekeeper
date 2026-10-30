@@ -16,6 +16,8 @@ import moment from "moment";
 import { useRouter } from "next/router";
 import { useMemo, useState } from "react";
 
+import { expandRun, hasDayTimes } from "../../utils/schedule";
+
 import type { ProgrammingOption } from "./GroupPlans";
 
 interface Props {
@@ -78,32 +80,8 @@ function theatresForShow(
 }
 
 function expandShowtimes(p: ProgrammingOption, cap = CANDIDATE_CAP): Date[] {
-  const raw = p.dayTimes;
-  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return [];
-  const dayTimes = raw as Record<string, string[]>;
-
-  const now = new Date();
-  const cursor = new Date(p.startDate);
-  cursor.setHours(0, 0, 0, 0);
-  const end = new Date(p.endDate);
-  const out: Date[] = [];
-
-  while (cursor <= end && out.length < cap) {
-    const dayName = cursor.toLocaleDateString("en-US", { weekday: "long" });
-    const times = dayTimes[dayName];
-    if (Array.isArray(times)) {
-      for (const time of times) {
-        const [h, m] = time.split(":").map(Number);
-        if (Number.isNaN(h) || Number.isNaN(m)) continue;
-        const dt = new Date(cursor);
-        dt.setHours(h, m, 0, 0);
-        if (dt > now) out.push(dt);
-        if (out.length >= cap) break;
-      }
-    }
-    cursor.setDate(cursor.getDate() + 1);
-  }
-  return out;
+  if (!hasDayTimes(p.dayTimes)) return [];
+  return expandRun(p, p.dayTimes, { from: new Date(), cap });
 }
 
 function combinedShowtimes(programmings: ProgrammingOption[]): Date[] {

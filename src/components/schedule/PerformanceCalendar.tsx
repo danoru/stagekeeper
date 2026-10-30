@@ -6,6 +6,8 @@ import type { musicals, PerformanceType, plays, programming } from "@prisma/clie
 import moment from "moment";
 import React from "react";
 
+import { expandRun, resolveDayTimes } from "../../utils/schedule";
+
 interface Props {
   viewType: "show" | "theatre";
   identifier: string;
@@ -23,42 +25,18 @@ function PerformanceCalendar({ viewType, identifier, showType }: Props) {
   const [initialDate, setInitialDate] = React.useState<Date | null>(null);
   const [loading, setLoading] = React.useState(true);
 
-  const defaultDayTimes = {
-    Tuesday: ["20:00"],
-    Wednesday: ["20:00"],
-    Thursday: ["20:00"],
-    Friday: ["20:00"],
-    Saturday: ["14:00", "20:00"],
-    Sunday: ["13:00", "18:30"],
-  };
-
   function generateEventDates(
-    programming: programming & { musicals?: musicals; plays?: plays },
-    dayTimes: Record<string, string[]>
+    programming: programming & { musicals?: musicals; plays?: plays }
   ): Event[] {
-    const { startDate, endDate, musicals, plays, type } = programming;
-    const startMoment = moment(startDate);
-    const endMoment = moment(endDate);
-    const events: Event[] = [];
-    const duration = type === "MUSICAL" ? musicals?.duration : plays?.duration;
-    const title = type === "MUSICAL" ? musicals?.title : plays?.title;
+    const { musicals, plays, type } = programming;
+    const duration = (type === "MUSICAL" ? musicals?.duration : plays?.duration) ?? 150;
+    const title = (type === "MUSICAL" ? musicals?.title : plays?.title) ?? "";
 
-    for (let date = startMoment; date.isSameOrBefore(endMoment); date.add(1, "day")) {
-      const dayName = date.format("dddd");
-      const times = dayTimes[dayName] || [];
-      times.forEach((time) => {
-        const [hour, minute] = time.split(":").map(Number);
-        const startTime = moment(date).set({ hour, minute });
-        const endTime = moment(startTime).add(duration, "minutes");
-        events.push({
-          start: startTime.toDate(),
-          end: endTime.toDate(),
-          title: title || "",
-        });
-      });
-    }
-
-    return events;
+    return expandRun(programming, resolveDayTimes(programming.dayTimes)).map((start) => ({
+      start,
+      end: moment(start).add(duration, "minutes").toDate(),
+      title,
+    }));
   }
 
   React.useEffect(() => {
@@ -67,23 +45,24 @@ function PerformanceCalendar({ viewType, identifier, showType }: Props) {
       try {
         const endpoint =
           viewType === "show"
-            ? `/api/shows/programming?title=${identifier}&type=${showType}`
-            : `/api/theatres/programming?theatreName=${identifier}`;
+            ? `/api/shows/programming?title=${encodeURIComponent(identifier)}&type=${showType}`
+            : `/api/theatres/programming?theatreName=${encodeURIComponent(identifier)}`;
         const response = await fetch(endpoint);
         if (!response.ok) throw new Error("Failed to fetch performances.");
 
         const programmingData: (programming & {
-          musicals: musicals;
-          dayTimes?: Record<string, string[]>;
+          musicals?: musicals;
+          plays?: plays;
         })[] = await response.json();
 
-        const allEvents = programmingData.flatMap((program) =>
-          generateEventDates(program, program.dayTimes || defaultDayTimes)
-        );
+        const allEvents = programmingData.flatMap((program) => generateEventDates(program));
 
         if (allEvents.length > 0) {
-          const earliestDate = new Date(Math.min(...allEvents.map((e) => e.start.getTime())));
-          setInitialDate(earliestDate);
+          // Open on the first upcoming showtime rather than a month that's already over.
+          const now = Date.now();
+          const times = allEvents.map((e) => e.start.getTime());
+          const upcoming = times.filter((t) => t >= now);
+          setInitialDate(new Date(Math.min(...(upcoming.length > 0 ? upcoming : times))));
         }
         setEvents(allEvents);
       } catch (error) {

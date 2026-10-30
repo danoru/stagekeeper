@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 
 import prisma from "../../../src/data/db";
+import { openRunCutoff } from "../../../src/utils/schedule";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { title, type } = req.query;
@@ -28,7 +29,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
 
       performances = await prisma.programming.findMany({
-        where: { musical: musical.id, endDate: { gte: new Date() } },
+        where: { musical: musical.id, endDate: { gte: openRunCutoff() } },
         include: {
           musicals: true,
         },
@@ -46,7 +47,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
 
       performances = await prisma.programming.findMany({
-        where: { play: play.id, endDate: { gte: new Date() } },
+        where: { play: play.id, endDate: { gte: openRunCutoff() } },
         include: {
           plays: true,
         },

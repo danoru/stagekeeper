@@ -1,17 +1,17 @@
 import { Box, Card, CardMedia, Stack, Typography } from "@mui/material";
 import { musicals, performances, theatres } from "@prisma/client";
 import moment from "moment";
-import Head from "next/head";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import superjson from "superjson";
 
+import PageMeta from "../../src/components/layout/PageMeta";
 import PerformanceCalendar from "../../src/components/schedule/PerformanceCalendar";
 import PendingNotice from "../../src/components/shows/PendingNotice";
 import ShowActionBar from "../../src/components/shows/ShowActionBar";
 import prisma from "../../src/data/db";
 import { getMusicalByTitle, getMusicals } from "../../src/data/musicals";
-import { slugify } from "../../src/utils/slug";
+import { showPath, slugify } from "../../src/utils/slug";
 
 interface Params {
   title: string;
@@ -25,8 +25,13 @@ interface Props {
 function MusicalPage({ musical, pastPerformances }: Props) {
   const { data: session } = useSession();
   const sessionUser = session?.user;
-  const title = `${musical.title} • StageKeeper`;
   const musicalTitle = musical.title;
+  const credits = [
+    musical.musicBy && `music by ${musical.musicBy}`,
+    musical.lyricsBy && `lyrics by ${musical.lyricsBy}`,
+    musical.bookBy && `book by ${musical.bookBy}`,
+  ].filter(Boolean);
+  const description = `${musical.title}${credits.length ? `, ${credits.join(", ")}` : ""}. Log it, rate it and see upcoming performances on StageKeeper.`;
 
   const [userStatus, setUserStatus] = useState<{
     attendance: any[];
@@ -46,11 +51,11 @@ function MusicalPage({ musical, pastPerformances }: Props) {
 
   return (
     <div>
-      <Head>
-        <title>{title}</title>
-        <meta content="Created with NextJS" name="description" />
-        <link href="/favicon.ico" rel="icon" />
-      </Head>
+      <PageMeta
+        description={description}
+        path={showPath("musicals", musical.title)}
+        title={musical.title}
+      />
       <Stack
         alignItems={{ xs: "center", md: "flex-start" }}
         direction={{ xs: "column", md: "row" }}
@@ -106,7 +111,9 @@ function MusicalPage({ musical, pastPerformances }: Props) {
           }}
         >
           <Stack direction="row" spacing={2} sx={{ flexWrap: "wrap", justifyContent: "inherit" }}>
-            <Typography variant="h6">{musical.title}</Typography>
+            <Typography component="h1" variant="h6">
+              {musical.title}
+            </Typography>
             {musical.premiere && (
               <Typography variant="h6">{`(${moment.utc(musical.premiere).format("YYYY")})`}</Typography>
             )}
@@ -166,7 +173,8 @@ export async function getStaticProps(context: { params: Params }) {
 
   return {
     props: superjson.serialize({ musical, pastPerformances }).json,
-    revalidate: 86400,
+    // Short enough that admin edits, approvals and merges show up promptly.
+    revalidate: 300,
   };
 }
 

@@ -38,13 +38,14 @@ export default function App({
             <title>StageKeeper</title>
             <meta charSet="utf-8" />
             <meta content="initial-scale=1.0, width=device-width" name="viewport" />
-            <meta content={SITE_DESCRIPTION} name="description" />
+            {/* Keys let pages override these through PageMeta. */}
+            <meta key="description" content={SITE_DESCRIPTION} name="description" />
 
             <meta content="website" property="og:type" />
             <meta content="StageKeeper" property="og:site_name" />
-            <meta content="StageKeeper" property="og:title" />
-            <meta content={SITE_DESCRIPTION} property="og:description" />
-            <meta content={SITE_URL} property="og:url" />
+            <meta key="og:title" content="StageKeeper" property="og:title" />
+            <meta key="og:description" content={SITE_DESCRIPTION} property="og:description" />
+            <meta key="og:url" content={SITE_URL} property="og:url" />
             <meta content={`${SITE_URL}/og.png`} property="og:image" />
             <meta content="image/png" property="og:image:type" />
             <meta content="1200" property="og:image:width" />
@@ -52,8 +53,8 @@ export default function App({
             <meta content="StageKeeper — a logbook for the stage" property="og:image:alt" />
 
             <meta content="summary_large_image" name="twitter:card" />
-            <meta content="StageKeeper" name="twitter:title" />
-            <meta content={SITE_DESCRIPTION} name="twitter:description" />
+            <meta key="twitter:title" content="StageKeeper" name="twitter:title" />
+            <meta key="twitter:description" content={SITE_DESCRIPTION} name="twitter:description" />
             <meta content={`${SITE_URL}/og.png`} name="twitter:image" />
             <meta content="StageKeeper — a logbook for the stage" name="twitter:image:alt" />
           </Head>

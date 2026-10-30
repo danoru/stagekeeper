@@ -1,16 +1,16 @@
 import { Box, Container, Grid, Stack, Typography } from "@mui/material";
 import { musicals, plays, programming, seasons, theatres } from "@prisma/client";
 import moment from "moment";
-import Head from "next/head";
 import superjson from "superjson";
 
 import ProgramCard from "../../src/components/cards/ProgramCard";
+import PageMeta from "../../src/components/layout/PageMeta";
 import PerformanceCalendar from "../../src/components/schedule/PerformanceCalendar";
 import { getTheatreByName, getCurrentSeason, getTheatres } from "../../src/data/theatres";
-import { showPath, slugify } from "../../src/utils/slug";
+import { showPath, slugify, theatrePath } from "../../src/utils/slug";
 
 interface Props {
-  theatre: theatres;
+  theatre: Omit<theatres, "scrapeConfig" | "seasonUrl">;
   seasons: (seasons & {
     programming: (programming & { musicals: musicals; plays: plays })[];
   })[];
@@ -21,35 +21,41 @@ interface Params {
 }
 
 function TheatrePage({ theatre, seasons }: Props) {
-  const title = `${theatre.name} • StageKeeper`;
   const theatreName = theatre.name;
+  const centered = {
+    alignItems: { xs: "center", md: "flex-start" },
+    textAlign: { xs: "center", md: "left" },
+    width: "100%",
+  } as const;
 
   return (
     <div>
-      <Head>
-        <title>{title}</title>
-      </Head>
+      <PageMeta
+        description={`${theatre.name}${theatre.location ? ` in ${theatre.location}` : ""}: season schedule and upcoming shows on StageKeeper.`}
+        path={theatrePath(theatre.name)}
+        title={theatre.name}
+      />
       <Container maxWidth="lg" sx={{ px: { xs: 2, md: 3 } }}>
+        <Stack direction="column" sx={{ ...centered, marginTop: "2vh" }}>
+          <Typography
+            gutterBottom
+            color="secondary"
+            component="h1"
+            sx={{ fontSize: { xs: "1.6rem", md: "2.125rem" } }}
+            variant="h4"
+          >
+            {theatre.name}
+          </Typography>
+          {theatre.location && (
+            <Typography gutterBottom component="p" variant="body2">
+              {theatre.location}
+            </Typography>
+          )}
+        </Stack>
         {seasons.map((season) => (
           <Box key={season.id} sx={{ marginTop: "2vh" }}>
-            <Stack
-              direction="column"
-              sx={{
-                alignItems: { xs: "center", md: "flex-start" },
-                textAlign: { xs: "center", md: "left" },
-                width: "100%",
-              }}
-            >
-              <Typography
-                gutterBottom
-                color="secondary"
-                component="h4"
-                sx={{ fontSize: { xs: "1.6rem", md: "2.125rem" } }}
-                variant="h4"
-              >
-                {theatre.name}
-              </Typography>
-              <Typography gutterBottom color="secondary" component="h6" variant="h6">
+            <Stack direction="column" sx={centered}>
+              <Typography gutterBottom color="secondary" component="h2" variant="h6">
                 {season.name}
               </Typography>
               <Typography gutterBottom component="p" variant="body2">
@@ -108,12 +114,17 @@ export async function getStaticProps(context: { params: Params }) {
     return { notFound: true };
   }
 
+  // The importer's settings are admin-only.
+  const publicTheatre: Props["theatre"] & Partial<theatres> = { ...theatre };
+  delete publicTheatre.scrapeConfig;
+  delete publicTheatre.seasonUrl;
+
   return {
     props: superjson.serialize({
-      theatre,
+      theatre: publicTheatre,
       seasons: seasons || [],
     }).json,
-    revalidate: 3600,
+    revalidate: 300,
   };
 }
 

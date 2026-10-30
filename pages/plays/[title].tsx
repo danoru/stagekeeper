@@ -1,17 +1,17 @@
 import { Box, Card, CardMedia, Stack, Typography } from "@mui/material";
 import { performances, plays, theatres } from "@prisma/client";
 import moment from "moment";
-import Head from "next/head";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import superjson from "superjson";
 
+import PageMeta from "../../src/components/layout/PageMeta";
 import PerformanceCalendar from "../../src/components/schedule/PerformanceCalendar";
 import PendingNotice from "../../src/components/shows/PendingNotice";
 import ShowActionBar from "../../src/components/shows/ShowActionBar";
 import prisma from "../../src/data/db";
 import { getPlayByTitle, getPlays } from "../../src/data/plays";
-import { slugify } from "../../src/utils/slug";
+import { showPath, slugify } from "../../src/utils/slug";
 
 interface Params {
   title: string;
@@ -26,7 +26,7 @@ function PlayPage({ play, pastPerformances }: Props) {
   const { data: session } = useSession();
   const sessionUser = session?.user;
   const playTitle = play.title;
-  const title = `${playTitle} • StageKeeper`;
+  const description = `${play.title}${play.writtenBy ? `, written by ${play.writtenBy}` : ""}. Log it, rate it and see upcoming performances on StageKeeper.`;
 
   const [userStatus, setUserStatus] = useState<{
     attendance: any[];
@@ -46,11 +46,7 @@ function PlayPage({ play, pastPerformances }: Props) {
 
   return (
     <div>
-      <Head>
-        <title>{title}</title>
-        <meta content="Created with NextJS" name="description" />
-        <link href="/favicon.ico" rel="icon" />
-      </Head>
+      <PageMeta description={description} path={showPath("plays", play.title)} title={play.title} />
       <Stack
         alignItems={{ xs: "center", md: "flex-start" }}
         direction={{ xs: "column", md: "row" }}
@@ -106,7 +102,9 @@ function PlayPage({ play, pastPerformances }: Props) {
           }}
         >
           <Stack direction="row" spacing={2} sx={{ flexWrap: "wrap", justifyContent: "inherit" }}>
-            <Typography variant="h6">{play.title}</Typography>
+            <Typography component="h1" variant="h6">
+              {play.title}
+            </Typography>
             {play.premiere && (
               <Typography variant="h6">{`(${moment.utc(play.premiere).format("YYYY")})`}</Typography>
             )}
@@ -160,7 +158,8 @@ export async function getStaticProps(context: { params: Params }) {
 
   return {
     props: superjson.serialize({ play, pastPerformances }).json,
-    revalidate: 86400,
+    // Short enough that admin edits, approvals and merges show up promptly.
+    revalidate: 300,
   };
 }
 

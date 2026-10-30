@@ -35,8 +35,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           play: true,
           seenDate: true,
           going: true,
-          performances: { select: { musical: true, play: true } },
+          rating: true,
+          comment: true,
+          theatre: true,
+          createdAt: true,
+          theatres: { select: { id: true, name: true } },
+          performances: {
+            select: {
+              musical: true,
+              play: true,
+              startTime: true,
+              theatres: { select: { id: true, name: true } },
+            },
+          },
         },
+        orderBy: { createdAt: "desc" },
       }),
       prisma.likedShows.findMany({
         where: { user: userId, ...showFilter },

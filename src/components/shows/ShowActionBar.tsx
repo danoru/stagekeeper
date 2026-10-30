@@ -26,6 +26,8 @@ import type {
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 
+import { theatreToday } from "../../utils/schedule";
+
 import LogShowDialog, { type LogMode } from "./LogShowDialog";
 
 interface Props {
@@ -56,8 +58,7 @@ function ShowActionBar({
   const playId = play ? Number(play.id) : undefined;
   const performanceType: "MUSICAL" | "PLAY" | null = musical ? "MUSICAL" : play ? "PLAY" : null;
 
-  const today = new Date();
-  today.setUTCHours(0, 0, 0, 0);
+  const today = theatreToday();
   const mine = attendance.filter((a) => {
     if (a.user !== userId) return false;
     if (a.performances) {

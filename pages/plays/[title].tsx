@@ -9,6 +9,8 @@ import PageMeta from "../../src/components/layout/PageMeta";
 import PerformanceCalendar from "../../src/components/schedule/PerformanceCalendar";
 import PendingNotice from "../../src/components/shows/PendingNotice";
 import ShowActionBar from "../../src/components/shows/ShowActionBar";
+import ShowCommunity from "../../src/components/shows/ShowCommunity";
+import YourVisits, { type Visit } from "../../src/components/shows/YourVisits";
 import prisma from "../../src/data/db";
 import { getPlayByTitle, getPlays } from "../../src/data/plays";
 import { showPath, slugify } from "../../src/utils/slug";
@@ -128,6 +130,13 @@ function PlayPage({ play, pastPerformances }: Props) {
           />
         </Stack>
       </Stack>
+      {session && (
+        <YourVisits
+          visits={(userStatus?.attendance ?? []) as Visit[]}
+          onChanged={() => setStatusVersion((v) => v + 1)}
+        />
+      )}
+      <ShowCommunity playId={play.id} version={statusVersion} />
       <PerformanceCalendar identifier={playTitle} showType="PLAY" viewType="show" />
     </div>
   );

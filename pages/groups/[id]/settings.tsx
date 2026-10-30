@@ -5,17 +5,19 @@ import { getSession } from "next-auth/react";
 import superjson from "superjson";
 
 import GroupSettingsPanel from "../../../src/components/groups/GroupSettingsPanel";
-import { getGroupById, getGroupMembership } from "../../../src/data/groups";
+import { getGroupById, getGroupInvites, getGroupMembership } from "../../../src/data/groups";
 
 type Group = NonNullable<Awaited<ReturnType<typeof getGroupById>>>;
+type Invite = Awaited<ReturnType<typeof getGroupInvites>>[number];
 
 interface Props {
   group: Group;
+  invites: Invite[];
   isOwner: boolean;
   viewerId: number;
 }
 
-function GroupSettingsPage({ group, isOwner, viewerId }: Props) {
+function GroupSettingsPage({ group, invites, isOwner, viewerId }: Props) {
   return (
     <Box sx={{ background: "#080C14", minHeight: "100vh" }}>
       <Head>
@@ -64,7 +66,7 @@ function GroupSettingsPage({ group, isOwner, viewerId }: Props) {
           </Typography>
         </Stack>
 
-        <GroupSettingsPanel group={group} isOwner={isOwner} viewerId={viewerId} />
+        <GroupSettingsPanel group={group} invites={invites} isOwner={isOwner} viewerId={viewerId} />
       </Container>
     </Box>
   );
@@ -89,13 +91,18 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     return { notFound: true };
   }
 
-  const group = await getGroupById(groupId);
+  const isOwner = membership.role === "OWNER";
+  const [group, invites] = await Promise.all([
+    getGroupById(groupId),
+    isOwner ? getGroupInvites(groupId) : Promise.resolve([]),
+  ]);
   if (!group) return { notFound: true };
 
   return {
     props: superjson.serialize({
       group,
-      isOwner: membership.role === "OWNER",
+      invites,
+      isOwner,
       viewerId: userId,
     }).json,
   };

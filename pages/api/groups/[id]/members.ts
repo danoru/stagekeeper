@@ -1,9 +1,10 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth";
 
-import { authOptions } from "../../auth/[...nextauth]";
 import prisma from "../../../../src/data/db";
-import { getGroupMembership, isGroupOwner } from "../../../../src/data/groups";
+import { getGroupMembership, inviteToGroup, isGroupOwner } from "../../../../src/data/groups";
+import { rateLimit } from "../../../../src/utils/rateLimit";
+import { authOptions } from "../../auth/[...nextauth]";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const session = await getServerSession(req, res, authOptions);
@@ -17,27 +18,33 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(400).json({ error: "Invalid group id." });
   }
 
+  // POST { username } — owners invite someone; they join only once they accept.
   if (req.method === "POST") {
     if (!(await isGroupOwner(groupId, userId))) {
-      return res.status(403).json({ error: "Only the owner can add members." });
+      return res.status(403).json({ error: "Only the owner can invite members." });
+    }
+    if (!rateLimit(`group-invite:${userId}`, 30, 60 * 60 * 1000)) {
+      return res.status(429).json({ error: "Too many invites. Try again later." });
     }
     const { username } = req.body ?? {};
     if (!username || typeof username !== "string") {
       return res.status(400).json({ error: "username is required." });
     }
 
-    const target = await prisma.users.findUnique({ where: { username } });
+    const target = await prisma.users.findUnique({
+      where: { username: username.trim() },
+      select: { id: true },
+    });
     if (!target) return res.status(404).json({ error: "User not found." });
 
-    const existing = await getGroupMembership(groupId, target.id);
-    if (existing) {
+    const result = await inviteToGroup(groupId, target.id, userId);
+    if (result === "already-member") {
       return res.status(409).json({ error: "User is already a member." });
     }
-
-    const membership = await prisma.groupMembership.create({
-      data: { group: groupId, user: target.id, role: "MEMBER" },
-    });
-    return res.status(201).json({ membership });
+    if (result === "already-invited") {
+      return res.status(409).json({ error: "User has already been invited." });
+    }
+    return res.status(201).json({ message: "Invited." });
   }
 
   // PATCH { username, role } — owners promote members to co-owner or demote

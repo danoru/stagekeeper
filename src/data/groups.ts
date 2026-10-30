@@ -62,12 +62,75 @@ export async function getGroupByInviteToken(token: string) {
 export async function joinGroupByInvite(token: string, userId: number) {
   const group = await prisma.groups.findUnique({ where: { inviteToken: token } });
   if (!group) return null;
-  await prisma.groupMembership.upsert({
-    where: { group_user: { group: group.id, user: userId } },
-    create: { group: group.id, user: userId, role: "MEMBER" },
-    update: {},
-  });
+  await prisma.$transaction([
+    prisma.groupMembership.upsert({
+      where: { group_user: { group: group.id, user: userId } },
+      create: { group: group.id, user: userId, role: "MEMBER" },
+      update: {},
+    }),
+    // Joining by link answers any pending username invite too.
+    prisma.groupInvite.deleteMany({ where: { group: group.id, user: userId } }),
+  ]);
   return group;
+}
+
+// Username invites. Groupmates see each other's going dates, so nobody becomes a member
+// without saying yes: an owner's invite waits here until the invitee accepts or declines.
+
+export type InviteResult = "invited" | "already-member" | "already-invited";
+
+export async function inviteToGroup(
+  groupId: number,
+  userId: number,
+  invitedBy: number
+): Promise<InviteResult> {
+  if (await getGroupMembership(groupId, userId)) return "already-member";
+  const created = await prisma.groupInvite.createMany({
+    data: [{ group: groupId, user: userId, invitedBy }],
+    skipDuplicates: true,
+  });
+  return created.count === 0 ? "already-invited" : "invited";
+}
+
+export async function getPendingInvitesForUser(userId: number) {
+  return prisma.groupInvite.findMany({
+    where: { user: userId },
+    select: {
+      group: true,
+      createdAt: true,
+      groups: { select: { name: true, _count: { select: { members: true } } } },
+      inviter: { select: { username: true } },
+    },
+    orderBy: { createdAt: "desc" },
+  });
+}
+
+export async function getGroupInvites(groupId: number) {
+  return prisma.groupInvite.findMany({
+    where: { group: groupId },
+    select: { user: true, createdAt: true, users: { select: feedUserSelect } },
+    orderBy: { createdAt: "asc" },
+  });
+}
+
+/** Accepts or declines; returns false when there was no invite to answer. */
+export async function respondToInvite(groupId: number, userId: number, accept: boolean) {
+  return prisma.$transaction(async (tx) => {
+    const removed = await tx.groupInvite.deleteMany({ where: { group: groupId, user: userId } });
+    if (removed.count === 0) return false;
+    if (accept) {
+      await tx.groupMembership.upsert({
+        where: { group_user: { group: groupId, user: userId } },
+        create: { group: groupId, user: userId, role: "MEMBER" },
+        update: {},
+      });
+    }
+    return true;
+  });
+}
+
+export async function cancelInvite(groupId: number, userId: number) {
+  await prisma.groupInvite.deleteMany({ where: { group: groupId, user: userId } });
 }
 
 export async function rotateInviteToken(groupId: number) {

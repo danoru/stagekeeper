@@ -20,18 +20,25 @@ interface Group {
   members: Member[];
 }
 
+interface Invite {
+  user: number;
+  users: FeedUser;
+}
+
 interface Props {
   group: Group;
+  invites: Invite[];
   isOwner: boolean;
   viewerId: number;
 }
 
-function GroupSettingsPanel({ group, isOwner, viewerId }: Props) {
+function GroupSettingsPanel({ group, invites, isOwner, viewerId }: Props) {
   const router = useRouter();
   const [name, setName] = useState(group.name);
   const [renameError, setRenameError] = useState<string | null>(null);
   const [newMember, setNewMember] = useState("");
   const [memberError, setMemberError] = useState<string | null>(null);
+  const [memberNotice, setMemberNotice] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [inviteToken, setInviteToken] = useState(group.inviteToken);
   const [copied, setCopied] = useState(false);
@@ -93,6 +100,7 @@ function GroupSettingsPanel({ group, isOwner, viewerId }: Props) {
     if (!newMember.trim()) return;
     setBusy(true);
     setMemberError(null);
+    setMemberNotice(null);
     try {
       const res = await fetch(`/api/groups/${group.id}/members`, {
         method: "POST",
@@ -101,10 +109,30 @@ function GroupSettingsPanel({ group, isOwner, viewerId }: Props) {
       });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
-        setMemberError(body.error ?? "Failed to add member.");
+        setMemberError(body.error ?? "Failed to send the invite.");
         return;
       }
+      setMemberNotice(`Invited ${newMember.trim()}. They'll join once they accept.`);
       setNewMember("");
+      refresh();
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleCancelInvite(userId: number) {
+    setBusy(true);
+    setMemberError(null);
+    try {
+      const res = await fetch(`/api/groups/${group.id}/invites`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId }),
+      });
+      if (!res.ok) {
+        setMemberError("Failed to cancel the invite.");
+        return;
+      }
       refresh();
     } finally {
       setBusy(false);
@@ -377,23 +405,78 @@ function GroupSettingsPanel({ group, isOwner, viewerId }: Props) {
           })}
         </Stack>
 
+        {isOwner && invites.length > 0 && (
+          <Box sx={{ mt: 2 }}>
+            <Typography sx={{ fontSize: "0.75rem", color: "rgba(232,220,200,0.5)", mb: 1 }}>
+              Invited — waiting for them to accept
+            </Typography>
+            <Stack spacing={1}>
+              {invites.map((invite) => (
+                <Stack
+                  key={invite.user}
+                  alignItems="center"
+                  direction="row"
+                  spacing={2}
+                  sx={{
+                    px: 2,
+                    py: 1,
+                    border: "1px dashed rgba(212,175,85,0.15)",
+                    borderRadius: 1,
+                  }}
+                >
+                  <UserAvatar avatarSize="32px" name={invite.users.username} />
+                  <Typography
+                    sx={{
+                      flex: 1,
+                      fontFamily: '"DM Sans", sans-serif',
+                      fontSize: "0.85rem",
+                      color: "rgba(232,220,200,0.7)",
+                    }}
+                  >
+                    {invite.users.username}
+                  </Typography>
+                  <Button
+                    disabled={busy}
+                    size="small"
+                    sx={{ color: "rgba(232,220,200,0.6)", fontSize: "0.7rem" }}
+                    variant="text"
+                    onClick={() => handleCancelInvite(invite.user)}
+                  >
+                    Cancel invite
+                  </Button>
+                </Stack>
+              ))}
+            </Stack>
+          </Box>
+        )}
+
         {isOwner && (
           <Box component="form" sx={{ mt: 2 }} onSubmit={handleAddMember}>
+            <Typography sx={{ fontSize: "0.75rem", color: "rgba(232,220,200,0.5)", mb: 1 }}>
+              Invite someone by username. They&apos;ll see it on their Groups page and join only if
+              they accept.
+            </Typography>
             <Box sx={{ display: "flex", gap: 1.5 }}>
               <TextField
                 fullWidth
+                inputProps={{ "aria-label": "Username to invite" }}
                 placeholder="Username"
                 size="small"
                 value={newMember}
                 onChange={(e) => setNewMember(e.target.value)}
               />
               <Button disabled={busy || !newMember.trim()} type="submit" variant="outlined">
-                Add
+                Invite
               </Button>
             </Box>
             {memberError && (
               <Typography sx={{ color: "#CF4444", fontSize: "0.7rem", mt: 1 }}>
                 {memberError}
+              </Typography>
+            )}
+            {memberNotice && (
+              <Typography sx={{ color: "#50CB78", fontSize: "0.7rem", mt: 1 }}>
+                {memberNotice}
               </Typography>
             )}
           </Box>

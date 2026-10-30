@@ -5,21 +5,25 @@ import { getSession } from "next-auth/react";
 import superjson from "superjson";
 
 import CreateGroupForm from "../../src/components/groups/CreateGroupForm";
-import { getUserGroups } from "../../src/data/groups";
+import GroupInvitations from "../../src/components/groups/GroupInvitations";
+import { getPendingInvitesForUser, getUserGroups } from "../../src/data/groups";
 
 type Membership = Awaited<ReturnType<typeof getUserGroups>>[number];
+type Invitation = Awaited<ReturnType<typeof getPendingInvitesForUser>>[number];
 
 interface Props {
+  invitations: Invitation[];
   memberships: Membership[];
 }
 
-function GroupsIndexPage({ memberships }: Props) {
+function GroupsIndexPage({ invitations, memberships }: Props) {
   return (
     <Box sx={{ background: "#080C14", minHeight: "100vh" }}>
       <Head>
         <title>Groups • StageKeeper</title>
       </Head>
       <Container maxWidth="md" sx={{ py: 4 }}>
+        <GroupInvitations invitations={invitations} />
         <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 4 }}>
           <Typography
             sx={{
@@ -175,9 +179,13 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   if (!session) {
     return { redirect: { destination: "/login", permanent: false } };
   }
-  const memberships = await getUserGroups(Number(session.user.id));
+  const userId = Number(session.user.id);
+  const [memberships, invitations] = await Promise.all([
+    getUserGroups(userId),
+    getPendingInvitesForUser(userId),
+  ]);
   return {
-    props: superjson.serialize({ memberships }).json,
+    props: superjson.serialize({ memberships, invitations }).json,
   };
 }
 

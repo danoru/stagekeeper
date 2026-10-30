@@ -11,6 +11,7 @@ import PendingNotice from "../../src/components/shows/PendingNotice";
 import ShowActionBar from "../../src/components/shows/ShowActionBar";
 import prisma from "../../src/data/db";
 import { getPlayByTitle, getPlays } from "../../src/data/plays";
+import { slugify } from "../../src/utils/slug";
 
 interface Params {
   title: string;
@@ -137,7 +138,7 @@ function PlayPage({ play, pastPerformances }: Props) {
 export async function getStaticPaths() {
   const plays = await getPlays();
   const paths = plays.map((play: { title: string }) => ({
-    params: { title: play.title.replace(/\s+/g, "-").toLowerCase() },
+    params: { title: slugify(play.title) },
   }));
   return { paths, fallback: "blocking" };
 }

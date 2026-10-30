@@ -3,6 +3,7 @@ import type { attendance, musicals, performances, plays, theatres } from "@prism
 import moment from "moment";
 
 import { resolveShowImage } from "../../utils/gradients";
+import { showPath } from "../../utils/slug";
 
 type ActivityEntry = attendance & {
   performances:
@@ -202,9 +203,7 @@ function ActivityRow({ entry }: { entry: ActivityEntry }) {
   const { show, isMusical, theatreName, date } = resolve(entry);
   if (!show) return null;
 
-  const slug = `/${isMusical ? "musicals" : "plays"}/${show.title
-    .replace(/\s+/g, "-")
-    .toLowerCase()}`;
+  const slug = showPath(isMusical ? "musicals" : "plays", show.title);
   const { isGradient, value } = resolveShowImage(show.playbill, show.title);
   const dateMoment = date ? moment(date) : null;
   const rating = entry.rating != null ? Number(entry.rating) : null;

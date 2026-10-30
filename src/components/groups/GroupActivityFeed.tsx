@@ -3,6 +3,7 @@ import moment from "moment";
 
 import type { GroupActivityEvent } from "../../data/groups";
 import { resolveShowImage } from "../../utils/gradients";
+import { showPath } from "../../utils/slug";
 import UserAvatar from "../users/UserAvatar";
 
 interface Props {
@@ -10,8 +11,7 @@ interface Props {
 }
 
 function showSlug(title: string, type: "MUSICAL" | "PLAY") {
-  const showType = type === "MUSICAL" ? "musicals" : "plays";
-  return `/${showType}/${title.replace(/\s+/g, "-").toLowerCase()}`;
+  return showPath(type === "MUSICAL" ? "musicals" : "plays", title);
 }
 
 function EventThumb({ playbill, title }: { playbill: string; title: string }) {

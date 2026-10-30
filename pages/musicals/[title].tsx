@@ -11,6 +11,7 @@ import PendingNotice from "../../src/components/shows/PendingNotice";
 import ShowActionBar from "../../src/components/shows/ShowActionBar";
 import prisma from "../../src/data/db";
 import { getMusicalByTitle, getMusicals } from "../../src/data/musicals";
+import { slugify } from "../../src/utils/slug";
 
 interface Params {
   title: string;
@@ -143,7 +144,7 @@ function MusicalPage({ musical, pastPerformances }: Props) {
 export async function getStaticPaths() {
   const musicals = await getMusicals();
   const paths = musicals.map((musical: { title: string }) => ({
-    params: { title: musical.title.replace(/\s+/g, "-").toLowerCase() },
+    params: { title: slugify(musical.title) },
   }));
   return { paths, fallback: "blocking" };
 }

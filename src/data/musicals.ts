@@ -1,3 +1,5 @@
+import { matchSlug } from "../utils/slug";
+
 import prisma from "./db";
 
 export const MUSICALS_LIST = [
@@ -421,8 +423,8 @@ export async function getPaginatedMusicals(page: number, limit: number) {
   return { musicals, musicalCount };
 }
 
-export async function getMusicalByTitle(musicalTitle: string) {
-  const titleWithSpaces = musicalTitle.replace(/-/g, " ");
+export async function getMusicalByTitle(slug: string) {
+  const titleWithSpaces = slug.replace(/-/g, " ");
   const musical = await prisma.musicals.findFirst({
     where: {
       title: {
@@ -431,5 +433,9 @@ export async function getMusicalByTitle(musicalTitle: string) {
       },
     },
   });
-  return musical;
+  if (musical) return musical;
+  // Hyphens, punctuation and accents don't survive the slug, so fall back to a slug match.
+  const all = await prisma.musicals.findMany({ select: { id: true, title: true } });
+  const match = matchSlug(all, slug, (m) => m.title);
+  return match ? prisma.musicals.findUnique({ where: { id: match.id } }) : null;
 }

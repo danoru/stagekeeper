@@ -3,6 +3,7 @@ import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
 import type { PerformanceType } from "@prisma/client";
 
+import { showPath } from "../../utils/slug";
 import ShowCard from "../cards/ShowCard";
 
 export interface ShowListItem {
@@ -94,7 +95,7 @@ function ShowList({ shows, header, upcomingShowKeys, emptyMessage }: Props) {
               key={showKey(show.type, show.id)}
               hasUpcomingPerformance={upcoming.has(showKey(show.type, show.id))}
               image={show.playbill}
-              link={`/${showType}/${show.title.replace(/\s+/g, "-").toLowerCase()}`}
+              link={showPath(showType, show.title)}
               name={show.title}
             />
           );

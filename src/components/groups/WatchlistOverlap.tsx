@@ -1,5 +1,6 @@
 import { Box, Link, Stack, Typography } from "@mui/material";
 
+import { showPath } from "../../utils/slug";
 import UserAvatar from "../users/UserAvatar";
 
 interface OverlapEntry {
@@ -70,7 +71,7 @@ function WatchlistOverlap({ overlap }: Props) {
         <Stack spacing={1.25}>
           {overlap.map((entry) => {
             const showType = entry.type === "MUSICAL" ? "musicals" : "plays";
-            const slug = `/${showType}/${entry.title.replace(/\s+/g, "-").toLowerCase()}`;
+            const slug = showPath(showType, entry.title);
             return (
               <Link
                 key={`${entry.type}-${entry.showId}`}

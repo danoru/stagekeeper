@@ -7,6 +7,7 @@ import superjson from "superjson";
 import ProgramCard from "../../src/components/cards/ProgramCard";
 import PerformanceCalendar from "../../src/components/schedule/PerformanceCalendar";
 import { getTheatreByName, getCurrentSeason, getTheatres } from "../../src/data/theatres";
+import { showPath, slugify } from "../../src/utils/slug";
 
 interface Props {
   theatre: theatres;
@@ -69,7 +70,7 @@ function TheatrePage({ theatre, seasons }: Props) {
                       key={program.id}
                       endDate={program.endDate}
                       image={image}
-                      link={`/${showType}/${show.replace(/\s+/g, "-").toLowerCase()}`}
+                      link={showPath(showType, show)}
                       show={show}
                       startDate={program.startDate}
                       type={program.type}
@@ -89,7 +90,7 @@ function TheatrePage({ theatre, seasons }: Props) {
 export async function getStaticPaths() {
   const theatres = await getTheatres();
   const paths = theatres.map((theatre: { name: string }) => ({
-    params: { name: theatre.name.replace(/\s+/g, "-").toLowerCase() },
+    params: { name: slugify(theatre.name) },
   }));
   return { paths, fallback: "blocking" };
 }

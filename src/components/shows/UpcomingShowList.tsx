@@ -6,6 +6,7 @@ import Link from "next/link";
 
 import type { UpcomingRun } from "../../data/shows";
 import { resolveShowImage } from "../../utils/gradients";
+import { showPath } from "../../utils/slug";
 import SimpleCarousel from "../ui/SimpleCarousel";
 
 interface Props {
@@ -43,7 +44,7 @@ function UpcomingShowList({ upcomingPerformances }: Props) {
           const title = isMusical ? performance.musicals?.title : performance.plays?.title;
           const image = isMusical ? performance.musicals?.playbill : performance.plays?.playbill;
           const { isGradient, value } = resolveShowImage(image ?? "", title ?? "");
-          const slug = `/${showType}/${title?.replace(/\s+/g, "-").toLowerCase()}`;
+          const slug = showPath(showType, title ?? "");
 
           return (
             <Link key={performance.id} href={slug} style={{ textDecoration: "none" }}>

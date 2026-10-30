@@ -3,6 +3,7 @@ import type { PerformanceType } from "@prisma/client";
 import moment from "moment";
 
 import { resolveShowImage } from "../../utils/gradients";
+import { showPath } from "../../utils/slug";
 
 interface Props {
   comment?: string | null;
@@ -27,7 +28,7 @@ function formatCardDate(date: Date) {
 function DetailInfoCard(card: Props) {
   const isMusical = card.type === "MUSICAL";
   const showType = isMusical ? "musicals" : "plays";
-  const slug = `/${showType}/${card.show.replace(/\s+/g, "-").toLowerCase()}`;
+  const slug = showPath(showType, card.show);
   const { isGradient, value } = resolveShowImage(card.image, card.show);
 
   return (

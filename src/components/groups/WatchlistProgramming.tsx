@@ -1,6 +1,7 @@
 import { Box, Link, Stack, Typography } from "@mui/material";
 import moment from "moment";
 
+import { showPath } from "../../utils/slug";
 import UserAvatar from "../users/UserAvatar";
 
 interface Member {
@@ -90,7 +91,7 @@ function WatchlistProgramming({ entries }: Props) {
             const show = entry.type === "MUSICAL" ? entry.musicals : entry.plays;
             if (!show) return null;
             const showType = entry.type === "MUSICAL" ? "musicals" : "plays";
-            const slug = `/${showType}/${show.title.replace(/\s+/g, "-").toLowerCase()}`;
+            const slug = showPath(showType, show.title);
             const theatre = entry.seasons?.theatres.name ?? "Theatre TBD";
 
             return (

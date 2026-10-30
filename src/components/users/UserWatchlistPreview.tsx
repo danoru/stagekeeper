@@ -5,6 +5,7 @@ import Typography from "@mui/material/Typography";
 import type { musicals, plays, watchlist } from "@prisma/client";
 
 import { resolveShowImage } from "../../utils/gradients";
+import { showPath } from "../../utils/slug";
 
 interface WatchlistProps {
   username: string;
@@ -79,7 +80,7 @@ function UserWatchlistPreview({ username, items, total }: WatchlistProps) {
 }
 
 function TinyCard({ title, playbill, type }: CardProps) {
-  const slug = `/${type === "musical" ? "musicals" : "plays"}/${title.replace(/\s+/g, "-").toLowerCase()}`;
+  const slug = showPath(type === "musical" ? "musicals" : "plays", title);
   const { isGradient, value } = resolveShowImage(playbill, title);
 
   return (

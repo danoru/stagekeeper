@@ -7,6 +7,7 @@ import superjson from "superjson";
 import TheatreCard from "../../src/components/cards/TheatreCard";
 import SearchBar from "../../src/components/ui/SearchBar";
 import { getTheatres } from "../../src/data/theatres";
+import { theatrePath } from "../../src/utils/slug";
 
 interface Props {
   theatres: theatres[];
@@ -110,7 +111,7 @@ function TheatresPage({ theatres }: Props) {
               <TheatreCard
                 key={theatre.id}
                 image={theatre.image}
-                link={`/theatres/${theatre.name.replace(/\s+/g, "-").toLowerCase()}`}
+                link={theatrePath(theatre.name)}
                 name={theatre.name}
               />
             ))}

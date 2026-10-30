@@ -5,6 +5,7 @@ import { useRouter } from "next/router";
 import { useState } from "react";
 
 import type { Plan } from "./GroupPlans";
+import { showPath } from "../../utils/slug";
 import UserAvatar from "../users/UserAvatar";
 
 interface Props {
@@ -36,7 +37,7 @@ function PlanCard({ groupId, plan, viewerId, isOwner, isPast = false }: Props) {
   const isMusical = prog.type === "MUSICAL";
   const show = isMusical ? prog.musicals : prog.plays;
   const showType = isMusical ? "musicals" : "plays";
-  const slug = show ? `/${showType}/${show.title.replace(/\s+/g, "-").toLowerCase()}` : null;
+  const slug = show ? showPath(showType, show.title) : null;
   const theatre = prog.seasons?.theatres.name ?? "Theatre TBD";
 
   const canMutate = plan.createdBy === viewerId || isOwner;

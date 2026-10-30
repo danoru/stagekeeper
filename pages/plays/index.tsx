@@ -9,6 +9,7 @@ import UpcomingShowList from "../../src/components/shows/UpcomingShowList";
 import SearchBar from "../../src/components/ui/SearchBar";
 import { getPlays } from "../../src/data/plays";
 import { getUpcomingRuns, type UpcomingRun } from "../../src/data/shows";
+import { showPath } from "../../src/utils/slug";
 
 interface Props {
   plays: Omit<ShowListItem, "type">[];
@@ -109,7 +110,7 @@ function PlaysPage({ plays, upcomingPerformances }: Props) {
               <PlayCard
                 key={play.id}
                 image={play.playbill}
-                link={`/plays/${play.title.replace(/\s+/g, "-").toLowerCase()}`}
+                link={showPath("plays", play.title)}
                 name={play.title}
               />
             ))}

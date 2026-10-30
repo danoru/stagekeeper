@@ -1,3 +1,5 @@
+import { matchSlug } from "../utils/slug";
+
 import prisma from "./db";
 
 export const THEATRES_LIST = [
@@ -135,8 +137,8 @@ export async function getPaginatedTheatres(page: number, limit: number) {
   return { theatres, theatreCount };
 }
 
-export async function getTheatreByName(theatreName: string) {
-  const nameWithSpaces = theatreName.replace(/-/g, " ");
+export async function getTheatreByName(slug: string) {
+  const nameWithSpaces = slug.replace(/-/g, " ");
   const theatre = await prisma.theatres.findFirst({
     where: {
       name: {
@@ -145,7 +147,11 @@ export async function getTheatreByName(theatreName: string) {
       },
     },
   });
-  return theatre;
+  if (theatre) return theatre;
+  // Hyphens, punctuation and accents don't survive the slug, so fall back to a slug match.
+  const all = await prisma.theatres.findMany({ select: { id: true, name: true } });
+  const match = matchSlug(all, slug, (t) => t.name);
+  return match ? prisma.theatres.findUnique({ where: { id: match.id } }) : null;
 }
 
 export async function getCurrentSeason(theatreId: number) {

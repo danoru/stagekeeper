@@ -7,6 +7,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { resolveShowImage } from "../../utils/gradients";
+import { showPath } from "../../utils/slug";
 import SimpleCarousel from "../ui/SimpleCarousel";
 
 interface Props {
@@ -55,7 +56,7 @@ function PerformanceCarousel({ items }: Props) {
 function CarouselItem({ title, location, playhouse, date, playbill, type }: CardProps) {
   const isMusical = type === "MUSICAL";
   const showType = isMusical ? "musicals" : "plays";
-  const slug = `/${showType}/${title.replace(/\s+/g, "-").toLowerCase()}`;
+  const slug = showPath(showType, title);
   const { isGradient, value } = resolveShowImage(playbill ?? "", title);
   const humanReadableDate = moment(date).format("MMMM Do, YYYY");
 

@@ -3,6 +3,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 import {
   Alert,
   AppBar,
+  Badge,
   Box,
   Button,
   Container,
@@ -19,11 +20,19 @@ import * as React from "react";
 
 import LogShowDialog, { type PresetShow } from "../shows/LogShowDialog";
 
-function getPages(session: any) {
+interface NavPage {
+  id: number;
+  title: string;
+  link: string;
+  /** Shown as a small pill next to the title, e.g. pending group invites. */
+  count?: number;
+}
+
+function getPages(session: any, inviteCount: number): NavPage[] {
   if (session) {
-    const pages = [
+    const pages: NavPage[] = [
       { id: 1, title: session.user.username, link: `/users/${session.user.username}` },
-      { id: 2, title: "Groups", link: "/groups" },
+      { id: 2, title: "Groups", link: "/groups", count: inviteCount },
       { id: 3, title: "Musicals", link: "/musicals" },
       { id: 4, title: "Plays", link: "/plays" },
       { id: 5, title: "Theatres", link: "/theatres" },
@@ -60,10 +69,55 @@ const navLinkSx = {
   "&:hover": { color: "#D4AF55", backgroundColor: "rgba(212, 175, 85, 0.06)" },
 };
 
+function CountPill({ count }: { count?: number }) {
+  if (!count) return null;
+  return (
+    <Box
+      aria-label={`${count} pending ${count === 1 ? "invite" : "invites"}`}
+      component="span"
+      sx={{
+        ml: 0.75,
+        px: 0.75,
+        minWidth: 18,
+        lineHeight: "18px",
+        borderRadius: 9,
+        fontSize: "0.65rem",
+        fontWeight: 600,
+        letterSpacing: 0,
+        textAlign: "center",
+        color: "#080C14",
+        background: "#D4AF55",
+      }}
+    >
+      {count}
+    </Box>
+  );
+}
+
 function Navbar() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const pages = getPages(session);
+  const [inviteCount, setInviteCount] = React.useState(0);
+  const pages = getPages(session, inviteCount);
+  const userId = session?.user?.id;
+
+  // Pending group invites. Refetched on navigation so accepting or declining clears it.
+  React.useEffect(() => {
+    if (!userId) {
+      setInviteCount(0);
+      return;
+    }
+    let cancelled = false;
+    fetch("/api/groups/invites")
+      .then((r) => (r.ok ? r.json() : []))
+      .then((invites: unknown[]) => {
+        if (!cancelled) setInviteCount(invites.length);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [userId, router.asPath]);
   const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
   const [logOpen, setLogOpen] = React.useState(false);
   const [snackbar, setSnackbar] = React.useState<string | null>(null);
@@ -111,8 +165,15 @@ function Navbar() {
 
           {/* Mobile hamburger */}
           <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
-            <IconButton color="inherit" size="large" onClick={handleOpenNavMenu}>
-              <MenuIcon />
+            <IconButton
+              aria-label={inviteCount ? "Open menu (you have group invites)" : "Open menu"}
+              color="inherit"
+              size="large"
+              onClick={handleOpenNavMenu}
+            >
+              <Badge color="primary" invisible={!inviteCount} variant="dot">
+                <MenuIcon />
+              </Badge>
             </IconButton>
             <Menu
               keepMounted
@@ -133,9 +194,12 @@ function Navbar() {
                       fontSize: "0.85rem",
                       color: "text.primary",
                       textDecoration: "none",
+                      display: "inline-flex",
+                      alignItems: "center",
                     }}
                   >
                     {page.title}
+                    <CountPill count={page.count} />
                   </Typography>
                 </MenuItem>
               ))}
@@ -190,6 +254,7 @@ function Navbar() {
                 onClick={handleCloseNavMenu}
               >
                 {page.title}
+                <CountPill count={page.count} />
               </Button>
             ))}
             {session && (

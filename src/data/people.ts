@@ -314,7 +314,8 @@ export async function submitCredits(args: {
       if (personId == null) {
         const match = await tx.people.findFirst({
           where: { name: { equals: row.name, mode: "insensitive" } },
-          orderBy: [{ status: "asc" }, { id: "asc" }],
+          // ContentStatus is declared PENDING, APPROVED; prefer the approved person.
+          orderBy: [{ status: "desc" }, { id: "asc" }],
           select: { id: true },
         });
         personId = match?.id ?? null;

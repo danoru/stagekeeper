@@ -2,6 +2,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth";
 
 import prisma from "../../../src/data/db";
+import { theatreToday } from "../../../src/utils/schedule";
 import { authOptions } from "../auth/[...nextauth]";
 
 function parseRating(raw: unknown): number | null | undefined {
@@ -36,10 +37,12 @@ function parseSeenDate(raw: unknown): Date | null | undefined {
   return d;
 }
 
-function startOfTodayUtc() {
-  const d = new Date();
-  d.setUTCHours(0, 0, 0, 0);
-  return d;
+function parseTheatreId(raw: unknown): number | null | undefined {
+  if (raw === undefined) return undefined;
+  if (raw === null || raw === "") return null;
+  const n = Number(raw);
+  if (!Number.isInteger(n) || n <= 0) throw new Error("Invalid theatre.");
+  return n;
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -67,7 +70,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     if (going) {
       if (!seenDate) return res.status(400).json({ error: "Pick the date you're going." });
-      if (seenDate < startOfTodayUtc()) {
+      if (seenDate < theatreToday()) {
         return res
           .status(400)
           .json({ error: "That date is in the past — log it as seen instead." });
@@ -81,6 +84,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     let resolvedPlay: number | null = null;
 
     if (performanceId) {
+      if (!Number.isInteger(Number(performanceId))) {
+        return res.status(400).json({ error: "Invalid performance." });
+      }
       const perf = await prisma.performances.findUnique({
         where: { id: Number(performanceId) },
       });
@@ -160,14 +166,42 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     let rating: number | null | undefined;
     let comment: string | null | undefined;
     let seenDate: Date | null | undefined;
+    let theatre: number | null | undefined;
     try {
       rating = parseRating(req.body?.rating);
       comment = parseComment(req.body?.comment);
       seenDate = parseSeenDate(req.body?.seenDate);
+      theatre = parseTheatreId(theatreId);
     } catch (e) {
       return res.status(400).json({ error: (e as Error).message });
     }
     const going = typeof req.body?.going === "boolean" ? req.body.going : undefined;
+
+    // Same rules as POST, applied to the row as it will be after the update.
+    let nextGoing = going ?? existing.going;
+    const nextSeenDate = seenDate !== undefined ? seenDate : existing.seenDate;
+    if (nextGoing) {
+      if (!nextSeenDate) return res.status(400).json({ error: "Pick the date you're going." });
+      if (nextSeenDate < theatreToday()) {
+        if (going === true) {
+          return res
+            .status(400)
+            .json({ error: "That date is in the past — log it as seen instead." });
+        }
+        // A "going" date that has passed is a viewing now; let it be rated.
+        nextGoing = false;
+      } else {
+        rating = null;
+      }
+    }
+
+    if (theatre) {
+      const found = await prisma.theatres.findUnique({
+        where: { id: theatre },
+        select: { id: true },
+      });
+      if (!found) return res.status(404).json({ error: "Theatre not found." });
+    }
 
     try {
       const updated = await prisma.attendance.update({
@@ -175,10 +209,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         data: {
           rating: rating !== undefined ? rating : existing.rating,
           comment: comment !== undefined ? comment : existing.comment,
-          seenDate: seenDate !== undefined ? seenDate : existing.seenDate,
-          going: going !== undefined ? going : existing.going,
-          theatre:
-            theatreId !== undefined ? (theatreId ? Number(theatreId) : null) : existing.theatre,
+          seenDate: nextSeenDate,
+          going: nextGoing,
+          theatre: theatre !== undefined ? theatre : existing.theatre,
         },
       });
       return res.status(200).json({ message: "Attendance updated.", attendance: updated });

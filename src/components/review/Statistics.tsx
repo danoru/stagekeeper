@@ -5,6 +5,8 @@ import type { attendance, musicals, performances, plays, theatres } from "@prism
 import moment from "moment";
 import Image from "next/image";
 
+import { isPlaceholderImage, titleToGradient } from "../../utils/gradients";
+
 import LocationsChart from "./LocationsChart";
 import MonthlyAttendanceChart from "./MonthlyAttendance";
 import PerformanceByPremiereChart from "./PerformanceByPremiere";
@@ -85,10 +87,11 @@ function SpotlightCard({
             overflow: "hidden",
           }}
         >
-          {playbill ? (
-            <Image alt={title} fill src={playbill} style={{ objectFit: "cover" }} />
+          {isPlaceholderImage(playbill) ? (
+            <Box sx={{ width: "100%", height: "100%", background: titleToGradient(title) }} />
           ) : (
-            <Box sx={{ width: "100%", height: "100%", background: "rgba(212,175,85,0.05)" }} />
+            // Playbills can live on any host an admin pastes, so skip the optimizer's allowlist.
+            <Image fill unoptimized alt={title} src={playbill} style={{ objectFit: "cover" }} />
           )}
           {/* Gold top line */}
           <Box

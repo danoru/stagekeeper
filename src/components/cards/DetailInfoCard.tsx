@@ -161,6 +161,7 @@ function DetailInfoCard(card: Props) {
             {card.rating != null && (
               <Rating
                 readOnly
+                precision={0.5}
                 size="small"
                 sx={{
                   "& .MuiRating-iconFilled": { color: "#D4AF55" },

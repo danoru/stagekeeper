@@ -50,6 +50,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(403).json({ error: "Not allowed to remove this date." });
   }
 
+  if (plan.selectedDate === dateId) {
+    return res
+      .status(409)
+      .json({ error: "That date is the confirmed one; cancel the plan instead." });
+  }
+
   await removeCandidateDate(dateId);
   return res.status(204).end();
 }

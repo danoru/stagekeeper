@@ -269,7 +269,7 @@ export async function getGroupPlans(groupId: number) {
 export async function getPlanWithGroup(planId: number) {
   return prisma.groupPlan.findUnique({
     where: { id: planId },
-    select: { id: true, group: true, createdBy: true, status: true },
+    select: { id: true, group: true, createdBy: true, status: true, selectedDate: true },
   });
 }
 

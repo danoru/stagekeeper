@@ -33,6 +33,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (!plan || plan.group !== groupId) {
     return res.status(404).json({ error: "Plan not found." });
   }
+  if (plan.status === "CANCELED") {
+    return res.status(409).json({ error: "This plan was canceled." });
+  }
 
   const date = await prisma.groupPlanDate.findUnique({
     where: { id: dateId },

@@ -27,16 +27,3 @@ export async function getPlayByTitle(slug: string) {
   const match = matchSlug(all, slug, (p) => p.title);
   return match ? prisma.plays.findUnique({ where: { id: match.id } }) : null;
 }
-
-export async function getPaginatedPlays(page: number, limit: number) {
-  const skip = (page - 1) * limit;
-  const plays = await prisma.plays.findMany({
-    orderBy: {
-      title: "asc",
-    },
-    skip,
-    take: limit,
-  });
-  const playCount = await prisma.plays.count();
-  return { plays, playCount };
-}

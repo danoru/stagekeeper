@@ -410,19 +410,6 @@ export async function getMusicals() {
   return musicals;
 }
 
-export async function getPaginatedMusicals(page: number, limit: number) {
-  const skip = (page - 1) * limit;
-  const musicals = await prisma.musicals.findMany({
-    orderBy: {
-      title: "asc",
-    },
-    skip,
-    take: limit,
-  });
-  const musicalCount = await prisma.musicals.count();
-  return { musicals, musicalCount };
-}
-
 export async function getMusicalByTitle(slug: string) {
   const titleWithSpaces = slug.replace(/-/g, " ");
   const musical = await prisma.musicals.findFirst({

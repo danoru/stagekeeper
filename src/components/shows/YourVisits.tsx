@@ -54,18 +54,23 @@ function visitDate(v: Visit): string | null {
   return v.seenDate ?? v.performances?.startTime ?? null;
 }
 
+/** Visits that have happened; a "going" date counts once it's passed. */
+export function pastVisits(visits: Visit[]): Visit[] {
+  const today = theatreToday();
+  return visits.filter((v) => {
+    const date = visitDate(v);
+    return !(v.going && date && new Date(date) >= today);
+  });
+}
+
 function visitRating(v: Visit): number | null {
   return v.rating == null ? null : Number(v.rating);
 }
 
 function YourVisits({ visits, onChanged }: Props) {
-  const today = theatreToday();
-  const seen = visits
-    .filter((v) => {
-      const date = visitDate(v);
-      return !(v.going && date && new Date(date) >= today);
-    })
-    .sort((a, b) => (visitDate(b) ?? "").localeCompare(visitDate(a) ?? ""));
+  const seen = pastVisits(visits).sort((a, b) =>
+    (visitDate(b) ?? "").localeCompare(visitDate(a) ?? "")
+  );
 
   const [editing, setEditing] = useState<Visit | null>(null);
   const [deleting, setDeleting] = useState<Visit | null>(null);

@@ -27,11 +27,12 @@ function getPages(session: any) {
       { id: 3, title: "Musicals", link: "/musicals" },
       { id: 4, title: "Plays", link: "/plays" },
       { id: 5, title: "Theatres", link: "/theatres" },
-      { id: 6, title: "Users", link: "/users" },
-      { id: 7, title: "Settings", link: "/settings" },
+      { id: 6, title: "People", link: "/people" },
+      { id: 7, title: "Users", link: "/users" },
+      { id: 8, title: "Settings", link: "/settings" },
     ];
     if (session.user.badge === "ADMIN") {
-      pages.push({ id: 8, title: "Admin", link: "/admin" });
+      pages.push({ id: 9, title: "Admin", link: "/admin" });
     }
     return pages;
   } else {
@@ -41,7 +42,8 @@ function getPages(session: any) {
       { id: 3, title: "Musicals", link: "/musicals" },
       { id: 4, title: "Plays", link: "/plays" },
       { id: 5, title: "Theatres", link: "/theatres" },
-      { id: 6, title: "Users", link: "/users" },
+      { id: 6, title: "People", link: "/people" },
+      { id: 7, title: "Users", link: "/users" },
     ];
   }
 }

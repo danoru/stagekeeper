@@ -6,12 +6,14 @@ import { useEffect, useState } from "react";
 import superjson from "superjson";
 
 import PageMeta from "../../src/components/layout/PageMeta";
+import Productions from "../../src/components/people/Productions";
 import PerformanceCalendar from "../../src/components/schedule/PerformanceCalendar";
 import PendingNotice from "../../src/components/shows/PendingNotice";
 import ShowActionBar from "../../src/components/shows/ShowActionBar";
 import ShowCommunity from "../../src/components/shows/ShowCommunity";
-import YourVisits, { type Visit } from "../../src/components/shows/YourVisits";
+import YourVisits, { pastVisits, type Visit } from "../../src/components/shows/YourVisits";
 import prisma from "../../src/data/db";
+import { getShowProductions, type ShowProduction } from "../../src/data/people";
 import { getPlayByTitle, getPlays } from "../../src/data/plays";
 import { showPath, slugify } from "../../src/utils/slug";
 
@@ -22,11 +24,13 @@ interface Params {
 interface Props {
   play: plays;
   pastPerformances: (performances & { theatres: theatres })[];
+  productions: ShowProduction[];
 }
 
-function PlayPage({ play, pastPerformances }: Props) {
+function PlayPage({ play, pastPerformances, productions }: Props) {
   const { data: session } = useSession();
   const sessionUser = session?.user;
+  const isAdmin = session?.user.badge === "ADMIN";
   const playTitle = play.title;
   const description = `${play.title}${play.writtenBy ? `, written by ${play.writtenBy}` : ""}. Log it, rate it and see upcoming performances on StageKeeper.`;
 
@@ -137,6 +141,13 @@ function PlayPage({ play, pastPerformances }: Props) {
         />
       )}
       <ShowCommunity playId={play.id} version={statusVersion} />
+      <Productions
+        canSuggest={isAdmin || pastVisits((userStatus?.attendance ?? []) as Visit[]).length > 0}
+        isAdmin={isAdmin}
+        loggedIn={!!session}
+        productions={productions}
+        showTitle={play.title}
+      />
       <PerformanceCalendar identifier={playTitle} showType="PLAY" viewType="show" />
     </div>
   );
@@ -158,15 +169,18 @@ export async function getStaticProps(context: { params: Params }) {
     return { notFound: true };
   }
 
-  const pastPerformances = await prisma.performances.findMany({
-    where: { play: play.id, startTime: { lte: new Date() } },
-    include: { theatres: true },
-    orderBy: { startTime: "desc" },
-    take: 50,
-  });
+  const [pastPerformances, productions] = await Promise.all([
+    prisma.performances.findMany({
+      where: { play: play.id, startTime: { lte: new Date() } },
+      include: { theatres: true },
+      orderBy: { startTime: "desc" },
+      take: 50,
+    }),
+    getShowProductions({ play: play.id }),
+  ]);
 
   return {
-    props: superjson.serialize({ play, pastPerformances }).json,
+    props: superjson.serialize({ play, pastPerformances, productions }).json,
     // Short enough that admin edits, approvals and merges show up promptly.
     revalidate: 300,
   };

@@ -2,6 +2,7 @@ import DownloadIcon from "@mui/icons-material/Download";
 import LibraryMusicIcon from "@mui/icons-material/LibraryMusic";
 import PendingActionsIcon from "@mui/icons-material/PendingActions";
 import PeopleIcon from "@mui/icons-material/People";
+import RecentActorsIcon from "@mui/icons-material/RecentActors";
 import ScheduleIcon from "@mui/icons-material/Schedule";
 import TheaterComedyIcon from "@mui/icons-material/TheaterComedy";
 import TheatersIcon from "@mui/icons-material/Theaters";
@@ -18,6 +19,12 @@ const sections = [
     description: "Approve, merge, or edit shows and theatres members have added.",
     href: "/admin/pending",
     icon: <PendingActionsIcon sx={{ fontSize: 40 }} />,
+  },
+  {
+    title: "Cast & Crew",
+    description: "Review cast and crew credits members suggested for productions.",
+    href: "/admin/credits",
+    icon: <RecentActorsIcon sx={{ fontSize: 40 }} />,
   },
   {
     title: "Musicals",

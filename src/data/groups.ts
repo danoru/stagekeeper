@@ -2,6 +2,8 @@ import { randomUUID } from "crypto";
 
 import { Availability, GroupRole, PlanStatus, type Prisma } from "@prisma/client";
 
+import { theatreToday } from "../utils/schedule";
+
 import prisma from "./db";
 import {
   attendanceInclude,
@@ -10,6 +12,7 @@ import {
   showSummarySelect,
   theatreSummarySelect,
 } from "./performances";
+import { getMutualFollowIds, hideGoingExcept } from "./privacy";
 
 // A programming run with just enough of its show and venue to render a card or picker row.
 const programmingSummaryInclude = {
@@ -92,17 +95,20 @@ export async function isGroupOwner(groupId: number, userId: number) {
   return membership?.role === GroupRole.OWNER;
 }
 
-// Shows any member has marked "going" with a date today or later.
-export async function getGroupUpcomingAttendance(groupId: number, take = 20) {
-  const memberIds = await prisma.groupMembership.findMany({
-    where: { group: groupId },
-    select: { user: true },
-  });
-  const ids = memberIds.map((m) => m.user);
+// Shows members have marked "going" with a date today or later, limited to the viewer and
+// members who are mutual follows with them (going dates aren't shared group-wide).
+export async function getGroupUpcomingAttendance(groupId: number, viewerId: number, take = 20) {
+  const [memberIds, mutual] = await Promise.all([
+    prisma.groupMembership.findMany({
+      where: { group: groupId },
+      select: { user: true },
+    }),
+    getMutualFollowIds(viewerId),
+  ]);
+  const ids = memberIds.map((m) => m.user).filter((id) => id === viewerId || mutual.has(id));
   if (ids.length === 0) return [];
 
-  const today = new Date();
-  today.setUTCHours(0, 0, 0, 0);
+  const today = theatreToday();
   const rows = await prisma.attendance.findMany({
     where: { user: { in: ids }, going: true, seenDate: { gte: today } },
     include: attendanceInclude,
@@ -471,9 +477,10 @@ export async function getGroupActivityFeed(
   });
   const memberIds = Array.from(new Set(memberRows.map((m) => m.user)));
 
+  const mutual = await getMutualFollowIds(viewerId);
   const [attendance, plans] = await Promise.all([
     prisma.attendance.findMany({
-      where: { user: { in: memberIds } },
+      where: { user: { in: memberIds }, ...hideGoingExcept([viewerId, ...mutual]) },
       include: attendanceInclude,
       orderBy: { createdAt: "desc" },
       take,

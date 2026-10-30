@@ -1,8 +1,11 @@
 import moment from "moment-timezone";
 import { NextApiRequest, NextApiResponse } from "next";
+import { getServerSession } from "next-auth";
 
 import prisma from "../../../src/data/db";
-import { openRunCutoff, THEATRE_TZ } from "../../../src/utils/schedule";
+import { canSeeGoingDates } from "../../../src/data/privacy";
+import { openRunCutoff, THEATRE_TZ, theatreToday } from "../../../src/utils/schedule";
+import { authOptions } from "../auth/[...nextauth]";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { userId } = req.query;
@@ -101,10 +104,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const date = new Date();
     const firstDayOfMonth = new Date(date.getFullYear(), date.getMonth(), 1);
 
+    // Future dates show where someone will be; only they and their mutual follows see them.
+    const session = await getServerSession(req, res, authOptions);
+    const canSeeGoing = await canSeeGoingDates(session ? Number(session.user.id) : null, user);
+    const before = canSeeGoing ? undefined : theatreToday();
+
     const attendancePerformances = await prisma.attendance.findMany({
       where: {
         user,
-        performances: { startTime: { gte: firstDayOfMonth } },
+        performances: { startTime: { gte: firstDayOfMonth, lt: before } },
       },
       select: {
         performances: {
@@ -140,7 +148,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // "I'm going" rows: a single day on the calendar.
     const goingRows = await prisma.attendance.findMany({
-      where: { user, going: true, seenDate: { gte: firstDayOfMonth } },
+      where: { user, going: true, seenDate: { gte: firstDayOfMonth, lt: before } },
       include: {
         musicals: { select: { title: true, duration: true } },
         plays: { select: { title: true, duration: true } },

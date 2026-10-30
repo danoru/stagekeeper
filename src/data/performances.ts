@@ -404,12 +404,13 @@ function byStartTimeAsc(a: NormalizedAttendance, b: NormalizedAttendance) {
   return a.performances.startTime.getTime() - b.performances.startTime.getTime();
 }
 
-// Shows the given users have marked "going" with a date today or later.
-export async function getFriendsUpcomingPerformances(usernames: string[], take = 20) {
-  if (usernames.length === 0) return [];
+// Shows the given users have marked "going" with a date today or later. Callers pass only
+// people allowed to see those dates (see privacy.ts).
+export async function getFriendsUpcomingPerformances(userIds: number[], take = 20) {
+  if (userIds.length === 0) return [];
   const rows = await prisma.attendance.findMany({
     where: {
-      users: { username: { in: usernames } },
+      user: { in: userIds },
       going: true,
       seenDate: { gte: startOfToday() },
     },
@@ -447,9 +448,10 @@ export async function getUserAttendance(id: number) {
   );
 }
 
+// Past viewings only; upcoming "going" rows live on the Upcoming tab.
 export async function getUserAttendanceHistory(id: number) {
   const rows = await prisma.attendance.findMany({
-    where: { user: id },
+    where: { user: id, OR: [{ going: false }, { seenDate: { lt: startOfToday() } }] },
     include: attendanceInclude,
   });
   return normalizeAttendanceRows(rows).sort(byStartTimeDesc);

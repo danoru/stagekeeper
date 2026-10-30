@@ -11,6 +11,7 @@ import {
   getRecentPerformances,
   getUserUpcoming,
 } from "../src/data/performances";
+import { getMutualFollowIds } from "../src/data/privacy";
 import styles from "../src/styles/home.module.css";
 
 interface Props {
@@ -59,15 +60,12 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
       return { redirect: { destination: "/welcome", permanent: false } };
     }
 
-    const following = await prisma.following.findMany({
-      where: { user: userId },
-      select: { followingUsername: true },
-    });
-    const followingList = following.map((f) => f.followingUsername);
+    // Going dates are only shared between mutual follows.
+    const mutualIds = await getMutualFollowIds(userId);
 
     const [recentPerformances, upcomingPerformances, myUpcoming] = await Promise.all([
       getRecentPerformances([username]),
-      getFriendsUpcomingPerformances(followingList),
+      getFriendsUpcomingPerformances([...mutualIds]),
       getUserUpcoming(userId),
     ]);
 

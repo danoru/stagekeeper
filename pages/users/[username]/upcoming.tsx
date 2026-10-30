@@ -1,33 +1,50 @@
-import { Box, Container } from "@mui/material";
+import { Box, Container, Typography } from "@mui/material";
 import { users } from "@prisma/client";
 import { GetServerSidePropsContext } from "next";
+import { getSession } from "next-auth/react";
 import superjson from "superjson";
 
 import FriendUpcomingActivity from "../../../src/components/home/FriendUpcomingActivity";
 import UpcomingCalendar from "../../../src/components/schedule/UpcomingCalendar";
 import ProfilePageWrapper from "../../../src/components/users/ProfilePageWrapper";
 import { getUserUpcoming, type NormalizedAttendance } from "../../../src/data/performances";
+import { canSeeGoingDates } from "../../../src/data/privacy";
 import { findUserByUsername } from "../../../src/data/users";
 
 interface Props {
+  canSeeGoing: boolean;
   going: NormalizedAttendance[];
   user: users;
 }
 
-function UserUpcomingPage({ going, user }: Props) {
+function UserUpcomingPage({ canSeeGoing, going, user }: Props) {
   return (
     <ProfilePageWrapper
       title={`${user.username}'s Upcoming • StageKeeper`}
       username={user.username}
     >
       <Container maxWidth="lg" sx={{ py: 4 }}>
-        <FriendUpcomingActivity
-          emptyHint="Use “I'm going” on a show page (or the Log a show button) to add one."
-          emptyTitle="No tickets booked yet."
-          title="Going"
-          trim={12}
-          upcomingPerformances={going}
-        />
+        {canSeeGoing ? (
+          <FriendUpcomingActivity
+            emptyHint="Use “I'm going” on a show page (or the Log a show button) to add one."
+            emptyTitle="No tickets booked yet."
+            title="Going"
+            trim={12}
+            upcomingPerformances={going}
+          />
+        ) : (
+          <Typography
+            sx={{
+              fontFamily: '"Cormorant Garamond", serif',
+              fontStyle: "italic",
+              color: "rgba(232,220,200,0.55)",
+              textAlign: "center",
+              py: 3,
+            }}
+          >
+            {`${user.username}'s plans are visible to people they follow back. Follow each other to see where they're going.`}
+          </Typography>
+        )}
         <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 3, mt: 4 }}>
           <Box
             sx={{
@@ -49,13 +66,15 @@ function UserUpcomingPage({ going, user }: Props) {
   );
 }
 
-export async function getServerSideProps({ params }: GetServerSidePropsContext) {
-  const username = String(params?.username);
+export async function getServerSideProps(context: GetServerSidePropsContext) {
+  const username = String(context.params?.username);
   const user = await findUserByUsername(username);
   if (!user) return { notFound: true };
-  const going = await getUserUpcoming(user.id);
+  const session = await getSession(context);
+  const canSeeGoing = await canSeeGoingDates(session ? Number(session.user.id) : null, user.id);
+  const going = canSeeGoing ? await getUserUpcoming(user.id) : [];
   return {
-    props: superjson.serialize({ user, going }).json,
+    props: superjson.serialize({ user, going, canSeeGoing }).json,
   };
 }
 

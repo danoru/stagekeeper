@@ -43,8 +43,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     },
   });
 
-  const base = process.env.NEXTAUTH_URL ?? `http://${req.headers.host}`;
-  const link = `${base}/reset-password?token=${token}`;
+  // Never build the link from the Host header in production: a forged Host would send the
+  // victim a working reset token pointing at someone else's site.
+  const base =
+    process.env.NEXTAUTH_URL ??
+    (process.env.NODE_ENV === "production" ? null : `http://${req.headers.host}`);
+  if (!base) {
+    console.error("NEXTAUTH_URL is not set; refusing to send a password reset link.");
+    return res.status(200).json(generic);
+  }
+  const link = `${base.replace(/\/$/, "")}/reset-password?token=${token}`;
   try {
     await sendMail({
       to: user.email,

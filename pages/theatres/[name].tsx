@@ -53,9 +53,9 @@ function TheatrePage({ theatre, seasons }: Props) {
                 {season.name}
               </Typography>
               <Typography gutterBottom component="p" variant="body2">
-                {`From ${moment(season.startDate).format("ll")} to ${moment(season.endDate).format(
-                  "ll"
-                )}`}
+                {`From ${moment.utc(season.startDate).format("ll")} to ${moment
+                  .utc(season.endDate)
+                  .format("ll")}`}
               </Typography>
             </Stack>
             <Grid container direction="row" sx={{ justifyContent: "center", flexWrap: "wrap" }}>

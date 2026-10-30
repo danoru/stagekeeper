@@ -108,7 +108,7 @@ function MusicalPage({ musical, pastPerformances }: Props) {
           <Stack direction="row" spacing={2} sx={{ flexWrap: "wrap", justifyContent: "inherit" }}>
             <Typography variant="h6">{musical.title}</Typography>
             {musical.premiere && (
-              <Typography variant="h6">{`(${moment(musical.premiere).format("YYYY")})`}</Typography>
+              <Typography variant="h6">{`(${moment.utc(musical.premiere).format("YYYY")})`}</Typography>
             )}
           </Stack>
           <Stack direction="column" sx={{ alignItems: "inherit" }}>

@@ -195,9 +195,9 @@ function UpcomingShowList({ upcomingPerformances }: Props) {
                       mb: 0.25,
                     }}
                   >
-                    {moment(performance.startDate).format("MMMM D, YYYY")}
+                    {moment.utc(performance.startDate).format("MMMM D, YYYY")}
                     {" — "}
-                    {moment(performance.endDate).format("MMMM D, YYYY")}
+                    {moment.utc(performance.endDate).format("MMMM D, YYYY")}
                   </Typography>
                   <Typography
                     sx={{

@@ -62,7 +62,7 @@ function MonthlyAttendanceChart({ stats }: Props) {
 
   const monthlyOccurrences = stats.reduce<Record<string, { musical: number; play: number }>>(
     (acc, stat) => {
-      const month = moment(stat.performances.startTime).format("MMMM");
+      const month = moment.utc(stat.performances.startTime).format("MMMM");
       const type = stat.performances.type;
       if (!acc[month]) acc[month] = { musical: 0, play: 0 };
       if (type === "MUSICAL") acc[month].musical += 1;

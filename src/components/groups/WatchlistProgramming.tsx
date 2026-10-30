@@ -28,9 +28,9 @@ interface Props {
 function formatRunDates(start: Date, end: Date) {
   const now = new Date();
   if (start <= now && end >= now) {
-    return `Now playing · through ${moment(end).format("MMM D")}`;
+    return `Now playing · through ${moment.utc(end).format("MMM D")}`;
   }
-  return `${moment(start).format("MMM D")} – ${moment(end).format("MMM D, YYYY")}`;
+  return `${moment.utc(start).format("MMM D")} – ${moment.utc(end).format("MMM D, YYYY")}`;
 }
 
 function WatchlistProgramming({ entries }: Props) {

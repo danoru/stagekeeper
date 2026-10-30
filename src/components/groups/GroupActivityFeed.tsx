@@ -113,7 +113,7 @@ function EventRow({ event }: { event: GroupActivityEvent }) {
           {event.show.title}
         </Link>
         {event.theatre ? <> at {event.theatre}</> : null}
-        {event.seenDate ? <> on {moment(event.seenDate).format("MMM D, YYYY")}</> : null}
+        {event.seenDate ? <> on {moment.utc(event.seenDate).format("MMM D, YYYY")}</> : null}
       </>
     );
     extra = (

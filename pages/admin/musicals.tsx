@@ -226,7 +226,7 @@ export default function AdminMusicalsPage() {
                       <Typography variant="caption" color="text.secondary">
                         {[
                           musical.musicBy && `Music: ${musical.musicBy}`,
-                          musical.premiere && new Date(musical.premiere).getFullYear(),
+                          musical.premiere && new Date(musical.premiere).getUTCFullYear(),
                         ]
                           .filter(Boolean)
                           .join(" · ")}

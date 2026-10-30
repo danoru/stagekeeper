@@ -196,10 +196,11 @@ function Statistics({ stats, view, year }: Props) {
   const getPerformanceTitle = (stat: (typeof stats)[0]) =>
     stat.performances.musicals?.title || stat.performances.plays?.title || "N/A";
 
-  const getPerformancePremiere = (stat: (typeof stats)[0]) =>
-    moment(
-      stat.performances.musicals?.premiere || stat.performances.plays?.premiere || null
-    ).year();
+  // Premieres and seen dates are calendar days stored at UTC midnight; read them in UTC.
+  const getPerformancePremiere = (stat: (typeof stats)[0]) => {
+    const premiere = stat.performances.musicals?.premiere || stat.performances.plays?.premiere;
+    return premiere ? moment.utc(premiere).year() : null;
+  };
 
   const getPlaybill = (stat: (typeof stats)[0]) =>
     stat.performances.musicals?.playbill || stat.performances.plays?.playbill || "";
@@ -282,7 +283,7 @@ function Statistics({ stats, view, year }: Props) {
 
   const monthlyOccurrence: Record<string, { musicals: number; plays: number }> = {};
   stats.forEach((stat) => {
-    const month = moment(stat.performances.startTime).format("MMMM");
+    const month = moment.utc(stat.performances.startTime).format("MMMM");
     if (!monthlyOccurrence[month]) monthlyOccurrence[month] = { musicals: 0, plays: 0 };
     if (stat.performances.musicals?.title) monthlyOccurrence[month].musicals++;
     if (stat.performances.plays?.title) monthlyOccurrence[month].plays++;
@@ -324,7 +325,7 @@ function Statistics({ stats, view, year }: Props) {
       <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" }, gap: 3 }}>
         {firstPerformance && (
           <SpotlightCard
-            date={moment(firstPerformance.performances.startTime).format("MMMM Do, YYYY")}
+            date={moment.utc(firstPerformance.performances.startTime).format("MMMM Do, YYYY")}
             headline={`First Performance ${getYearText()}`}
             location={firstPerformance.performances.theatres.location}
             playbill={getPlaybill(firstPerformance)}
@@ -335,7 +336,7 @@ function Statistics({ stats, view, year }: Props) {
         )}
         {latestPerformance && (
           <SpotlightCard
-            date={moment(latestPerformance.performances.startTime).format("MMMM Do, YYYY")}
+            date={moment.utc(latestPerformance.performances.startTime).format("MMMM Do, YYYY")}
             headline={`Most Recent Performance ${getYearText()}`}
             location={latestPerformance.performances.theatres.location}
             playbill={getPlaybill(latestPerformance)}
@@ -352,7 +353,7 @@ function Statistics({ stats, view, year }: Props) {
       <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" }, gap: 3 }}>
         {oldestPerformance && (
           <SpotlightCard
-            date={moment(oldestPerformance.performances.startTime).format("MMMM Do, YYYY")}
+            date={moment.utc(oldestPerformance.performances.startTime).format("MMMM Do, YYYY")}
             headline={`Oldest Premiere ${getYearText()}`}
             location={oldestPerformance.performances.theatres.location}
             playbill={getPlaybill(oldestPerformance)}
@@ -363,7 +364,7 @@ function Statistics({ stats, view, year }: Props) {
         )}
         {newestPerformance && (
           <SpotlightCard
-            date={moment(newestPerformance.performances.startTime).format("MMMM Do, YYYY")}
+            date={moment.utc(newestPerformance.performances.startTime).format("MMMM Do, YYYY")}
             headline={`Newest Premiere ${getYearText()}`}
             location={newestPerformance.performances.theatres.location}
             playbill={getPlaybill(newestPerformance)}

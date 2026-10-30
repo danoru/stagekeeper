@@ -64,7 +64,7 @@ function groupByMonth(rows: ActivityEntry[]): {
       undated.push(row);
       continue;
     }
-    const key = moment(date).format("YYYY-MM");
+    const key = moment.utc(date).format("YYYY-MM");
     const bucket = dated.get(key);
     if (bucket) {
       bucket.push(row);
@@ -205,7 +205,7 @@ function ActivityRow({ entry }: { entry: ActivityEntry }) {
 
   const slug = showPath(isMusical ? "musicals" : "plays", show.title);
   const { isGradient, value } = resolveShowImage(show.playbill, show.title);
-  const dateMoment = date ? moment(date) : null;
+  const dateMoment = date ? moment.utc(date) : null;
   const rating = entry.rating != null ? Number(entry.rating) : null;
 
   return (

@@ -375,7 +375,7 @@ export default function LogShowDialog({
                         <Typography sx={{ flex: 1 }}>{option.title}</Typography>
                         {option.premiere && (
                           <Typography sx={{ color: "rgba(232,220,200,0.4)", fontSize: "0.75rem" }}>
-                            {moment(option.premiere).format("YYYY")}
+                            {moment.utc(option.premiere).format("YYYY")}
                           </Typography>
                         )}
                         <Chip
@@ -432,7 +432,7 @@ export default function LogShowDialog({
                 >
                   {pastPerformances.map((p) => (
                     <MenuItem key={p.id} value={p.id}>
-                      {moment(p.startTime).format("MMM D, YYYY")} — {p.theatres.name}
+                      {moment.utc(p.startTime).format("MMM D, YYYY")} — {p.theatres.name}
                     </MenuItem>
                   ))}
                 </Select>

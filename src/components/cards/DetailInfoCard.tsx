@@ -18,8 +18,9 @@ interface Props {
 }
 
 // Undated manual logs carry epoch 0; show nothing rather than "Jan 1, 1970".
+// Seen/going dates are calendar days stored at UTC midnight.
 function formatCardDate(date: Date) {
-  const m = moment(date);
+  const m = moment.utc(date);
   if (m.year() < 1971) return "";
   const fmt = m.year() === moment().year() ? "MMM D" : "MMM D, YYYY";
   return ` · ${m.format(fmt)}`;

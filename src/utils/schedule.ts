@@ -101,6 +101,21 @@ export function expandRun(run: Run, dayTimes: DayTimes, opts: ExpandOptions = {}
 }
 
 /**
+ * Today's date at the theatres, as UTC midnight — the same shape as `seenDate` and other
+ * calendar-day columns. Plain UTC "today" flips to tomorrow at 5pm in California.
+ */
+export function theatreToday(now: Date = new Date()): Date {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: THEATRE_TZ,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(now);
+  const get = (type: string) => Number(parts.find((p) => p.type === type)?.value);
+  return new Date(Date.UTC(get("year"), get("month") - 1, get("day")));
+}
+
+/**
  * Lower bound for "runs that haven't closed". End dates are calendar days stored in UTC, so
  * comparing against `now` would hide a run on its closing evening in California.
  */

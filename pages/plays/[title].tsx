@@ -108,7 +108,7 @@ function PlayPage({ play, pastPerformances }: Props) {
           <Stack direction="row" spacing={2} sx={{ flexWrap: "wrap", justifyContent: "inherit" }}>
             <Typography variant="h6">{play.title}</Typography>
             {play.premiere && (
-              <Typography variant="h6">{`(${moment(play.premiere).format("YYYY")})`}</Typography>
+              <Typography variant="h6">{`(${moment.utc(play.premiere).format("YYYY")})`}</Typography>
             )}
           </Stack>
           <Stack direction="column" sx={{ alignItems: "inherit" }}>

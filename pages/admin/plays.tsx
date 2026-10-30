@@ -207,7 +207,7 @@ export default function AdminPlaysPage() {
                       <Typography variant="caption" color="text.secondary">
                         {[
                           play.writtenBy && `By ${play.writtenBy}`,
-                          play.premiere && new Date(play.premiere).getFullYear(),
+                          play.premiere && new Date(play.premiere).getUTCFullYear(),
                         ]
                           .filter(Boolean)
                           .join(" · ")}

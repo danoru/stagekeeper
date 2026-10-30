@@ -1,5 +1,7 @@
 import type { PerformanceType, Prisma } from "@prisma/client";
 
+import { theatreToday } from "../utils/schedule";
+
 import prisma from "./db";
 
 export const PERFORMANCE_LIST = [
@@ -351,9 +353,7 @@ export type NormalizedAttendance = Omit<RawAttendance, "performances"> & {
 const UNKNOWN_THEATRE: TheatreSummary = { id: 0, name: "Unknown theatre", location: "" };
 
 function startOfToday() {
-  const d = new Date();
-  d.setUTCHours(0, 0, 0, 0);
-  return d;
+  return theatreToday();
 }
 
 export function normalizeAttendance(row: RawAttendance): NormalizedAttendance | null {

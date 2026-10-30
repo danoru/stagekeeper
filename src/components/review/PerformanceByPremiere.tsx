@@ -48,10 +48,10 @@ function MusicalByPremiereChart({ stats }: Props) {
   const yearlyOccurrence = stats.reduce<Record<string, { musical: number; play: number }>>(
     (acc, stat) => {
       const musicalYear = stat.performances.musicals?.premiere
-        ? moment(stat.performances.musicals.premiere).format("YYYY")
+        ? moment.utc(stat.performances.musicals.premiere).format("YYYY")
         : null;
       const playYear = stat.performances.plays?.premiere
-        ? moment(stat.performances.plays.premiere).format("YYYY")
+        ? moment.utc(stat.performances.plays.premiere).format("YYYY")
         : null;
       if (musicalYear) {
         if (!acc[musicalYear]) acc[musicalYear] = { musical: 0, play: 0 };

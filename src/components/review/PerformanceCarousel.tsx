@@ -58,7 +58,7 @@ function CarouselItem({ title, location, playhouse, date, playbill, type }: Card
   const showType = isMusical ? "musicals" : "plays";
   const slug = showPath(showType, title);
   const { isGradient, value } = resolveShowImage(playbill ?? "", title);
-  const humanReadableDate = moment(date).format("MMMM Do, YYYY");
+  const humanReadableDate = moment.utc(date).format("MMMM Do, YYYY");
 
   return (
     <Link href={slug} style={{ textDecoration: "none" }}>

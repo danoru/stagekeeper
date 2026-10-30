@@ -144,9 +144,9 @@ function ProgramCard(card: Props) {
                 color: "rgba(212,175,85,0.6)",
               }}
             >
-              {moment(card.startDate).format("MMM D")}
+              {moment.utc(card.startDate).format("MMM D")}
               {" — "}
-              {moment(card.endDate).format("MMM D, YYYY")}
+              {moment.utc(card.endDate).format("MMM D, YYYY")}
             </Typography>
           </Box>
         </Link>

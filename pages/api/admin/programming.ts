@@ -100,11 +100,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const { id } = req.body;
     if (!id) return res.status(400).json({ error: "ID is required." });
     try {
-      // Showtimes nobody logged go with the run; logged ones stay for those people's history.
+      // A logged showtime needs its run: without one it reads as an older calendar-day row, and
+      // deleting it would take people's visits with it.
+      const logged = await prisma.performances.count({
+        where: { programming: Number(id), attendance: { some: {} } },
+      });
+      if (logged > 0) {
+        return res.status(409).json({
+          error: `${logged} showtime${logged === 1 ? " has" : "s have"} been logged, so this run can't be deleted. Cancel them under Showtimes instead.`,
+        });
+      }
       await prisma.$transaction([
-        prisma.performances.deleteMany({
-          where: { programming: Number(id), attendance: { none: {} } },
-        }),
+        prisma.performances.deleteMany({ where: { programming: Number(id) } }),
         prisma.programming.delete({ where: { id: Number(id) } }),
       ]);
       return res.status(200).json({ message: "Deleted." });

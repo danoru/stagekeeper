@@ -6,6 +6,7 @@ import type { musicals, plays, watchlist } from "@prisma/client";
 
 import { resolveShowImage } from "../../utils/gradients";
 import { showPath } from "../../utils/slug";
+import LinkBehavior from "../layout/LinkBehavior";
 
 interface WatchlistProps {
   username: string;
@@ -45,7 +46,6 @@ function UserWatchlistPreview({ username, items, total }: WatchlistProps) {
         <Box sx={{ flex: 1, height: "1px", background: "rgba(212,175,85,0.2)" }} />
         <Link
           href={`/users/${username}/watchlist`}
-          underline="none"
           sx={{
             fontFamily: '"DM Sans", sans-serif',
             fontSize: "0.6rem",
@@ -55,6 +55,7 @@ function UserWatchlistPreview({ username, items, total }: WatchlistProps) {
             transition: "color 0.2s",
             "&:hover": { color: "#D4AF55" },
           }}
+          underline="none"
         >
           {total} total →
         </Link>
@@ -84,9 +85,9 @@ function TinyCard({ title, playbill, type }: CardProps) {
   const { isGradient, value } = resolveShowImage(playbill, title);
 
   return (
-    <Tooltip title={title} placement="top">
+    <Tooltip placement="top" title={title}>
       <Box
-        component="a"
+        component={LinkBehavior}
         href={slug}
         sx={{
           position: "relative",

@@ -1,21 +1,14 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth";
 
-import { getPendingInvitesForUser, respondToInvite } from "../../../src/data/groups";
+import { respondToInvite } from "../../../src/data/groups";
 import { authOptions } from "../auth/[...nextauth]";
 
-// The signed-in user's group invites.
-//   GET                          → pending invites
-//   POST { groupId, accept }     → join (accept: true) or decline
+// POST { groupId, accept } — the signed-in user joins (accept: true) or declines a group invite.
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const session = await getServerSession(req, res, authOptions);
   if (!session) return res.status(401).json({ error: "Not authenticated." });
   const userId = Number(session.user.id);
-
-  if (req.method === "GET") {
-    res.setHeader("Cache-Control", "private, no-store");
-    return res.status(200).json(await getPendingInvitesForUser(userId));
-  }
 
   if (req.method === "POST") {
     const groupId = Number(req.body?.groupId);
@@ -28,6 +21,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(200).json({ message: accept ? "Joined." : "Declined.", groupId });
   }
 
-  res.setHeader("Allow", ["GET", "POST"]);
+  res.setHeader("Allow", ["POST"]);
   return res.status(405).json({ error: "Method not allowed." });
 }

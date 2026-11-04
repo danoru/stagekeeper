@@ -18,9 +18,12 @@ import { useRouter } from "next/router";
 import { signOut, useSession } from "next-auth/react";
 import * as React from "react";
 
+import type { AccountStatus } from "../../data/emailVerification";
 import LogShowDialog, { type PresetShow } from "../shows/LogShowDialog";
 
+import LinkBehavior from "./LinkBehavior";
 import NavSearch from "./NavSearch";
+import VerifyEmailBanner from "./VerifyEmailBanner";
 
 interface NavPage {
   id: number;
@@ -56,6 +59,12 @@ function getPages(session: any, inviteCount: number): NavPage[] {
     ];
   }
 }
+
+const ACCOUNT_PAGES = /^\/(groups|settings|verify-email)/;
+
+// The width where the logo, every link (admin and invite count included) and Log a show all fit.
+// Narrower screens get the menu.
+const DESKTOP_NAV = "@media (min-width: 1280px)";
 
 const navLinkSx = {
   fontFamily: '"DM Sans", sans-serif',
@@ -97,27 +106,43 @@ function CountPill({ count }: { count?: number }) {
 function Navbar() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const [inviteCount, setInviteCount] = React.useState(0);
-  const pages = getPages(session, inviteCount);
+  const [account, setAccount] = React.useState<AccountStatus | null>(null);
+  const inviteCount = account?.pendingInvites ?? 0;
+  // While the session loads, show the frame without links rather than a blank bar.
+  const pages = status === "loading" ? [] : getPages(session, inviteCount);
   const userId = session?.user?.id;
+  const [accountVersion, setAccountVersion] = React.useState(0);
 
-  // Pending group invites. Refetched on navigation so accepting or declining clears it.
+  // Invites and email status only change on these pages, so other clicks don't refetch them.
+  // Includes refreshes in place (declining an invite) and leaving (after confirming an email).
+  React.useEffect(() => {
+    let lastUrl = window.location.pathname;
+    const onRouteChange = (url: string) => {
+      if (ACCOUNT_PAGES.test(url) || ACCOUNT_PAGES.test(lastUrl)) {
+        setAccountVersion((version) => version + 1);
+      }
+      lastUrl = url;
+    };
+    router.events.on("routeChangeComplete", onRouteChange);
+    return () => router.events.off("routeChangeComplete", onRouteChange);
+  }, [router.events]);
+
   React.useEffect(() => {
     if (!userId) {
-      setInviteCount(0);
+      setAccount(null);
       return;
     }
     let cancelled = false;
-    fetch("/api/groups/invites")
-      .then((r) => (r.ok ? r.json() : []))
-      .then((invites: unknown[]) => {
-        if (!cancelled) setInviteCount(invites.length);
+    fetch("/api/user/account-status")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data: AccountStatus | null) => {
+        if (!cancelled) setAccount(data);
       })
       .catch(() => {});
     return () => {
       cancelled = true;
     };
-  }, [userId, router.asPath]);
+  }, [userId, accountVersion]);
   const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
   const [logOpen, setLogOpen] = React.useState(false);
   const [snackbar, setSnackbar] = React.useState<string | null>(null);
@@ -137,175 +162,180 @@ function Navbar() {
     signOut({ redirect: false }).then(() => router.push("/"));
   }
 
-  if (status === "loading") return null;
-
   return (
-    <AppBar position="static">
-      <Container maxWidth="xl">
-        <Toolbar disableGutters sx={{ minHeight: { xs: 56, md: 60 } }}>
-          {/* Logo desktop */}
-          <Typography
-            noWrap
-            component="a"
-            href="/"
-            sx={{
-              mr: 4,
-              flexShrink: 0,
-              display: { md: "flex", xs: "none" },
-              fontFamily: '"Cormorant Garamond", Georgia, serif',
-              fontWeight: 600,
-              fontSize: "1.35rem",
-              letterSpacing: "0.12em",
-              color: "#D4AF55",
-              textDecoration: "none",
-              textTransform: "uppercase",
-            }}
-          >
-            StageKeeper
-          </Typography>
+    <>
+      <AppBar position="static">
+        <Container maxWidth="xl">
+          <Toolbar disableGutters sx={{ minHeight: { xs: 56, md: 60 } }}>
+            {/* Logo desktop */}
+            <Typography
+              noWrap
+              component={LinkBehavior}
+              href="/"
+              sx={{
+                mr: 4,
+                flexShrink: 0,
+                display: "none",
+                [DESKTOP_NAV]: { display: "flex" },
+                fontFamily: '"Cormorant Garamond", Georgia, serif',
+                fontWeight: 600,
+                fontSize: "1.35rem",
+                letterSpacing: "0.12em",
+                color: "#D4AF55",
+                textDecoration: "none",
+                textTransform: "uppercase",
+              }}
+            >
+              StageKeeper
+            </Typography>
 
-          {/* Mobile hamburger */}
-          <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
-            <IconButton
-              aria-label={inviteCount ? "Open menu (you have group invites)" : "Open menu"}
-              color="inherit"
-              size="large"
-              onClick={handleOpenNavMenu}
+            {/* Mobile hamburger */}
+            <Box sx={{ flexGrow: 1, display: "flex", [DESKTOP_NAV]: { display: "none" } }}>
+              <IconButton
+                aria-label={inviteCount ? "Open menu (you have group invites)" : "Open menu"}
+                color="inherit"
+                size="large"
+                onClick={handleOpenNavMenu}
+              >
+                <Badge color="primary" invisible={!inviteCount} variant="dot">
+                  <MenuIcon />
+                </Badge>
+              </IconButton>
+              <Menu
+                anchorEl={anchorElNav}
+                anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+                open={Boolean(anchorElNav)}
+                sx={{ display: "block", [DESKTOP_NAV]: { display: "none" } }}
+                transformOrigin={{ vertical: "top", horizontal: "left" }}
+                onClose={handleCloseNavMenu}
+              >
+                {pages.map((page) => (
+                  <MenuItem key={page.id} onClick={handleCloseNavMenu}>
+                    <Typography
+                      component={LinkBehavior}
+                      href={page.link}
+                      sx={{
+                        fontFamily: '"DM Sans", sans-serif',
+                        fontSize: "0.85rem",
+                        color: "text.primary",
+                        textDecoration: "none",
+                        display: "inline-flex",
+                        alignItems: "center",
+                      }}
+                    >
+                      {page.title}
+                      <CountPill count={page.count} />
+                    </Typography>
+                  </MenuItem>
+                ))}
+                {session && (
+                  <MenuItem onClick={handleLogout}>
+                    <Typography
+                      sx={{
+                        fontFamily: '"DM Sans", sans-serif',
+                        fontSize: "0.85rem",
+                        color: "text.primary",
+                      }}
+                    >
+                      Logout
+                    </Typography>
+                  </MenuItem>
+                )}
+              </Menu>
+            </Box>
+
+            {/* Logo mobile */}
+            <Typography
+              noWrap
+              component={LinkBehavior}
+              href="/"
+              sx={{
+                flexGrow: 1,
+                display: "flex",
+                [DESKTOP_NAV]: { display: "none" },
+                fontFamily: '"Cormorant Garamond", Georgia, serif',
+                fontWeight: 600,
+                fontSize: "1.15rem",
+                letterSpacing: "0.1em",
+                color: "#D4AF55",
+                textDecoration: "none",
+                textTransform: "uppercase",
+              }}
             >
-              <Badge color="primary" invisible={!inviteCount} variant="dot">
-                <MenuIcon />
-              </Badge>
-            </IconButton>
-            <Menu
-              keepMounted
-              anchorEl={anchorElNav}
-              anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-              open={Boolean(anchorElNav)}
-              sx={{ display: { xs: "block", md: "none" } }}
-              transformOrigin={{ vertical: "top", horizontal: "left" }}
-              onClose={handleCloseNavMenu}
-            >
+              StageKeeper
+            </Typography>
+
+            {/* Desktop links */}
+            <Box sx={{ flexGrow: 1, display: "none", gap: 0.5, [DESKTOP_NAV]: { display: "flex" } }}>
               {pages.map((page) => (
-                <MenuItem key={page.id} onClick={handleCloseNavMenu}>
-                  <Typography
-                    component="a"
-                    href={page.link}
-                    sx={{
-                      fontFamily: '"DM Sans", sans-serif',
-                      fontSize: "0.85rem",
-                      color: "text.primary",
-                      textDecoration: "none",
-                      display: "inline-flex",
-                      alignItems: "center",
-                    }}
-                  >
-                    {page.title}
-                    <CountPill count={page.count} />
-                  </Typography>
-                </MenuItem>
+                <Button
+                  key={page.id}
+                  href={page.link}
+                  sx={{
+                    ...navLinkSx,
+                    color: page.title === session?.user?.username ? "#D4AF55" : navLinkSx.color,
+                    fontWeight: page.title === session?.user?.username ? 600 : 400,
+                  }}
+                  onClick={handleCloseNavMenu}
+                >
+                  {page.title}
+                  <CountPill count={page.count} />
+                </Button>
               ))}
               {session && (
-                <MenuItem onClick={handleLogout}>
-                  <Typography
-                    sx={{
-                      fontFamily: '"DM Sans", sans-serif',
-                      fontSize: "0.85rem",
-                      color: "text.primary",
-                    }}
-                  >
-                    Logout
-                  </Typography>
-                </MenuItem>
+                <Button sx={navLinkSx} onClick={handleLogout}>
+                  Logout
+                </Button>
               )}
-            </Menu>
-          </Box>
+            </Box>
 
-          {/* Logo mobile */}
-          <Typography
-            noWrap
-            component="a"
-            href="/"
-            sx={{
-              flexGrow: 1,
-              display: { xs: "flex", md: "none" },
-              fontFamily: '"Cormorant Garamond", Georgia, serif',
-              fontWeight: 600,
-              fontSize: "1.15rem",
-              letterSpacing: "0.1em",
-              color: "#D4AF55",
-              textDecoration: "none",
-              textTransform: "uppercase",
-            }}
-          >
-            StageKeeper
-          </Typography>
+            <NavSearch />
 
-          {/* Desktop links */}
-          <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" }, gap: 0.5 }}>
-            {pages.map((page) => (
-              <Button
-                key={page.id}
-                component="a"
-                href={page.link}
-                sx={{
-                  ...navLinkSx,
-                  color: page.title === session?.user?.username ? "#D4AF55" : navLinkSx.color,
-                  fontWeight: page.title === session?.user?.username ? 600 : 400,
-                }}
-                onClick={handleCloseNavMenu}
-              >
-                {page.title}
-                <CountPill count={page.count} />
-              </Button>
-            ))}
             {session && (
-              <Button sx={navLinkSx} onClick={handleLogout}>
-                Logout
+              <Button
+                aria-label="Log a show"
+                size="small"
+                startIcon={<AddIcon />}
+                sx={{
+                  ml: 1,
+                  flexShrink: 0,
+                  minWidth: { xs: 36, sm: 64 },
+                  fontFamily: '"DM Sans", sans-serif',
+                  fontSize: "0.7rem",
+                  letterSpacing: "0.1em",
+                  textTransform: "uppercase",
+                  color: "#D4AF55",
+                  borderColor: "rgba(212,175,85,0.4)",
+                  whiteSpace: "nowrap",
+                  "&:hover": { borderColor: "#D4AF55", background: "rgba(212,175,85,0.08)" },
+                  // Phones only have room for the plus.
+                  "& .MuiButton-startIcon": { mx: { xs: 0, sm: undefined } },
+                }}
+                variant="outlined"
+                onClick={() => setLogOpen(true)}
+              >
+                <Box component="span" sx={{ display: { xs: "none", sm: "inline" } }}>
+                  Log a show
+                </Box>
               </Button>
             )}
-          </Box>
-
-          <NavSearch />
-
-          {session && (
-            <Button
-              aria-label="Log a show"
-              size="small"
-              startIcon={<AddIcon />}
-              sx={{
-                ml: 1,
-                flexShrink: 0,
-                minWidth: { xs: 36, sm: 64 },
-                fontFamily: '"DM Sans", sans-serif',
-                fontSize: "0.7rem",
-                letterSpacing: "0.1em",
-                textTransform: "uppercase",
-                color: "#D4AF55",
-                borderColor: "rgba(212,175,85,0.4)",
-                whiteSpace: "nowrap",
-                "&:hover": { borderColor: "#D4AF55", background: "rgba(212,175,85,0.08)" },
-                // Phones only have room for the plus.
-                "& .MuiButton-startIcon": { mx: { xs: 0, sm: undefined } },
-              }}
-              variant="outlined"
-              onClick={() => setLogOpen(true)}
-            >
-              <Box component="span" sx={{ display: { xs: "none", sm: "inline" } }}>
-                Log a show
-              </Box>
-            </Button>
-          )}
-        </Toolbar>
-      </Container>
-      {session && (
-        <LogShowDialog open={logOpen} onClose={() => setLogOpen(false)} onLogged={handleLogged} />
-      )}
-      <Snackbar autoHideDuration={5000} open={snackbar !== null} onClose={() => setSnackbar(null)}>
-        <Alert severity="success" onClose={() => setSnackbar(null)}>
-          {snackbar}
-        </Alert>
-      </Snackbar>
-    </AppBar>
+          </Toolbar>
+        </Container>
+        {session && (
+          <LogShowDialog open={logOpen} onClose={() => setLogOpen(false)} onLogged={handleLogged} />
+        )}
+        <Snackbar
+          autoHideDuration={5000}
+          open={snackbar !== null}
+          onClose={() => setSnackbar(null)}
+        >
+          <Alert severity="success" onClose={() => setSnackbar(null)}>
+            {snackbar}
+          </Alert>
+        </Snackbar>
+      </AppBar>
+      <VerifyEmailBanner status={account} />
+    </>
   );
 }
 

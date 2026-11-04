@@ -1,5 +1,7 @@
 import { Box, Container, Typography } from "@mui/material";
 
+import LinkBehavior from "../layout/LinkBehavior";
+
 export type ActivityScope = "mine" | "groups";
 
 interface Props {
@@ -31,7 +33,7 @@ function ActivityScopeTabs({ username, scope }: Props) {
           return (
             <Box
               key={tab.value}
-              component="a"
+              component={LinkBehavior}
               href={href}
               sx={{
                 position: "relative",

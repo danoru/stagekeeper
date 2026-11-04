@@ -2,6 +2,8 @@ import GroupsIcon from "@mui/icons-material/Groups";
 import { Button, ListItemText, Menu, MenuItem } from "@mui/material";
 import { useState } from "react";
 
+import LinkBehavior from "../layout/LinkBehavior";
+
 interface Props {
   /** "MUSICAL-12" | "PLAY-34", the key the group plan form uses for shows. */
   showKey: string;
@@ -42,7 +44,7 @@ function PlanWithGroup({ showKey }: Props) {
         {groups?.map((g) => (
           <MenuItem
             key={g.group}
-            component="a"
+            component={LinkBehavior}
             href={`/groups/${g.group}?propose=${encodeURIComponent(showKey)}`}
           >
             <ListItemText
@@ -52,7 +54,7 @@ function PlanWithGroup({ showKey }: Props) {
           </MenuItem>
         ))}
         {groups?.length === 0 && (
-          <MenuItem component="a" href="/groups">
+          <MenuItem component={LinkBehavior} href="/groups">
             <ListItemText primary="Start a group" secondary="You're not in any groups yet" />
           </MenuItem>
         )}

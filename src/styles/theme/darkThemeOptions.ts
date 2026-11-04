@@ -1,4 +1,7 @@
+import type { LinkProps } from "@mui/material/Link";
 import { ThemeOptions } from "@mui/material/styles";
+
+import LinkBehavior from "../../components/layout/LinkBehavior";
 
 const darkThemeOptions: ThemeOptions = {
   palette: {
@@ -93,6 +96,13 @@ const darkThemeOptions: ThemeOptions = {
     borderRadius: 3,
   },
   components: {
+    // In-app links navigate on the client rather than reloading the whole app.
+    MuiLink: {
+      defaultProps: { component: LinkBehavior } as LinkProps,
+    },
+    MuiButtonBase: {
+      defaultProps: { LinkComponent: LinkBehavior },
+    },
     MuiAppBar: {
       styleOverrides: {
         root: {

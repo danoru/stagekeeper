@@ -3,6 +3,7 @@ import { users, following } from "@prisma/client";
 import { GetServerSidePropsContext } from "next";
 import superjson from "superjson";
 
+import LinkBehavior from "../../../src/components/layout/LinkBehavior";
 import ProfilePageWrapper from "../../../src/components/users/ProfilePageWrapper";
 import UserAvatar from "../../../src/components/users/UserAvatar";
 import { findUserByUsername, getFollowing } from "../../../src/data/users";
@@ -29,7 +30,7 @@ function NetworkToggle({ username }: { username: string }) {
       ].map((tab) => (
         <Box
           key={tab.label}
-          component="a"
+          component={LinkBehavior}
           href={tab.href}
           sx={{
             px: 3,

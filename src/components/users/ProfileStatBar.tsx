@@ -12,6 +12,7 @@ import type { following, users } from "@prisma/client";
 import React, { useState } from "react";
 
 import { followUser, unfollowUser } from "../../data/users";
+import LinkBehavior from "../layout/LinkBehavior";
 
 import UserAvatar from "./UserAvatar";
 
@@ -110,13 +111,13 @@ function ProfileStatBar({
         }}
       >
         <Stack
-          direction={{ xs: "column", sm: "row" }}
           alignItems={{ xs: "center", sm: "center" }}
+          direction={{ xs: "column", sm: "row" }}
           justifyContent="space-between"
           spacing={3}
         >
           {/* Left: avatar + name + actions */}
-          <Stack direction="row" alignItems="center" spacing={2}>
+          <Stack alignItems="center" direction="row" spacing={2}>
             <UserAvatar avatarSize={avatarSize} name={fullName} />
             <Box>
               <Typography
@@ -145,24 +146,24 @@ function ProfileStatBar({
               )}
             </Box>
 
-            <Stack direction="row" alignItems="center" spacing={1} sx={{ ml: 1 }}>
+            <Stack alignItems="center" direction="row" spacing={1} sx={{ ml: 1 }}>
               {isOwnProfile ? (
                 <Button
                   href="/settings"
                   size="small"
-                  variant="outlined"
                   sx={{ fontSize: "0.68rem", letterSpacing: "0.08em", px: 2 }}
+                  variant="outlined"
                 >
                   Edit Profile
                 </Button>
               ) : (
                 <Button
                   size="small"
+                  sx={{ fontSize: "0.68rem", letterSpacing: "0.08em", px: 2, minWidth: 90 }}
                   variant={isFollowing ? "outlined" : "contained"}
                   onClick={handleFollow}
                   onMouseEnter={() => setHovered(true)}
                   onMouseLeave={() => setHovered(false)}
-                  sx={{ fontSize: "0.68rem", letterSpacing: "0.08em", px: 2, minWidth: 90 }}
                 >
                   {isFollowing ? (hovered ? "Unfollow" : "Following") : "Follow"}
                 </Button>
@@ -170,8 +171,8 @@ function ProfileStatBar({
               <Tooltip title="Copy profile link">
                 <IconButton
                   size="small"
-                  onClick={copyUrlToClipboard}
                   sx={{ color: "rgba(212,175,85,0.5)", "&:hover": { color: "#D4AF55" } }}
+                  onClick={copyUrlToClipboard}
                 >
                   <ContentCopyIcon sx={{ fontSize: 16 }} />
                 </IconButton>
@@ -184,8 +185,8 @@ function ProfileStatBar({
             direction="row"
             divider={
               <Divider
-                orientation="vertical"
                 flexItem
+                orientation="vertical"
                 sx={{ borderColor: "rgba(212,175,85,0.1)" }}
               />
             }
@@ -202,7 +203,7 @@ function ProfileStatBar({
             {stats.map((stat) => (
               <Box
                 key={stat.label}
-                component="a"
+                component={LinkBehavior}
                 href={stat.href}
                 sx={{
                   px: { xs: 1.5, md: 2.5 },

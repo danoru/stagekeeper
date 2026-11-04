@@ -4,6 +4,7 @@ import { GetServerSidePropsContext } from "next";
 import { useRouter } from "next/router";
 import superjson from "superjson";
 
+import LinkBehavior from "../../../src/components/layout/LinkBehavior";
 import ProfilePageWrapper from "../../../src/components/users/ProfilePageWrapper";
 import UserAvatar from "../../../src/components/users/UserAvatar";
 import { findUserByUsername, getFollowers } from "../../../src/data/users";
@@ -35,7 +36,7 @@ function NetworkToggle({ username }: { username: string }) {
         return (
           <Box
             key={tab.label}
-            component="a"
+            component={LinkBehavior}
             href={tab.href}
             sx={{
               px: 3,

@@ -3,6 +3,8 @@ import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import type { following } from "@prisma/client";
 
+import LinkBehavior from "../layout/LinkBehavior";
+
 import UserAvatar from "./UserAvatar";
 
 interface Props {
@@ -32,9 +34,9 @@ function UserFollowing({ following }: Props) {
 
       <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1.5 }}>
         {following.map((user: any, i: number) => (
-          <Tooltip key={i} title={user.followingUsername} placement="top">
+          <Tooltip key={i} placement="top" title={user.followingUsername}>
             <Box
-              component="a"
+              component={LinkBehavior}
               href={`/users/${user.followingUsername}`}
               sx={{
                 textDecoration: "none",

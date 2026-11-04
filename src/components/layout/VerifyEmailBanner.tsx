@@ -1,41 +1,17 @@
 import { Alert, Button } from "@mui/material";
-import { useRouter } from "next/router";
-import { useSession } from "next-auth/react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
-interface Status {
-  required: boolean;
-  verified: boolean;
-  email: string | null;
+import type { AccountStatus } from "../../data/emailVerification";
+
+interface Props {
+  status: AccountStatus | null;
 }
 
-// Nudges signed-in members with an unconfirmed email. Hidden when mail isn't configured,
-// since verification isn't enforced then and no link could arrive.
-function VerifyEmailBanner() {
-  const { data: session } = useSession();
-  const router = useRouter();
-  const [status, setStatus] = useState<Status | null>(null);
+// Nudges signed-in members with an unconfirmed email. Hidden when mail isn't configured, since
+// verification isn't enforced then and no link could arrive. The navbar owns the status request.
+function VerifyEmailBanner({ status }: Props) {
   const [notice, setNotice] = useState<{ text: string; ok: boolean } | null>(null);
   const [sending, setSending] = useState(false);
-  const userId = session?.user?.id;
-
-  useEffect(() => {
-    if (!userId) {
-      setStatus(null);
-      return;
-    }
-    let cancelled = false;
-    fetch("/api/user/email-verification")
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data) => {
-        if (!cancelled) setStatus(data);
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-    // Refetched on navigation so changing an email in settings shows up straight away.
-  }, [userId, router.asPath]);
 
   if (!status?.required || status.verified) return null;
 

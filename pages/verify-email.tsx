@@ -62,7 +62,7 @@ function VerifyEmailPage() {
           </>
         )}
         {state !== "checking" && (
-          <Button component="a" href="/" variant="outlined">
+          <Button href="/" variant="outlined">
             Go to StageKeeper
           </Button>
         )}

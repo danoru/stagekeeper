@@ -25,15 +25,27 @@ export async function isEmailVerified(userId: number): Promise<boolean> {
   return user?.emailVerifiedAt != null;
 }
 
-export async function getVerificationStatus(userId: number) {
+export interface AccountStatus {
+  required: boolean;
+  verified: boolean;
+  email: string | null;
+  pendingInvites: number;
+}
+
+export async function getAccountStatus(userId: number): Promise<AccountStatus> {
   const user = await prisma.users.findUnique({
     where: { id: userId },
-    select: { email: true, emailVerifiedAt: true },
+    select: {
+      email: true,
+      emailVerifiedAt: true,
+      _count: { select: { groupInvites: true } },
+    },
   });
   return {
     required: mailConfigured,
     verified: user?.emailVerifiedAt != null,
     email: user?.email ?? null,
+    pendingInvites: user?._count.groupInvites ?? 0,
   };
 }
 

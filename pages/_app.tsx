@@ -8,8 +8,8 @@ import * as React from "react";
 import superjson from "superjson";
 
 import Navbar from "../src/components/layout/Navbar";
+import RouteProgress from "../src/components/layout/RouteProgress";
 import SiteFooter from "../src/components/layout/SiteFooter";
-import VerifyEmailBanner from "../src/components/layout/VerifyEmailBanner";
 import darkThemeOptions from "../src/styles/theme/darkThemeOptions";
 import createEmotionCache from "../src/utils/createEmotionCache";
 import "../src/styles/globals.css";
@@ -30,9 +30,10 @@ export default function App({
   Component,
   emotionCache = clientSideEmotionCache,
   pageProps,
+  router,
 }: MyAppProps) {
   return (
-    <SessionProvider>
+    <SessionProvider refetchOnWindowFocus={false}>
       <CacheProvider value={emotionCache}>
         <ThemeProvider theme={darkTheme}>
           <CssBaseline />
@@ -60,9 +61,11 @@ export default function App({
             <meta content={`${SITE_URL}/og.png`} name="twitter:image" />
             <meta content="StageKeeper — a logbook for the stage" name="twitter:image:alt" />
           </Head>
+          <RouteProgress />
           <Navbar />
-          <VerifyEmailBanner />
-          <Component {...pageProps} />
+          {/* Keyed by URL so moving between two shows starts fresh rather than reusing the first
+              one's state. Refreshing the same URL keeps state and just updates the props. */}
+          <Component key={router.asPath.split("#")[0]} {...pageProps} />
           <SiteFooter />
         </ThemeProvider>
       </CacheProvider>

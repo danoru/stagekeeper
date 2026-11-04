@@ -2,6 +2,8 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import { useRouter } from "next/router";
 
+import LinkBehavior from "../layout/LinkBehavior";
+
 interface Props {
   username: string;
 }
@@ -49,7 +51,7 @@ function ProfileLinkBar({ username }: Props) {
           return (
             <Box
               key={tab.label}
-              component="a"
+              component={LinkBehavior}
               href={href}
               sx={{
                 position: "relative",

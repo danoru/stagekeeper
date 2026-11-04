@@ -4,6 +4,7 @@ import moment from "moment";
 
 import { resolveShowImage } from "../../utils/gradients";
 import { showPath } from "../../utils/slug";
+import LinkBehavior from "../layout/LinkBehavior";
 
 type ActivityEntry = attendance & {
   performances:
@@ -265,7 +266,7 @@ function ActivityRow({ entry }: { entry: ActivityEntry }) {
       </Box>
 
       <Box
-        component="a"
+        component={LinkBehavior}
         href={slug}
         sx={{
           display: "block",
@@ -301,7 +302,7 @@ function ActivityRow({ entry }: { entry: ActivityEntry }) {
       <Box sx={{ minWidth: 0 }}>
         <Typography
           className="row-title"
-          component="a"
+          component={LinkBehavior}
           href={slug}
           sx={{
             display: "block",

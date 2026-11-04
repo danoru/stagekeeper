@@ -20,6 +20,8 @@ import * as React from "react";
 
 import LogShowDialog, { type PresetShow } from "../shows/LogShowDialog";
 
+import NavSearch from "./NavSearch";
+
 interface NavPage {
   id: number;
   title: string;
@@ -36,12 +38,11 @@ function getPages(session: any, inviteCount: number): NavPage[] {
       { id: 3, title: "Musicals", link: "/musicals" },
       { id: 4, title: "Plays", link: "/plays" },
       { id: 5, title: "Theatres", link: "/theatres" },
-      { id: 6, title: "People", link: "/people" },
-      { id: 7, title: "Users", link: "/users" },
-      { id: 8, title: "Settings", link: "/settings" },
+      { id: 6, title: "Users", link: "/users" },
+      { id: 7, title: "Settings", link: "/settings" },
     ];
     if (session.user.badge === "ADMIN") {
-      pages.push({ id: 9, title: "Admin", link: "/admin" });
+      pages.push({ id: 8, title: "Admin", link: "/admin" });
     }
     return pages;
   } else {
@@ -51,8 +52,7 @@ function getPages(session: any, inviteCount: number): NavPage[] {
       { id: 3, title: "Musicals", link: "/musicals" },
       { id: 4, title: "Plays", link: "/plays" },
       { id: 5, title: "Theatres", link: "/theatres" },
-      { id: 6, title: "People", link: "/people" },
-      { id: 7, title: "Users", link: "/users" },
+      { id: 6, title: "Users", link: "/users" },
     ];
   }
 }
@@ -150,6 +150,7 @@ function Navbar() {
             href="/"
             sx={{
               mr: 4,
+              flexShrink: 0,
               display: { md: "flex", xs: "none" },
               fontFamily: '"Cormorant Garamond", Georgia, serif',
               fontWeight: 600,
@@ -264,12 +265,17 @@ function Navbar() {
             )}
           </Box>
 
+          <NavSearch />
+
           {session && (
             <Button
+              aria-label="Log a show"
               size="small"
               startIcon={<AddIcon />}
               sx={{
                 ml: 1,
+                flexShrink: 0,
+                minWidth: { xs: 36, sm: 64 },
                 fontFamily: '"DM Sans", sans-serif',
                 fontSize: "0.7rem",
                 letterSpacing: "0.1em",
@@ -278,11 +284,15 @@ function Navbar() {
                 borderColor: "rgba(212,175,85,0.4)",
                 whiteSpace: "nowrap",
                 "&:hover": { borderColor: "#D4AF55", background: "rgba(212,175,85,0.08)" },
+                // Phones only have room for the plus.
+                "& .MuiButton-startIcon": { mx: { xs: 0, sm: undefined } },
               }}
               variant="outlined"
               onClick={() => setLogOpen(true)}
             >
-              Log a show
+              <Box component="span" sx={{ display: { xs: "none", sm: "inline" } }}>
+                Log a show
+              </Box>
             </Button>
           )}
         </Toolbar>

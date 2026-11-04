@@ -2,10 +2,10 @@ import { Box, Button, Container, Typography } from "@mui/material";
 import { GetServerSidePropsContext } from "next";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import { getSession } from "next-auth/react";
 import { useState } from "react";
 
 import { getGroupByInviteToken, getGroupMembership } from "../../../src/data/groups";
+import { getViewerSession } from "../../../src/utils/viewer";
 
 interface Props {
   alreadyMember: boolean;
@@ -97,7 +97,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   const group = await getGroupByInviteToken(token);
   if (!group) return { notFound: true };
 
-  const session = await getSession(context);
+  const session = await getViewerSession(context);
   if (!session) {
     // Register (or sign in) and come straight back here.
     const callback = encodeURIComponent(`/groups/join/${token}`);

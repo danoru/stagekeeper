@@ -1,7 +1,6 @@
 import { Box, Container, Typography } from "@mui/material";
 import { users } from "@prisma/client";
 import { GetServerSidePropsContext } from "next";
-import { getSession } from "next-auth/react";
 import superjson from "superjson";
 
 import FriendUpcomingActivity from "../../../src/components/home/FriendUpcomingActivity";
@@ -10,6 +9,7 @@ import ProfilePageWrapper from "../../../src/components/users/ProfilePageWrapper
 import { getUserUpcoming, type NormalizedAttendance } from "../../../src/data/performances";
 import { canSeeGoingDates } from "../../../src/data/privacy";
 import { findUserByUsername } from "../../../src/data/users";
+import { getViewerSession } from "../../../src/utils/viewer";
 
 interface Props {
   canSeeGoing: boolean;
@@ -70,7 +70,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   const username = String(context.params?.username);
   const user = await findUserByUsername(username);
   if (!user) return { notFound: true };
-  const session = await getSession(context);
+  const session = await getViewerSession(context);
   const viewerId = session ? Number(session.user.id) : null;
   const canSeeGoing = await canSeeGoingDates(viewerId, user.id);
   const going = canSeeGoing ? await getUserUpcoming(user.id, viewerId) : [];

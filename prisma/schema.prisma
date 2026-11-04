@@ -1,6 +1,7 @@
 generator client {
   provider        = "prisma-client-js"
-  previewFeatures = ["driverAdapters", "postgresqlExtensions"]
+  // relationJoins loads related rows with SQL joins instead of one query per relation.
+  previewFeatures = ["driverAdapters", "postgresqlExtensions", "relationJoins"]
 }
 
 datasource db {

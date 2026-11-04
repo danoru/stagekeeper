@@ -1,7 +1,7 @@
 import { Box, Container } from "@mui/material";
 import { following, musicals, plays, users, watchlist } from "@prisma/client";
+import { GetServerSidePropsContext } from "next";
 import Head from "next/head";
-import { getSession } from "next-auth/react";
 import superjson from "superjson";
 
 import FriendRecentActivity from "../../../src/components/performances/RecentActivity";
@@ -12,6 +12,7 @@ import UserFollowing from "../../../src/components/users/UserFollowing";
 import UserWatchlistPreview from "../../../src/components/users/UserWatchlistPreview";
 import { getRecentPerformances } from "../../../src/data/performances";
 import { getUserProfile } from "../../../src/data/users";
+import { getViewerSession } from "../../../src/utils/viewer";
 
 interface Props {
   attendanceStats: {
@@ -27,10 +28,6 @@ interface Props {
   user: users;
   watchlistPreview: (watchlist & { musicals: musicals | null; plays: plays | null })[];
   watchlistTotal: number;
-}
-
-interface Params {
-  username: string;
 }
 
 function ProfilePage({
@@ -90,9 +87,9 @@ function ProfilePage({
   );
 }
 
-export async function getServerSideProps(context: { params: Params; req: any }) {
-  const { username } = context.params;
-  const session = await getSession({ req: context.req });
+export async function getServerSideProps(context: GetServerSidePropsContext) {
+  const username = String(context.params?.username);
+  const session = await getViewerSession(context);
   const sessionUser = session?.user || null;
   const viewerId = sessionUser ? Number(sessionUser.id) : undefined;
 

@@ -3,7 +3,6 @@ import { Box, Button, Chip, Container, Grid, Stack, TextField, Typography } from
 import { GetServerSidePropsContext } from "next";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import { getSession } from "next-auth/react";
 import { useState } from "react";
 import superjson from "superjson";
 
@@ -13,6 +12,7 @@ import prisma from "../src/data/db";
 import { getUserGroups } from "../src/data/groups";
 import { getStarterShows, getSuggestedPeople, type StarterShow } from "../src/data/onboarding";
 import { resolveShowImage } from "../src/utils/gradients";
+import { getViewerSession } from "../src/utils/viewer";
 
 type Person = Awaited<ReturnType<typeof getSuggestedPeople>>[number];
 
@@ -397,7 +397,7 @@ function WelcomePage({ groups, people, starterShows, username }: Props) {
 }
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
-  const session = await getSession(context);
+  const session = await getViewerSession(context);
   if (!session) {
     return { redirect: { destination: "/register", permanent: false } };
   }

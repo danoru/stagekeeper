@@ -1,6 +1,5 @@
 import { GetServerSidePropsContext } from "next";
 import Head from "next/head";
-import { getSession } from "next-auth/react";
 import superjson from "superjson";
 
 import LoggedInHomePage from "../src/components/home/LoggedInHomePage";
@@ -13,6 +12,7 @@ import {
 } from "../src/data/performances";
 import { getFollowedGoingVisibleIds } from "../src/data/privacy";
 import styles from "../src/styles/home.module.css";
+import { getViewerSession } from "../src/utils/viewer";
 
 interface Props {
   myUpcoming: any;
@@ -45,7 +45,7 @@ function Home({ myUpcoming, recentPerformances, session, upcomingPerformances }:
 }
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
-  const session = await getSession(context);
+  const session = await getViewerSession(context);
 
   if (session) {
     const userId = Number(session.user.id);

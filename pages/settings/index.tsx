@@ -15,12 +15,13 @@ import {
 } from "@mui/material";
 import { GetServerSidePropsContext } from "next";
 import Head from "next/head";
-import { getSession, signIn, signOut } from "next-auth/react";
+import { signIn, signOut } from "next-auth/react";
 import { useState } from "react";
 import superjson from "superjson";
 
 import prisma from "../../src/data/db";
 import { PASSWORD_MIN_LENGTH } from "../../src/utils/validation";
+import { getViewerSession } from "../../src/utils/viewer";
 
 interface ProfileFields {
   firstName: string;
@@ -372,7 +373,7 @@ function SettingsPage({ username, profile }: Props) {
 }
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
-  const session = await getSession(context);
+  const session = await getViewerSession(context);
   if (!session) {
     return { redirect: { destination: "/login?callbackUrl=/settings", permanent: false } };
   }

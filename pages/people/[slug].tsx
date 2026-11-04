@@ -1,7 +1,6 @@
 import { Box, Chip, Container, Link, Stack, Typography } from "@mui/material";
 import moment from "moment";
 import { GetServerSidePropsContext } from "next";
-import { getSession } from "next-auth/react";
 import superjson from "superjson";
 
 import PageMeta from "../../src/components/layout/PageMeta";
@@ -11,6 +10,7 @@ import ReportButton from "../../src/components/shows/ReportButton";
 import { getPersonBySlug, getPersonCredits, type PersonProduction } from "../../src/data/people";
 import { resolveShowImage } from "../../src/utils/gradients";
 import { showPath, theatrePath } from "../../src/utils/slug";
+import { getViewerSession } from "../../src/utils/viewer";
 
 interface Props {
   person: { id: number; name: string; slug: string; bio: string | null; status: string };
@@ -141,7 +141,7 @@ function PersonPage({ person, current, past }: Props) {
 export async function getServerSideProps(context: GetServerSidePropsContext) {
   const slug = String(context.params?.slug ?? "");
   const person = await getPersonBySlug(slug);
-  const session = await getSession(context);
+  const session = await getViewerSession(context);
   const isAdmin = session?.user.badge === "ADMIN";
   // Unconfirmed people stay hidden until an admin approves one of their credits.
   if (!person || (person.status === "PENDING" && !isAdmin)) return { notFound: true };

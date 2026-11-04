@@ -1,12 +1,12 @@
 import { Box, Container, Divider, Link, Stack, Typography } from "@mui/material";
 import { GetServerSidePropsContext } from "next";
 import Head from "next/head";
-import { getSession } from "next-auth/react";
 import superjson from "superjson";
 
 import CreateGroupForm from "../../src/components/groups/CreateGroupForm";
 import GroupInvitations from "../../src/components/groups/GroupInvitations";
 import { getPendingInvitesForUser, getUserGroups } from "../../src/data/groups";
+import { getViewerSession } from "../../src/utils/viewer";
 
 type Membership = Awaited<ReturnType<typeof getUserGroups>>[number];
 type Invitation = Awaited<ReturnType<typeof getPendingInvitesForUser>>[number];
@@ -175,7 +175,7 @@ function GroupsIndexPage({ invitations, memberships }: Props) {
 export const config = { maxDuration: 30 };
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
-  const session = await getSession(context);
+  const session = await getViewerSession(context);
   if (!session) {
     return { redirect: { destination: "/login", permanent: false } };
   }

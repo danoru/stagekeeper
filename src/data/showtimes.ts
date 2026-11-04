@@ -1,6 +1,6 @@
 import type { PerformanceStatus, Prisma } from "@prisma/client";
 
-import { expandRun, hasDayTimes, parseTime, zonedTime } from "../utils/schedule";
+import { expandRun, hasDayTimes, parseTime, theatreToday, zonedTime } from "../utils/schedule";
 
 import prisma from "./db";
 
@@ -145,10 +145,27 @@ export async function removeShowtime(id: number): Promise<"deleted" | "canceled"
   return "canceled";
 }
 
-/** Adds showtimes found by the season importer, inside the caller's transaction. */
-export async function addImportedShowtimes(programmingId: number, starts: Date[], tx: Tx) {
-  if (starts.length === 0) return 0;
+function calendarDay(value: Date) {
+  return Date.UTC(value.getUTCFullYear(), value.getUTCMonth(), value.getUTCDate());
+}
+
+/**
+ * Adds showtimes the season importer stored on a candidate (ISO strings), inside the caller's
+ * transaction. Ones outside the run's dates are dropped, since an admin may have adjusted them.
+ */
+export async function addImportedShowtimes(programmingId: number, stored: unknown, tx: Tx) {
+  if (!Array.isArray(stored) || stored.length === 0) return 0;
   const run = await loadRun(programmingId, tx);
+  const first = calendarDay(run.startDate);
+  const last = calendarDay(run.endDate);
+  const starts = stored
+    .map((value) => new Date(String(value)))
+    .filter((d) => !Number.isNaN(d.getTime()))
+    .filter((d) => {
+      const day = theatreToday(d).getTime();
+      return day >= first && day <= last;
+    });
+  if (starts.length === 0) return 0;
   const created = await tx.performances.createMany({
     data: toRows(run, starts),
     skipDuplicates: true,

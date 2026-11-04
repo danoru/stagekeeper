@@ -70,6 +70,7 @@ interface Candidate {
   startDate: string | null;
   endDate: string | null;
   snippet: string | null;
+  showtimes: string[] | null;
   matchType: PerformanceType | null;
   matchMusical: number | null;
   matchPlay: number | null;
@@ -566,6 +567,7 @@ function CandidateCard({ candidate, seasons, onResolved, onError }: CandidateCar
   const [startDate, setStartDate] = useState(toDateInput(candidate.startDate));
   const [endDate, setEndDate] = useState(toDateInput(candidate.endDate));
   const [busy, setBusy] = useState(false);
+  const [applied, setApplied] = useState<number | null>(null);
 
   // Default to the season containing the start date, else the latest season if the run
   // plausibly belongs to it (approving extends its dates), else a new one.
@@ -600,6 +602,27 @@ function CandidateCard({ candidate, seasons, onResolved, onError }: CandidateCar
   }, [query]);
 
   const isDuplicate = candidate.state === "DUPLICATE";
+  const showtimeCount = candidate.showtimes?.length ?? 0;
+
+  // Keeps the card up: the run stays scheduled, and re-applying is harmless.
+  async function applyShowtimes() {
+    setBusy(true);
+    try {
+      const res = await fetch("/api/admin/import/candidates", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: candidate.id, action: "apply-showtimes" }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        onError(data.error || "Something went wrong.");
+        return;
+      }
+      setApplied(data.added);
+    } finally {
+      setBusy(false);
+    }
+  }
 
   async function act(body: Record<string, unknown>) {
     setBusy(true);
@@ -680,6 +703,14 @@ function CandidateCard({ candidate, seasons, onResolved, onError }: CandidateCar
           </Typography>
         </Box>
         <Stack direction="row" spacing={1}>
+          {showtimeCount > 0 && (
+            <Chip
+              color="info"
+              label={`${showtimeCount} showtime${showtimeCount === 1 ? "" : "s"} found`}
+              size="small"
+              variant="outlined"
+            />
+          )}
           {isDuplicate && (
             <Chip color="warning" label="already scheduled" size="small" variant="outlined" />
           )}
@@ -778,7 +809,17 @@ function CandidateCard({ candidate, seasons, onResolved, onError }: CandidateCar
           />
         )}
         <Box sx={{ flex: 1 }} />
-        <Stack direction="row" spacing={1}>
+        <Stack alignItems="center" direction="row" spacing={1}>
+          {applied !== null && (
+            <Typography color="text.secondary" variant="caption">
+              {applied > 0 ? `Added ${applied} to the run.` : "Already on the run."}
+            </Typography>
+          )}
+          {isDuplicate && showtimeCount > 0 && candidate.existingProgramming && (
+            <Button disabled={busy} size="small" variant="outlined" onClick={applyShowtimes}>
+              Add showtimes to existing run
+            </Button>
+          )}
           <Button
             disabled={busy}
             size="small"

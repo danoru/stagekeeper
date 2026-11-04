@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 
 import { createUserShow } from "../../../../src/data/catalog";
 import prisma from "../../../../src/data/db";
+import { addImportedShowtimes, ShowtimeError } from "../../../../src/data/showtimes";
 import { authOptions } from "../../auth/[...nextauth]";
 
 async function requireAdmin(req: NextApiRequest, res: NextApiResponse) {
@@ -101,6 +102,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(200).json(updated);
     }
 
+    // Already-scheduled runs are how real showtimes reach existing programming.
+    if (action === "apply-showtimes") {
+      if (!candidate.existingProgramming) {
+        return res.status(400).json({ error: "This candidate has no existing run." });
+      }
+      try {
+        const added = await prisma.$transaction((tx) =>
+          addImportedShowtimes(candidate.existingProgramming!, candidate.showtimes, tx)
+        );
+        return res.status(200).json({ added });
+      } catch (e) {
+        const message = e instanceof ShowtimeError ? e.message : "Failed to add showtimes.";
+        return res.status(400).json({ error: message });
+      }
+    }
+
     if (action !== "approve") return res.status(400).json({ error: "Unknown action." });
     if (candidate.state === "APPROVED")
       return res.status(409).json({ error: "This run was already approved." });
@@ -175,6 +192,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             dayTimes: {},
           },
         });
+        await addImportedShowtimes(programming.id, candidate.showtimes, tx);
         const updated = await tx.importCandidates.update({
           where: { id: candidate.id },
           data: {

@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import * as yup from "yup";
 
 import prisma from "../../../src/data/db";
+import { sendVerificationEmail } from "../../../src/data/emailVerification";
 import { publicUserSelect } from "../../../src/data/users";
 import { authOptions } from "../auth/[...nextauth]";
 
@@ -65,11 +66,19 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
     try {
       const data = await profileSchema.validate(req.body, { stripUnknown: true });
+      const userId = Number(session.user.id);
+      const current = await prisma.users.findUnique({
+        where: { id: userId },
+        select: { email: true },
+      });
+      // A new address hasn't been confirmed yet, whatever the old one's status was.
+      const emailChanged = current?.email.toLowerCase() !== data.email.toLowerCase();
       const updatedUser = await prisma.users.update({
-        where: { id: Number(session.user.id) },
-        data,
+        where: { id: userId },
+        data: { ...data, ...(emailChanged ? { emailVerifiedAt: null } : {}) },
         select: publicUserSelect,
       });
+      if (emailChanged) await sendVerificationEmail(userId, req);
       return res.status(200).json(updatedUser);
     } catch (e: any) {
       if (e instanceof yup.ValidationError) {

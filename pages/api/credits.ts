@@ -2,13 +2,14 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth";
 
 import prisma from "../../src/data/db";
+import { isEmailVerified, VERIFY_EMAIL_MESSAGE } from "../../src/data/emailVerification";
 import {
   hasSeenShow,
   parseSuggestion,
   submitCredits,
   type CreditSuggestion,
 } from "../../src/data/people";
-import { clientIp, rateLimit } from "../../src/utils/rateLimit";
+import { rateLimit } from "../../src/utils/rateLimit";
 
 import { authOptions } from "./auth/[...nextauth]";
 
@@ -27,7 +28,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const userId = Number(session.user.id);
   const isAdmin = session.user.badge === "ADMIN";
 
-  if (!isAdmin && !rateLimit(`credits:${userId}:${clientIp(req)}`, 20, 60 * 60 * 1000)) {
+  if (!isAdmin && !(await isEmailVerified(userId))) {
+    return res.status(403).json({ error: VERIFY_EMAIL_MESSAGE });
+  }
+  if (!isAdmin && !(await rateLimit(`credits:${userId}`, 20, 60 * 60 * 1000))) {
     return res.status(429).json({ error: "Too many suggestions. Try again later." });
   }
 

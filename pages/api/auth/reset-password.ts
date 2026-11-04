@@ -12,7 +12,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).json({ error: "Method not allowed." });
   }
 
-  if (!rateLimit(`reset:${clientIp(req)}`, 10, 15 * 60 * 1000)) {
+  if (!(await rateLimit(`reset:${clientIp(req)}`, 10, 15 * 60 * 1000))) {
     return res.status(429).json({ error: "Too many attempts. Try again in a few minutes." });
   }
 
@@ -38,6 +38,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     where: { id: user.id },
     data: {
       password: await hash(password, 10),
+      passwordChangedAt: new Date(),
       passwordResetToken: null,
       passwordResetExpires: null,
     },

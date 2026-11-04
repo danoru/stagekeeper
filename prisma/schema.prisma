@@ -379,6 +379,12 @@ model users {
   onboardedAt          DateTime?               @db.Timestamptz(6)
   passwordResetToken   String?                 @unique
   passwordResetExpires DateTime?               @db.Timestamptz(6)
+  /// Sessions signed in before this are revoked.
+  passwordChangedAt    DateTime?               @db.Timestamptz(6)
+  emailVerifiedAt      DateTime?               @db.Timestamptz(6)
+  emailVerifyToken     String?                 @unique
+  emailVerifyExpires   DateTime?               @db.Timestamptz(6)
+  reportsFiled         reports[]
   musicalsCreated      musicals[]              @relation("MusicalCreator")
   playsCreated         plays[]                 @relation("PlayCreator")
   theatresCreated      theatres[]              @relation("TheatreCreator")
@@ -452,6 +458,41 @@ enum GroupVisibility {
 enum PerformanceType {
   MUSICAL
   PLAY
+}
+
+/// Fixed-window request counts, shared across serverless instances.
+model rateLimits {
+  key     String   @id
+  count   Int      @default(0)
+  resetAt DateTime @db.Timestamptz(6)
+
+  @@index([resetAt])
+}
+
+/// Something a member flagged for an admin to look at. The label is kept so a report still
+/// reads sensibly after its target is removed.
+model reports {
+  id         Int          @id @default(autoincrement())
+  createdAt  DateTime     @default(now()) @db.Timestamptz(6)
+  reporter   Int?
+  targetType ReportTarget
+  targetId   Int
+  label      String
+  reason     String
+  details    String?
+  resolvedAt DateTime?    @db.Timestamptz(6)
+  users      users?       @relation(fields: [reporter], references: [id], onDelete: SetNull, onUpdate: NoAction)
+
+  @@index([resolvedAt])
+  @@index([reporter])
+}
+
+enum ReportTarget {
+  MUSICAL
+  PLAY
+  THEATRE
+  PERSON
+  USER
 }
 
 enum PerformanceStatus {

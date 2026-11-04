@@ -6,6 +6,7 @@ import prisma from "../../../src/data/db";
 import { sendMail } from "../../../src/utils/mail";
 import { clientIp, rateLimit } from "../../../src/utils/rateLimit";
 import { hashResetToken } from "../../../src/utils/resetToken";
+import { emailLinkBase } from "../../../src/utils/siteUrl";
 
 const TOKEN_TTL_MS = 60 * 60 * 1000;
 
@@ -16,7 +17,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   const ip = clientIp(req);
-  if (!rateLimit(`forgot:${ip}`, 5, 15 * 60 * 1000)) {
+  if (!(await rateLimit(`forgot:${ip}`, 5, 15 * 60 * 1000))) {
     return res.status(429).json({ error: "Too many requests. Try again in a few minutes." });
   }
 
@@ -43,16 +44,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     },
   });
 
-  // Never build the link from the Host header in production: a forged Host would send the
-  // victim a working reset token pointing at someone else's site.
-  const base =
-    process.env.NEXTAUTH_URL ??
-    (process.env.NODE_ENV === "production" ? null : `http://${req.headers.host}`);
+  const base = emailLinkBase(req);
   if (!base) {
     console.error("NEXTAUTH_URL is not set; refusing to send a password reset link.");
     return res.status(200).json(generic);
   }
-  const link = `${base.replace(/\/$/, "")}/reset-password?token=${token}`;
+  const link = `${base}/reset-password?token=${token}`;
   try {
     await sendMail({
       to: user.email,

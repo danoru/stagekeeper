@@ -1,15 +1,8 @@
 import type { NextApiRequest } from "next";
 
-// Fixed-window, in-memory limiter. Good enough for a single Node instance; on a
-// multi-instance deploy each instance keeps its own counts, which only loosens the cap.
-const buckets = new Map<string, { count: number; resetAt: number }>();
+import prisma from "../data/db";
 
-function sweep(now: number) {
-  if (buckets.size < 1000) return;
-  for (const [key, bucket] of buckets) {
-    if (bucket.resetAt <= now) buckets.delete(key);
-  }
-}
+// Fixed-window limiter backed by Postgres, because serverless instances don't share memory.
 
 export function clientIp(req: NextApiRequest | { headers: Record<string, unknown> }) {
   const forwarded = req.headers["x-forwarded-for"];
@@ -22,15 +15,28 @@ export function clientIp(req: NextApiRequest | { headers: Record<string, unknown
 
 /**
  * Returns true when `key` is still within `limit` hits per `windowMs`; false once exceeded.
+ * A database failure allows the request: limits shouldn't take the site down with them, and
+ * every limited route needs the database anyway.
  */
-export function rateLimit(key: string, limit: number, windowMs: number) {
-  const now = Date.now();
-  sweep(now);
-  const bucket = buckets.get(key);
-  if (!bucket || bucket.resetAt <= now) {
-    buckets.set(key, { count: 1, resetAt: now + windowMs });
+export async function rateLimit(key: string, limit: number, windowMs: number): Promise<boolean> {
+  const resetAt = new Date(Date.now() + windowMs);
+  try {
+    const rows = await prisma.$queryRaw<{ count: number }[]>`
+      INSERT INTO "rateLimits" ("key", "count", "resetAt")
+      VALUES (${key}, 1, ${resetAt}::timestamptz)
+      ON CONFLICT ("key") DO UPDATE SET
+        "count" = CASE WHEN "rateLimits"."resetAt" <= now() THEN 1
+                       ELSE "rateLimits"."count" + 1 END,
+        "resetAt" = CASE WHEN "rateLimits"."resetAt" <= now() THEN EXCLUDED."resetAt"
+                         ELSE "rateLimits"."resetAt" END
+      RETURNING "count"`;
+    // Expired rows are overwritten when their key returns; sweep the rest now and then.
+    if (Math.random() < 0.01) {
+      await prisma.rateLimits.deleteMany({ where: { resetAt: { lt: new Date() } } });
+    }
+    return Number(rows[0].count) <= limit;
+  } catch (error) {
+    console.error("Rate limit check failed:", error);
     return true;
   }
-  bucket.count += 1;
-  return bucket.count <= limit;
 }

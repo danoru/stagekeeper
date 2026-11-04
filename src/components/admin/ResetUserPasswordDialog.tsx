@@ -14,6 +14,8 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 
+import { PASSWORD_MIN_LENGTH } from "../../utils/validation";
+
 type Props = {
   open: boolean;
   user: { id: number; username: string } | null;
@@ -55,8 +57,8 @@ function ResetUserPasswordDialog({ open, user, onClose, onSuccess, onError }: Pr
 
   async function handleConfirm() {
     if (!user) return;
-    if (password.length < 5) {
-      setError("Password must be at least 5 characters long.");
+    if (password.length < PASSWORD_MIN_LENGTH) {
+      setError(`Password must be at least ${PASSWORD_MIN_LENGTH} characters long.`);
       return;
     }
     setSubmitting(true);
@@ -167,7 +169,7 @@ function ResetUserPasswordDialog({ open, user, onClose, onSuccess, onError }: Pr
               Cancel
             </Button>
             <Button
-              disabled={submitting || password.length < 5}
+              disabled={submitting || password.length < PASSWORD_MIN_LENGTH}
               variant="contained"
               onClick={handleConfirm}
             >

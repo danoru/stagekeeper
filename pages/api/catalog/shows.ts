@@ -2,7 +2,8 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth";
 
 import { createUserShow } from "../../../src/data/catalog";
-import { clientIp, rateLimit } from "../../../src/utils/rateLimit";
+import { isEmailVerified, VERIFY_EMAIL_MESSAGE } from "../../../src/data/emailVerification";
+import { rateLimit } from "../../../src/utils/rateLimit";
 import { authOptions } from "../auth/[...nextauth]";
 
 // POST /api/catalog/shows — any signed-in user can add a show (lands as PENDING).
@@ -13,7 +14,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
   const session = await getServerSession(req, res, authOptions);
   if (!session) return res.status(401).json({ error: "Not authenticated." });
-  if (!rateLimit(`create-show:${clientIp(req)}`, 30, 60 * 60 * 1000)) {
+  if (!(await isEmailVerified(Number(session.user.id)))) {
+    return res.status(403).json({ error: VERIFY_EMAIL_MESSAGE });
+  }
+  if (!(await rateLimit(`create-show:${session.user.id}`, 30, 60 * 60 * 1000))) {
     return res.status(429).json({ error: "Slow down — too many new shows at once." });
   }
 

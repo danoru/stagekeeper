@@ -36,7 +36,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   await prisma.users.update({
     where: { id: user.id },
-    data: { password: await hash(newPassword, 10) },
+    // Signs out every other session; the settings page signs this device back in.
+    data: { password: await hash(newPassword, 10), passwordChangedAt: new Date() },
   });
   return res.status(200).json({ message: "Password updated." });
 }

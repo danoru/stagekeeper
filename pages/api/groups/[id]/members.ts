@@ -2,6 +2,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth";
 
 import prisma from "../../../../src/data/db";
+import { isEmailVerified, VERIFY_EMAIL_MESSAGE } from "../../../../src/data/emailVerification";
 import { getGroupMembership, inviteToGroup, isGroupOwner } from "../../../../src/data/groups";
 import { rateLimit } from "../../../../src/utils/rateLimit";
 import { authOptions } from "../../auth/[...nextauth]";
@@ -23,7 +24,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (!(await isGroupOwner(groupId, userId))) {
       return res.status(403).json({ error: "Only the owner can invite members." });
     }
-    if (!rateLimit(`group-invite:${userId}`, 30, 60 * 60 * 1000)) {
+    if (!(await isEmailVerified(userId))) {
+      return res.status(403).json({ error: VERIFY_EMAIL_MESSAGE });
+    }
+    if (!(await rateLimit(`group-invite:${userId}`, 30, 60 * 60 * 1000))) {
       return res.status(429).json({ error: "Too many invites. Try again later." });
     }
     const { username } = req.body ?? {};

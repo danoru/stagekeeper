@@ -3,6 +3,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import * as yup from "yup";
 
 import prisma from "../../../src/data/db";
+import { sendVerificationEmail } from "../../../src/data/emailVerification";
 import { clientIp, rateLimit } from "../../../src/utils/rateLimit";
 import {
   PASSWORD_MIN_LENGTH,
@@ -33,7 +34,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   }
 
   const ip = clientIp(req);
-  if (!rateLimit(`register:${ip}`, 10, 60 * 60 * 1000)) {
+  if (!(await rateLimit(`register:${ip}`, 10, 60 * 60 * 1000))) {
     return res
       .status(429)
       .json({ error: "Too many accounts created from this address. Try later." });
@@ -44,13 +45,15 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
     const hashedPassword = await hash(password, 10);
 
-    await prisma.users.create({
+    const user = await prisma.users.create({
       data: {
         email,
         username,
         password: hashedPassword,
       },
+      select: { id: true },
     });
+    await sendVerificationEmail(user.id, req);
 
     return res.status(201).json({ message: "Success." });
   } catch (e: any) {

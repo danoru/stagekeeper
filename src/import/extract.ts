@@ -1,6 +1,8 @@
 import * as cheerio from "cheerio";
 import type { Cheerio, CheerioAPI } from "cheerio";
 
+import { theatreToday, zonedTime } from "../utils/schedule";
+
 import { containsDateRange, findDateRanges, findSeasonYearHint, type YearHint } from "./dates";
 import {
   findCatalogMatch,
@@ -18,6 +20,8 @@ export type RawRun = {
   end?: Date;
   sourceUrl: string;
   snippet: string;
+  /** Individual performances, when the page lists them with real times. */
+  showtimes?: Date[];
   /** Catalog row the title resolved to, if any. */
   match?: CatalogTitle;
 };
@@ -55,6 +59,8 @@ const LOOKS_LIKE_DATE =
 const CREDIT_WORDS =
   /\b(directed|written|produced|presented|sponsored|choreographed|adapted|conceived)\s+by\b|\b(music|lyrics|book)\s+(and|&)\s+(music|lyrics|book)\b|\bmusical direction\b/i;
 const NOISE_TAGS = "script, style, noscript, svg, iframe, template, nav, footer, header, form";
+/** Same title after a gap this long is a separate run rather than more dates of the same one. */
+const RUN_GAP_DAYS = 45;
 
 type ExtractOptions = {
   baseUrl: string;
@@ -65,13 +71,18 @@ type ExtractOptions = {
 
 export function extractRuns(html: string, opts: ExtractOptions): RawRun[] {
   const $ = cheerio.load(html);
+  // JSON-LD lives in <script> tags, so read it before stripping them as noise.
+  const structured = extractJsonLd($, opts);
   $(NOISE_TAGS).remove();
   const pageText = collapse($("body").text());
   const hint = findSeasonYearHint(pageText) ?? findSeasonYearHint($("title").text());
 
-  let runs = extractJsonLd($, opts);
-  if (runs.length === 0 && opts.config?.item) runs = extractBySelectors($, opts, hint);
-  if (runs.length === 0) runs = extractGeneric($, opts, hint);
+  let scraped = opts.config?.item ? extractBySelectors($, opts, hint) : [];
+  if (scraped.length === 0) scraped = extractGeneric($, opts, hint);
+  // Structured data wins for the shows it covers, but pages often mark up only some of them
+  // (just the next show, say), so the page's other shows still come from the markup.
+  const known = new Set(structured.map((r) => normalizeTitle(r.title)));
+  const runs = [...structured, ...scraped.filter((r) => !known.has(normalizeTitle(r.title)))];
   return dedupe(dropSectionHeadings(runs)).map((r) => ({
     ...r,
     match: findCatalogMatch(r.title, opts.catalog),
@@ -92,9 +103,9 @@ function dropSectionHeadings(runs: RawRun[]): RawRun[] {
 /** Single show page (followed link): one run named by og:title / h1. */
 export function extractSinglePage(html: string, opts: ExtractOptions): RawRun | undefined {
   const $ = cheerio.load(html);
-  $(NOISE_TAGS).remove();
   const fromLd = extractJsonLd($, opts)[0];
   if (fromLd) return { ...fromLd, match: findCatalogMatch(fromLd.title, opts.catalog) };
+  $(NOISE_TAGS).remove();
 
   const title = cleanTitle(
     $('meta[property="og:title"]').attr("content") ?? $("h1").first().text() ?? $("title").text()
@@ -146,8 +157,17 @@ export function collectShowLinks(html: string, baseUrl: string, limit = 20): str
 
 // ---------------------------------------------------------------------------
 
+type LdEvent = {
+  title: string;
+  start: Date;
+  end: Date;
+  showtime?: Date;
+  sourceUrl: string;
+  type: string;
+};
+
 function extractJsonLd($: CheerioAPI, opts: ExtractOptions): RawRun[] {
-  const out: RawRun[] = [];
+  const events: LdEvent[] = [];
   $('script[type="application/ld+json"]').each((_, el) => {
     let data: unknown;
     try {
@@ -159,36 +179,110 @@ function extractJsonLd($: CheerioAPI, opts: ExtractOptions): RawRun[] {
       const type = String(node["@type"] ?? "");
       if (!/Event$/i.test(type)) continue;
       const title = cleanTitle(String(node.name ?? ""));
-      const start = ldDate(node.startDate);
-      const end = ldDate(node.endDate) ?? start;
-      if (!title || !start) continue;
-      out.push({
+      const from = parseLdDate(node.startDate);
+      const to = parseLdDate(node.endDate) ?? from;
+      if (!title || !from || !to) continue;
+      events.push({
         title,
-        start,
-        end,
+        start: from.day,
+        end: to.day,
+        // An event spanning several days is the whole run, not one performance.
+        showtime: from.day.getTime() === to.day.getTime() ? from.instant : undefined,
         sourceUrl: typeof node.url === "string" ? node.url : opts.baseUrl,
-        snippet: `${type}: ${node.startDate ?? ""} – ${node.endDate ?? ""}`,
+        type,
       });
     }
   });
-  return out;
+  return mergeLdEvents(events);
+}
+
+/**
+ * Ticketing pages often list every performance as its own event. Those are one run with many
+ * showtimes, so events are merged per title; a long gap means the show came back as a new run.
+ */
+function mergeLdEvents(events: LdEvent[]): RawRun[] {
+  const byTitle = new Map<string, LdEvent[]>();
+  for (const event of events) {
+    const key = normalizeTitle(event.title);
+    byTitle.set(key, [...(byTitle.get(key) ?? []), event]);
+  }
+
+  const runs: RawRun[] = [];
+  for (const group of byTitle.values()) {
+    group.sort((a, b) => a.start.getTime() - b.start.getTime());
+    let batch: LdEvent[] = [];
+    let batchEnd = 0;
+    const flush = () => {
+      if (batch.length > 0) runs.push(runFromLdEvents(batch));
+      batch = [];
+      batchEnd = 0;
+    };
+    for (const event of group) {
+      if (batch.length > 0 && event.start.getTime() - batchEnd > RUN_GAP_DAYS * 86_400_000) flush();
+      batch.push(event);
+      batchEnd = Math.max(batchEnd, event.end.getTime());
+    }
+    flush();
+  }
+  return runs;
+}
+
+function runFromLdEvents(events: LdEvent[]): RawRun {
+  const start = events[0].start;
+  const end = new Date(Math.max(...events.map((e) => e.end.getTime())));
+  const instants = new Set(events.flatMap((e) => (e.showtime ? [e.showtime.getTime()] : [])));
+  const showtimes = [...instants].sort((a, b) => a - b).map((t) => new Date(t));
+  return {
+    title: events[0].title,
+    start,
+    end,
+    sourceUrl: events[0].sourceUrl,
+    snippet: `${events[0].type}: ${start.toISOString().slice(0, 10)} – ${end.toISOString().slice(0, 10)}`,
+    showtimes: showtimes.length > 0 ? showtimes : undefined,
+  };
 }
 
 function flattenLd(data: unknown): Record<string, unknown>[] {
   if (Array.isArray(data)) return data.flatMap(flattenLd);
   if (!data || typeof data !== "object") return [];
   const node = data as Record<string, unknown>;
-  const children = ["@graph", "subEvent", "itemListElement", "item"].flatMap((k) =>
+  const children = ["@graph", "itemListElement", "item"].flatMap((k) =>
     k in node ? flattenLd(node[k]) : []
   );
-  return [node, ...children];
+  // Performances listed under a show often leave the show's name to their parent.
+  const performances = flattenLd(node.subEvent).map((child) =>
+    child.name ? child : { ...child, name: node.name }
+  );
+  return [node, ...children, ...performances];
 }
 
-function ldDate(value: unknown): Date | undefined {
+/**
+ * `day` is the calendar day at the theatre (UTC noon, like other imported dates). `instant` is
+ * set only when the value carries a real time; "T00:00" is how sites write "no time given".
+ */
+function parseLdDate(value: unknown): { day: Date; instant?: Date } | undefined {
   if (typeof value !== "string") return undefined;
-  const m = value.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  const m = value
+    .trim()
+    .match(
+      /^(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{2}):(\d{2})(?::\d{2}(?:\.\d+)?)?\s*(Z|[+-]\d{2}:?\d{2})?)?/
+    );
   if (!m) return undefined;
-  return new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3]), 12));
+  const [, y, mo, d, hh, mm, zone] = m;
+  const dayUtc = Date.UTC(Number(y), Number(mo) - 1, Number(d));
+  const asDay = { day: new Date(dayUtc + 12 * 3_600_000) };
+  if (hh === undefined || (hh === "00" && mm === "00")) return asDay;
+
+  if (!zone) {
+    // No zone given: it's the clock at the theatre.
+    return { ...asDay, instant: zonedTime(dayUtc, Number(hh), Number(mm)) };
+  }
+  const offset =
+    zone === "Z" ? "Z" : zone.includes(":") ? zone : `${zone.slice(0, 3)}:${zone.slice(3)}`;
+  const instant = new Date(`${y}-${mo}-${d}T${hh}:${mm}:00${offset}`);
+  if (Number.isNaN(instant.getTime())) return asDay;
+  // 8pm in California is already tomorrow in UTC, so the day comes from the theatre's clock.
+  return { day: new Date(theatreToday(instant).getTime() + 12 * 3_600_000), instant };
 }
 
 function extractBySelectors($: CheerioAPI, opts: ExtractOptions, hint?: YearHint): RawRun[] {

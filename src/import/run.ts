@@ -16,6 +16,8 @@ import {
   type CatalogTitle,
 } from "./match";
 
+const MAX_SHOWTIMES = 400;
+
 export type ImportStatus = "OK" | "EMPTY" | "BLOCKED" | "ERROR" | "NO_URL";
 
 export type ImportSummary = {
@@ -131,6 +133,7 @@ export async function runTheatreImport(
         startDate: run.start ?? null,
         endDate: run.end ?? null,
         snippet: run.snippet.slice(0, 300),
+        showtimes: run.showtimes?.slice(0, MAX_SHOWTIMES).map((d) => d.toISOString()),
         matchType: run.match?.type ?? null,
         matchMusical: run.match?.type === "MUSICAL" ? run.match.id : null,
         matchPlay: run.match?.type === "PLAY" ? run.match.id : null,
@@ -163,7 +166,9 @@ function dedupeRuns(runs: RawRun[]): RawRun[] {
   const seen = new Map<string, RawRun>();
   for (const r of runs) {
     const key = `${r.match ? `${r.match.type}:${r.match.id}` : r.title.toLowerCase()}|${r.start?.toISOString() ?? ""}`;
-    if (!seen.has(key)) seen.set(key, r);
+    // A show's own page usually has showtimes the season listing doesn't; keep the richer copy.
+    const existing = seen.get(key);
+    if (!existing || (!existing.showtimes && r.showtimes)) seen.set(key, r);
   }
   return [...seen.values()];
 }

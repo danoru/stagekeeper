@@ -64,7 +64,7 @@ const ACCOUNT_PAGES = /^\/(groups|settings|verify-email)/;
 
 // The width where the logo, every link (admin and invite count included) and Log a show all fit.
 // Narrower screens get the menu.
-const DESKTOP_NAV = "@media (min-width: 1280px)";
+const DESKTOP_NAV = "@media (min-width: 1320px)";
 
 const navLinkSx = {
   fontFamily: '"DM Sans", sans-serif',

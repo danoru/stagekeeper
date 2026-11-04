@@ -1,24 +1,23 @@
 import { Box, Container, Grid, Stack, Typography } from "@mui/material";
 import { musicals, plays, programming, seasons, theatres } from "@prisma/client";
 import moment from "moment";
+import { GetServerSidePropsContext } from "next";
 import superjson from "superjson";
 
 import ProgramCard from "../../src/components/cards/ProgramCard";
 import PageMeta from "../../src/components/layout/PageMeta";
 import PerformanceCalendar from "../../src/components/schedule/PerformanceCalendar";
 import ReportButton from "../../src/components/shows/ReportButton";
-import { getTheatreByName, getCurrentSeason, getTheatres } from "../../src/data/theatres";
-import { showPath, slugify, theatrePath } from "../../src/utils/slug";
+import { getTheatreByName, getCurrentSeason } from "../../src/data/theatres";
+import { canViewPending } from "../../src/data/visibility";
+import { showPath, theatrePath } from "../../src/utils/slug";
+import { getViewer } from "../../src/utils/viewer";
 
 interface Props {
   theatre: Omit<theatres, "scrapeConfig" | "seasonUrl">;
   seasons: (seasons & {
     programming: (programming & { musicals: musicals; plays: plays })[];
   })[];
-}
-
-interface Params {
-  name: string;
 }
 
 function TheatrePage({ theatre, seasons }: Props) {
@@ -95,26 +94,26 @@ function TheatrePage({ theatre, seasons }: Props) {
   );
 }
 
-export async function getStaticPaths() {
-  const theatres = await getTheatres();
-  const paths = theatres.map((theatre: { name: string }) => ({
-    params: { name: slugify(theatre.name) },
-  }));
-  return { paths, fallback: "blocking" };
-}
-
-export async function getStaticProps(context: { params: Params }) {
-  const { name } = context.params;
-  const theatre = await getTheatreByName(name);
-  let seasons: any = [];
-
-  if (theatre) {
-    seasons = await getCurrentSeason(theatre.id);
-  }
+export async function getServerSideProps(context: GetServerSidePropsContext) {
+  const theatre = await getTheatreByName(String(context.params?.name));
 
   if (!theatre) {
     return { notFound: true };
   }
+
+  // Pending theatres are checked per viewer and never cached; approved ones are the same for
+  // everyone, so the CDN can hold them for a few minutes.
+  if (theatre.status === "PENDING") {
+    const viewer = await getViewer(context);
+    if (!(await canViewPending({ theatre: theatre.id }, theatre.createdBy, viewer))) {
+      return { notFound: true };
+    }
+    context.res.setHeader("Cache-Control", "private, no-store");
+  } else {
+    context.res.setHeader("Cache-Control", "public, s-maxage=300, stale-while-revalidate=600");
+  }
+
+  const seasons = await getCurrentSeason(theatre.id);
 
   // The importer's settings are admin-only.
   const publicTheatre: Props["theatre"] & Partial<theatres> = { ...theatre };
@@ -126,7 +125,6 @@ export async function getStaticProps(context: { params: Params }) {
       theatre: publicTheatre,
       seasons: seasons || [],
     }).json,
-    revalidate: 300,
   };
 }
 

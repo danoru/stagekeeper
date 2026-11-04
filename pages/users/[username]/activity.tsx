@@ -76,7 +76,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     };
   }
 
-  const entries = await getUserAttendanceHistory(user.id);
+  const entries = await getUserAttendanceHistory(user.id, viewerId);
   return {
     props: superjson.serialize({ user, scope: "mine", isSelf, entries }).json,
   };

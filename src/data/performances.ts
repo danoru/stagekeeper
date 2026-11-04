@@ -3,6 +3,7 @@ import type { PerformanceType, Prisma } from "@prisma/client";
 import { theatreToday } from "../utils/schedule";
 
 import prisma from "./db";
+import { visibleAttendance } from "./visibility";
 
 export const PERFORMANCE_LIST = [
   {
@@ -406,13 +407,18 @@ function byStartTimeAsc(a: NormalizedAttendance, b: NormalizedAttendance) {
 
 // Shows the given users have marked "going" with a date today or later. Callers pass only
 // people allowed to see those dates (see privacy.ts).
-export async function getFriendsUpcomingPerformances(userIds: number[], take = 20) {
+export async function getFriendsUpcomingPerformances(
+  userIds: number[],
+  viewerId: number | null,
+  take = 20
+) {
   if (userIds.length === 0) return [];
   const rows = await prisma.attendance.findMany({
     where: {
       user: { in: userIds },
       going: true,
       seenDate: { gte: startOfToday() },
+      AND: [visibleAttendance(viewerId)],
     },
     include: attendanceInclude,
     orderBy: { seenDate: "asc" },
@@ -422,12 +428,17 @@ export async function getFriendsUpcomingPerformances(userIds: number[], take = 2
 }
 
 // Past attendance (not future "going" rows), newest first.
-export async function getRecentPerformances(usernames: string[], take = 20) {
+export async function getRecentPerformances(
+  usernames: string[],
+  viewerId: number | null,
+  take = 20
+) {
   if (usernames.length === 0) return [];
   const rows = await prisma.attendance.findMany({
     where: {
       users: { username: { in: usernames } },
       OR: [{ going: false }, { seenDate: { lt: startOfToday() } }],
+      AND: [visibleAttendance(viewerId)],
     },
     include: attendanceInclude,
     orderBy: { createdAt: "desc" },
@@ -449,24 +460,37 @@ export async function getUserAttendance(id: number) {
 }
 
 // Past viewings only; upcoming "going" rows live on the Upcoming tab.
-export async function getUserAttendanceHistory(id: number) {
+export async function getUserAttendanceHistory(id: number, viewerId: number | null) {
   const rows = await prisma.attendance.findMany({
-    where: { user: id, OR: [{ going: false }, { seenDate: { lt: startOfToday() } }] },
+    where: {
+      user: id,
+      OR: [{ going: false }, { seenDate: { lt: startOfToday() } }],
+      AND: [visibleAttendance(viewerId)],
+    },
     include: attendanceInclude,
   });
   return normalizeAttendanceRows(rows).sort(byStartTimeDesc);
 }
 
-export async function getUserUpcoming(id: number) {
+export async function getUserUpcoming(id: number, viewerId: number | null) {
   const rows = await prisma.attendance.findMany({
-    where: { user: id, going: true, seenDate: { gte: startOfToday() } },
+    where: {
+      user: id,
+      going: true,
+      seenDate: { gte: startOfToday() },
+      AND: [visibleAttendance(viewerId)],
+    },
     include: attendanceInclude,
     orderBy: { seenDate: "asc" },
   });
   return normalizeAttendanceRows(rows);
 }
 
-export async function getUserAttendanceByYear(year: number | null, id: number) {
+export async function getUserAttendanceByYear(
+  year: number | null,
+  id: number,
+  viewerId: number | null
+) {
   const today = startOfToday();
   // Stats need a date, so undated manual logs are excluded at the DB rather than after load.
   const dated: Prisma.attendanceWhereInput = year
@@ -494,7 +518,11 @@ export async function getUserAttendanceByYear(year: number | null, id: number) {
   const rows = await prisma.attendance.findMany({
     where: {
       user: id,
-      AND: [dated, { OR: [{ going: false }, { seenDate: { lt: today } }] }],
+      AND: [
+        dated,
+        { OR: [{ going: false }, { seenDate: { lt: today } }] },
+        visibleAttendance(viewerId),
+      ],
     },
     include: attendanceInclude,
   });

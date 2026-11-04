@@ -5,6 +5,7 @@ import { getServerSession } from "next-auth";
 import prisma from "../../../src/data/db";
 import { canSeeGoingDates } from "../../../src/data/privacy";
 import { showtimeSelect } from "../../../src/data/showtimes";
+import { visibleAttendance, visibleWatchlist } from "../../../src/data/visibility";
 import { openRunCutoff, THEATRE_TZ, theatreToday } from "../../../src/utils/schedule";
 import { authOptions } from "../auth/[...nextauth]";
 
@@ -23,9 +24,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const cutoff = openRunCutoff();
 
   try {
+    const session = await getServerSession(req, res, authOptions);
+    const viewerId = session ? Number(session.user.id) : null;
+
     const watchlist = await prisma.watchlist.findMany({
       where: {
         user,
+        AND: [visibleWatchlist(viewerId)],
         OR: [
           {
             musicals: {
@@ -110,14 +115,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const firstDayOfMonth = new Date(date.getFullYear(), date.getMonth(), 1);
 
     // Future dates show where someone will be; only they and their mutual follows see them.
-    const session = await getServerSession(req, res, authOptions);
-    const canSeeGoing = await canSeeGoingDates(session ? Number(session.user.id) : null, user);
+    const canSeeGoing = await canSeeGoingDates(viewerId, user);
     const before = canSeeGoing ? undefined : theatreToday();
 
     const attendancePerformances = await prisma.attendance.findMany({
       where: {
         user,
         performances: { startTime: { gte: firstDayOfMonth, lt: before } },
+        AND: [visibleAttendance(viewerId)],
       },
       select: {
         performances: {
@@ -159,6 +164,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         going: true,
         performance: null,
         seenDate: { gte: firstDayOfMonth, lt: before },
+        AND: [visibleAttendance(viewerId)],
       },
       include: {
         musicals: { select: { title: true, duration: true } },

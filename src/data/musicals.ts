@@ -404,6 +404,7 @@ export const MUSICALS_LIST = [
 // Card-ready list for /musicals; detail pages load the full row themselves.
 export async function getMusicals() {
   const musicals = await prisma.musicals.findMany({
+    where: { status: "APPROVED" },
     select: { id: true, title: true, playbill: true },
     orderBy: { title: "asc" },
   });

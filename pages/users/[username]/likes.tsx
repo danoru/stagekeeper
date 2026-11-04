@@ -5,6 +5,7 @@ import superjson from "superjson";
 import ShowList, { type ShowListItem } from "../../../src/components/shows/ShowList";
 import ProfilePageWrapper from "../../../src/components/users/ProfilePageWrapper";
 import { getUserLikes } from "../../../src/data/users";
+import { getViewer } from "../../../src/utils/viewer";
 
 interface Props {
   user: users & {
@@ -29,9 +30,10 @@ function UserLikes({ user }: Props) {
   );
 }
 
-export async function getServerSideProps({ params }: GetServerSidePropsContext) {
-  const username = String(params?.username);
-  const user = await getUserLikes(username);
+export async function getServerSideProps(context: GetServerSidePropsContext) {
+  const username = String(context.params?.username);
+  const viewer = await getViewer(context);
+  const user = await getUserLikes(username, viewer.id);
   if (!user) return { notFound: true };
   return {
     props: superjson.serialize({ user }).json,

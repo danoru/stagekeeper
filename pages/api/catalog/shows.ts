@@ -6,7 +6,8 @@ import { isEmailVerified, VERIFY_EMAIL_MESSAGE } from "../../../src/data/emailVe
 import { rateLimit } from "../../../src/utils/rateLimit";
 import { authOptions } from "../auth/[...nextauth]";
 
-// POST /api/catalog/shows — any signed-in user can add a show (lands as PENDING).
+// POST /api/catalog/shows — any signed-in user can add a show. It stays hidden (PENDING) until an
+// admin approves it; an admin's own additions are approved straight away.
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "POST") {
     res.setHeader("Allow", ["POST"]);
@@ -37,13 +38,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
+    const isAdmin = session.user.badge === "ADMIN";
     const result = await createUserShow({
       type,
       title,
       premiereYear: year,
       createdBy: Number(session.user.id),
+      approve: isAdmin,
     });
-    if (result.created) {
+    if (isAdmin) {
       // Static list pages would otherwise hide the new show until their next revalidation.
       const listPath = type === "MUSICAL" ? "/musicals" : "/plays";
       await res.revalidate(listPath).catch(() => undefined);

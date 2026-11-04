@@ -1,6 +1,7 @@
 import { Box, Card, CardMedia, Stack, Typography } from "@mui/material";
 import { musicals, performances, theatres } from "@prisma/client";
 import moment from "moment";
+import { GetServerSidePropsContext } from "next";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import superjson from "superjson";
@@ -14,13 +15,11 @@ import ShowActionBar from "../../src/components/shows/ShowActionBar";
 import ShowCommunity from "../../src/components/shows/ShowCommunity";
 import YourVisits, { pastVisits, type Visit } from "../../src/components/shows/YourVisits";
 import prisma from "../../src/data/db";
-import { getMusicalByTitle, getMusicals } from "../../src/data/musicals";
+import { getMusicalByTitle } from "../../src/data/musicals";
 import { getShowProductions, type ShowProduction } from "../../src/data/people";
-import { showPath, slugify } from "../../src/utils/slug";
-
-interface Params {
-  title: string;
-}
+import { canViewPending } from "../../src/data/visibility";
+import { showPath } from "../../src/utils/slug";
+import { getViewer } from "../../src/utils/viewer";
 
 interface Props {
   musical: musicals;
@@ -172,20 +171,23 @@ function MusicalPage({ musical, pastPerformances, productions }: Props) {
   );
 }
 
-export async function getStaticPaths() {
-  const musicals = await getMusicals();
-  const paths = musicals.map((musical: { title: string }) => ({
-    params: { title: slugify(musical.title) },
-  }));
-  return { paths, fallback: "blocking" };
-}
-
-export async function getStaticProps(context: { params: Params }) {
-  const { title } = context.params;
-  const musical = await getMusicalByTitle(title);
+export async function getServerSideProps(context: GetServerSidePropsContext) {
+  const musical = await getMusicalByTitle(String(context.params?.title));
 
   if (!musical) {
     return { notFound: true };
+  }
+
+  // Pending shows are checked per viewer and never cached; approved ones are the same for
+  // everyone, so the CDN can hold them for a few minutes.
+  if (musical.status === "PENDING") {
+    const viewer = await getViewer(context);
+    if (!(await canViewPending({ musical: musical.id }, musical.createdBy, viewer))) {
+      return { notFound: true };
+    }
+    context.res.setHeader("Cache-Control", "private, no-store");
+  } else {
+    context.res.setHeader("Cache-Control", "public, s-maxage=300, stale-while-revalidate=600");
   }
 
   const [pastPerformances, productions] = await Promise.all([
@@ -200,8 +202,6 @@ export async function getStaticProps(context: { params: Params }) {
 
   return {
     props: superjson.serialize({ musical, pastPerformances, productions }).json,
-    // Short enough that admin edits, approvals and merges show up promptly.
-    revalidate: 300,
   };
 }
 

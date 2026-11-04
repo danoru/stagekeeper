@@ -102,7 +102,7 @@ export async function getServerSideProps(context: { params: Params; req: any }) 
     return { notFound: true };
   }
 
-  const recentPerformances = await getRecentPerformances([profile.user.username]);
+  const recentPerformances = await getRecentPerformances([profile.user.username], viewerId ?? null);
 
   return {
     props: superjson.serialize({

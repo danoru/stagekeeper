@@ -6,6 +6,7 @@ import ShowList, { type ShowListItem } from "../../../src/components/shows/ShowL
 import ProfilePageWrapper from "../../../src/components/users/ProfilePageWrapper";
 import { getUpcomingShowKeys, getWatchlist } from "../../../src/data/shows";
 import { findUserByUsername } from "../../../src/data/users";
+import { getViewer } from "../../../src/utils/viewer";
 
 interface Props {
   upcomingShowKeys: string[];
@@ -29,12 +30,13 @@ function UserWatchlist({ watchlist, user, upcomingShowKeys }: Props) {
   );
 }
 
-export async function getServerSideProps({ params }: GetServerSidePropsContext) {
-  const username = String(params?.username);
+export async function getServerSideProps(context: GetServerSidePropsContext) {
+  const username = String(context.params?.username);
   const user = await findUserByUsername(username);
   if (!user) return { notFound: true };
+  const viewer = await getViewer(context);
   const [watchlist, upcomingShowKeys] = await Promise.all([
-    getWatchlist(user.id),
+    getWatchlist(user.id, viewer.id),
     getUpcomingShowKeys(),
   ]);
   return {

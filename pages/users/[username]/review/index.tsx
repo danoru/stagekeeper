@@ -10,6 +10,7 @@ import ReviewHeader from "../../../../src/components/review/ReviewHeader";
 import Statistics from "../../../../src/components/review/Statistics";
 import { getUserAttendanceByYear } from "../../../../src/data/performances";
 import { findUserByUsername } from "../../../../src/data/users";
+import { getViewer } from "../../../../src/utils/viewer";
 
 interface Props {
   attendance: (attendance & {
@@ -38,7 +39,8 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   const user = await findUserByUsername(username);
   if (!user) return { notFound: true };
 
-  const attendance = await getUserAttendanceByYear(null, user.id);
+  const viewer = await getViewer(context);
+  const attendance = await getUserAttendanceByYear(null, user.id, viewer.id);
 
   return {
     props: superjson.serialize({ attendance, username }).json,

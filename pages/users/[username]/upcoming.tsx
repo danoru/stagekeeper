@@ -71,8 +71,9 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   const user = await findUserByUsername(username);
   if (!user) return { notFound: true };
   const session = await getSession(context);
-  const canSeeGoing = await canSeeGoingDates(session ? Number(session.user.id) : null, user.id);
-  const going = canSeeGoing ? await getUserUpcoming(user.id) : [];
+  const viewerId = session ? Number(session.user.id) : null;
+  const canSeeGoing = await canSeeGoingDates(viewerId, user.id);
+  const going = canSeeGoing ? await getUserUpcoming(user.id, viewerId) : [];
   return {
     props: superjson.serialize({ user, going, canSeeGoing }).json,
   };

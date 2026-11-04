@@ -10,6 +10,7 @@ import ReviewHeader from "../../../../src/components/review/ReviewHeader";
 import Statistics from "../../../../src/components/review/Statistics";
 import { getUserAttendanceByYear } from "../../../../src/data/performances";
 import { getDistinctYears, findUserByUsername } from "../../../../src/data/users";
+import { getViewer } from "../../../../src/utils/viewer";
 
 interface Props {
   attendance: (attendance & {
@@ -44,8 +45,9 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   const user = await findUserByUsername(username);
   if (!user) return { notFound: true };
 
+  const viewer = await getViewer(context);
   const [attendance, allYears] = await Promise.all([
-    getUserAttendanceByYear(Number(year), user.id),
+    getUserAttendanceByYear(Number(year), user.id, viewer.id),
     getDistinctYears(),
   ]);
 

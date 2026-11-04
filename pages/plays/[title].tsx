@@ -1,6 +1,7 @@
 import { Box, Card, CardMedia, Stack, Typography } from "@mui/material";
 import { performances, plays, theatres } from "@prisma/client";
 import moment from "moment";
+import { GetServerSidePropsContext } from "next";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import superjson from "superjson";
@@ -15,12 +16,10 @@ import ShowCommunity from "../../src/components/shows/ShowCommunity";
 import YourVisits, { pastVisits, type Visit } from "../../src/components/shows/YourVisits";
 import prisma from "../../src/data/db";
 import { getShowProductions, type ShowProduction } from "../../src/data/people";
-import { getPlayByTitle, getPlays } from "../../src/data/plays";
-import { showPath, slugify } from "../../src/utils/slug";
-
-interface Params {
-  title: string;
-}
+import { getPlayByTitle } from "../../src/data/plays";
+import { canViewPending } from "../../src/data/visibility";
+import { showPath } from "../../src/utils/slug";
+import { getViewer } from "../../src/utils/viewer";
 
 interface Props {
   play: plays;
@@ -157,20 +156,23 @@ function PlayPage({ play, pastPerformances, productions }: Props) {
   );
 }
 
-export async function getStaticPaths() {
-  const plays = await getPlays();
-  const paths = plays.map((play: { title: string }) => ({
-    params: { title: slugify(play.title) },
-  }));
-  return { paths, fallback: "blocking" };
-}
-
-export async function getStaticProps(context: { params: Params }) {
-  const { title } = context.params;
-  const play = await getPlayByTitle(title);
+export async function getServerSideProps(context: GetServerSidePropsContext) {
+  const play = await getPlayByTitle(String(context.params?.title));
 
   if (!play) {
     return { notFound: true };
+  }
+
+  // Pending shows are checked per viewer and never cached; approved ones are the same for
+  // everyone, so the CDN can hold them for a few minutes.
+  if (play.status === "PENDING") {
+    const viewer = await getViewer(context);
+    if (!(await canViewPending({ play: play.id }, play.createdBy, viewer))) {
+      return { notFound: true };
+    }
+    context.res.setHeader("Cache-Control", "private, no-store");
+  } else {
+    context.res.setHeader("Cache-Control", "public, s-maxage=300, stale-while-revalidate=600");
   }
 
   const [pastPerformances, productions] = await Promise.all([
@@ -185,8 +187,6 @@ export async function getStaticProps(context: { params: Params }) {
 
   return {
     props: superjson.serialize({ play, pastPerformances, productions }).json,
-    // Short enough that admin edits, approvals and merges show up promptly.
-    revalidate: 300,
   };
 }
 

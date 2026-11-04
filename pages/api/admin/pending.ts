@@ -44,6 +44,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           await prisma.plays.update({ where: { id: targetId }, data: { status: "APPROVED" } });
         else
           await prisma.theatres.update({ where: { id: targetId }, data: { status: "APPROVED" } });
+        // Approved content now belongs on the static list, so don't wait for it to refresh.
+        const listPath =
+          kind === "MUSICAL" ? "/musicals" : kind === "PLAY" ? "/plays" : "/theatres";
+        await res.revalidate(listPath).catch(() => undefined);
         return res.status(200).json({ message: "Approved." });
       }
       if (action === "merge") {

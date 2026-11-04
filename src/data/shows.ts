@@ -1,15 +1,17 @@
 import type { PerformanceType } from "@prisma/client";
 
 import { showKey, type ShowListItem } from "../components/shows/ShowList";
+import { theatreToday } from "../utils/schedule";
 
 import prisma from "./db";
+import { visibleAttendance, visibleWatchlist } from "./visibility";
 
 const showCardSelect = { id: true, title: true, playbill: true } as const;
 
 // A user's watchlist as card-ready rows, alphabetical.
-export async function getWatchlist(id: number): Promise<ShowListItem[]> {
+export async function getWatchlist(id: number, viewerId: number | null): Promise<ShowListItem[]> {
   const watchlist = await prisma.watchlist.findMany({
-    where: { user: id },
+    where: { user: id, AND: [visibleWatchlist(viewerId)] },
     select: {
       type: true,
       musicals: { select: showCardSelect },
@@ -27,15 +29,15 @@ export async function getWatchlist(id: number): Promise<ShowListItem[]> {
 // Distinct shows of one type a user has seen (future "going" rows excluded), alphabetical.
 export async function getUserSeenShows(
   userId: number,
-  type: PerformanceType
+  type: PerformanceType,
+  viewerId: number | null
 ): Promise<ShowListItem[]> {
-  const today = new Date();
-  today.setUTCHours(0, 0, 0, 0);
   const rows = await prisma.attendance.findMany({
     where: {
       user: userId,
       AND: [
-        { OR: [{ going: false }, { seenDate: { lt: today } }] },
+        visibleAttendance(viewerId),
+        { OR: [{ going: false }, { seenDate: { lt: theatreToday() } }] },
         type === "MUSICAL"
           ? { OR: [{ musical: { not: null } }, { performances: { musical: { not: null } } }] }
           : { OR: [{ play: { not: null } }, { performances: { play: { not: null } } }] },

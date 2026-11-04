@@ -64,9 +64,9 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     const friendIds = await getFollowedGoingVisibleIds(userId);
 
     const [recentPerformances, upcomingPerformances, myUpcoming] = await Promise.all([
-      getRecentPerformances([username]),
-      getFriendsUpcomingPerformances(friendIds),
-      getUserUpcoming(userId),
+      getRecentPerformances([username], userId),
+      getFriendsUpcomingPerformances(friendIds, userId),
+      getUserUpcoming(userId, userId),
     ]);
 
     return {

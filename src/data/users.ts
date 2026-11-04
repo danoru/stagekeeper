@@ -1,6 +1,7 @@
 import { Prisma } from "@prisma/client";
 
 import prisma from "./db";
+import { visibleLikes, visibleWatchlist } from "./visibility";
 
 // The only user columns that may ever reach the client. Never `include: { users: true }`
 // on a query whose result is serialized into page props — that ships password hashes.
@@ -110,7 +111,7 @@ export async function getUserProfile(username: string, viewerId?: number) {
         })
       : Promise.resolve(null),
     prisma.watchlist.findMany({
-      where: { user: user.id },
+      where: { user: user.id, AND: [visibleWatchlist(viewerId ?? null)] },
       select: {
         id: true,
         type: true,
@@ -120,7 +121,9 @@ export async function getUserProfile(username: string, viewerId?: number) {
       orderBy: { createdAt: "desc" },
       take: 4,
     }),
-    prisma.watchlist.count({ where: { user: user.id } }),
+    prisma.watchlist.count({
+      where: { user: user.id, AND: [visibleWatchlist(viewerId ?? null)] },
+    }),
   ]);
 
   return {
@@ -228,7 +231,7 @@ export async function getDistinctYears() {
   return rows.map((r) => r.year);
 }
 
-export async function getUserLikes(username: string) {
+export async function getUserLikes(username: string, viewerId: number | null) {
   const user = await prisma.users.findUnique({
     where: {
       username,
@@ -236,6 +239,7 @@ export async function getUserLikes(username: string) {
     select: {
       ...publicUserSelect,
       likedShows: {
+        where: visibleLikes(viewerId),
         select: {
           type: true,
           musicals: { select: { id: true, title: true, playbill: true } },

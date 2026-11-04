@@ -6,6 +6,7 @@ import ShowList, { type ShowListItem } from "../../../src/components/shows/ShowL
 import ProfilePageWrapper from "../../../src/components/users/ProfilePageWrapper";
 import { getUserSeenShows } from "../../../src/data/shows";
 import { findUserByUsername } from "../../../src/data/users";
+import { getViewer } from "../../../src/utils/viewer";
 
 interface Props {
   shows: ShowListItem[];
@@ -24,11 +25,12 @@ function UserPlaysList({ shows, user }: Props) {
   );
 }
 
-export async function getServerSideProps({ params }: GetServerSidePropsContext) {
-  const username = String(params?.username);
+export async function getServerSideProps(context: GetServerSidePropsContext) {
+  const username = String(context.params?.username);
   const user = await findUserByUsername(username);
   if (!user) return { notFound: true };
-  const shows = await getUserSeenShows(user.id, "PLAY");
+  const viewer = await getViewer(context);
+  const shows = await getUserSeenShows(user.id, "PLAY", viewer.id);
   return {
     props: superjson.serialize({ shows, user }).json,
   };

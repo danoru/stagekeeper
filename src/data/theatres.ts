@@ -118,6 +118,7 @@ export const THEATRES_LIST = [
 // Card-ready list for /theatres and static-path generation.
 export async function getTheatres() {
   const theatres = await prisma.theatres.findMany({
+    where: { status: "APPROVED" },
     select: { id: true, name: true, image: true },
     orderBy: { name: "asc" },
   });

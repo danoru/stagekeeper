@@ -5,6 +5,7 @@ import prisma from "./db";
 // Card-ready list for /plays; detail pages load the full row themselves.
 export async function getPlays() {
   const plays = await prisma.plays.findMany({
+    where: { status: "APPROVED" },
     select: { id: true, title: true, playbill: true },
     orderBy: { title: "asc" },
   });

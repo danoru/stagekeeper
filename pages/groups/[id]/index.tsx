@@ -160,7 +160,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
 
   const [group, upcoming, overlap, watchlistRuns, plans, programmingOptions] = await Promise.all([
     getGroupById(groupId),
-    getGroupUpcomingAttendance(groupId),
+    getGroupUpcomingAttendance(groupId, userId),
     getGroupWatchlistOverlap(groupId),
     getGroupWatchlistProgramming(groupId),
     getGroupPlans(groupId),

@@ -13,6 +13,7 @@ import {
   theatreSummarySelect,
 } from "./performances";
 import { showtimeSelect } from "./showtimes";
+import { visibleAttendance, visibleWatchlist } from "./visibility";
 
 // A programming run with just enough of its show and venue to render a card or picker row.
 const programmingSummaryInclude = {
@@ -160,7 +161,7 @@ export async function isGroupOwner(groupId: number, userId: number) {
 
 // Shows any member has marked "going" with a date today or later. Going dates are shared
 // with groupmates (see privacy.ts), and only members can load a group page.
-export async function getGroupUpcomingAttendance(groupId: number, take = 20) {
+export async function getGroupUpcomingAttendance(groupId: number, viewerId: number, take = 20) {
   const memberIds = await prisma.groupMembership.findMany({
     where: { group: groupId },
     select: { user: true },
@@ -170,7 +171,12 @@ export async function getGroupUpcomingAttendance(groupId: number, take = 20) {
 
   const today = theatreToday();
   const rows = await prisma.attendance.findMany({
-    where: { user: { in: ids }, going: true, seenDate: { gte: today } },
+    where: {
+      user: { in: ids },
+      going: true,
+      seenDate: { gte: today },
+      AND: [visibleAttendance(viewerId)],
+    },
     include: attendanceInclude,
     orderBy: { seenDate: "asc" },
     take,
@@ -186,8 +192,9 @@ export async function getGroupWatchlistOverlap(groupId: number) {
   const ids = memberIds.map((m) => m.user);
   if (ids.length === 0) return [];
 
+  // Overlap shows what several people share, so it only ever lists approved shows.
   const rows = await prisma.watchlist.findMany({
-    where: { user: { in: ids } },
+    where: { user: { in: ids }, AND: [visibleWatchlist(null)] },
     select: {
       type: true,
       musical: true,
@@ -240,7 +247,7 @@ export async function getGroupWatchlistProgramming(groupId: number) {
   if (ids.length === 0) return [];
 
   const watchlistRows = await prisma.watchlist.findMany({
-    where: { user: { in: ids } },
+    where: { user: { in: ids }, AND: [visibleWatchlist(null)] },
     select: { type: true, musical: true, play: true, users: { select: feedUserSelect } },
   });
   if (watchlistRows.length === 0) return [];
@@ -542,7 +549,7 @@ export async function getGroupActivityFeed(
 
   const [attendance, plans] = await Promise.all([
     prisma.attendance.findMany({
-      where: { user: { in: memberIds } },
+      where: { user: { in: memberIds }, AND: [visibleAttendance(viewerId)] },
       include: attendanceInclude,
       orderBy: { createdAt: "desc" },
       take,

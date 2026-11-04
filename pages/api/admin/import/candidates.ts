@@ -144,6 +144,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           title,
           premiereYear: newShow?.premiereYear ? Number(newShow.premiereYear) : null,
           createdBy: Number(admin.user.id),
+          approve: true,
         });
         showId = created.show.id;
       }

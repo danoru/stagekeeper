@@ -6,7 +6,8 @@ import { isEmailVerified, VERIFY_EMAIL_MESSAGE } from "../../../src/data/emailVe
 import { rateLimit } from "../../../src/utils/rateLimit";
 import { authOptions } from "../auth/[...nextauth]";
 
-// POST /api/catalog/theatres — any signed-in user can add a theatre (lands as PENDING).
+// POST /api/catalog/theatres — any signed-in user can add a theatre. It stays hidden (PENDING)
+// until an admin approves it; an admin's own additions are approved straight away.
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "POST") {
     res.setHeader("Allow", ["POST"]);
@@ -30,12 +31,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
+    const isAdmin = session.user.badge === "ADMIN";
     const result = await createUserTheatre({
       name,
       location,
       createdBy: Number(session.user.id),
+      approve: isAdmin,
     });
-    if (result.created) await res.revalidate("/theatres").catch(() => undefined);
+    if (isAdmin) await res.revalidate("/theatres").catch(() => undefined);
     return res
       .status(result.created ? 201 : 200)
       .json({ theatre: result.theatre, created: result.created });

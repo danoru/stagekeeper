@@ -1,6 +1,7 @@
 import type { PerformanceType } from "@prisma/client";
 
 import prisma from "./db";
+import { visibleCatalog, type Viewer } from "./visibility";
 
 export const DEFAULT_PLAYBILL = "https://picsum.photos/649/1024";
 
@@ -13,19 +14,25 @@ export type ShowSearchResult = {
   status: "PENDING" | "APPROVED";
 };
 
-// Substring search across musicals and plays, exact-title matches first.
-export async function searchShows(query: string, take = 10): Promise<ShowSearchResult[]> {
+// Substring search across musicals and plays, exact-title matches first. Approved shows only,
+// unless the viewer is allowed to see pending ones (see visibility.ts).
+export async function searchShows(
+  query: string,
+  take = 10,
+  viewer: Viewer = { id: null, isAdmin: false }
+): Promise<ShowSearchResult[]> {
   const q = query.trim();
   if (!q) return [];
+  const visible = visibleCatalog(viewer);
   const [musicals, plays] = await Promise.all([
     prisma.musicals.findMany({
-      where: { title: { contains: q, mode: "insensitive" } },
+      where: { title: { contains: q, mode: "insensitive" }, ...visible },
       select: { id: true, title: true, playbill: true, premiere: true, status: true },
       orderBy: { title: "asc" },
       take,
     }),
     prisma.plays.findMany({
-      where: { title: { contains: q, mode: "insensitive" } },
+      where: { title: { contains: q, mode: "insensitive" }, ...visible },
       select: { id: true, title: true, playbill: true, premiere: true, status: true },
       orderBy: { title: "asc" },
       take,
@@ -46,11 +53,16 @@ export async function searchShows(query: string, take = 10): Promise<ShowSearchR
     .slice(0, take);
 }
 
-export async function searchTheatres(query: string, take = 10) {
+export async function searchTheatres(
+  query: string,
+  take = 10,
+  viewer: Viewer = { id: null, isAdmin: false }
+) {
   const q = query.trim();
   if (!q) return [];
   return prisma.theatres.findMany({
     where: {
+      AND: [visibleCatalog(viewer)],
       OR: [
         { name: { contains: q, mode: "insensitive" } },
         { location: { contains: q, mode: "insensitive" } },
@@ -62,15 +74,18 @@ export async function searchTheatres(query: string, take = 10) {
   });
 }
 
-// Any signed-in user can add a show; it lands as PENDING for an admin to tidy up.
-// Titles are unique, so an existing match is returned rather than erroring.
+// Any signed-in user can add a show; it lands as PENDING for an admin to tidy up, and an admin's
+// own additions are approved from the start. Titles are unique, so an existing match is returned
+// rather than erroring (and approved, when an admin is the one asking for it).
 export async function createUserShow(args: {
   type: PerformanceType;
   title: string;
   premiereYear?: number | null;
   createdBy: number;
+  approve?: boolean;
 }) {
   const title = args.title.trim();
+  const status = args.approve ? ("APPROVED" as const) : ("PENDING" as const);
   const premiere =
     args.premiereYear && Number.isFinite(args.premiereYear)
       ? new Date(Date.UTC(args.premiereYear, 0, 1))
@@ -80,7 +95,16 @@ export async function createUserShow(args: {
     const existing = await prisma.musicals.findFirst({
       where: { title: { equals: title, mode: "insensitive" } },
     });
-    if (existing) return { show: existing, type: "MUSICAL" as const, created: false };
+    if (existing) {
+      const show =
+        args.approve && existing.status === "PENDING"
+          ? await prisma.musicals.update({
+              where: { id: existing.id },
+              data: { status: "APPROVED" },
+            })
+          : existing;
+      return { show, type: "MUSICAL" as const, created: false };
+    }
     const show = await prisma.musicals.create({
       data: {
         title,
@@ -88,7 +112,7 @@ export async function createUserShow(args: {
         musicBy: "",
         lyricsBy: "",
         bookBy: "",
-        status: "PENDING",
+        status,
         createdBy: args.createdBy,
       },
     });
@@ -98,9 +122,15 @@ export async function createUserShow(args: {
   const existing = await prisma.plays.findFirst({
     where: { title: { equals: title, mode: "insensitive" } },
   });
-  if (existing) return { show: existing, type: "PLAY" as const, created: false };
+  if (existing) {
+    const show =
+      args.approve && existing.status === "PENDING"
+        ? await prisma.plays.update({ where: { id: existing.id }, data: { status: "APPROVED" } })
+        : existing;
+    return { show, type: "PLAY" as const, created: false };
+  }
   const show = await prisma.plays.create({
-    data: { title, premiere, writtenBy: "", status: "PENDING", createdBy: args.createdBy },
+    data: { title, premiere, writtenBy: "", status, createdBy: args.createdBy },
   });
   return { show, type: "PLAY" as const, created: true };
 }
@@ -109,17 +139,27 @@ export async function createUserTheatre(args: {
   name: string;
   location: string;
   createdBy: number;
+  approve?: boolean;
 }) {
   const name = args.name.trim();
   const existing = await prisma.theatres.findFirst({
     where: { name: { equals: name, mode: "insensitive" } },
   });
-  if (existing) return { theatre: existing, created: false };
+  if (existing) {
+    const theatre =
+      args.approve && existing.status === "PENDING"
+        ? await prisma.theatres.update({
+            where: { id: existing.id },
+            data: { status: "APPROVED" },
+          })
+        : existing;
+    return { theatre, created: false };
+  }
   const theatre = await prisma.theatres.create({
     data: {
       name,
       location: args.location.trim(),
-      status: "PENDING",
+      status: args.approve ? "APPROVED" : "PENDING",
       createdBy: args.createdBy,
     },
   });

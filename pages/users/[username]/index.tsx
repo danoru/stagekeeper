@@ -5,6 +5,7 @@ import { getSession } from "next-auth/react";
 import superjson from "superjson";
 
 import FriendRecentActivity from "../../../src/components/performances/RecentActivity";
+import ReportButton from "../../../src/components/shows/ReportButton";
 import ProfileLinkBar from "../../../src/components/users/ProfileLinkBar";
 import ProfileStatBar from "../../../src/components/users/ProfileStatBar";
 import UserFollowing from "../../../src/components/users/UserFollowing";
@@ -84,6 +85,7 @@ function ProfilePage({
           </Box>
         </Box>
       </Container>
+      {Number(sessionUser?.id) !== user.id && <ReportButton targetId={user.id} targetType="USER" />}
     </Box>
   );
 }

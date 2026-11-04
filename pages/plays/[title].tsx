@@ -9,6 +9,7 @@ import PageMeta from "../../src/components/layout/PageMeta";
 import Productions from "../../src/components/people/Productions";
 import PerformanceCalendar from "../../src/components/schedule/PerformanceCalendar";
 import PendingNotice from "../../src/components/shows/PendingNotice";
+import ReportButton from "../../src/components/shows/ReportButton";
 import ShowActionBar from "../../src/components/shows/ShowActionBar";
 import ShowCommunity from "../../src/components/shows/ShowCommunity";
 import YourVisits, { pastVisits, type Visit } from "../../src/components/shows/YourVisits";
@@ -151,6 +152,7 @@ function PlayPage({ play, pastPerformances, productions }: Props) {
         visits={(userStatus?.attendance ?? []) as Visit[]}
       />
       <PerformanceCalendar identifier={playTitle} showType="PLAY" viewType="show" />
+      <ReportButton targetId={play.id} targetType="PLAY" />
     </div>
   );
 }

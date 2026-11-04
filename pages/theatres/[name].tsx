@@ -6,6 +6,7 @@ import superjson from "superjson";
 import ProgramCard from "../../src/components/cards/ProgramCard";
 import PageMeta from "../../src/components/layout/PageMeta";
 import PerformanceCalendar from "../../src/components/schedule/PerformanceCalendar";
+import ReportButton from "../../src/components/shows/ReportButton";
 import { getTheatreByName, getCurrentSeason, getTheatres } from "../../src/data/theatres";
 import { showPath, slugify, theatrePath } from "../../src/utils/slug";
 
@@ -89,6 +90,7 @@ function TheatrePage({ theatre, seasons }: Props) {
         ))}
       </Container>
       <PerformanceCalendar identifier={theatreName} viewType="theatre" />
+      <ReportButton targetId={theatre.id} targetType="THEATRE" />
     </div>
   );
 }

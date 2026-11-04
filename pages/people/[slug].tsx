@@ -7,6 +7,7 @@ import superjson from "superjson";
 import PageMeta from "../../src/components/layout/PageMeta";
 import { describePart } from "../../src/components/people/creditText";
 import PendingNotice from "../../src/components/shows/PendingNotice";
+import ReportButton from "../../src/components/shows/ReportButton";
 import { getPersonBySlug, getPersonCredits, type PersonProduction } from "../../src/data/people";
 import { resolveShowImage } from "../../src/utils/gradients";
 import { showPath, theatrePath } from "../../src/utils/slug";
@@ -130,6 +131,9 @@ function PersonPage({ person, current, past }: Props) {
           No confirmed credits yet.
         </Typography>
       )}
+      <Box sx={{ mt: 3 }}>
+        <ReportButton targetId={person.id} targetType="PERSON" />
+      </Box>
     </Container>
   );
 }

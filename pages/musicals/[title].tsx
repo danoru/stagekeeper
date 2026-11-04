@@ -9,6 +9,7 @@ import PageMeta from "../../src/components/layout/PageMeta";
 import Productions from "../../src/components/people/Productions";
 import PerformanceCalendar from "../../src/components/schedule/PerformanceCalendar";
 import PendingNotice from "../../src/components/shows/PendingNotice";
+import ReportButton from "../../src/components/shows/ReportButton";
 import ShowActionBar from "../../src/components/shows/ShowActionBar";
 import ShowCommunity from "../../src/components/shows/ShowCommunity";
 import YourVisits, { pastVisits, type Visit } from "../../src/components/shows/YourVisits";
@@ -166,6 +167,7 @@ function MusicalPage({ musical, pastPerformances, productions }: Props) {
         visits={(userStatus?.attendance ?? []) as Visit[]}
       />
       <PerformanceCalendar identifier={musicalTitle} showType="MUSICAL" viewType="show" />
+      <ReportButton targetId={musical.id} targetType="MUSICAL" />
     </div>
   );
 }

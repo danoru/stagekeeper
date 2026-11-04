@@ -1,4 +1,5 @@
 import DownloadIcon from "@mui/icons-material/Download";
+import FlagIcon from "@mui/icons-material/Flag";
 import LibraryMusicIcon from "@mui/icons-material/LibraryMusic";
 import PendingActionsIcon from "@mui/icons-material/PendingActions";
 import PeopleIcon from "@mui/icons-material/People";
@@ -19,6 +20,12 @@ const sections = [
     description: "Approve, merge, or edit shows and theatres members have added.",
     href: "/admin/pending",
     icon: <PendingActionsIcon sx={{ fontSize: 40 }} />,
+  },
+  {
+    title: "Reports",
+    description: "Review things members have flagged as wrong or inappropriate.",
+    href: "/admin/reports",
+    icon: <FlagIcon sx={{ fontSize: 40 }} />,
   },
   {
     title: "Cast & Crew",

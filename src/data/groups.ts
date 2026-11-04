@@ -12,7 +12,6 @@ import {
   showSummarySelect,
   theatreSummarySelect,
 } from "./performances";
-import { showtimeSelect } from "./showtimes";
 import { visibleAttendance, visibleWatchlist } from "./visibility";
 
 // A programming run with just enough of its show and venue to render a card or picker row.
@@ -161,12 +160,7 @@ export async function isGroupOwner(groupId: number, userId: number) {
 
 // Shows any member has marked "going" with a date today or later. Going dates are shared
 // with groupmates (see privacy.ts), and only members can load a group page.
-export async function getGroupUpcomingAttendance(groupId: number, viewerId: number, take = 20) {
-  const memberIds = await prisma.groupMembership.findMany({
-    where: { group: groupId },
-    select: { user: true },
-  });
-  const ids = memberIds.map((m) => m.user);
+export async function getGroupUpcomingAttendance(ids: number[], viewerId: number, take = 20) {
   if (ids.length === 0) return [];
 
   const today = theatreToday();
@@ -184,16 +178,11 @@ export async function getGroupUpcomingAttendance(groupId: number, viewerId: numb
   return normalizeAttendanceRows(rows);
 }
 
-export async function getGroupWatchlistOverlap(groupId: number) {
-  const memberIds = await prisma.groupMembership.findMany({
-    where: { group: groupId },
-    select: { user: true },
-  });
-  const ids = memberIds.map((m) => m.user);
+// What the members want to see. Group views show what several people share, so this only ever
+// lists approved shows.
+export async function getGroupWatchlist(ids: number[]) {
   if (ids.length === 0) return [];
-
-  // Overlap shows what several people share, so it only ever lists approved shows.
-  const rows = await prisma.watchlist.findMany({
+  return prisma.watchlist.findMany({
     where: { user: { in: ids }, AND: [visibleWatchlist(null)] },
     select: {
       type: true,
@@ -205,7 +194,11 @@ export async function getGroupWatchlistOverlap(groupId: number) {
     },
     orderBy: { createdAt: "desc" },
   });
+}
 
+type GroupWatchlist = Awaited<ReturnType<typeof getGroupWatchlist>>;
+
+export function getGroupWatchlistOverlap(rows: GroupWatchlist) {
   type Bucket = {
     type: "MUSICAL" | "PLAY";
     showId: number;
@@ -238,18 +231,7 @@ export async function getGroupWatchlistOverlap(groupId: number) {
     .sort((a, b) => b.members.length - a.members.length || a.title.localeCompare(b.title));
 }
 
-export async function getGroupWatchlistProgramming(groupId: number) {
-  const memberIds = await prisma.groupMembership.findMany({
-    where: { group: groupId },
-    select: { user: true },
-  });
-  const ids = memberIds.map((m) => m.user);
-  if (ids.length === 0) return [];
-
-  const watchlistRows = await prisma.watchlist.findMany({
-    where: { user: { in: ids }, AND: [visibleWatchlist(null)] },
-    select: { type: true, musical: true, play: true, users: { select: feedUserSelect } },
-  });
+export async function getGroupWatchlistProgramming(watchlistRows: GroupWatchlist) {
   if (watchlistRows.length === 0) return [];
 
   type Member = { id: number; username: string; image: string | null };
@@ -652,7 +634,18 @@ export async function getUpcomingProgrammingForPicker(take = 100) {
         { startDate: { lte: limit, gte: now } },
       ],
     },
-    include: { ...programmingSummaryInclude, performances: { select: showtimeSelect } },
+    include: {
+      ...programmingSummaryInclude,
+      // Only dates someone could still pick. The count says whether the run has a real schedule,
+      // so one that has simply finished doesn't fall back to estimated dates.
+      performances: {
+        where: { startTime: { gt: now }, status: "SCHEDULED" },
+        select: { startTime: true },
+        orderBy: { startTime: "asc" },
+        take: 90,
+      },
+      _count: { select: { performances: true } },
+    },
     orderBy: { startDate: "asc" },
     take,
   });

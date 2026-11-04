@@ -2,7 +2,7 @@ import { mean } from "../utils/ratings";
 import { theatreToday } from "../utils/schedule";
 
 import prisma from "./db";
-import { getGoingVisibleIds } from "./privacy";
+import { getFollowedWithGoingAccess } from "./privacy";
 
 export interface FriendSeen {
   username: string;
@@ -80,16 +80,8 @@ export async function getShowSummary(show: ShowRef, viewerId: number | null): Pr
   };
   if (viewerId == null) return summary;
 
-  const following = await prisma.following.findMany({
-    where: { user: viewerId },
-    select: { followingUsername: true },
-  });
-  if (following.length === 0) return summary;
-
-  const friends = await prisma.users.findMany({
-    where: { username: { in: following.map((f) => f.followingUsername) } },
-    select: { id: true, username: true, image: true },
-  });
+  // Going dates are only shared with mutual follows and groupmates (see privacy.ts).
+  const { followed: friends, goingVisible: visible } = await getFollowedWithGoingAccess(viewerId);
   if (friends.length === 0) return summary;
 
   const rows = await prisma.attendance.findMany({
@@ -105,8 +97,6 @@ export async function getShowSummary(show: ShowRef, viewerId: number | null): Pr
 
   const byId = new Map(friends.map((f) => [f.id, f]));
   const seen = new Map<number, { ratings: number[]; visits: number; last: Date | null }>();
-  // Going dates are only shared with mutual follows and groupmates (see privacy.ts).
-  const visible = await getGoingVisibleIds(viewerId);
 
   for (const row of rows) {
     const friend = row.user != null ? byId.get(row.user) : undefined;

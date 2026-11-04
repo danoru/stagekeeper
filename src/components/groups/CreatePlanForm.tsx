@@ -16,7 +16,7 @@ import moment from "moment";
 import { useRouter } from "next/router";
 import { useMemo, useState } from "react";
 
-import { expandRun, hasDayTimes, runShowtimes } from "../../utils/schedule";
+import { expandRun, hasDayTimes } from "../../utils/schedule";
 
 import type { ProgrammingOption } from "./GroupPlans";
 
@@ -59,10 +59,7 @@ function groupShows(options: ProgrammingOption[]): ShowChoice[] {
   return Array.from(seen.values()).sort((a, b) => a.title.localeCompare(b.title));
 }
 
-function theatresForShow(
-  options: ProgrammingOption[],
-  show: ShowChoice
-): TheatreChoice[] {
+function theatresForShow(options: ProgrammingOption[], show: ShowChoice): TheatreChoice[] {
   const byTheatre = new Map<number, TheatreChoice>();
   for (const p of options) {
     const showId = p.type === "MUSICAL" ? p.musical : p.play;
@@ -76,17 +73,16 @@ function theatresForShow(
     }
     bucket.programmings.push(p);
   }
-  return Array.from(byTheatre.values()).sort((a, b) =>
-    a.theatreName.localeCompare(b.theatreName)
-  );
+  return Array.from(byTheatre.values()).sort((a, b) => a.theatreName.localeCompare(b.theatreName));
 }
 
 function expandShowtimes(p: ProgrammingOption, cap = CANDIDATE_CAP): Date[] {
   const now = new Date();
-  if (p.performances && p.performances.length > 0) {
-    return runShowtimes(p)
-      .filter((s) => s.status === "SCHEDULED" && s.start > now)
-      .map((s) => s.start)
+  if (p._count && p._count.performances > 0) {
+    // The server sends only this run's future scheduled showtimes, in order.
+    return (p.performances ?? [])
+      .map((s) => new Date(s.startTime))
+      .filter((start) => start > now)
       .slice(0, cap);
   }
   if (!hasDayTimes(p.dayTimes)) return [];
@@ -179,9 +175,9 @@ function CreatePlanForm({ groupId, programmingOptions, initialShowKey, onResult 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!theatre || allChosen.length === 0) return;
-    const chosenDates = allChosen.map((iso) => new Date(iso)).sort(
-      (a, b) => a.getTime() - b.getTime()
-    );
+    const chosenDates = allChosen
+      .map((iso) => new Date(iso))
+      .sort((a, b) => a.getTime() - b.getTime());
     const earliest = chosenDates[0];
     const programming =
       theatre.programmings.find(
@@ -217,25 +213,23 @@ function CreatePlanForm({ groupId, programmingOptions, initialShowKey, onResult 
   return (
     <Box
       component="form"
-      onSubmit={handleSubmit}
       sx={{
         border: "1px solid rgba(212,175,85,0.15)",
         borderRadius: 1,
         p: 2.5,
         background: "rgba(212,175,85,0.03)",
       }}
+      onSubmit={handleSubmit}
     >
       <Autocomplete
         getOptionLabel={(o) => o.title}
         isOptionEqualToValue={(a, b) => a.key === b.key}
-        onChange={(_, value) => handleShowChange(value)}
         options={shows}
-        renderInput={(params) => (
-          <TextField {...params} placeholder="Pick a show" size="small" />
-        )}
+        renderInput={(params) => <TextField {...params} placeholder="Pick a show" size="small" />}
         size="small"
         sx={{ mb: 2 }}
         value={show}
+        onChange={(_, value) => handleShowChange(value)}
       />
 
       {show && (
@@ -243,8 +237,8 @@ function CreatePlanForm({ groupId, programmingOptions, initialShowKey, onResult 
           <InputLabel>Theatre</InputLabel>
           <Select
             label="Theatre"
-            onChange={(e) => handleTheatreChange(Number(e.target.value))}
             value={theatre?.theatreId ?? ""}
+            onChange={(e) => handleTheatreChange(Number(e.target.value))}
           >
             {theatres.length === 0 && (
               <MenuItem disabled value="">
@@ -270,8 +264,7 @@ function CreatePlanForm({ groupId, programmingOptions, initialShowKey, onResult 
             mb: 1.5,
           }}
         >
-          No future showtimes from this run&rsquo;s schedule. Add a custom
-          date/time below.
+          No future showtimes from this run&rsquo;s schedule. Add a custom date/time below.
         </Typography>
       )}
 
@@ -309,9 +302,9 @@ function CreatePlanForm({ groupId, programmingOptions, initialShowKey, onResult 
                   control={
                     <Checkbox
                       checked={picked.has(iso)}
-                      onChange={() => togglePick(iso)}
                       size="small"
                       sx={{ color: "rgba(212,175,85,0.4)" }}
+                      onChange={() => togglePick(iso)}
                     />
                   }
                   label={
@@ -339,13 +332,13 @@ function CreatePlanForm({ groupId, programmingOptions, initialShowKey, onResult 
             <TextField
               InputLabelProps={{ shrink: true }}
               label="Add a custom date/time"
-              onChange={(e) => setCustomInput(e.target.value)}
               size="small"
               sx={{ flex: 1 }}
               type="datetime-local"
               value={customInput}
+              onChange={(e) => setCustomInput(e.target.value)}
             />
-            <Button disabled={!customInput} onClick={addCustom} variant="outlined">
+            <Button disabled={!customInput} variant="outlined" onClick={addCustom}>
               Add
             </Button>
           </Box>
@@ -375,9 +368,9 @@ function CreatePlanForm({ groupId, programmingOptions, initialShowKey, onResult 
                     {moment(iso).format("ddd, MMM D · h:mm A")}
                   </Typography>
                   <Button
-                    onClick={() => removeCustom(iso)}
                     size="small"
                     sx={{ minWidth: 0, p: 0.25, fontSize: "0.7rem", color: "#CF4444" }}
+                    onClick={() => removeCustom(iso)}
                   >
                     ×
                   </Button>
@@ -390,14 +383,14 @@ function CreatePlanForm({ groupId, programmingOptions, initialShowKey, onResult 
 
       <TextField
         fullWidth
-        inputProps={{ maxLength: 500 }}
         multiline
-        onChange={(e) => setNote(e.target.value)}
+        inputProps={{ maxLength: 500 }}
         placeholder="Add a note (optional)"
         rows={2}
         size="small"
         sx={{ mb: 2 }}
         value={note}
+        onChange={(e) => setNote(e.target.value)}
       />
 
       <Box sx={{ display: "flex", gap: 1.5, alignItems: "center" }}>
@@ -408,9 +401,7 @@ function CreatePlanForm({ groupId, programmingOptions, initialShowKey, onResult 
         >
           Start poll
         </Button>
-        {error && (
-          <Typography sx={{ color: "#CF4444", fontSize: "0.7rem" }}>{error}</Typography>
-        )}
+        {error && <Typography sx={{ color: "#CF4444", fontSize: "0.7rem" }}>{error}</Typography>}
         <Box sx={{ flex: 1 }} />
         <Typography
           sx={{
@@ -433,8 +424,7 @@ function CreatePlanForm({ groupId, programmingOptions, initialShowKey, onResult 
             mt: 1.5,
           }}
         >
-          No upcoming runs found. Ask an admin to add programming for the show
-          you want to plan.
+          No upcoming runs found. Ask an admin to add programming for the show you want to plan.
         </Typography>
       )}
     </Box>

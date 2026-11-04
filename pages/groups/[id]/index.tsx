@@ -1,7 +1,6 @@
 import { Box, Container, Link, Stack, Typography } from "@mui/material";
 import { GetServerSidePropsContext } from "next";
 import Head from "next/head";
-import { getSession } from "next-auth/react";
 import superjson from "superjson";
 
 import GroupMembers from "../../../src/components/groups/GroupMembers";
@@ -12,20 +11,19 @@ import WatchlistOverlap from "../../../src/components/groups/WatchlistOverlap";
 import WatchlistProgramming from "../../../src/components/groups/WatchlistProgramming";
 import {
   getGroupById,
-  getGroupMembership,
   getGroupPlans,
   getGroupUpcomingAttendance,
+  getGroupWatchlist,
   getGroupWatchlistOverlap,
   getGroupWatchlistProgramming,
-  getUpcomingProgrammingForPicker,
 } from "../../../src/data/groups";
+import { getViewerSession } from "../../../src/utils/viewer";
 
 type Group = NonNullable<Awaited<ReturnType<typeof getGroupById>>>;
 type Upcoming = Awaited<ReturnType<typeof getGroupUpcomingAttendance>>;
-type Overlap = Awaited<ReturnType<typeof getGroupWatchlistOverlap>>;
+type Overlap = ReturnType<typeof getGroupWatchlistOverlap>;
 type WatchlistRuns = Awaited<ReturnType<typeof getGroupWatchlistProgramming>>;
 type Plans = Awaited<ReturnType<typeof getGroupPlans>>;
-type ProgOptions = Awaited<ReturnType<typeof getUpcomingProgrammingForPicker>>;
 
 interface Props {
   group: Group;
@@ -34,7 +32,6 @@ interface Props {
   overlap: Overlap;
   watchlistRuns: WatchlistRuns;
   plans: Plans;
-  programmingOptions: ProgOptions;
   viewerId: number;
   /** Set when arriving from a show page's "Plan with a group"; opens the form on that show. */
   proposeShowKey: string | null;
@@ -47,7 +44,6 @@ function GroupDetailPage({
   overlap,
   watchlistRuns,
   plans,
-  programmingOptions,
   viewerId,
   proposeShowKey,
 }: Props) {
@@ -118,7 +114,6 @@ function GroupDetailPage({
             initialShowKey={proposeShowKey}
             isOwner={isOwner}
             plans={plans}
-            programmingOptions={programmingOptions}
             viewerId={viewerId}
           />
         </Box>
@@ -142,7 +137,7 @@ function GroupDetailPage({
 export const config = { maxDuration: 30 };
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
-  const session = await getSession(context);
+  const session = await getViewerSession(context);
   if (!session) {
     return { redirect: { destination: "/login", permanent: false } };
   }
@@ -153,31 +148,29 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   }
 
   const userId = Number(session.user.id);
-  const membership = await getGroupMembership(groupId, userId);
-  if (!membership) {
+  // The group already carries its members, so nothing below needs to look them up again.
+  const group = await getGroupById(groupId);
+  const membership = group?.members.find((m) => m.user === userId);
+  if (!group || !membership) {
     return { notFound: true };
   }
+  const memberIds = group.members.map((m) => m.user);
 
-  const [group, upcoming, overlap, watchlistRuns, plans, programmingOptions] = await Promise.all([
-    getGroupById(groupId),
-    getGroupUpcomingAttendance(groupId, userId),
-    getGroupWatchlistOverlap(groupId),
-    getGroupWatchlistProgramming(groupId),
+  const [upcoming, watchlist, plans] = await Promise.all([
+    getGroupUpcomingAttendance(memberIds, userId),
+    getGroupWatchlist(memberIds),
     getGroupPlans(groupId),
-    getUpcomingProgrammingForPicker(),
   ]);
-
-  if (!group) return { notFound: true };
+  const watchlistRuns = await getGroupWatchlistProgramming(watchlist);
 
   return {
     props: superjson.serialize({
       group,
       isOwner: membership.role === "OWNER",
       upcoming,
-      overlap,
+      overlap: getGroupWatchlistOverlap(watchlist),
       watchlistRuns,
       plans,
-      programmingOptions,
       viewerId: userId,
       proposeShowKey:
         typeof context.query.propose === "string" &&

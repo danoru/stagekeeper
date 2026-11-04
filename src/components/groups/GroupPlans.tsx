@@ -1,4 +1,4 @@
-import { Alert, Box, Button, Snackbar, Stack, Typography } from "@mui/material";
+import { Alert, Box, Button, CircularProgress, Snackbar, Stack, Typography } from "@mui/material";
 import type {
   Availability,
   groupPlan,
@@ -7,7 +7,7 @@ import type {
   PlanStatus,
   programming,
 } from "@prisma/client";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import type { ShowSummary, TheatreSummary } from "../../data/performances";
 import type { ShowtimeRow } from "../../utils/schedule";
@@ -26,7 +26,8 @@ export type ProgrammingOption = programming & {
   musicals: ShowSummary | null;
   plays: ShowSummary | null;
   seasons: { id: number; name: string; theatres: TheatreSummary } | null;
-  performances?: ShowtimeRow[];
+  performances?: Pick<ShowtimeRow, "startTime">[];
+  _count?: { performances: number };
 };
 
 export type Plan = groupPlan & {
@@ -63,21 +64,53 @@ function planTime(plan: Plan): number {
 interface Props {
   groupId: number;
   plans: Plan[];
-  programmingOptions: ProgrammingOption[];
   viewerId: number;
   isOwner: boolean;
   /** "MUSICAL-12": open the propose form with this show already picked. */
   initialShowKey?: string | null;
 }
 
-function GroupPlans({
+// The form's show and showtime data is large, so it only loads once someone opens the form.
+function LazyCreatePlanForm({
   groupId,
-  plans,
-  programmingOptions,
-  viewerId,
-  isOwner,
   initialShowKey,
-}: Props) {
+  onResult,
+}: {
+  groupId: number;
+  initialShowKey?: string | null;
+  onResult: (result: { ok: true } | { ok: false; error: string }) => void;
+}) {
+  const [options, setOptions] = useState<ProgrammingOption[] | null>(null);
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch(`/api/groups/${groupId}/plan-options`)
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
+      .then((data: ProgrammingOption[]) => {
+        if (!cancelled) setOptions(data);
+      })
+      .catch(() => {
+        if (!cancelled) setFailed(true);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [groupId]);
+
+  if (failed) return <Alert severity="error">Couldn&rsquo;t load shows. Try again.</Alert>;
+  if (!options) return <CircularProgress aria-label="Loading shows" size={22} />;
+  return (
+    <CreatePlanForm
+      groupId={groupId}
+      initialShowKey={initialShowKey}
+      programmingOptions={options}
+      onResult={onResult}
+    />
+  );
+}
+
+function GroupPlans({ groupId, plans, viewerId, isOwner, initialShowKey }: Props) {
   const [creating, setCreating] = useState(Boolean(initialShowKey));
   const [showPast, setShowPast] = useState(false);
   const { upcoming, past } = useMemo(() => {
@@ -142,10 +175,9 @@ function GroupPlans({
 
       {creating && (
         <Box sx={{ mb: 2.5 }}>
-          <CreatePlanForm
+          <LazyCreatePlanForm
             groupId={groupId}
             initialShowKey={initialShowKey}
-            programmingOptions={programmingOptions}
             onResult={handleCreateResult}
           />
         </Box>

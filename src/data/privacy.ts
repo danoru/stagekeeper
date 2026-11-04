@@ -4,39 +4,46 @@ import prisma from "./db";
 // given night, so only the person, their mutual follows (each follows the other) and people
 // who share a group with them see them.
 
-async function getFollowedIds(viewerId: number) {
-  const following = await prisma.following.findMany({
-    where: { user: viewerId },
-    select: { followingUsername: true },
-  });
-  if (following.length === 0) return [];
-  const users = await prisma.users.findMany({
-    where: { username: { in: following.map((f) => f.followingUsername) } },
-    select: { id: true },
-  });
-  return users.map((u) => u.id);
+export interface FollowedUser {
+  id: number;
+  username: string;
+  image: string | null;
 }
 
-/** Ids of people the viewer follows who follow the viewer back. */
-export async function getMutualFollowIds(viewerId: number): Promise<Set<number>> {
-  const [me, following] = await Promise.all([
-    prisma.users.findUnique({ where: { id: viewerId }, select: { username: true } }),
-    prisma.following.findMany({ where: { user: viewerId }, select: { followingUsername: true } }),
-  ]);
-  if (!me || following.length === 0) return new Set();
-
-  const mutual = await prisma.users.findMany({
-    where: {
-      username: { in: following.map((f) => f.followingUsername) },
-      following: { some: { followingUsername: { equals: me.username, mode: "insensitive" } } },
+/** Who the viewer follows, and which of those follow back. */
+async function getFollowGraph(viewerId: number) {
+  const me = await prisma.users.findUnique({
+    where: { id: viewerId },
+    select: {
+      username: true,
+      following: { select: { followingUsername: true } },
     },
-    select: { id: true },
   });
-  return new Set(mutual.map((u) => u.id));
+  if (!me || me.following.length === 0)
+    return { followed: [] as FollowedUser[], mutual: new Set<number>() };
+
+  const followed = await prisma.users.findMany({
+    where: { username: { in: me.following.map((f) => f.followingUsername) } },
+    select: {
+      id: true,
+      username: true,
+      image: true,
+      following: {
+        where: { followingUsername: { equals: me.username, mode: "insensitive" } },
+        select: { user: true },
+      },
+    },
+  });
+  return {
+    followed: followed.map(
+      (u): FollowedUser => ({ id: u.id, username: u.username, image: u.image })
+    ),
+    mutual: new Set(followed.filter((u) => u.following.length > 0).map((u) => u.id)),
+  };
 }
 
 /** Ids of everyone who shares at least one group with the viewer. */
-export async function getGroupmateIds(viewerId: number): Promise<Set<number>> {
+async function getGroupmateIds(viewerId: number): Promise<Set<number>> {
   const rows = await prisma.groupMembership.findMany({
     where: { groups: { members: { some: { user: viewerId } } }, user: { not: viewerId } },
     select: { user: true },
@@ -46,8 +53,8 @@ export async function getGroupmateIds(viewerId: number): Promise<Set<number>> {
 
 /** Everyone whose going dates the viewer may see (not including the viewer). */
 export async function getGoingVisibleIds(viewerId: number): Promise<Set<number>> {
-  const [mutual, groupmates] = await Promise.all([
-    getMutualFollowIds(viewerId),
+  const [{ mutual }, groupmates] = await Promise.all([
+    getFollowGraph(viewerId),
     getGroupmateIds(viewerId),
   ]);
   return new Set([...mutual, ...groupmates]);
@@ -55,11 +62,20 @@ export async function getGoingVisibleIds(viewerId: number): Promise<Set<number>>
 
 /** People the viewer follows whose going dates they may see; feeds the home page. */
 export async function getFollowedGoingVisibleIds(viewerId: number): Promise<number[]> {
-  const [followed, visible] = await Promise.all([
-    getFollowedIds(viewerId),
-    getGoingVisibleIds(viewerId),
+  const [{ followed, mutual }, groupmates] = await Promise.all([
+    getFollowGraph(viewerId),
+    getGroupmateIds(viewerId),
   ]);
-  return followed.filter((id) => visible.has(id));
+  return followed.map((u) => u.id).filter((id) => mutual.has(id) || groupmates.has(id));
+}
+
+/** The viewer's follows, plus those whose going dates they may see, for the show page panel. */
+export async function getFollowedWithGoingAccess(viewerId: number) {
+  const [{ followed, mutual }, groupmates] = await Promise.all([
+    getFollowGraph(viewerId),
+    getGroupmateIds(viewerId),
+  ]);
+  return { followed, goingVisible: new Set([...mutual, ...groupmates]) };
 }
 
 /** Whether `viewerId` may see `ownerId`'s upcoming "going" dates. */

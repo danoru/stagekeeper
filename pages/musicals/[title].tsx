@@ -30,6 +30,7 @@ interface Props {
 function MusicalPage({ musical, pastPerformances, productions }: Props) {
   const { data: session } = useSession();
   const sessionUser = session?.user;
+  const viewerId = sessionUser?.id;
   const isAdmin = session?.user.badge === "ADMIN";
   const musicalTitle = musical.title;
   const credits = [
@@ -48,12 +49,12 @@ function MusicalPage({ musical, pastPerformances, productions }: Props) {
   const [statusVersion, setStatusVersion] = useState(0);
 
   useEffect(() => {
-    if (session) {
+    if (viewerId) {
       fetch(`/api/shows/user-status?musicalId=${musical.id}`)
         .then((r) => r.json())
         .then(setUserStatus);
     }
-  }, [session, musical.id, statusVersion]);
+  }, [viewerId, musical.id, statusVersion]);
 
   return (
     <div>

@@ -37,6 +37,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       orderBy: { startDate: "asc" },
     });
 
+    res.setHeader("Cache-Control", "public, max-age=60, stale-while-revalidate=120");
     res.status(200).json(performances);
   } catch (error) {
     res.status(500).json({ error: "Internal server error." });

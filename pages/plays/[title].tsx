@@ -30,6 +30,7 @@ interface Props {
 function PlayPage({ play, pastPerformances, productions }: Props) {
   const { data: session } = useSession();
   const sessionUser = session?.user;
+  const viewerId = sessionUser?.id;
   const isAdmin = session?.user.badge === "ADMIN";
   const playTitle = play.title;
   const description = `${play.title}${play.writtenBy ? `, written by ${play.writtenBy}` : ""}. Log it, rate it and see upcoming performances on StageKeeper.`;
@@ -43,12 +44,12 @@ function PlayPage({ play, pastPerformances, productions }: Props) {
   const [statusVersion, setStatusVersion] = useState(0);
 
   useEffect(() => {
-    if (session) {
+    if (viewerId) {
       fetch(`/api/shows/user-status?playId=${play.id}`)
         .then((r) => r.json())
         .then(setUserStatus);
     }
-  }, [session, play.id, statusVersion]);
+  }, [viewerId, play.id, statusVersion]);
 
   return (
     <div>

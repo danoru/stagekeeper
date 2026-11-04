@@ -8,6 +8,8 @@ import * as React from "react";
 import superjson from "superjson";
 
 import Navbar from "../src/components/layout/Navbar";
+import SiteFooter from "../src/components/layout/SiteFooter";
+import VerifyEmailBanner from "../src/components/layout/VerifyEmailBanner";
 import darkThemeOptions from "../src/styles/theme/darkThemeOptions";
 import createEmotionCache from "../src/utils/createEmotionCache";
 import "../src/styles/globals.css";
@@ -59,7 +61,9 @@ export default function App({
             <meta content="StageKeeper — a logbook for the stage" name="twitter:image:alt" />
           </Head>
           <Navbar />
+          <VerifyEmailBanner />
           <Component {...pageProps} />
+          <SiteFooter />
         </ThemeProvider>
       </CacheProvider>
     </SessionProvider>

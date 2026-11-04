@@ -3,6 +3,10 @@ import {
   Box,
   Button,
   Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   Divider,
   Snackbar,
   Stack,
@@ -11,7 +15,7 @@ import {
 } from "@mui/material";
 import { GetServerSidePropsContext } from "next";
 import Head from "next/head";
-import { getSession } from "next-auth/react";
+import { getSession, signIn, signOut } from "next-auth/react";
 import { useState } from "react";
 import superjson from "superjson";
 
@@ -54,6 +58,32 @@ function SettingsPage({ username, profile }: Props) {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [changingPassword, setChangingPassword] = useState(false);
 
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deletePassword, setDeletePassword] = useState("");
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
+  async function handleDeleteAccount(e: React.FormEvent) {
+    e.preventDefault();
+    setDeleting(true);
+    setDeleteError(null);
+    try {
+      const response = await fetch("/api/user/account", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: deletePassword }),
+      });
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        setDeleteError(data.error ?? "Couldn't delete your account.");
+        return;
+      }
+      await signOut({ callbackUrl: "/" });
+    } finally {
+      setDeleting(false);
+    }
+  }
+
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const { id, value } = e.target;
     setUserData((prev) => ({ ...prev, [id]: value }));
@@ -94,7 +124,12 @@ function SettingsPage({ username, profile }: Props) {
       });
       const data = await response.json().catch(() => ({}));
       if (response.ok) {
-        setSnackbar({ message: "Password updated.", severity: "success" });
+        // The change revokes every session, this one included, so get a fresh one.
+        await signIn("credentials", { redirect: false, username, password: newPassword });
+        setSnackbar({
+          message: "Password updated. Other devices will be signed out.",
+          severity: "success",
+        });
         setCurrentPassword("");
         setNewPassword("");
         setConfirmPassword("");
@@ -252,8 +287,77 @@ function SettingsPage({ username, profile }: Props) {
               {changingPassword ? "Updating…" : "Update Password"}
             </Button>
           </Box>
+
+          <Box>
+            <Typography sx={sectionLabelSx}>Your Data</Typography>
+            <Typography sx={{ fontSize: "0.85rem", color: "rgba(232,220,200,0.6)", mb: 1.5 }}>
+              Download your profile, visits, ratings, lists and groups as a JSON file.
+            </Typography>
+            <Button component="a" href="/api/user/account" variant="outlined">
+              Download My Data
+            </Button>
+          </Box>
+
+          <Box>
+            <Typography sx={{ ...sectionLabelSx, color: "#CF4444" }}>Delete Account</Typography>
+            <Typography sx={{ fontSize: "0.85rem", color: "rgba(232,220,200,0.6)", mb: 1.5 }}>
+              This permanently removes your profile, visits, ratings, lists and follows. Groups you
+              share carry on without you, and shows or credits you added stay in the catalog with
+              your name removed. This can&apos;t be undone.
+            </Typography>
+            <Button color="error" variant="outlined" onClick={() => setDeleteOpen(true)}>
+              Delete My Account
+            </Button>
+          </Box>
         </Stack>
       </Container>
+      <Dialog
+        fullWidth
+        maxWidth="xs"
+        open={deleteOpen}
+        onClose={() => {
+          if (!deleting) setDeleteOpen(false);
+        }}
+      >
+        <Box component="form" onSubmit={handleDeleteAccount}>
+          <DialogTitle>Delete your account?</DialogTitle>
+          <DialogContent>
+            <Typography sx={{ fontSize: "0.9rem", mb: 2 }}>
+              Everything personal to {username} will be gone for good. Enter your password to
+              confirm.
+            </Typography>
+            <TextField
+              autoFocus
+              fullWidth
+              required
+              autoComplete="current-password"
+              label="Password"
+              margin="dense"
+              type="password"
+              value={deletePassword}
+              onChange={(e) => setDeletePassword(e.target.value)}
+            />
+            {deleteError && (
+              <Alert severity="error" sx={{ mt: 1 }}>
+                {deleteError}
+              </Alert>
+            )}
+          </DialogContent>
+          <DialogActions>
+            <Button disabled={deleting} onClick={() => setDeleteOpen(false)}>
+              Keep My Account
+            </Button>
+            <Button
+              color="error"
+              disabled={deleting || !deletePassword}
+              type="submit"
+              variant="contained"
+            >
+              {deleting ? "Deleting…" : "Delete Forever"}
+            </Button>
+          </DialogActions>
+        </Box>
+      </Dialog>
       <Snackbar autoHideDuration={6000} open={snackbar !== null} onClose={() => setSnackbar(null)}>
         <Alert
           severity={snackbar?.severity ?? "success"}

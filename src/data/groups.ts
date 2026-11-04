@@ -465,28 +465,31 @@ export async function deletePlan(planId: number) {
 // Plans, their candidate dates and availability all point at the group with NoAction
 // FKs, so they have to go first.
 export async function deleteGroup(groupId: number) {
-  return prisma.$transaction(async (tx) => {
-    const plans = await tx.groupPlan.findMany({ where: { group: groupId }, select: { id: true } });
-    const planIds = plans.map((p) => p.id);
-    if (planIds.length > 0) {
-      const dates = await tx.groupPlanDate.findMany({
-        where: { plan: { in: planIds } },
-        select: { id: true },
-      });
-      const dateIds = dates.map((d) => d.id);
-      if (dateIds.length > 0) {
-        await tx.groupPlanAvailability.deleteMany({ where: { planDate: { in: dateIds } } });
-      }
-      await tx.groupPlan.updateMany({
-        where: { id: { in: planIds } },
-        data: { selectedDate: null },
-      });
-      await tx.groupPlanDate.deleteMany({ where: { plan: { in: planIds } } });
-      await tx.groupPlan.deleteMany({ where: { id: { in: planIds } } });
+  return prisma.$transaction((tx) => deleteGroupWith(tx, groupId));
+}
+
+/** deleteGroup inside a transaction the caller already holds. */
+export async function deleteGroupWith(tx: Prisma.TransactionClient, groupId: number) {
+  const plans = await tx.groupPlan.findMany({ where: { group: groupId }, select: { id: true } });
+  const planIds = plans.map((p) => p.id);
+  if (planIds.length > 0) {
+    const dates = await tx.groupPlanDate.findMany({
+      where: { plan: { in: planIds } },
+      select: { id: true },
+    });
+    const dateIds = dates.map((d) => d.id);
+    if (dateIds.length > 0) {
+      await tx.groupPlanAvailability.deleteMany({ where: { planDate: { in: dateIds } } });
     }
-    await tx.groupMembership.deleteMany({ where: { group: groupId } });
-    await tx.groups.delete({ where: { id: groupId } });
-  });
+    await tx.groupPlan.updateMany({
+      where: { id: { in: planIds } },
+      data: { selectedDate: null },
+    });
+    await tx.groupPlanDate.deleteMany({ where: { plan: { in: planIds } } });
+    await tx.groupPlan.deleteMany({ where: { id: { in: planIds } } });
+  }
+  await tx.groupMembership.deleteMany({ where: { group: groupId } });
+  await tx.groups.delete({ where: { id: groupId } });
 }
 
 export type GroupActivityEvent =

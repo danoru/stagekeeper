@@ -4,6 +4,7 @@ import Button from "@mui/material/Button";
 import Link from "@mui/material/Link";
 import Snackbar from "@mui/material/Snackbar";
 import TextField from "@mui/material/TextField";
+import Typography from "@mui/material/Typography";
 import { Formik, Form } from "formik";
 import { useRouter } from "next/router";
 import { signIn } from "next-auth/react";
@@ -168,6 +169,24 @@ function RegistrationForm() {
             >
               {isSubmitting ? "Creating…" : "Create Account"}
             </Button>
+            <Typography
+              sx={{
+                fontSize: "0.72rem",
+                color: "rgba(232,220,200,0.5)",
+                textAlign: "center",
+                mb: 2,
+              }}
+            >
+              By creating an account you agree to the{" "}
+              <Link href="/terms" sx={{ color: "#D4AF55" }} underline="hover">
+                Terms
+              </Link>{" "}
+              and{" "}
+              <Link href="/privacy" sx={{ color: "#D4AF55" }} underline="hover">
+                Privacy Policy
+              </Link>
+              . You must be at least 13.
+            </Typography>
             <Box sx={authFooterSx}>
               <Link href="/login" sx={authFooterLinkSx} underline="none">
                 Already have an account?{" "}

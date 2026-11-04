@@ -28,6 +28,13 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import AdminGuard from "../../src/components/admin/AdminGuard";
+import {
+  DEFAULT_DAY_TIMES,
+  hasDayTimes,
+  parseTime,
+  WEEK_ORDER,
+  type DayTimes,
+} from "../../src/utils/schedule";
 
 type ProgramWithRelations = programming & {
   musicals: musicals | null;
@@ -44,12 +51,48 @@ const EMPTY_FORM = {
   endDate: "",
 };
 
+const EMPTY_SCHEDULE: Record<string, string> = Object.fromEntries(WEEK_ORDER.map((d) => [d, ""]));
+
+function displayTime(time: string) {
+  const [hour, minute] = time.split(":").map(Number);
+  const suffix = hour >= 12 ? "pm" : "am";
+  const h = hour % 12 || 12;
+  return minute ? `${h}:${String(minute).padStart(2, "0")}${suffix}` : `${h}${suffix}`;
+}
+
+function scheduleToText(dayTimes: unknown): Record<string, string> {
+  if (!hasDayTimes(dayTimes)) return EMPTY_SCHEDULE;
+  return Object.fromEntries(
+    WEEK_ORDER.map((d) => [d, (dayTimes[d] ?? []).map(displayTime).join(", ")])
+  );
+}
+
+/** Turns the day inputs into a weekly pattern, or names the first thing it can't read. */
+function textToSchedule(text: Record<string, string>): DayTimes | string {
+  const out: DayTimes = {};
+  for (const day of WEEK_ORDER) {
+    const pieces = text[day]
+      .split(",")
+      .map((t) => t.trim())
+      .filter(Boolean);
+    const times: string[] = [];
+    for (const piece of pieces) {
+      const time = parseTime(piece);
+      if (!time) return `Couldn't read "${piece}" on ${day}. Try "2pm, 8pm".`;
+      times.push(time);
+    }
+    if (times.length > 0) out[day] = times;
+  }
+  return out;
+}
+
 export default function AdminProgrammingPage() {
   const [programs, setPrograms] = useState<ProgramWithRelations[]>([]);
   const [musicals, setMusicals] = useState<musicals[]>([]);
   const [plays, setPlays] = useState<plays[]>([]);
   const [seasons, setSeasons] = useState<(seasons & { theatres: theatres })[]>([]);
   const [form, setForm] = useState(EMPTY_FORM);
+  const [schedule, setSchedule] = useState(EMPTY_SCHEDULE);
   const [editId, setEditId] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
   const [deleteId, setDeleteId] = useState<number | null>(null);
@@ -89,12 +132,14 @@ export default function AdminProgrammingPage() {
       startDate: new Date(program.startDate).toISOString().split("T")[0],
       endDate: new Date(program.endDate).toISOString().split("T")[0],
     });
+    setSchedule(scheduleToText(program.dayTimes));
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   function cancelEdit() {
     setEditId(null);
     setForm(EMPTY_FORM);
+    setSchedule(EMPTY_SCHEDULE);
   }
 
   function showSnackbar(message: string, severity: "success" | "error") {
@@ -103,9 +148,14 @@ export default function AdminProgrammingPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    const dayTimes = textToSchedule(schedule);
+    if (typeof dayTimes === "string") {
+      showSnackbar(dayTimes, "error");
+      return;
+    }
     setSaving(true);
     const method = editId ? "PUT" : "POST";
-    const body = editId ? { ...form, id: editId } : form;
+    const body = editId ? { ...form, dayTimes, id: editId } : { ...form, dayTimes };
 
     const res = await fetch("/api/admin/programming", {
       method,
@@ -263,6 +313,45 @@ export default function AdminProgrammingPage() {
                     onChange={(e) => setForm({ ...form, endDate: e.target.value })}
                   />
 
+                  <Box>
+                    <Stack
+                      direction="row"
+                      alignItems="center"
+                      justifyContent="space-between"
+                      sx={{ mb: 1 }}
+                    >
+                      <Typography variant="body2" fontWeight={500}>
+                        Weekly schedule
+                      </Typography>
+                      <Button
+                        size="small"
+                        onClick={() => setSchedule(scheduleToText(DEFAULT_DAY_TIMES))}
+                      >
+                        Fill typical week
+                      </Button>
+                    </Stack>
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      sx={{ display: "block", mb: 1 }}
+                    >
+                      Times at the theatre, like &quot;2pm, 8pm&quot;. Leave every day blank if you
+                      don&apos;t know yet; the site then shows a typical week labelled as estimated.
+                    </Typography>
+                    <Stack spacing={1}>
+                      {WEEK_ORDER.map((day) => (
+                        <TextField
+                          key={day}
+                          fullWidth
+                          label={day}
+                          size="small"
+                          value={schedule[day]}
+                          onChange={(e) => setSchedule({ ...schedule, [day]: e.target.value })}
+                        />
+                      ))}
+                    </Stack>
+                  </Box>
+
                   <Stack direction="row" spacing={1}>
                     <Button type="submit" variant="contained" disabled={saving} fullWidth>
                       {saving ? "Saving…" : editId ? "Save Changes" : "Add"}
@@ -309,14 +398,28 @@ export default function AdminProgrammingPage() {
                           variant="outlined"
                           sx={{ fontSize: "0.65rem", height: 18 }}
                         />
+                        {!hasDayTimes(program.dayTimes) && (
+                          <Chip
+                            label="Estimated times"
+                            size="small"
+                            color="warning"
+                            variant="outlined"
+                            sx={{ fontSize: "0.65rem", height: 18 }}
+                          />
+                        )}
                       </Stack>
                       <Typography variant="caption" color="text.secondary">
                         {program.seasons?.theatres?.name} · {program.seasons?.name}
                       </Typography>
                       <br />
                       <Typography variant="caption" color="text.secondary">
-                        {new Date(program.startDate).toLocaleDateString()} –{" "}
-                        {new Date(program.endDate).toLocaleDateString()}
+                        {new Date(program.startDate).toLocaleDateString(undefined, {
+                          timeZone: "UTC",
+                        })}{" "}
+                        –{" "}
+                        {new Date(program.endDate).toLocaleDateString(undefined, {
+                          timeZone: "UTC",
+                        })}
                       </Typography>
                     </Box>
                     <Stack direction="row">

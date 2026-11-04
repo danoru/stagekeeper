@@ -6,7 +6,9 @@ import type { musicals, PerformanceType, plays, programming } from "@prisma/clie
 import moment from "moment";
 import React from "react";
 
-import { expandRun, resolveDayTimes } from "../../utils/schedule";
+import { expandRun, hasDayTimes, resolveDayTimes } from "../../utils/schedule";
+
+const ESTIMATED_CLASS = "sk-estimated";
 
 interface Props {
   viewType: "show" | "theatre";
@@ -18,6 +20,7 @@ interface Event {
   start: Date;
   end: Date;
   title: string;
+  classNames?: string[];
 }
 
 function PerformanceCalendar({ viewType, identifier, showType }: Props) {
@@ -31,11 +34,13 @@ function PerformanceCalendar({ viewType, identifier, showType }: Props) {
     const { musicals, plays, type } = programming;
     const duration = (type === "MUSICAL" ? musicals?.duration : plays?.duration) ?? 150;
     const title = (type === "MUSICAL" ? musicals?.title : plays?.title) ?? "";
+    const estimated = !hasDayTimes(programming.dayTimes);
 
     return expandRun(programming, resolveDayTimes(programming.dayTimes)).map((start) => ({
       start,
       end: moment(start).add(duration, "minutes").toDate(),
       title,
+      classNames: estimated ? [ESTIMATED_CLASS] : [],
     }));
   }
 
@@ -76,6 +81,7 @@ function PerformanceCalendar({ viewType, identifier, showType }: Props) {
   }, [viewType, identifier, showType]);
 
   const sectionLabel = viewType === "theatre" ? "Season Schedule" : "Upcoming Performances";
+  const hasEstimates = events.some((e) => e.classNames?.includes(ESTIMATED_CLASS));
 
   return (
     <Box sx={{ mt: 4, px: { xs: 2, md: 4 }, pb: 4 }}>
@@ -120,15 +126,33 @@ function PerformanceCalendar({ viewType, identifier, showType }: Props) {
         </Box>
       )}
 
+      {hasEstimates && (
+        <Typography
+          sx={{
+            fontFamily: '"DM Sans", sans-serif',
+            fontSize: "0.75rem",
+            color: "rgba(232,220,200,0.6)",
+            mb: 1.5,
+          }}
+        >
+          <Box component="span" sx={{ fontStyle: "italic", color: "#D4AF55" }}>
+            Estimated times.
+          </Box>{" "}
+          {`Dimmed showtimes are a typical week, not the theatre's published schedule. Check with the theatre before you buy tickets.`}
+        </Typography>
+      )}
+
       {/* Calendar */}
       {initialDate && (
-        <FullCalendar
-          events={events}
-          fixedWeekCount={false}
-          initialDate={initialDate}
-          initialView="dayGridMonth"
-          plugins={[dayGridPlugin]}
-        />
+        <Box sx={{ [`& .${ESTIMATED_CLASS}`]: { opacity: 0.55, fontStyle: "italic" } }}>
+          <FullCalendar
+            events={events}
+            fixedWeekCount={false}
+            initialDate={initialDate}
+            initialView="dayGridMonth"
+            plugins={[dayGridPlugin]}
+          />
+        </Box>
       )}
     </Box>
   );

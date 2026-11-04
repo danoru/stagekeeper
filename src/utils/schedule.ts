@@ -151,6 +151,50 @@ export function expandRun(run: Run, dayTimes: DayTimes, opts: ExpandOptions = {}
   return out;
 }
 
+export interface ShowtimeRow {
+  startTime: Date | string;
+  endTime: Date | string;
+  status: "SCHEDULED" | "CANCELED" | "SOLD_OUT";
+  label: string | null;
+}
+
+export interface RunShowtime {
+  start: Date;
+  /** Null when only a start is known (pattern or estimate). */
+  end: Date | null;
+  status: ShowtimeRow["status"];
+  label: string | null;
+  estimated: boolean;
+}
+
+/**
+ * Everything a calendar shows for a run, best source first: real performance rows, else the
+ * run's weekly pattern, else a typical week flagged as estimated.
+ */
+export function runShowtimes(
+  run: Run & { dayTimes?: unknown; performances?: ShowtimeRow[] }
+): RunShowtime[] {
+  if (run.performances && run.performances.length > 0) {
+    return run.performances
+      .map((p) => ({
+        start: new Date(p.startTime),
+        end: new Date(p.endTime),
+        status: p.status,
+        label: p.label,
+        estimated: false,
+      }))
+      .sort((a, b) => a.start.getTime() - b.start.getTime());
+  }
+  const estimated = !hasDayTimes(run.dayTimes);
+  return expandRun(run, resolveDayTimes(run.dayTimes)).map((start) => ({
+    start,
+    end: null,
+    status: "SCHEDULED",
+    label: null,
+    estimated,
+  }));
+}
+
 /**
  * Today's date at the theatres, as UTC midnight — the same shape as `seenDate` and other
  * calendar-day columns. Plain UTC "today" flips to tomorrow at 5pm in California.

@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 
 import prisma from "../../../src/data/db";
+import { showtimeSelect } from "../../../src/data/showtimes";
 import { openRunCutoff } from "../../../src/utils/schedule";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -32,6 +33,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         where: { musical: musical.id, endDate: { gte: openRunCutoff() } },
         include: {
           musicals: true,
+          performances: { select: showtimeSelect },
         },
         orderBy: { startDate: "asc" },
       });
@@ -50,6 +52,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         where: { play: play.id, endDate: { gte: openRunCutoff() } },
         include: {
           plays: true,
+          performances: { select: showtimeSelect },
         },
         orderBy: { startDate: "asc" },
       });

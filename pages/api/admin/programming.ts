@@ -100,7 +100,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const { id } = req.body;
     if (!id) return res.status(400).json({ error: "ID is required." });
     try {
-      await prisma.programming.delete({ where: { id: Number(id) } });
+      // Showtimes nobody logged go with the run; logged ones stay for those people's history.
+      await prisma.$transaction([
+        prisma.performances.deleteMany({
+          where: { programming: Number(id), attendance: { none: {} } },
+        }),
+        prisma.programming.delete({ where: { id: Number(id) } }),
+      ]);
       return res.status(200).json({ message: "Deleted." });
     } catch (e) {
       return res.status(500).json({ error: "Failed to delete programming entry." });

@@ -22,12 +22,14 @@ import {
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
+import ScheduleIcon from "@mui/icons-material/Schedule";
 import { musicals, plays, programming, seasons, theatres } from "@prisma/client";
 import Head from "next/head";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import AdminGuard from "../../src/components/admin/AdminGuard";
+import ShowtimesDialog from "../../src/components/admin/ShowtimesDialog";
 import {
   DEFAULT_DAY_TIMES,
   hasDayTimes,
@@ -93,6 +95,7 @@ export default function AdminProgrammingPage() {
   const [seasons, setSeasons] = useState<(seasons & { theatres: theatres })[]>([]);
   const [form, setForm] = useState(EMPTY_FORM);
   const [schedule, setSchedule] = useState(EMPTY_SCHEDULE);
+  const [showtimesFor, setShowtimesFor] = useState<ProgramWithRelations | null>(null);
   const [editId, setEditId] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
   const [deleteId, setDeleteId] = useState<number | null>(null);
@@ -423,6 +426,13 @@ export default function AdminProgrammingPage() {
                       </Typography>
                     </Box>
                     <Stack direction="row">
+                      <IconButton
+                        aria-label="Showtimes"
+                        size="small"
+                        onClick={() => setShowtimesFor(program)}
+                      >
+                        <ScheduleIcon fontSize="small" />
+                      </IconButton>
                       <IconButton size="small" onClick={() => startEdit(program)}>
                         <EditIcon fontSize="small" />
                       </IconButton>
@@ -452,6 +462,14 @@ export default function AdminProgrammingPage() {
       </Box>
 
       {/* Delete confirmation dialog */}
+      {showtimesFor && (
+        <ShowtimesDialog
+          programmingId={showtimesFor.id}
+          title={showLabel(showtimesFor) ?? ""}
+          onClose={() => setShowtimesFor(null)}
+        />
+      )}
+
       <Dialog open={!!deleteId} onClose={() => setDeleteId(null)}>
         <DialogTitle>Delete programming entry?</DialogTitle>
         <DialogContent>

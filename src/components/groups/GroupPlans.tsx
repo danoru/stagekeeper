@@ -10,6 +10,7 @@ import type {
 import { useMemo, useState } from "react";
 
 import type { ShowSummary, TheatreSummary } from "../../data/performances";
+import type { ShowtimeRow } from "../../utils/schedule";
 
 import CreatePlanForm from "./CreatePlanForm";
 import PlanCard from "./PlanCard";
@@ -25,6 +26,7 @@ export type ProgrammingOption = programming & {
   musicals: ShowSummary | null;
   plays: ShowSummary | null;
   seasons: { id: number; name: string; theatres: TheatreSummary } | null;
+  performances?: ShowtimeRow[];
 };
 
 export type Plan = groupPlan & {

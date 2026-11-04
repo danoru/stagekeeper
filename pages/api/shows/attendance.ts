@@ -93,9 +93,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       if (!perf) {
         return res.status(404).json({ error: "Performance not found." });
       }
+      if (perf.status === "CANCELED") {
+        return res.status(400).json({ error: "That performance was canceled." });
+      }
       resolvedMusical = perf.musical ?? null;
       resolvedPlay = perf.play ?? null;
       data = { user: userId, performance: perf.id, rating, comment };
+      // A run's showtime is a real instant; pages read logged dates as calendar days, so store
+      // the date at the theatre. Older rows are already calendar days and stay as they are.
+      if (perf.programming != null) data.seenDate = theatreToday(perf.startTime);
     } else if (type === "MUSICAL" && musicalId) {
       const musical = await prisma.musicals.findUnique({
         where: { id: Number(musicalId) },

@@ -188,7 +188,7 @@ export async function getStaticProps(context: { params: Params }) {
 
   const [pastPerformances, productions] = await Promise.all([
     prisma.performances.findMany({
-      where: { musical: musical.id, startTime: { lte: new Date() } },
+      where: { musical: musical.id, startTime: { lte: new Date() }, status: { not: "CANCELED" } },
       include: { theatres: true },
       orderBy: { startTime: "desc" },
       take: 50,

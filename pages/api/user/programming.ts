@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 
 import prisma from "../../../src/data/db";
 import { canSeeGoingDates } from "../../../src/data/privacy";
+import { showtimeSelect } from "../../../src/data/showtimes";
 import { openRunCutoff, THEATRE_TZ, theatreToday } from "../../../src/utils/schedule";
 import { authOptions } from "../auth/[...nextauth]";
 
@@ -54,6 +55,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 musicals: { select: { title: true, duration: true } },
                 plays: { select: { title: true, duration: true } },
                 seasons: { include: { theatres: { select: { name: true } } } },
+                performances: { select: showtimeSelect },
               },
             },
           },
@@ -65,6 +67,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 musicals: { select: { title: true, duration: true } },
                 plays: { select: { title: true, duration: true } },
                 seasons: { include: { theatres: { select: { name: true } } } },
+                performances: { select: showtimeSelect },
               },
             },
           },
@@ -84,6 +87,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             startDate: program.startDate,
             endDate: program.endDate,
             dayTimes: program.dayTimes,
+            performances: program.performances,
             source: "watchlist",
           })) || []),
         ...(watchItem.plays?.programming
@@ -96,6 +100,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             startDate: program.startDate,
             endDate: program.endDate,
             dayTimes: program.dayTimes,
+            performances: program.performances,
             source: "watchlist",
           })) || []),
       ];
@@ -148,7 +153,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // "I'm going" rows: a single day on the calendar.
     const goingRows = await prisma.attendance.findMany({
-      where: { user, going: true, seenDate: { gte: firstDayOfMonth, lt: before } },
+      // Rows tied to a real performance are already on the calendar above, at their real time.
+      where: {
+        user,
+        going: true,
+        performance: null,
+        seenDate: { gte: firstDayOfMonth, lt: before },
+      },
       include: {
         musicals: { select: { title: true, duration: true } },
         plays: { select: { title: true, duration: true } },

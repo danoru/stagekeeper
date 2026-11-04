@@ -6,9 +6,24 @@ import type { musicals, PerformanceType, plays, programming } from "@prisma/clie
 import moment from "moment";
 import React from "react";
 
-import { expandRun, hasDayTimes, resolveDayTimes } from "../../utils/schedule";
+import { runShowtimes, type RunShowtime, type ShowtimeRow } from "../../utils/schedule";
 
 const ESTIMATED_CLASS = "sk-estimated";
+const CANCELED_CLASS = "sk-canceled";
+
+type ProgramWithShowtimes = programming & {
+  musicals?: musicals;
+  plays?: plays;
+  performances?: ShowtimeRow[];
+};
+
+function eventTitle(title: string, showtime: RunShowtime) {
+  if (showtime.status === "CANCELED") return `Canceled: ${title}`;
+  const notes = [showtime.label, showtime.status === "SOLD_OUT" ? "Sold out" : null].filter(
+    Boolean
+  );
+  return notes.length > 0 ? `${title} (${notes.join(", ")})` : title;
+}
 
 interface Props {
   viewType: "show" | "theatre";
@@ -28,19 +43,19 @@ function PerformanceCalendar({ viewType, identifier, showType }: Props) {
   const [initialDate, setInitialDate] = React.useState<Date | null>(null);
   const [loading, setLoading] = React.useState(true);
 
-  function generateEventDates(
-    programming: programming & { musicals?: musicals; plays?: plays }
-  ): Event[] {
-    const { musicals, plays, type } = programming;
+  function generateEventDates(program: ProgramWithShowtimes): Event[] {
+    const { musicals, plays, type } = program;
     const duration = (type === "MUSICAL" ? musicals?.duration : plays?.duration) ?? 150;
     const title = (type === "MUSICAL" ? musicals?.title : plays?.title) ?? "";
-    const estimated = !hasDayTimes(programming.dayTimes);
 
-    return expandRun(programming, resolveDayTimes(programming.dayTimes)).map((start) => ({
-      start,
-      end: moment(start).add(duration, "minutes").toDate(),
-      title,
-      classNames: estimated ? [ESTIMATED_CLASS] : [],
+    return runShowtimes(program).map((s) => ({
+      start: s.start,
+      end: s.end ?? moment(s.start).add(duration, "minutes").toDate(),
+      title: eventTitle(title, s),
+      classNames: [
+        ...(s.estimated ? [ESTIMATED_CLASS] : []),
+        ...(s.status === "CANCELED" ? [CANCELED_CLASS] : []),
+      ],
     }));
   }
 
@@ -55,10 +70,7 @@ function PerformanceCalendar({ viewType, identifier, showType }: Props) {
         const response = await fetch(endpoint);
         if (!response.ok) throw new Error("Failed to fetch performances.");
 
-        const programmingData: (programming & {
-          musicals?: musicals;
-          plays?: plays;
-        })[] = await response.json();
+        const programmingData: ProgramWithShowtimes[] = await response.json();
 
         const allEvents = programmingData.flatMap((program) => generateEventDates(program));
 
@@ -144,7 +156,12 @@ function PerformanceCalendar({ viewType, identifier, showType }: Props) {
 
       {/* Calendar */}
       {initialDate && (
-        <Box sx={{ [`& .${ESTIMATED_CLASS}`]: { opacity: 0.55, fontStyle: "italic" } }}>
+        <Box
+          sx={{
+            [`& .${ESTIMATED_CLASS}`]: { opacity: 0.55, fontStyle: "italic" },
+            [`& .${CANCELED_CLASS}`]: { opacity: 0.45, textDecoration: "line-through" },
+          }}
+        >
           <FullCalendar
             events={events}
             fixedWeekCount={false}

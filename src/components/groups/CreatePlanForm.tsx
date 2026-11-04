@@ -16,7 +16,7 @@ import moment from "moment";
 import { useRouter } from "next/router";
 import { useMemo, useState } from "react";
 
-import { expandRun, hasDayTimes } from "../../utils/schedule";
+import { expandRun, hasDayTimes, runShowtimes } from "../../utils/schedule";
 
 import type { ProgrammingOption } from "./GroupPlans";
 
@@ -82,8 +82,15 @@ function theatresForShow(
 }
 
 function expandShowtimes(p: ProgrammingOption, cap = CANDIDATE_CAP): Date[] {
+  const now = new Date();
+  if (p.performances && p.performances.length > 0) {
+    return runShowtimes(p)
+      .filter((s) => s.status === "SCHEDULED" && s.start > now)
+      .map((s) => s.start)
+      .slice(0, cap);
+  }
   if (!hasDayTimes(p.dayTimes)) return [];
-  return expandRun(p, p.dayTimes, { from: new Date(), cap });
+  return expandRun(p, p.dayTimes, { from: now, cap });
 }
 
 function combinedShowtimes(programmings: ProgrammingOption[]): Date[] {

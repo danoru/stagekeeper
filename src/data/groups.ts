@@ -2,7 +2,7 @@ import { randomUUID } from "crypto";
 
 import { Availability, GroupRole, PlanStatus, type Prisma } from "@prisma/client";
 
-import { theatreToday } from "../utils/schedule";
+import { openRunCutoff, theatreToday } from "../utils/schedule";
 
 import prisma from "./db";
 import {
@@ -12,6 +12,7 @@ import {
   showSummarySelect,
   theatreSummarySelect,
 } from "./performances";
+import { showtimeSelect } from "./showtimes";
 
 // A programming run with just enough of its show and venue to render a card or picker row.
 const programmingSummaryInclude = {
@@ -637,11 +638,11 @@ export async function getUpcomingProgrammingForPicker(take = 100) {
   return prisma.programming.findMany({
     where: {
       OR: [
-        { AND: [{ startDate: { lte: now } }, { endDate: { gte: now } }] },
+        { AND: [{ startDate: { lte: now } }, { endDate: { gte: openRunCutoff(now) } }] },
         { startDate: { lte: limit, gte: now } },
       ],
     },
-    include: programmingSummaryInclude,
+    include: { ...programmingSummaryInclude, performances: { select: showtimeSelect } },
     orderBy: { startDate: "asc" },
     take,
   });

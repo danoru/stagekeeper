@@ -6,7 +6,7 @@ import Typography from "@mui/material/Typography";
 import moment from "moment";
 import React, { useEffect, useState } from "react";
 
-import { expandRun, resolveDayTimes } from "../../utils/schedule";
+import { runShowtimes, type ShowtimeRow } from "../../utils/schedule";
 
 interface Props {
   identifier: number;
@@ -20,6 +20,7 @@ interface Program {
   title: string;
   theatre: string;
   dayTimes: Record<string, string[]>;
+  performances?: ShowtimeRow[];
 }
 
 interface Event {
@@ -28,6 +29,7 @@ interface Event {
   theatre: string;
   title: string;
   source?: string;
+  estimated?: boolean;
 }
 
 function UpcomingCalendar({ identifier }: Props) {
@@ -37,15 +39,20 @@ function UpcomingCalendar({ identifier }: Props) {
 
   function generateEventDates(programming: Program): Event[] {
     const { duration, source, theatre, title } = programming;
-    return expandRun(programming, resolveDayTimes(programming.dayTimes)).map((start) => ({
-      start,
-      end: moment(start)
-        .add(Number(duration) || 150, "minutes")
-        .toDate(),
-      theatre,
-      title,
-      source,
-    }));
+    return runShowtimes(programming)
+      .filter((s) => s.status !== "CANCELED")
+      .map((s) => ({
+        start: s.start,
+        end:
+          s.end ??
+          moment(s.start)
+            .add(Number(duration) || 150, "minutes")
+            .toDate(),
+        theatre,
+        title,
+        source,
+        estimated: s.estimated,
+      }));
   }
 
   useEffect(() => {
@@ -94,6 +101,7 @@ function UpcomingCalendar({ identifier }: Props) {
       end: info.event.end,
       theatre: info.event.extendedProps.theatre || "N/A",
       source: info.event.extendedProps.source,
+      estimated: info.event.extendedProps.estimated,
     });
   }
 
@@ -199,6 +207,19 @@ function UpcomingCalendar({ identifier }: Props) {
                 {" — "}
                 {moment(selectedEvent.end).format("h:mm A")}
               </Typography>
+              {selectedEvent.estimated && (
+                <Typography
+                  sx={{
+                    fontFamily: '"DM Sans", sans-serif',
+                    fontSize: "0.72rem",
+                    fontStyle: "italic",
+                    color: "#D4AF55",
+                    mt: 1,
+                  }}
+                >
+                  Estimated time. Check with the theatre before you buy tickets.
+                </Typography>
+              )}
             </>
           )}
         </Box>

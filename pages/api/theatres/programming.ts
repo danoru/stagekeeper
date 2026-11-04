@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 
 import prisma from "../../../src/data/db";
+import { showtimeSelect } from "../../../src/data/showtimes";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { theatreName } = req.query;
@@ -31,6 +32,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       include: {
         musicals: true,
         plays: true,
+        performances: { select: showtimeSelect },
       },
       orderBy: { startDate: "asc" },
     });

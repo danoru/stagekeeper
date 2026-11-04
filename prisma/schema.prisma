@@ -179,19 +179,27 @@ model musicals {
 }
 
 model performances {
-  id         Int             @id(map: "showings_pkey") @default(autoincrement())
-  type       PerformanceType
-  play       Int?
-  musical    Int?
-  theatre    Int
-  startTime  DateTime        @db.Timestamptz(6)
-  endTime    DateTime        @db.Timestamptz(6)
-  createdAt  DateTime        @default(now()) @db.Timestamptz(6)
-  attendance attendance[]
-  musicals   musicals?       @relation(fields: [musical], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "showings_musical_fkey")
-  plays      plays?          @relation(fields: [play], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "showings_play_fkey")
-  theatres   theatres        @relation(fields: [theatre], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "showings_theatre_fkey")
+  id           Int               @id(map: "showings_pkey") @default(autoincrement())
+  type         PerformanceType
+  play         Int?
+  musical      Int?
+  theatre      Int
+  startTime    DateTime          @db.Timestamptz(6)
+  endTime      DateTime          @db.Timestamptz(6)
+  createdAt    DateTime          @default(now()) @db.Timestamptz(6)
+  /// The run this showtime belongs to. Null on older rows, whose startTime is a calendar day
+  /// stored at UTC midnight rather than a real instant.
+  programming  Int?
+  status       PerformanceStatus @default(SCHEDULED)
+  /// "Preview", "Opening night", "ASL interpreted"...
+  label        String?
+  programmings programming?      @relation(fields: [programming], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  attendance   attendance[]
+  musicals     musicals?         @relation(fields: [musical], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "showings_musical_fkey")
+  plays        plays?            @relation(fields: [play], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "showings_play_fkey")
+  theatres     theatres          @relation(fields: [theatre], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "showings_theatre_fkey")
 
+  @@unique([programming, startTime])
   @@index([musical])
   @@index([play])
   @@index([theatre])
@@ -220,20 +228,21 @@ model plays {
 }
 
 model programming {
-  id         Int             @id @default(autoincrement())
-  createdAt  DateTime        @default(now()) @db.Timestamptz(6)
-  type       PerformanceType
-  play       Int?
-  musical    Int?
-  season     Int?
-  startDate  DateTime        @db.Timestamptz(6)
-  endDate    DateTime        @db.Timestamptz(6)
-  dayTimes   Json
-  musicals   musicals?       @relation(fields: [musical], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "showings_musical_fkey")
-  plays      plays?          @relation(fields: [play], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "showings_play_fkey")
-  seasons    seasons?        @relation(fields: [season], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  groupPlans groupPlan[]
-  credits    credits[]
+  id           Int             @id @default(autoincrement())
+  createdAt    DateTime        @default(now()) @db.Timestamptz(6)
+  type         PerformanceType
+  play         Int?
+  musical      Int?
+  season       Int?
+  startDate    DateTime        @db.Timestamptz(6)
+  endDate      DateTime        @db.Timestamptz(6)
+  dayTimes     Json
+  musicals     musicals?       @relation(fields: [musical], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "showings_musical_fkey")
+  plays        plays?          @relation(fields: [play], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "showings_play_fkey")
+  seasons      seasons?        @relation(fields: [season], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  groupPlans   groupPlan[]
+  credits      credits[]
+  performances performances[]
 
   @@index([musical])
   @@index([play])
@@ -326,6 +335,8 @@ model importCandidates {
   startDate           DateTime?            @db.Timestamptz(6)
   endDate             DateTime?            @db.Timestamptz(6)
   snippet             String?
+  /// ISO instants of individual performances found on the page, if it listed them.
+  showtimes           Json?
   matchType           PerformanceType?
   matchMusical        Int?
   matchPlay           Int?
@@ -441,6 +452,12 @@ enum GroupVisibility {
 enum PerformanceType {
   MUSICAL
   PLAY
+}
+
+enum PerformanceStatus {
+  SCHEDULED
+  CANCELED
+  SOLD_OUT
 }
 
 enum CreditCategory {

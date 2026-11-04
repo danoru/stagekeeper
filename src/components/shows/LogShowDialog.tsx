@@ -26,6 +26,7 @@ import moment from "moment";
 import { useEffect, useMemo, useState } from "react";
 
 import type { ShowSearchResult } from "../../data/catalog";
+import { formatTheatreTime } from "../../utils/schedule";
 
 export type LogMode = "seen" | "going";
 
@@ -109,7 +110,7 @@ export default function LogShowDialog({
   const [newShowYear, setNewShowYear] = useState("");
   const debouncedShowQuery = useDebounced(showQuery, 250);
 
-  // Specific performance (legacy admin-entered rows)
+  // Specific performance (a run's real showtimes, or legacy admin-entered rows)
   const [performanceId, setPerformanceId] = useState<number | "">("");
 
   // Theatre picker
@@ -432,7 +433,10 @@ export default function LogShowDialog({
                 >
                   {pastPerformances.map((p) => (
                     <MenuItem key={p.id} value={p.id}>
-                      {moment.utc(p.startTime).format("MMM D, YYYY")} — {p.theatres.name}
+                      {p.programming != null
+                        ? formatTheatreTime(p.startTime, true)
+                        : moment.utc(p.startTime).format("MMM D, YYYY")}{" "}
+                      — {p.theatres.name}
                     </MenuItem>
                   ))}
                 </Select>

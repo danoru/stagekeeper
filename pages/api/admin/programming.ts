@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 
 import { authOptions } from "../auth/[...nextauth]";
 import prisma from "../../../src/data/db";
+import { parseDayTimes } from "../../../src/utils/schedule";
 
 async function requireAdmin(req: NextApiRequest, res: NextApiResponse) {
   const session = await getServerSession(req, res, authOptions);
@@ -39,6 +40,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ error: "Musical is required." });
     if (type === "PLAY" && !play) return res.status(400).json({ error: "Play is required." });
 
+    const schedule = parseDayTimes(dayTimes);
+    if (typeof schedule === "string") return res.status(400).json({ error: schedule });
+
     try {
       const program = await prisma.programming.create({
         data: {
@@ -48,7 +52,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           season: Number(season),
           startDate: new Date(startDate),
           endDate: new Date(endDate),
-          dayTimes: dayTimes || {},
+          dayTimes: schedule,
         },
         include: {
           musicals: true,
@@ -65,6 +69,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (req.method === "PUT") {
     const { id, type, musical, play, season, startDate, endDate, dayTimes } = req.body;
     if (!id) return res.status(400).json({ error: "ID is required." });
+    // Leaving dayTimes out keeps the run's schedule; only an explicit value replaces it.
+    const schedule = dayTimes === undefined ? undefined : parseDayTimes(dayTimes);
+    if (typeof schedule === "string") return res.status(400).json({ error: schedule });
     try {
       const program = await prisma.programming.update({
         where: { id: Number(id) },
@@ -75,7 +82,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           season: Number(season),
           startDate: new Date(startDate),
           endDate: new Date(endDate),
-          dayTimes: dayTimes || {},
+          dayTimes: schedule,
         },
         include: {
           musicals: true,

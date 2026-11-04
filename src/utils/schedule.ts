@@ -30,6 +30,57 @@ export function resolveDayTimes(raw: unknown): DayTimes {
   return hasDayTimes(raw) ? raw : DEFAULT_DAY_TIMES;
 }
 
+export const WEEK_ORDER = [
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+  "Sunday",
+];
+
+/** "2pm", "2:30 PM", "14:00" → "14:00"; null when it isn't a time. */
+export function parseTime(text: string): string | null {
+  const m = text.trim().match(/^(\d{1,2})(?::(\d{2}))?\s*([ap])\.?m?\.?$|^(\d{1,2}):(\d{2})$/i);
+  if (!m) return null;
+  const minute = Number(m[2] ?? m[5] ?? 0);
+  let hour = Number(m[1] ?? m[4]);
+  if (m[3]) {
+    if (hour < 1 || hour > 12) return null;
+    hour = (hour % 12) + (m[3].toLowerCase() === "p" ? 12 : 0);
+  }
+  if (hour > 23 || minute > 59) return null;
+  return `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
+}
+
+/** Validates a weekly pattern from a request; returns it cleaned, or an error message. */
+export function parseDayTimes(raw: unknown): DayTimes | string {
+  if (raw === null || raw === undefined) return {};
+  if (typeof raw !== "object" || Array.isArray(raw)) return "Schedule must list days and times.";
+  const out: DayTimes = {};
+  for (const [day, times] of Object.entries(raw)) {
+    if (!WEEK_ORDER.includes(day)) return `Unknown day: ${day}.`;
+    if (!Array.isArray(times)) return `Times for ${day} must be a list.`;
+    const parsed = times.map((t) => (typeof t === "string" ? parseTime(t) : null));
+    if (parsed.some((t) => t === null)) return `Invalid time on ${day}.`;
+    if (parsed.length > 0) out[day] = [...new Set(parsed as string[])].sort();
+  }
+  return out;
+}
+
+/** "Nov 7, 8:00 PM" as the clock reads at the theatre, whatever zone the viewer is in. */
+export function formatTheatreTime(value: Date | string, withYear = false): string {
+  return new Intl.DateTimeFormat("en-US", {
+    timeZone: THEATRE_TZ,
+    month: "short",
+    day: "numeric",
+    year: withYear ? "numeric" : undefined,
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(new Date(value));
+}
+
 function zoneOffsetMs(at: Date, tz: string): number {
   const parts = new Intl.DateTimeFormat("en-US", {
     timeZone: tz,

@@ -35,9 +35,11 @@ async function getFollowGraph(viewerId: number) {
     },
   });
   return {
-    followed: followed.map(
-      (u): FollowedUser => ({ id: u.id, username: u.username, image: u.image })
-    ),
+    followed: followed.map((u): FollowedUser => ({
+      id: u.id,
+      username: u.username,
+      image: u.image,
+    })),
     mutual: new Set(followed.filter((u) => u.following.length > 0).map((u) => u.id)),
   };
 }

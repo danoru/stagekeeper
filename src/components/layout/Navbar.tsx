@@ -266,7 +266,9 @@ function Navbar() {
             </Typography>
 
             {/* Desktop links */}
-            <Box sx={{ flexGrow: 1, display: "none", gap: 0.5, [DESKTOP_NAV]: { display: "flex" } }}>
+            <Box
+              sx={{ flexGrow: 1, display: "none", gap: 0.5, [DESKTOP_NAV]: { display: "flex" } }}
+            >
               {pages.map((page) => (
                 <Button
                   key={page.id}

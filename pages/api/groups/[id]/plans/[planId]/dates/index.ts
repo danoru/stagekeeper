@@ -1,12 +1,12 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth";
 
-import { authOptions } from "../../../../../auth/[...nextauth]";
 import {
   addCandidateDate,
   getPlanWithGroup,
   isGroupMember,
 } from "../../../../../../../src/data/groups";
+import { authOptions } from "../../../../../auth/[...nextauth]";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "POST") {

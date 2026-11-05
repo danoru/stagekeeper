@@ -75,14 +75,6 @@ export default function SimpleCarousel({ children, sx, autoplay = false, interva
 
   return (
     <Box
-      tabIndex={0}
-      onKeyDown={onKey}
-      onPointerDown={onPointerDown}
-      onPointerMove={onPointerMove}
-      onPointerUp={onPointerUp}
-      onPointerCancel={onPointerUp}
-      onMouseEnter={() => setIsDragging(true)}
-      onMouseLeave={() => setIsDragging(false)}
       sx={{
         position: "relative",
         overflow: "hidden",
@@ -90,6 +82,14 @@ export default function SimpleCarousel({ children, sx, autoplay = false, interva
         outline: "none",
         ...((sx as object) || {}),
       }}
+      tabIndex={0}
+      onKeyDown={onKey}
+      onMouseEnter={() => setIsDragging(true)}
+      onMouseLeave={() => setIsDragging(false)}
+      onPointerCancel={onPointerUp}
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={onPointerUp}
     >
       {/* Slides */}
       <Box
@@ -113,7 +113,6 @@ export default function SimpleCarousel({ children, sx, autoplay = false, interva
           <IconButton
             aria-label="previous"
             size="small"
-            onClick={prev}
             sx={{
               position: "absolute",
               left: 10,
@@ -127,13 +126,13 @@ export default function SimpleCarousel({ children, sx, autoplay = false, interva
                 borderColor: "rgba(212,175,85,0.5)",
               },
             }}
+            onClick={prev}
           >
             <ChevronLeftIcon />
           </IconButton>
           <IconButton
             aria-label="next"
             size="small"
-            onClick={next}
             sx={{
               position: "absolute",
               right: 10,
@@ -147,6 +146,7 @@ export default function SimpleCarousel({ children, sx, autoplay = false, interva
                 borderColor: "rgba(212,175,85,0.5)",
               },
             }}
+            onClick={next}
           >
             <ChevronRightIcon />
           </IconButton>
@@ -165,9 +165,8 @@ export default function SimpleCarousel({ children, sx, autoplay = false, interva
             {childArray.map((_, i) => (
               <Box
                 key={i}
-                component="button"
                 aria-label={`Go to slide ${i + 1}`}
-                onClick={() => setIndex(i)}
+                component="button"
                 sx={{
                   width: i === index ? 20 : 6,
                   height: 6,
@@ -178,6 +177,7 @@ export default function SimpleCarousel({ children, sx, autoplay = false, interva
                   p: 0,
                   transition: "width 0.3s, background 0.3s",
                 }}
+                onClick={() => setIndex(i)}
               />
             ))}
           </Box>

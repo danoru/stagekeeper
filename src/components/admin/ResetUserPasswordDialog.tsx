@@ -97,11 +97,11 @@ function ResetUserPasswordDialog({ open, user, onClose, onSuccess, onError }: Pr
   }
 
   return (
-    <Dialog fullWidth open={open} maxWidth="xs" onClose={handleClose}>
+    <Dialog fullWidth maxWidth="xs" open={open} onClose={handleClose}>
       <DialogTitle>Reset password</DialogTitle>
       <DialogContent>
         {user && (
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          <Typography color="text.secondary" sx={{ mb: 2 }} variant="body2">
             Setting a new password for <strong>{user.username}</strong>.
           </Typography>
         )}
@@ -111,21 +111,17 @@ function ResetUserPasswordDialog({ open, user, onClose, onSuccess, onError }: Pr
             after you close this dialog.
           </Alert>
         ) : (
-          <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 1.5 }}>
+          <Typography color="text.secondary" sx={{ display: "block", mb: 1.5 }} variant="caption">
             Type a password or generate one. The user can change it later from settings.
           </Typography>
         )}
-        <Stack direction="row" spacing={1} alignItems="flex-start">
+        <Stack alignItems="flex-start" direction="row" spacing={1}>
           <TextField
             fullWidth
             autoFocus={!completed}
             disabled={submitting}
             error={!!error}
             helperText={error}
-            label="New password"
-            size="small"
-            type="text"
-            value={password}
             InputProps={{
               readOnly: completed,
               endAdornment: password ? (
@@ -141,6 +137,10 @@ function ResetUserPasswordDialog({ open, user, onClose, onSuccess, onError }: Pr
                 </InputAdornment>
               ) : undefined,
             }}
+            label="New password"
+            size="small"
+            type="text"
+            value={password}
             onChange={(e) => {
               setPassword(e.target.value);
               setError(null);

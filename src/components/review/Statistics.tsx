@@ -339,11 +339,11 @@ function Statistics({ stats, view, year }: Props) {
         )}
         {latestPerformance && (
           <SpotlightCard
+            reverse
             date={moment.utc(latestPerformance.performances.startTime).format("MMMM Do, YYYY")}
             headline={`Most Recent Performance ${getYearText()}`}
             location={latestPerformance.performances.theatres.location}
             playbill={getPlaybill(latestPerformance)}
-            reverse
             subtext={`Most recently you sat down for ${getPerformanceTitle(latestPerformance)}.`}
             theatre={latestPerformance.performances.theatres.name}
             title={getPerformanceTitle(latestPerformance)}
@@ -367,11 +367,11 @@ function Statistics({ stats, view, year }: Props) {
         )}
         {newestPerformance && (
           <SpotlightCard
+            reverse
             date={moment.utc(newestPerformance.performances.startTime).format("MMMM Do, YYYY")}
             headline={`Newest Premiere ${getYearText()}`}
             location={newestPerformance.performances.theatres.location}
             playbill={getPlaybill(newestPerformance)}
-            reverse
             subtext={`${getPerformanceTitle(newestPerformance)} premiered in ${getPerformancePremiere(newestPerformance)} — the newest show you've seen.`}
             theatre={newestPerformance.performances.theatres.name}
             title={getPerformanceTitle(newestPerformance)}

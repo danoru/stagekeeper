@@ -39,7 +39,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         },
       });
       return res.status(201).json(theatre);
-    } catch (e) {
+    } catch {
       return res.status(500).json({ error: "Failed to create theatre." });
     }
   }
@@ -63,7 +63,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         },
       });
       return res.status(200).json(theatre);
-    } catch (e) {
+    } catch {
       return res.status(500).json({ error: "Failed to update theatre." });
     }
   }
@@ -81,7 +81,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         },
       });
       return res.status(200).json(theatre);
-    } catch (e) {
+    } catch {
       return res.status(500).json({ error: "Failed to update theatre." });
     }
   }

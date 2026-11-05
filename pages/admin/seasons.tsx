@@ -1,3 +1,4 @@
+import EditIcon from "@mui/icons-material/Edit";
 import {
   Alert,
   Box,
@@ -13,7 +14,6 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import EditIcon from "@mui/icons-material/Edit";
 import { seasons, theatres } from "@prisma/client";
 import Head from "next/head";
 import Link from "next/link";
@@ -115,7 +115,7 @@ export default function AdminSeasonsPage() {
         <title>Seasons • Admin • StageKeeper</title>
       </Head>
       <Box sx={{ maxWidth: 1100, mx: "auto", mt: 4, px: 2 }}>
-        <Stack direction="row" alignItems="center" justifyContent="space-between" mb={2}>
+        <Stack alignItems="center" direction="row" justifyContent="space-between" mb={2}>
           <Typography variant="h5">
             <Link href="/admin" style={{ textDecoration: "none", color: "inherit" }}>
               Admin
@@ -128,24 +128,24 @@ export default function AdminSeasonsPage() {
         <Grid container spacing={3}>
           <Grid size={{ xs: 12, md: 5 }}>
             <Paper sx={{ p: 3 }}>
-              <Typography variant="h6" gutterBottom>
+              <Typography gutterBottom variant="h6">
                 {editId ? "Edit Season" : "Add Season"}
               </Typography>
               <form onSubmit={handleSubmit}>
                 <Stack spacing={2}>
                   <TextField
-                    required
                     fullWidth
+                    required
                     label="Season name"
-                    size="small"
                     placeholder="2024-2025 Season"
+                    size="small"
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
                   />
                   <TextField
+                    fullWidth
                     required
                     select
-                    fullWidth
                     label="Theatre"
                     size="small"
                     value={form.theatre}
@@ -158,31 +158,31 @@ export default function AdminSeasonsPage() {
                     ))}
                   </TextField>
                   <TextField
-                    required
                     fullWidth
+                    required
+                    InputLabelProps={{ shrink: true }}
                     label="Start date"
                     size="small"
                     type="date"
-                    InputLabelProps={{ shrink: true }}
                     value={form.startDate}
                     onChange={(e) => setForm({ ...form, startDate: e.target.value })}
                   />
                   <TextField
-                    required
                     fullWidth
+                    required
+                    InputLabelProps={{ shrink: true }}
                     label="End date"
                     size="small"
                     type="date"
-                    InputLabelProps={{ shrink: true }}
                     value={form.endDate}
                     onChange={(e) => setForm({ ...form, endDate: e.target.value })}
                   />
                   <Stack direction="row" spacing={1}>
-                    <Button type="submit" variant="contained" disabled={saving} fullWidth>
+                    <Button fullWidth disabled={saving} type="submit" variant="contained">
                       {saving ? "Saving…" : editId ? "Save Changes" : "Add Season"}
                     </Button>
                     {editId && (
-                      <Button variant="outlined" onClick={cancelEdit} fullWidth>
+                      <Button fullWidth variant="outlined" onClick={cancelEdit}>
                         Cancel
                       </Button>
                     )}
@@ -196,26 +196,26 @@ export default function AdminSeasonsPage() {
             <Paper sx={{ p: 3 }}>
               <TextField
                 fullWidth
-                size="small"
                 placeholder="Search seasons…"
+                size="small"
+                sx={{ mb: 2 }}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                sx={{ mb: 2 }}
               />
               <Stack divider={<Divider />} spacing={0}>
                 {filtered.map((season) => (
                   <Stack
                     key={season.id}
-                    direction="row"
                     alignItems="center"
+                    direction="row"
                     justifyContent="space-between"
                     sx={{ py: 1 }}
                   >
                     <Box>
-                      <Typography variant="body2" fontWeight={500}>
+                      <Typography fontWeight={500} variant="body2">
                         {season.name}
                       </Typography>
-                      <Typography variant="caption" color="text.secondary">
+                      <Typography color="text.secondary" variant="caption">
                         {season.theatres?.name} · {new Date(season.startDate).toLocaleDateString()}{" "}
                         – {new Date(season.endDate).toLocaleDateString()}
                       </Typography>
@@ -227,9 +227,9 @@ export default function AdminSeasonsPage() {
                 ))}
                 {filtered.length === 0 && (
                   <Typography
-                    variant="body2"
                     color="text.secondary"
                     sx={{ py: 2, textAlign: "center" }}
+                    variant="body2"
                   >
                     No seasons found.
                   </Typography>
@@ -241,8 +241,8 @@ export default function AdminSeasonsPage() {
       </Box>
 
       <Snackbar
-        open={snackbar.open}
         autoHideDuration={4000}
+        open={snackbar.open}
         onClose={() => setSnackbar((s) => ({ ...s, open: false }))}
       >
         <Alert

@@ -162,10 +162,9 @@ function LoggedOutHomePage() {
           </Typography>
 
           {/* CTAs */}
-          <Stack direction="row" spacing={2} justifyContent="center">
+          <Stack direction="row" justifyContent="center" spacing={2}>
             <Button
               href="/register"
-              variant="contained"
               sx={{
                 px: 4,
                 py: 1.5,
@@ -173,12 +172,12 @@ function LoggedOutHomePage() {
                 letterSpacing: "0.12em",
                 textTransform: "uppercase",
               }}
+              variant="contained"
             >
               Start Your Archive
             </Button>
             <Button
               href="/musicals"
-              variant="outlined"
               sx={{
                 px: 4,
                 py: 1.5,
@@ -186,6 +185,7 @@ function LoggedOutHomePage() {
                 letterSpacing: "0.12em",
                 textTransform: "uppercase",
               }}
+              variant="outlined"
             >
               Browse Shows
             </Button>
@@ -245,7 +245,7 @@ function LoggedOutHomePage() {
 
       {/* Feature strip */}
       <Box sx={{ maxWidth: 860, mx: "auto", px: 4, py: 8 }}>
-        <Stack direction={{ xs: "column", md: "row" }} spacing={6} justifyContent="center">
+        <Stack direction={{ xs: "column", md: "row" }} justifyContent="center" spacing={6}>
           {[
             {
               title: "Track Every Show",

@@ -37,7 +37,7 @@ function ProgramCard(card: Props) {
           },
         }}
       >
-        <Link href={card.link} underline="none" sx={{ display: "block", height: "100%" }}>
+        <Link href={card.link} sx={{ display: "block", height: "100%" }} underline="none">
           {/* Background */}
           {isGradient ? (
             <Box

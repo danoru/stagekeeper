@@ -46,7 +46,7 @@ function ShowCard({ hasUpcomingPerformance, image, link, name }: Props) {
             },
           }}
         >
-          <Link href={link} underline="none" sx={{ display: "block", height: "100%" }}>
+          <Link href={link} sx={{ display: "block", height: "100%" }} underline="none">
             {isGradient ? (
               <Box
                 className="show-image"

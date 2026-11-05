@@ -3,15 +3,13 @@ import Head from "next/head";
 import superjson from "superjson";
 
 import UserAvatar from "../../src/components/users/UserAvatar";
-import { getUsers, type PublicUser } from "../../src/data/users";
+import { getMemberDirectory } from "../../src/data/users";
 
 interface Props {
-  users: PublicUser[];
+  users: Awaited<ReturnType<typeof getMemberDirectory>>;
 }
 
 function UsersPage({ users }: Props) {
-  const filteredUsers = users.filter((user) => user.username !== "guest");
-
   return (
     <Box sx={{ background: "#080C14", minHeight: "100vh" }}>
       <Head>
@@ -42,7 +40,7 @@ function UsersPage({ users }: Props) {
               whiteSpace: "nowrap",
             }}
           >
-            {filteredUsers.length} {filteredUsers.length === 1 ? "member" : "members"}
+            {users.length} {users.length === 1 ? "member" : "members"}
           </Typography>
         </Box>
 
@@ -54,7 +52,7 @@ function UsersPage({ users }: Props) {
           }}
         >
           <Stack divider={<Divider sx={{ borderColor: "rgba(212,175,85,0.08)" }} />}>
-            {filteredUsers.map((user) => (
+            {users.map((user) => (
               <Stack
                 key={user.username}
                 alignItems="center"
@@ -84,18 +82,6 @@ function UsersPage({ users }: Props) {
                   >
                     {user.username}
                   </Link>
-                  {(user.firstName || user.lastName) && (
-                    <Typography
-                      sx={{
-                        fontFamily: '"DM Sans", sans-serif',
-                        fontSize: "0.72rem",
-                        color: "rgba(232,220,200,0.35)",
-                        mt: 0.1,
-                      }}
-                    >
-                      {[user.firstName, user.lastName].filter(Boolean).join(" ")}
-                    </Typography>
-                  )}
                 </Box>
 
                 {/* Badge chip for ADMIN / PATRON */}
@@ -164,7 +150,7 @@ function UsersPage({ users }: Props) {
 }
 
 export async function getServerSideProps() {
-  const users = await getUsers();
+  const users = await getMemberDirectory();
   return {
     props: superjson.serialize({ users }).json,
   };

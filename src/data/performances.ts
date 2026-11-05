@@ -486,6 +486,27 @@ export async function getUserUpcoming(id: number, viewerId: number | null) {
   return normalizeAttendanceRows(rows);
 }
 
+/** The years this user has reviewable visits in, oldest first, as this viewer may see them. */
+export async function getUserReviewYears(id: number, viewerId: number | null) {
+  const rows = await prisma.attendance.findMany({
+    where: {
+      user: id,
+      AND: [
+        { OR: [{ seenDate: { not: null } }, { performance: { not: null } }] },
+        { OR: [{ going: false }, { seenDate: { lt: startOfToday() } }] },
+        visibleAttendance(viewerId),
+      ],
+    },
+    select: { seenDate: true, performances: { select: { startTime: true } } },
+  });
+  const years = new Set<number>();
+  for (const row of rows) {
+    const date = row.seenDate ?? row.performances?.startTime;
+    if (date) years.add(date.getUTCFullYear());
+  }
+  return Array.from(years).sort((a, b) => a - b);
+}
+
 export async function getUserAttendanceByYear(
   year: number | null,
   id: number,

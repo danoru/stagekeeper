@@ -28,23 +28,12 @@ function Highlights({ highlights }: Props) {
     return `${hours}h ${minutes}m`;
   }
 
-  const locationStorage: Record<string, number> = {};
-  let locationCount = 0;
-  highlights.forEach((h) => {
-    if (!locationStorage[h.performances.theatres.location]) {
-      locationStorage[h.performances.theatres.location] = 1;
-      locationCount++;
-    }
-  });
-
-  const stageStorage: Record<string, number> = {};
-  let stageCount = 0;
-  highlights.forEach((h) => {
-    if (!stageStorage[h.performances.theatres.name]) {
-      stageStorage[h.performances.theatres.name] = 1;
-      stageCount++;
-    }
-  });
+  // Logs without a theatre are shown as "Unknown theatre" (id 0), which isn't a stage or a city.
+  const knownTheatres = highlights
+    .map((h) => h.performances.theatres)
+    .filter((theatre) => theatre.id !== 0);
+  const locationCount = new Set(knownTheatres.map((t) => t.location).filter(Boolean)).size;
+  const stageCount = new Set(knownTheatres.map((t) => t.id)).size;
 
   const stats = [
     { value: musicalCount, label: "Musicals" },
@@ -69,7 +58,8 @@ function Highlights({ highlights }: Props) {
         <Box
           sx={{
             display: "grid",
-            gridTemplateColumns: `repeat(${stats.length}, 1fr)`,
+            // Two columns on phones, where five don't fit, with the odd one out across the bottom.
+            gridTemplateColumns: { xs: "repeat(2, 1fr)", sm: `repeat(${stats.length}, 1fr)` },
             py: 0,
           }}
         >
@@ -80,7 +70,16 @@ function Highlights({ highlights }: Props) {
                 py: 3,
                 px: 2,
                 textAlign: "center",
-                borderRight: i < stats.length - 1 ? "1px solid rgba(212,175,85,0.1)" : "none",
+                gridColumn: { xs: i === stats.length - 1 ? "1 / -1" : "auto", sm: "auto" },
+                borderBottom: {
+                  xs: i < stats.length - 1 ? "1px solid rgba(212,175,85,0.1)" : "none",
+                  sm: "none",
+                },
+                borderRight: {
+                  xs:
+                    i % 2 === 0 && i < stats.length - 1 ? "1px solid rgba(212,175,85,0.1)" : "none",
+                  sm: i < stats.length - 1 ? "1px solid rgba(212,175,85,0.1)" : "none",
+                },
                 cursor: "default",
                 transition: "background 0.2s",
                 "&:hover": { background: "rgba(212,175,85,0.04)" },

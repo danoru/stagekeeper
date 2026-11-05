@@ -52,7 +52,8 @@ function LocationsChart(props: Props) {
   const locationOccurrence: Record<string, number> = {};
   stats.forEach((s) => {
     const loc = s.performances.theatres.location;
-    locationOccurrence[loc] = (locationOccurrence[loc] ?? 0) + 1;
+    // Logs without a theatre have no city to count.
+    if (loc) locationOccurrence[loc] = (locationOccurrence[loc] ?? 0) + 1;
   });
 
   const locationData = {

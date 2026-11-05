@@ -8,22 +8,13 @@ import Link from "next/link";
 interface Props {
   username: string;
   year?: string | null;
-  minYear?: number;
-  maxYear?: number;
+  /** The years this person has visits in, oldest first. The arrows step between these. */
+  years?: number[];
 }
 
-function ReviewHeader({ year, username, minYear = 2019, maxYear }: Props) {
-  const currentYear = new Date().getFullYear();
-  const yearMax = maxYear ?? currentYear;
-
-  const previousYear = year ? Number(year) - 1 : null;
-  const nextYear = year ? Number(year) + 1 : null;
-
-  const showPrev = previousYear && previousYear >= minYear;
-  const showNext = nextYear && nextYear <= yearMax;
-
-  const prevYearURL = `/users/${username}/review/${previousYear}`;
-  const nextYearURL = `/users/${username}/review/${nextYear}`;
+function ReviewHeader({ year, username, years = [] }: Props) {
+  const previousYear = year ? years.filter((y) => y < Number(year)).at(-1) : undefined;
+  const nextYear = year ? years.find((y) => y > Number(year)) : undefined;
 
   return (
     <Box
@@ -68,8 +59,12 @@ function ReviewHeader({ year, username, minYear = 2019, maxYear }: Props) {
 
         {/* Year nav */}
         <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 2 }}>
-          {showPrev ? (
-            <Link href={prevYearURL} style={{ textDecoration: "none", color: "inherit" }}>
+          {previousYear ? (
+            <Link
+              aria-label={`Previous year, ${previousYear}`}
+              href={`/users/${username}/review/${previousYear}`}
+              style={{ textDecoration: "none", color: "inherit" }}
+            >
               <Box
                 sx={{
                   color: "rgba(212,175,85,0.5)",
@@ -99,8 +94,12 @@ function ReviewHeader({ year, username, minYear = 2019, maxYear }: Props) {
             {year ?? "All Time"}
           </Typography>
 
-          {showNext ? (
-            <Link href={nextYearURL} style={{ textDecoration: "none", color: "inherit" }}>
+          {nextYear ? (
+            <Link
+              aria-label={`Next year, ${nextYear}`}
+              href={`/users/${username}/review/${nextYear}`}
+              style={{ textDecoration: "none", color: "inherit" }}
+            >
               <Box
                 sx={{
                   color: "rgba(212,175,85,0.5)",

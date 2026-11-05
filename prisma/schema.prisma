@@ -52,13 +52,10 @@ model groups {
   id          Int               @id(map: "group_pkey") @default(autoincrement())
   createdAt   DateTime          @default(now()) @db.Timestamptz(6)
   name        String
-  visibility  GroupVisibility   @default(PRIVATE)
   inviteToken String            @unique @default(uuid())
   members     groupMembership[]
   invites     groupInvite[]
   plans       groupPlan[]
-
-  @@index([visibility])
 }
 
 model groupMembership {
@@ -450,11 +447,6 @@ enum Availability {
   GOING
 }
 
-enum GroupVisibility {
-  PRIVATE
-  PUBLIC_REQUEST
-  PUBLIC_OPEN
-}
 
 enum PerformanceType {
   MUSICAL

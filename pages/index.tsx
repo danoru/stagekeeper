@@ -4,6 +4,7 @@ import superjson from "superjson";
 
 import LoggedInHomePage from "../src/components/home/LoggedInHomePage";
 import LoggedOutHomePage from "../src/components/home/LoggedOutHomePage";
+import { getStageBoard } from "../src/data/board";
 import prisma from "../src/data/db";
 import {
   getFriendsUpcomingPerformances,
@@ -12,16 +13,18 @@ import {
 } from "../src/data/performances";
 import { getFollowedGoingVisibleIds } from "../src/data/privacy";
 import styles from "../src/styles/home.module.css";
+import type { StageBoard } from "../src/utils/stageBoard";
 import { getViewerSession } from "../src/utils/viewer";
 
 interface Props {
+  board: StageBoard | null;
   myUpcoming: any;
   recentPerformances: any;
   session: any;
   upcomingPerformances: any;
 }
 
-function Home({ myUpcoming, recentPerformances, session, upcomingPerformances }: Props) {
+function Home({ board, myUpcoming, recentPerformances, session, upcomingPerformances }: Props) {
   const sessionUser = session?.user.username;
 
   return (
@@ -32,13 +35,14 @@ function Home({ myUpcoming, recentPerformances, session, upcomingPerformances }:
       </Head>
       {session ? (
         <LoggedInHomePage
+          board={board}
           myUpcoming={myUpcoming}
           recentPerformances={recentPerformances}
           sessionUser={sessionUser}
           upcomingPerformances={upcomingPerformances}
         />
       ) : (
-        <LoggedOutHomePage />
+        <LoggedOutHomePage board={board} />
       )}
     </div>
   );
@@ -63,14 +67,16 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     // Going dates are only shared with mutual follows and groupmates.
     const friendIds = await getFollowedGoingVisibleIds(userId);
 
-    const [recentPerformances, upcomingPerformances, myUpcoming] = await Promise.all([
+    const [recentPerformances, upcomingPerformances, myUpcoming, board] = await Promise.all([
       getRecentPerformances([username], userId),
       getFriendsUpcomingPerformances(friendIds, userId),
       getUserUpcoming(userId, userId),
+      getStageBoard({ viewerId: userId }),
     ]);
 
     return {
       props: superjson.serialize({
+        board,
         recentPerformances,
         session,
         upcomingPerformances,
@@ -78,8 +84,10 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
       }).json,
     };
   }
+  // The landing page should still open if the database can't be reached.
+  const board = await getStageBoard().catch(() => null);
   return {
-    props: { session },
+    props: { board, session },
   };
 }
 

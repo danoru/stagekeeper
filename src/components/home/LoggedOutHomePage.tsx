@@ -1,7 +1,24 @@
 import { Box, Button, Stack, Typography } from "@mui/material";
 import Image from "next/image";
 
-function LoggedOutHomePage() {
+import type { StageBoard } from "../../utils/stageBoard";
+import WeeklyBoard from "../shows/WeeklyBoard";
+
+interface Props {
+  board: StageBoard | null;
+}
+
+function LoggedOutHomePage({ board }: Props) {
+  // Live counts from the week's runs. A stat that would read zero is left out, and the whole
+  // strip goes when nothing is on.
+  const stats = board
+    ? [
+        { n: board.productions, label: "On Stage This Week" },
+        { n: board.theatres, label: board.theatres === 1 ? "Theatre" : "Theatres" },
+        { n: board.opening.length, label: "Opening This Week" },
+      ].filter((stat) => stat.n > 0)
+    : [];
+
   return (
     <Box sx={{ minHeight: "100vh", background: "#080C14" }}>
       {/* Hero */}
@@ -199,21 +216,18 @@ function LoggedOutHomePage() {
           borderTop: "1px solid rgba(212,175,85,0.15)",
           borderBottom: "1px solid rgba(212,175,85,0.15)",
           background: "linear-gradient(90deg, #0A0F1A, #0D1520, #0A0F1A)",
-          display: "grid",
-          gridTemplateColumns: "repeat(3, 1fr)",
+          display: stats.length > 0 ? "grid" : "none",
+          gridTemplateColumns: `repeat(${stats.length}, 1fr)`,
         }}
       >
-        {[
-          { n: "66+", label: "Shows Tracked" },
-          { n: "26", label: "Stages Visited" },
-          { n: "161h", label: "Live Theatre" },
-        ].map((stat, i) => (
+        {stats.map((stat, i) => (
           <Box
-            key={i}
+            key={stat.label}
             sx={{
               py: 3,
+              px: 1,
               textAlign: "center",
-              borderRight: i < 2 ? "1px solid rgba(212,175,85,0.1)" : "none",
+              borderRight: i < stats.length - 1 ? "1px solid rgba(212,175,85,0.1)" : "none",
             }}
           >
             <Typography
@@ -242,6 +256,13 @@ function LoggedOutHomePage() {
           </Box>
         ))}
       </Box>
+
+      {/* This week's runs; the strip above already carries the counts */}
+      {board && board.productions > 0 && (
+        <Box sx={{ maxWidth: 1200, mx: "auto", px: { xs: 2, md: 4 }, pt: 6 }}>
+          <WeeklyBoard board={board} summary={false} />
+        </Box>
+      )}
 
       {/* Feature strip */}
       <Box sx={{ maxWidth: 860, mx: "auto", px: 4, py: 8 }}>

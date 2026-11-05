@@ -6,19 +6,23 @@ import superjson from "superjson";
 import PlayCard from "../../src/components/cards/ShowCard";
 import type { ShowListItem } from "../../src/components/shows/ShowList";
 import UpcomingShowList from "../../src/components/shows/UpcomingShowList";
+import WeeklyBoard from "../../src/components/shows/WeeklyBoard";
 import SearchBar from "../../src/components/ui/SearchBar";
+import { getStageBoard } from "../../src/data/board";
 import { getPlays } from "../../src/data/plays";
 import { getUpcomingRuns, type UpcomingRun } from "../../src/data/shows";
 import { showPath } from "../../src/utils/slug";
+import type { StageBoard } from "../../src/utils/stageBoard";
 
 interface Props {
+  board: StageBoard;
   plays: Omit<ShowListItem, "type">[];
   upcomingPerformances: UpcomingRun[];
 }
 
 const itemsPerPage = 8;
 
-function PlaysPage({ plays, upcomingPerformances }: Props) {
+function PlaysPage({ board, plays, upcomingPerformances }: Props) {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
 
@@ -48,6 +52,7 @@ function PlaysPage({ plays, upcomingPerformances }: Props) {
       </Head>
 
       <Container maxWidth="lg" sx={{ py: 4 }}>
+        <WeeklyBoard board={board} title="Plays This Week" />
         <UpcomingShowList upcomingPerformances={upcomingPerformances} />
 
         {/* Section header */}
@@ -145,10 +150,14 @@ function PlaysPage({ plays, upcomingPerformances }: Props) {
 }
 
 export async function getStaticProps() {
-  const [plays, upcomingPerformances] = await Promise.all([getPlays(), getUpcomingRuns("PLAY")]);
+  const [plays, upcomingPerformances, board] = await Promise.all([
+    getPlays(),
+    getUpcomingRuns("PLAY"),
+    getStageBoard({ type: "PLAY" }),
+  ]);
 
   return {
-    props: superjson.serialize({ plays, upcomingPerformances }).json,
+    props: superjson.serialize({ board, plays, upcomingPerformances }).json,
     revalidate: 3600,
   };
 }

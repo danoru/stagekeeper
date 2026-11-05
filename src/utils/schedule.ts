@@ -17,7 +17,7 @@ export const DEFAULT_DAY_TIMES: DayTimes = {
 };
 
 const WEEKDAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-const DAY_MS = 86_400_000;
+export const DAY_MS = 86_400_000;
 
 /** True when `raw` has at least one usable "HH:mm" entry. */
 export function hasDayTimes(raw: unknown): raw is DayTimes {
@@ -116,7 +116,7 @@ export function zonedTime(dayUtc: number, hour: number, minute: number, tz = THE
 }
 
 /** UTC midnight of the calendar day a stored run date names (stored at UTC midnight or noon). */
-function calendarDay(value: Date | string): number {
+export function calendarDay(value: Date | string): number {
   const d = new Date(value);
   return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
 }

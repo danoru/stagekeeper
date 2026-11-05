@@ -33,6 +33,13 @@ interface NavPage {
   count?: number;
 }
 
+const PUBLIC_PAGES: NavPage[] = [
+  { id: 3, title: "Musicals", link: "/musicals" },
+  { id: 4, title: "Plays", link: "/plays" },
+  { id: 5, title: "Theatres", link: "/theatres" },
+  { id: 6, title: "Users", link: "/users" },
+];
+
 function getPages(session: any, inviteCount: number): NavPage[] {
   if (session) {
     const pages: NavPage[] = [
@@ -108,8 +115,8 @@ function Navbar() {
   const router = useRouter();
   const [account, setAccount] = React.useState<AccountStatus | null>(null);
   const inviteCount = account?.pendingInvites ?? 0;
-  // While the session loads, show the frame without links rather than a blank bar.
-  const pages = status === "loading" ? [] : getPages(session, inviteCount);
+  // While the session loads, show the links everyone gets, so crawlers and first paint have them.
+  const pages = status === "loading" ? PUBLIC_PAGES : getPages(session, inviteCount);
   const userId = session?.user?.id;
   const [accountVersion, setAccountVersion] = React.useState(0);
 

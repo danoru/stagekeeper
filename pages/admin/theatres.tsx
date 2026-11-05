@@ -218,7 +218,11 @@ export default function AdminTheatresPage() {
                         {theatre.location}
                       </Typography>
                     </Box>
-                    <IconButton size="small" onClick={() => startEdit(theatre)}>
+                    <IconButton
+                      aria-label="Edit theatre"
+                      size="small"
+                      onClick={() => startEdit(theatre)}
+                    >
                       <EditIcon fontSize="small" />
                     </IconButton>
                   </Stack>

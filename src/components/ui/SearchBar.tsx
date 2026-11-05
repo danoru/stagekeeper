@@ -20,7 +20,7 @@ export default function SearchBar({ value, onChange, placeholder }: Props) {
         ),
         endAdornment: value ? (
           <InputAdornment position="end">
-            <IconButton size="small" onClick={() => onChange("")}>
+            <IconButton aria-label="Clear search" size="small" onClick={() => onChange("")}>
               <ClearIcon sx={{ color: "rgba(232,220,200,0.45)", fontSize: "1rem" }} />
             </IconButton>
           </InputAdornment>

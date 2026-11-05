@@ -213,7 +213,7 @@ export default function AdminPlaysPage() {
                           .join(" · ")}
                       </Typography>
                     </Box>
-                    <IconButton size="small" onClick={() => startEdit(play)}>
+                    <IconButton aria-label="Edit play" size="small" onClick={() => startEdit(play)}>
                       <EditIcon fontSize="small" />
                     </IconButton>
                   </Stack>

@@ -232,7 +232,11 @@ export default function AdminMusicalsPage() {
                           .join(" · ")}
                       </Typography>
                     </Box>
-                    <IconButton size="small" onClick={() => startEdit(musical)}>
+                    <IconButton
+                      aria-label="Edit musical"
+                      size="small"
+                      onClick={() => startEdit(musical)}
+                    >
                       <EditIcon fontSize="small" />
                     </IconButton>
                   </Stack>

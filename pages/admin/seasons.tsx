@@ -220,7 +220,11 @@ export default function AdminSeasonsPage() {
                         – {new Date(season.endDate).toLocaleDateString()}
                       </Typography>
                     </Box>
-                    <IconButton size="small" onClick={() => startEdit(season)}>
+                    <IconButton
+                      aria-label="Edit season"
+                      size="small"
+                      onClick={() => startEdit(season)}
+                    >
                       <EditIcon fontSize="small" />
                     </IconButton>
                   </Stack>

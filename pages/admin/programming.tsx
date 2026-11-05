@@ -433,10 +433,15 @@ export default function AdminProgrammingPage() {
                       >
                         <ScheduleIcon fontSize="small" />
                       </IconButton>
-                      <IconButton size="small" onClick={() => startEdit(program)}>
+                      <IconButton
+                        aria-label="Edit run"
+                        size="small"
+                        onClick={() => startEdit(program)}
+                      >
                         <EditIcon fontSize="small" />
                       </IconButton>
                       <IconButton
+                        aria-label="Delete run"
                         color="error"
                         size="small"
                         onClick={() => setDeleteId(program.id)}

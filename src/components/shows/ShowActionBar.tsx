@@ -42,6 +42,54 @@ interface Props {
   pastPerformances: (performances & { theatres: theatres })[];
 }
 
+const actionButtonSx = {
+  minWidth: 0,
+  px: { xs: 0.5, sm: 1 },
+  py: 1,
+  "& .MuiSvgIcon-root": { fontSize: { xs: 26, md: 30 } },
+};
+const actionLabelSx = {
+  fontSize: { xs: "0.7rem", md: "0.85rem" },
+  textAlign: "center" as const,
+  lineHeight: 1.2,
+};
+
+// Kept outside ShowActionBar: a component defined during render is a new one every time, which
+// remounts the button and drops keyboard focus whenever the bar updates.
+function ActionButton({
+  ariaLabel,
+  icon,
+  label,
+  onClick,
+  onMouseEnter,
+  onMouseLeave,
+  pressed,
+}: {
+  ariaLabel?: string;
+  icon: React.ReactNode;
+  label: string;
+  onClick: () => void;
+  onMouseEnter?: () => void;
+  onMouseLeave?: () => void;
+  pressed?: boolean;
+}) {
+  return (
+    <Stack alignItems="center" direction="column" sx={{ flex: 1, minWidth: 0 }}>
+      <Button
+        aria-label={ariaLabel ?? label}
+        aria-pressed={pressed}
+        sx={actionButtonSx}
+        onClick={onClick}
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
+      >
+        {icon}
+      </Button>
+      <Typography sx={actionLabelSx}>{label}</Typography>
+    </Stack>
+  );
+}
+
 function ShowActionBar({
   attendance,
   likedShows,
@@ -182,61 +230,6 @@ function ShowActionBar({
       : "Attended"
     : "Log";
 
-  const actionButtonSx = {
-    minWidth: 0,
-    px: { xs: 0.5, sm: 1 },
-    py: 1,
-    "& .MuiSvgIcon-root": { fontSize: { xs: 26, md: 30 } },
-  };
-  const actionLabelSx = {
-    fontSize: { xs: "0.7rem", md: "0.85rem" },
-    textAlign: "center" as const,
-    lineHeight: 1.2,
-  };
-
-  const AttendanceButton = () => (
-    <Stack alignItems="center" direction="column" sx={{ flex: 1, minWidth: 0 }}>
-      <Button
-        sx={actionButtonSx}
-        onClick={() => handleOpenLogDialog("seen")}
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
-      >
-        {hasAttended ? <LocalActivity /> : <LocalActivityOutlined />}
-      </Button>
-      <Typography sx={actionLabelSx}>
-        {hovered && hasAttended ? "Log again" : attendLabel}
-      </Typography>
-    </Stack>
-  );
-
-  const GoingButton = () => (
-    <Stack alignItems="center" direction="column" sx={{ flex: 1, minWidth: 0 }}>
-      <Button sx={actionButtonSx} onClick={() => handleOpenLogDialog("going")}>
-        {isGoing ? <EventAvailable /> : <EventAvailableOutlined />}
-      </Button>
-      <Typography sx={actionLabelSx}>{isGoing ? "Going" : "I'm going"}</Typography>
-    </Stack>
-  );
-
-  const LikedButton = () => (
-    <Stack alignItems="center" direction="column" sx={{ flex: 1, minWidth: 0 }}>
-      <Button sx={actionButtonSx} onClick={handleLikes}>
-        {isLiked ? <FavoriteIcon /> : <FavoriteBorder />}
-      </Button>
-      <Typography sx={actionLabelSx}>{isLiked ? "Liked" : "Like"}</Typography>
-    </Stack>
-  );
-
-  const WatchlistButton = () => (
-    <Stack alignItems="center" direction="column" sx={{ flex: 1, minWidth: 0 }}>
-      <Button sx={actionButtonSx} onClick={handleWatchlist}>
-        {isWatchlisted ? <WatchLater /> : <WatchLaterOutlined />}
-      </Button>
-      <Typography sx={actionLabelSx}>Watchlist</Typography>
-    </Stack>
-  );
-
   const showId = musicalId ?? playId;
   const showTitle = musical?.title ?? play?.title ?? "";
 
@@ -244,10 +237,31 @@ function ShowActionBar({
     <Paper sx={{ borderRadius: "1%" }}>
       {sessionUser ? (
         <Stack direction="row" justifyContent="center">
-          <AttendanceButton />
-          <GoingButton />
-          <LikedButton />
-          <WatchlistButton />
+          <ActionButton
+            ariaLabel={hasAttended ? `${attendLabel}. Log again` : "Log a viewing"}
+            icon={hasAttended ? <LocalActivity /> : <LocalActivityOutlined />}
+            label={hovered && hasAttended ? "Log again" : attendLabel}
+            onClick={() => handleOpenLogDialog("seen")}
+            onMouseEnter={() => setHovered(true)}
+            onMouseLeave={() => setHovered(false)}
+          />
+          <ActionButton
+            icon={isGoing ? <EventAvailable /> : <EventAvailableOutlined />}
+            label={isGoing ? "Going" : "I'm going"}
+            onClick={() => handleOpenLogDialog("going")}
+          />
+          <ActionButton
+            icon={isLiked ? <FavoriteIcon /> : <FavoriteBorder />}
+            label={isLiked ? "Liked" : "Like"}
+            pressed={isLiked}
+            onClick={handleLikes}
+          />
+          <ActionButton
+            icon={isWatchlisted ? <WatchLater /> : <WatchLaterOutlined />}
+            label="Watchlist"
+            pressed={isWatchlisted}
+            onClick={handleWatchlist}
+          />
         </Stack>
       ) : (
         <Link href="/login" underline="none">

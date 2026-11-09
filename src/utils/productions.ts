@@ -1,6 +1,13 @@
 // Pins a visit to a production (one run of a show at one theatre): same show, same theatre,
-// dated inside the run. Visits without a theatre or a date can't be pinned. Shared by the
-// server (person pages, production stats) and the client (your visits on show pages).
+// dated inside the run or in the week before its stored first day (previews, which season
+// pages often leave out). Visits without a theatre or a date can't be pinned. Shared by the
+// server (person pages, production stats) and the client (your visits on show pages), and
+// mirrored in SQL by `findRunForVisit` in data/productions.ts and the backfill migrations.
+
+/** Visits this many days before a run's stored first day still count as that run. */
+export const PREVIEW_DAYS = 7;
+
+const DAY_MS = 86_400_000;
 
 export interface RunRef {
   id: number;
@@ -30,15 +37,23 @@ export function visitProduction(
   return visit.programming ?? productionForVisit(visit, runs);
 }
 
-/** The id of the run (all of the same show) this visit belongs to, if any. */
+/**
+ * The id of the run (all of the same show) this visit belongs to, if any: a run that covers the
+ * day, else the nearest run opening within `PREVIEW_DAYS` after it.
+ */
 export function productionForVisit(visit: VisitRef, runs: RunRef[]): number | null {
   if (visit.theatreId == null || !visit.date) return null;
   const day = calendarDay(visit.date);
-  const run = runs.find(
-    (r) =>
-      r.theatreId === visit.theatreId &&
-      day >= calendarDay(r.startDate) &&
-      day <= calendarDay(r.endDate)
+  const atTheatre = runs.filter((r) => r.theatreId === visit.theatreId);
+  const covering = atTheatre.find(
+    (r) => day >= calendarDay(r.startDate) && day <= calendarDay(r.endDate)
   );
-  return run?.id ?? null;
+  if (covering) return covering.id;
+  const preview = atTheatre
+    .filter((r) => {
+      const start = calendarDay(r.startDate);
+      return day < start && day >= start - PREVIEW_DAYS * DAY_MS;
+    })
+    .sort((a, b) => calendarDay(a.startDate) - calendarDay(b.startDate))[0];
+  return preview?.id ?? null;
 }

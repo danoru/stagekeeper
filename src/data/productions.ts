@@ -1,3 +1,4 @@
+import { PREVIEW_DAYS } from "../utils/productions";
 import { DAY_MS } from "../utils/schedule";
 
 import prisma from "./db";
@@ -16,9 +17,10 @@ function calendarDay(d: Date): number {
 
 /**
  * The run a visit belongs to, looked up when the visit is saved: same show, a season at the
- * same theatre, and the visit's calendar day inside the run. The same rule as
- * `productionForVisit` in utils/productions.ts, which readers still use as a fallback. Run
- * dates are stored at UTC midnight or noon, so the day is compared as a half-open range.
+ * same theatre, and the visit's calendar day inside the run, else the nearest run opening
+ * within `PREVIEW_DAYS` after it. The same rule as `productionForVisit` in
+ * utils/productions.ts, which readers still use as a fallback. Run dates are stored at UTC
+ * midnight or noon, so days are compared as half-open ranges.
  */
 export async function findRunForVisit(visit: VisitPin): Promise<number | null> {
   if (visit.theatreId == null || !visit.date) return null;
@@ -27,17 +29,27 @@ export async function findRunForVisit(visit: VisitPin): Promise<number | null> {
   if (!showOrPlay) return null;
 
   const day = calendarDay(visit.date);
-  const run = await prisma.programming.findFirst({
+  const atTheatre = { ...showOrPlay, seasons: { theatre: visit.theatreId } };
+  const covering = await prisma.programming.findFirst({
     where: {
-      ...showOrPlay,
-      seasons: { theatre: visit.theatreId },
+      ...atTheatre,
       startDate: { lt: new Date(day + DAY_MS) },
       endDate: { gte: new Date(day) },
     },
     select: { id: true },
     orderBy: { startDate: "desc" },
   });
-  return run?.id ?? null;
+  if (covering) return covering.id;
+
+  const preview = await prisma.programming.findFirst({
+    where: {
+      ...atTheatre,
+      startDate: { gte: new Date(day + DAY_MS), lt: new Date(day + (PREVIEW_DAYS + 1) * DAY_MS) },
+    },
+    select: { id: true },
+    orderBy: { startDate: "asc" },
+  });
+  return preview?.id ?? null;
 }
 
 /**
@@ -74,7 +86,7 @@ export async function repinRun(programmingId: number): Promise<void> {
       theatreId != null &&
       v.theatre === theatreId &&
       day != null &&
-      day >= first &&
+      day >= first - PREVIEW_DAYS * DAY_MS &&
       day <= last &&
       (run.musical != null ? v.musical === run.musical : v.play === run.play);
     if (stillFits) continue;
@@ -87,7 +99,8 @@ export async function repinRun(programmingId: number): Promise<void> {
     await prisma.attendance.update({ where: { id: v.id }, data: { programming: elsewhere } });
   }
 
-  // 2. Unpinned dated visits of this show at this theatre that now fall inside the run.
+  // 2. Unpinned dated visits of this show at this theatre that now fall inside the run or
+  //    its preview week.
   if (theatreId == null) return;
   await prisma.attendance.updateMany({
     where: {
@@ -95,7 +108,7 @@ export async function repinRun(programmingId: number): Promise<void> {
       programming: null,
       performance: null,
       theatre: theatreId,
-      seenDate: { gte: new Date(first), lte: new Date(last) },
+      seenDate: { gte: new Date(first - PREVIEW_DAYS * DAY_MS), lte: new Date(last) },
     },
     data: { programming: run.id },
   });

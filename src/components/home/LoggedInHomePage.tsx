@@ -3,14 +3,17 @@ import Link from "@mui/material/Link";
 import Typography from "@mui/material/Typography";
 
 import type { NormalizedAttendance } from "../../data/performances";
+import type { HomeTheatreCard } from "../../utils/homeTheatres";
 import type { StageBoard } from "../../utils/stageBoard";
 import RecentActivity from "../performances/RecentActivity";
 import WeeklyBoard from "../shows/WeeklyBoard";
 
 import FriendUpcomingActivity from "./FriendUpcomingActivity";
+import HomeTheatres from "./HomeTheatres";
 
 interface Props {
   board: StageBoard | null;
+  homeTheatres: HomeTheatreCard[];
   myUpcoming: NormalizedAttendance[];
   recentPerformances: NormalizedAttendance[];
   sessionUser: string;
@@ -19,6 +22,7 @@ interface Props {
 
 function LoggedInHomePage({
   board,
+  homeTheatres,
   myUpcoming,
   recentPerformances,
   sessionUser,
@@ -61,6 +65,7 @@ function LoggedInHomePage({
       </Box>
 
       <Box sx={{ maxWidth: 1200, mx: "auto", px: { xs: 1.5, md: 3 }, py: 4 }}>
+        <HomeTheatres theatres={homeTheatres} />
         <WeeklyBoard board={board} />
         <FriendUpcomingActivity trim={trim} upcomingPerformances={upcomingPerformances} />
         {myUpcoming.length > 0 && (

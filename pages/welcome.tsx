@@ -10,7 +10,13 @@ import LogShowDialog from "../src/components/shows/LogShowDialog";
 import UserAvatar from "../src/components/users/UserAvatar";
 import prisma from "../src/data/db";
 import { getUserGroups } from "../src/data/groups";
-import { getStarterShows, getSuggestedPeople, type StarterShow } from "../src/data/onboarding";
+import {
+  getStarterShows,
+  getStarterTheatres,
+  getSuggestedPeople,
+  type StarterShow,
+  type StarterTheatre,
+} from "../src/data/onboarding";
 import { resolveShowImage } from "../src/utils/gradients";
 import { getViewerSession } from "../src/utils/viewer";
 
@@ -20,10 +26,14 @@ interface Props {
   groups: { id: number; name: string }[];
   people: Person[];
   starterShows: StarterShow[];
+  theatres: StarterTheatre[];
   username: string;
 }
 
-const STEPS = ["Shows you've seen", "People to follow", "Your group"] as const;
+const STEPS = ["Your theatres", "Shows you've seen", "People to follow", "Your group"] as const;
+
+// Theatres shown before anyone types a filter.
+const THEATRE_GRID = 12;
 
 const eyebrowSx = {
   fontFamily: '"DM Sans", sans-serif',
@@ -43,9 +53,12 @@ const headingSx = {
 
 const bodySx = { color: "rgba(232,220,200,0.55)", fontSize: "0.95rem" };
 
-function WelcomePage({ groups, people, starterShows, username }: Props) {
+function WelcomePage({ groups, people, starterShows, theatres, username }: Props) {
   const router = useRouter();
   const [step, setStep] = useState(0);
+  const [homeTheatres, setHomeTheatres] = useState<Set<number>>(new Set());
+  const [pendingTheatres, setPendingTheatres] = useState<Set<number>>(new Set());
+  const [theatreFilter, setTheatreFilter] = useState("");
   const [seen, setSeen] = useState<Set<string>>(new Set());
   const [pending, setPending] = useState<Set<string>>(new Set());
   const [logOpen, setLogOpen] = useState(false);
@@ -57,6 +70,33 @@ function WelcomePage({ groups, people, starterShows, username }: Props) {
   const [createdGroup, setCreatedGroup] = useState<{ id: number; name: string } | null>(null);
   const [groupError, setGroupError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+
+  async function toggleTheatre(theatre: StarterTheatre) {
+    if (pendingTheatres.has(theatre.id)) return;
+    const isHome = homeTheatres.has(theatre.id);
+    setPendingTheatres((s) => new Set(s).add(theatre.id));
+    try {
+      const res = await fetch("/api/user/theatres", {
+        method: isHome ? "DELETE" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ theatreId: theatre.id }),
+      });
+      if (res.ok) {
+        setHomeTheatres((s) => {
+          const next = new Set(s);
+          if (isHome) next.delete(theatre.id);
+          else next.add(theatre.id);
+          return next;
+        });
+      }
+    } finally {
+      setPendingTheatres((s) => {
+        const next = new Set(s);
+        next.delete(theatre.id);
+        return next;
+      });
+    }
+  }
 
   async function toggleSeen(show: StarterShow) {
     const key = `${show.type}-${show.id}`;
@@ -133,6 +173,14 @@ function WelcomePage({ groups, people, starterShows, username }: Props) {
   }
 
   const loggedCount = seen.size + extraLogged.length;
+  const filter = theatreFilter.trim().toLowerCase();
+  const visibleTheatres = filter
+    ? theatres
+        .filter(
+          (t) => t.name.toLowerCase().includes(filter) || t.location.toLowerCase().includes(filter)
+        )
+        .slice(0, 24)
+    : theatres.slice(0, THEATRE_GRID);
   const firstGroup = createdGroup ?? groups[0] ?? null;
 
   return (
@@ -168,6 +216,120 @@ function WelcomePage({ groups, people, starterShows, username }: Props) {
         {step === 0 && (
           <>
             <Typography sx={eyebrowSx}>Welcome, {username}</Typography>
+            <Typography sx={{ ...headingSx, mt: 1, mb: 1.5 }}>
+              Which stages do you go to?
+            </Typography>
+            <Typography sx={{ ...bodySx, mb: 3 }}>
+              Pick the theatres you actually visit. Their seasons and what&apos;s on will lead your
+              home page. Only you can see this list.
+            </Typography>
+
+            <TextField
+              fullWidth
+              placeholder="Filter by name or town…"
+              size="small"
+              sx={{ mb: 2 }}
+              value={theatreFilter}
+              onChange={(e) => setTheatreFilter(e.target.value)}
+            />
+
+            <Grid container spacing={1.5} sx={{ mb: 3 }}>
+              {visibleTheatres.map((theatre) => {
+                const isHome = homeTheatres.has(theatre.id);
+                const { isGradient, value } = resolveShowImage(theatre.image, theatre.name);
+                return (
+                  <Grid key={theatre.id} size={{ xs: 6, sm: 4, md: 3 }}>
+                    <Box
+                      aria-pressed={isHome}
+                      role="button"
+                      sx={{
+                        position: "relative",
+                        aspectRatio: "3 / 2",
+                        borderRadius: 1,
+                        overflow: "hidden",
+                        cursor: "pointer",
+                        border: "2px solid",
+                        borderColor: isHome ? "#D4AF55" : "rgba(212,175,85,0.12)",
+                        background: isGradient ? value : `url(${value}) center/cover`,
+                        opacity: pendingTheatres.has(theatre.id) ? 0.6 : 1,
+                        transition: "border-color 0.2s, transform 0.2s",
+                        "&:hover": { transform: "translateY(-2px)" },
+                      }}
+                      tabIndex={0}
+                      onClick={() => toggleTheatre(theatre)}
+                      onKeyDown={(e) => e.key === "Enter" && toggleTheatre(theatre)}
+                    >
+                      <Box
+                        sx={{
+                          position: "absolute",
+                          inset: 0,
+                          background:
+                            "linear-gradient(180deg, rgba(8,12,20,0.1) 30%, rgba(8,12,20,0.92) 100%)",
+                        }}
+                      />
+                      {isHome && (
+                        <Box
+                          sx={{
+                            position: "absolute",
+                            top: 6,
+                            right: 6,
+                            width: 22,
+                            height: 22,
+                            borderRadius: "50%",
+                            background: "#D4AF55",
+                            color: "#0D1520",
+                            display: "grid",
+                            placeItems: "center",
+                          }}
+                        >
+                          <CheckIcon sx={{ fontSize: 16 }} />
+                        </Box>
+                      )}
+                      <Box sx={{ position: "absolute", left: 10, right: 10, bottom: 8 }}>
+                        <Typography
+                          sx={{
+                            fontFamily: '"Cormorant Garamond", serif',
+                            fontSize: "0.95rem",
+                            fontWeight: 600,
+                            color: "#E8DCC8",
+                            lineHeight: 1.15,
+                          }}
+                        >
+                          {theatre.name}
+                        </Typography>
+                        <Typography sx={{ fontSize: "0.65rem", color: "rgba(232,220,200,0.5)" }}>
+                          {theatre.location}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  </Grid>
+                );
+              })}
+              {visibleTheatres.length === 0 && (
+                <Grid size={12}>
+                  <Typography sx={bodySx}>
+                    No theatre matches. You can add one from any show&apos;s log dialog later.
+                  </Typography>
+                </Grid>
+              )}
+            </Grid>
+
+            <Stack direction="row" justifyContent="space-between">
+              <Button sx={{ color: "rgba(232,220,200,0.4)" }} onClick={() => finish()}>
+                Skip for now
+              </Button>
+              <Button variant="contained" onClick={() => setStep(1)}>
+                {homeTheatres.size > 0
+                  ? `Next (${homeTheatres.size} ${homeTheatres.size === 1 ? "theatre" : "theatres"})`
+                  : "Next"}
+              </Button>
+            </Stack>
+          </>
+        )}
+
+        {step === 1 && (
+          <>
+            <Typography sx={eyebrowSx}>Step 2</Typography>
             <Typography sx={{ ...headingSx, mt: 1, mb: 1.5 }}>
               Which of these have you seen?
             </Typography>
@@ -259,10 +421,10 @@ function WelcomePage({ groups, people, starterShows, username }: Props) {
             </Stack>
 
             <Stack direction="row" justifyContent="space-between">
-              <Button sx={{ color: "rgba(232,220,200,0.4)" }} onClick={() => finish()}>
-                Skip for now
+              <Button sx={{ color: "rgba(232,220,200,0.4)" }} onClick={() => setStep(0)}>
+                Back
               </Button>
-              <Button variant="contained" onClick={() => setStep(1)}>
+              <Button variant="contained" onClick={() => setStep(2)}>
                 {loggedCount > 0 ? `Next (${loggedCount} logged)` : "Next"}
               </Button>
             </Stack>
@@ -275,9 +437,9 @@ function WelcomePage({ groups, people, starterShows, username }: Props) {
           </>
         )}
 
-        {step === 1 && (
+        {step === 2 && (
           <>
-            <Typography sx={eyebrowSx}>Step 2</Typography>
+            <Typography sx={eyebrowSx}>Step 3</Typography>
             <Typography sx={{ ...headingSx, mt: 1, mb: 1.5 }}>Follow a few people</Typography>
             <Typography sx={{ ...bodySx, mb: 3 }}>
               Their shows and plans show up on your home page. Everyone here so far:
@@ -327,19 +489,19 @@ function WelcomePage({ groups, people, starterShows, username }: Props) {
             </Stack>
 
             <Stack direction="row" justifyContent="space-between">
-              <Button sx={{ color: "rgba(232,220,200,0.4)" }} onClick={() => setStep(0)}>
+              <Button sx={{ color: "rgba(232,220,200,0.4)" }} onClick={() => setStep(1)}>
                 Back
               </Button>
-              <Button variant="contained" onClick={() => setStep(2)}>
+              <Button variant="contained" onClick={() => setStep(3)}>
                 Next
               </Button>
             </Stack>
           </>
         )}
 
-        {step === 2 && (
+        {step === 3 && (
           <>
-            <Typography sx={eyebrowSx}>Step 3</Typography>
+            <Typography sx={eyebrowSx}>Step 4</Typography>
             <Typography sx={{ ...headingSx, mt: 1, mb: 1.5 }}>
               {firstGroup ? "You're in a group" : "Start a group"}
             </Typography>
@@ -378,7 +540,7 @@ function WelcomePage({ groups, people, starterShows, username }: Props) {
             )}
 
             <Stack direction="row" justifyContent="space-between">
-              <Button sx={{ color: "rgba(232,220,200,0.4)" }} onClick={() => setStep(1)}>
+              <Button sx={{ color: "rgba(232,220,200,0.4)" }} onClick={() => setStep(2)}>
                 Back
               </Button>
               <Button
@@ -408,10 +570,11 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   });
   if (!user) return { redirect: { destination: "/login", permanent: false } };
 
-  const [starterShows, people, memberships] = await Promise.all([
+  const [starterShows, people, memberships, theatres] = await Promise.all([
     getStarterShows(),
     getSuggestedPeople(userId),
     getUserGroups(userId),
+    getStarterTheatres(),
   ]);
 
   return {
@@ -419,6 +582,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
       groups: memberships.map((m) => ({ id: m.groups.id, name: m.groups.name })),
       people,
       starterShows,
+      theatres,
       username: user.username,
     }).json,
   };

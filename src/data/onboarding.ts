@@ -68,6 +68,37 @@ export async function getStarterShows(take = 18): Promise<StarterShow[]> {
     .slice(0, take);
 }
 
+export type StarterTheatre = {
+  id: number;
+  name: string;
+  location: string;
+  image: string;
+  visits: number;
+};
+
+// Approved theatres, the ones members log most first — the grid for "which stages do you go to?"
+export async function getStarterTheatres(): Promise<StarterTheatre[]> {
+  const theatres = await prisma.theatres.findMany({
+    where: { status: "APPROVED" },
+    select: {
+      id: true,
+      name: true,
+      location: true,
+      image: true,
+      _count: { select: { attendance: true, performances: true } },
+    },
+  });
+  return theatres
+    .map((t) => ({
+      id: t.id,
+      name: t.name,
+      location: t.location,
+      image: t.image,
+      visits: t._count.attendance + t._count.performances,
+    }))
+    .sort((a, b) => b.visits - a.visits || a.name.localeCompare(b.name));
+}
+
 export async function getSuggestedPeople(viewerId: number, take = 12) {
   const [people, following] = await Promise.all([
     prisma.users.findMany({

@@ -18,7 +18,7 @@ import moment from "moment";
 import { useState } from "react";
 
 import { formatRating, mean } from "../../utils/ratings";
-import { theatreToday } from "../../utils/schedule";
+import { theatreToday, visitDay } from "../../utils/schedule";
 
 export interface Visit {
   id: number;
@@ -53,7 +53,7 @@ const starsSx = {
 };
 
 function visitDate(v: Visit): string | null {
-  return v.seenDate ?? v.performances?.startTime ?? null;
+  return visitDay(v.seenDate, v.performances?.startTime)?.toISOString() ?? null;
 }
 
 /** Visits that have happened; a "going" date counts once it's passed. */

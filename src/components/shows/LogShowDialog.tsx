@@ -26,7 +26,7 @@ import moment from "moment";
 import { useEffect, useMemo, useState } from "react";
 
 import type { ShowSearchResult } from "../../data/catalog";
-import { formatTheatreTime } from "../../utils/schedule";
+import { formatTheatreTime, showtimeDay } from "../../utils/schedule";
 
 export type LogMode = "seen" | "going";
 
@@ -435,7 +435,7 @@ export default function LogShowDialog({
                     <MenuItem key={p.id} value={p.id}>
                       {p.programming != null
                         ? formatTheatreTime(p.startTime, true)
-                        : moment.utc(p.startTime).format("MMM D, YYYY")}{" "}
+                        : moment.utc(showtimeDay(p.startTime)).format("MMM D, YYYY")}{" "}
                       — {p.theatres.name}
                     </MenuItem>
                   ))}

@@ -211,6 +211,24 @@ export function theatreToday(now: Date = new Date()): Date {
 }
 
 /**
+ * The calendar day at the theatre of a showtime, as UTC midnight like `seenDate`. Showtimes
+ * are instants: an 8pm show in California is stored as 03:00Z or 04:00Z the next day, so its
+ * UTC date is a day late.
+ */
+export function showtimeDay(startTime: Date | string): Date {
+  return theatreToday(new Date(startTime));
+}
+
+/** The day a visit happened: its logged date, else the day of the showtime it was logged on. */
+export function visitDay(
+  seenDate: Date | string | null | undefined,
+  startTime: Date | string | null | undefined
+): Date | null {
+  if (seenDate) return new Date(seenDate);
+  return startTime ? showtimeDay(startTime) : null;
+}
+
+/**
  * Lower bound for "runs that haven't closed". End dates are calendar days stored in UTC, so
  * comparing against `now` would hide a run on its closing evening in California.
  */

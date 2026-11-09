@@ -1,5 +1,5 @@
 import { mean } from "../utils/ratings";
-import { theatreToday } from "../utils/schedule";
+import { theatreToday, visitDay } from "../utils/schedule";
 
 import prisma from "./db";
 import { getFollowedWithGoingAccess } from "./privacy";
@@ -101,7 +101,7 @@ export async function getShowSummary(show: ShowRef, viewerId: number | null): Pr
   for (const row of rows) {
     const friend = row.user != null ? byId.get(row.user) : undefined;
     if (!friend) continue;
-    const date = row.seenDate ?? row.performances?.startTime ?? null;
+    const date = visitDay(row.seenDate, row.performances?.startTime);
     if (row.going && date && date >= today) {
       if (!visible.has(friend.id)) continue;
       summary.friends.going.push({

@@ -2,7 +2,7 @@ import type { CreditCategory, Prisma } from "@prisma/client";
 
 import { visitProduction, type RunRef } from "../utils/productions";
 import { mean } from "../utils/ratings";
-import { openRunCutoff, theatreToday } from "../utils/schedule";
+import { openRunCutoff, theatreToday, visitDay } from "../utils/schedule";
 import { slugify } from "../utils/slug";
 
 import prisma from "./db";
@@ -153,7 +153,7 @@ async function getSeenProductionIds(viewerId: number, productions: Production[])
       {
         programming: v.programming,
         theatreId: v.theatre ?? v.performances?.theatre ?? null,
-        date: v.seenDate ?? (v.performances ? theatreToday(v.performances.startTime) : null),
+        date: visitDay(v.seenDate, v.performances?.startTime),
       },
       runs
     );
@@ -259,7 +259,7 @@ export async function getShowProductions(show: { musical: number } | { play: num
       {
         programming: v.programming,
         theatreId: v.theatre ?? v.performances?.theatre ?? null,
-        date: v.seenDate ?? (v.performances ? theatreToday(v.performances.startTime) : null),
+        date: visitDay(v.seenDate, v.performances?.startTime),
       },
       refs
     );

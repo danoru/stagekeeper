@@ -2,7 +2,7 @@ import { randomUUID } from "crypto";
 
 import { Availability, GroupRole, PlanStatus, type Prisma } from "@prisma/client";
 
-import { openRunCutoff, theatreToday } from "../utils/schedule";
+import { openRunCutoff, theatreToday, visitDay } from "../utils/schedule";
 
 import prisma from "./db";
 import {
@@ -649,7 +649,7 @@ export async function getGroupActivityFeed(
       user: a.users,
       show: { title, type, playbill },
       theatre: theatreName,
-      seenDate: a.seenDate ?? a.performances?.startTime ?? null,
+      seenDate: visitDay(a.seenDate, a.performances?.startTime),
       rating: a.rating != null ? Number(a.rating) : null,
       comment: a.comment ?? null,
     });

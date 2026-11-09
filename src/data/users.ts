@@ -1,6 +1,6 @@
 import { Prisma } from "@prisma/client";
 
-import { theatreToday } from "../utils/schedule";
+import { theatreToday, visitDay } from "../utils/schedule";
 
 import prisma from "./db";
 import { visibleAttendance, visibleLikes, visibleWatchlist } from "./visibility";
@@ -112,7 +112,7 @@ export async function getUserProfile(username: string, viewerId?: number) {
     const play = row.play ?? row.performances?.play;
     if (musical) musicals.add(musical);
     if (play) plays.add(play);
-    const date = row.seenDate ?? row.performances?.startTime;
+    const date = visitDay(row.seenDate, row.performances?.startTime);
     if (date?.getUTCFullYear() === today.getUTCFullYear()) attendanceThisYear++;
   }
 

@@ -10,6 +10,7 @@ import LogShowDialog from "../src/components/shows/LogShowDialog";
 import UserAvatar from "../src/components/users/UserAvatar";
 import prisma from "../src/data/db";
 import { getUserGroups } from "../src/data/groups";
+import { getHomeTheatreIds } from "../src/data/homeTheatres";
 import {
   getStarterShows,
   getStarterTheatres,
@@ -24,6 +25,7 @@ type Person = Awaited<ReturnType<typeof getSuggestedPeople>>[number];
 
 interface Props {
   groups: { id: number; name: string }[];
+  homeTheatreIds: number[];
   people: Person[];
   starterShows: StarterShow[];
   theatres: StarterTheatre[];
@@ -53,10 +55,10 @@ const headingSx = {
 
 const bodySx = { color: "rgba(232,220,200,0.55)", fontSize: "0.95rem" };
 
-function WelcomePage({ groups, people, starterShows, theatres, username }: Props) {
+function WelcomePage({ groups, homeTheatreIds, people, starterShows, theatres, username }: Props) {
   const router = useRouter();
   const [step, setStep] = useState(0);
-  const [homeTheatres, setHomeTheatres] = useState<Set<number>>(new Set());
+  const [homeTheatres, setHomeTheatres] = useState<Set<number>>(new Set(homeTheatreIds));
   const [pendingTheatres, setPendingTheatres] = useState<Set<number>>(new Set());
   const [theatreFilter, setTheatreFilter] = useState("");
   const [seen, setSeen] = useState<Set<string>>(new Set());
@@ -570,16 +572,18 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   });
   if (!user) return { redirect: { destination: "/login", permanent: false } };
 
-  const [starterShows, people, memberships, theatres] = await Promise.all([
+  const [starterShows, people, memberships, theatres, homeTheatreIds] = await Promise.all([
     getStarterShows(),
     getSuggestedPeople(userId),
     getUserGroups(userId),
     getStarterTheatres(),
+    getHomeTheatreIds(userId),
   ]);
 
   return {
     props: superjson.serialize({
       groups: memberships.map((m) => ({ id: m.groups.id, name: m.groups.name })),
+      homeTheatreIds,
       people,
       starterShows,
       theatres,

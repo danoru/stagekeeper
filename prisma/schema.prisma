@@ -23,7 +23,11 @@ model attendance {
   theatre      Int?
   seenDate     DateTime?     @db.Date
   going        Boolean       @default(false)
+  /// The run this visit belongs to: same show, same theatre, dated inside the run. Set when
+  /// the visit is saved and backfilled by migration; null when the visit has no theatre or date.
+  programming  Int?
   performances performances? @relation(fields: [performance], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  programmings programming?  @relation(fields: [programming], references: [id], onDelete: SetNull, onUpdate: NoAction)
   users        users?        @relation(fields: [user], references: [id], onDelete: NoAction, onUpdate: NoAction)
   musicals     musicals?     @relation(fields: [musical], references: [id], onDelete: NoAction, onUpdate: NoAction)
   plays        plays?        @relation(fields: [play], references: [id], onDelete: NoAction, onUpdate: NoAction)
@@ -35,6 +39,7 @@ model attendance {
   @@index([musical])
   @@index([play])
   @@index([theatre])
+  @@index([programming])
   @@index([seenDate])
   @@index([going, seenDate])
 }
@@ -241,6 +246,7 @@ model programming {
   groupPlans   groupPlan[]
   credits      credits[]
   performances performances[]
+  attendance   attendance[]
 
   @@index([musical])
   @@index([play])

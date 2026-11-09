@@ -98,7 +98,11 @@ export async function getHomeTheatres(userId: number): Promise<HomeTheatreCard[]
   });
   const visits = normalizeAttendanceRows(rows)
     .filter((v) => !v.isUpcoming && v.performances.startTime.getTime() > 0)
-    .map((v) => ({ theatreId: v.performances.theatre, date: v.performances.startTime }));
+    .map((v) => ({
+      programming: v.programming,
+      theatreId: v.performances.theatre,
+      date: v.performances.startTime,
+    }));
 
   const now = new Date();
   return follows.map((f) =>

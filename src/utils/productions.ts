@@ -19,6 +19,17 @@ function calendarDay(value: Date | string) {
   return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
 }
 
+/**
+ * The run a visit belongs to: the pinned `attendance.programming` when the visit has one, else
+ * the date match below. The fallback is what lets a dated visit find a run an admin adds later.
+ */
+export function visitProduction(
+  visit: VisitRef & { programming?: number | null },
+  runs: RunRef[]
+): number | null {
+  return visit.programming ?? productionForVisit(visit, runs);
+}
+
 /** The id of the run (all of the same show) this visit belongs to, if any. */
 export function productionForVisit(visit: VisitRef, runs: RunRef[]): number | null {
   if (visit.theatreId == null || !visit.date) return null;

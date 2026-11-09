@@ -4,7 +4,7 @@
 
 import type { PerformanceType } from "@prisma/client";
 
-import { productionForVisit, type VisitRef } from "./productions";
+import { visitProduction, type VisitRef } from "./productions";
 import { calendarDay, theatreToday } from "./schedule";
 
 export interface SeasonRun {
@@ -91,9 +91,11 @@ export function pickSeason(seasons: TheatreSeason[], today: number): TheatreSeas
   return [...seasons].sort((a, b) => calendarDay(b.endDate) - calendarDay(a.endDate))[0];
 }
 
+export type HomeVisit = VisitRef & { programming?: number | null };
+
 export function buildHomeTheatreCard(
   theatre: HomeTheatreInput,
-  visits: VisitRef[],
+  visits: HomeVisit[],
   now: Date = new Date()
 ): HomeTheatreCard {
   const today = theatreToday(now).getTime();
@@ -106,7 +108,7 @@ export function buildHomeTheatreCard(
   }));
   const seenRuns = new Set<number>();
   for (const visit of visits) {
-    const id = productionForVisit(visit, runRefs);
+    const id = visitProduction(visit, runRefs);
     if (id != null) seenRuns.add(id);
   }
 

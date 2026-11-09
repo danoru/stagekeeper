@@ -2,6 +2,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth";
 
 import prisma from "../../../src/data/db";
+import { findRunForVisit } from "../../../src/data/productions";
 import { theatreToday } from "../../../src/utils/schedule";
 import { authOptions } from "../auth/[...nextauth]";
 
@@ -102,6 +103,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       // A run's showtime is a real instant; pages read logged dates as calendar days, so store
       // the date at the theatre. Older rows are already calendar days and stay as they are.
       if (perf.programming != null) data.seenDate = theatreToday(perf.startTime);
+      // Pin the visit to the showtime's run; older showtimes have none, so match by date.
+      data.programming =
+        perf.programming ??
+        (await findRunForVisit({
+          musical: perf.musical,
+          play: perf.play,
+          theatreId: perf.theatre,
+          date: perf.startTime,
+        }));
     } else if (type === "MUSICAL" && musicalId) {
       const musical = await prisma.musicals.findUnique({
         where: { id: Number(musicalId) },
@@ -131,6 +141,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
       if (!theatre) return res.status(404).json({ error: "Theatre not found." });
       data.theatre = theatre.id;
+    }
+    if (!performanceId) {
+      // Pinned now, so a future "going" date already knows its production.
+      data.programming = await findRunForVisit({
+        musical: resolvedMusical,
+        play: resolvedPlay,
+        theatreId: data.theatre ?? null,
+        date: seenDate,
+      });
     }
 
     try {
@@ -209,6 +228,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       if (!found) return res.status(404).json({ error: "Theatre not found." });
     }
 
+    const nextTheatre = theatre !== undefined ? theatre : existing.theatre;
+    // Re-pin from the row as it will be. A visit logged against a showtime keeps its run.
+    const programming =
+      existing.performance != null
+        ? existing.programming
+        : await findRunForVisit({
+            musical: existing.musical,
+            play: existing.play,
+            theatreId: nextTheatre,
+            date: nextSeenDate,
+          });
+
     try {
       const updated = await prisma.attendance.update({
         where: { id: existing.id },
@@ -217,7 +248,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           comment: comment !== undefined ? comment : existing.comment,
           seenDate: nextSeenDate,
           going: nextGoing,
-          theatre: theatre !== undefined ? theatre : existing.theatre,
+          theatre: nextTheatre,
+          programming,
         },
       });
       return res.status(200).json({ message: "Attendance updated.", attendance: updated });

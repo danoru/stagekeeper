@@ -38,6 +38,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           rating: true,
           comment: true,
           theatre: true,
+          programming: true,
           createdAt: true,
           theatres: { select: { id: true, name: true } },
           performances: {

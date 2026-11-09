@@ -1,7 +1,7 @@
 import type { PerformanceType } from "@prisma/client";
 
 import { showKey, type ShowListItem } from "../components/shows/ShowList";
-import { theatreToday } from "../utils/schedule";
+import { openRunCutoff, theatreToday } from "../utils/schedule";
 
 import prisma from "./db";
 import { visibleAttendance, visibleWatchlist } from "./visibility";
@@ -76,11 +76,12 @@ export type UpcomingRun = {
 };
 
 // Runs on now or opening in the next six months, as the carousel on /musicals and /plays needs.
+// End dates are calendar days, so `openRunCutoff` keeps a run listed through its closing night.
 export async function getUpcomingRuns(type: PerformanceType): Promise<UpcomingRun[]> {
   const upcomingLimit = new Date();
   upcomingLimit.setMonth(upcomingLimit.getMonth() + 6);
   return prisma.programming.findMany({
-    where: { type, startDate: { lte: upcomingLimit }, endDate: { gte: new Date() } },
+    where: { type, startDate: { lte: upcomingLimit }, endDate: { gte: openRunCutoff() } },
     select: {
       id: true,
       type: true,
@@ -99,7 +100,7 @@ export async function getUpcomingShowKeys() {
   const upcomingLimit = new Date();
   upcomingLimit.setMonth(upcomingLimit.getMonth() + 6);
   const rows = await prisma.programming.findMany({
-    where: { startDate: { lte: upcomingLimit }, endDate: { gte: new Date() } },
+    where: { startDate: { lte: upcomingLimit }, endDate: { gte: openRunCutoff() } },
     select: { type: true, musical: true, play: true },
   });
   return Array.from(

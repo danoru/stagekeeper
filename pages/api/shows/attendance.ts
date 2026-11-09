@@ -110,7 +110,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           musical: perf.musical,
           play: perf.play,
           theatreId: perf.theatre,
-          date: perf.startTime,
+          date: theatreToday(perf.startTime),
         }));
     } else if (type === "MUSICAL" && musicalId) {
       const musical = await prisma.musicals.findUnique({

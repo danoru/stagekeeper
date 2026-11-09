@@ -9,6 +9,11 @@ export interface VisitPin {
   date: Date | null;
 }
 
+/** UTC midnight of the calendar day a stored date names. */
+function calendarDay(d: Date): number {
+  return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+}
+
 /**
  * The run a visit belongs to, looked up when the visit is saved: same show, a season at the
  * same theatre, and the visit's calendar day inside the run. The same rule as
@@ -21,8 +26,7 @@ export async function findRunForVisit(visit: VisitPin): Promise<number | null> {
   const showOrPlay = show ?? (visit.play != null ? { play: visit.play } : null);
   if (!showOrPlay) return null;
 
-  const d = visit.date;
-  const day = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+  const day = calendarDay(visit.date);
   const run = await prisma.programming.findFirst({
     where: {
       ...showOrPlay,
@@ -34,4 +38,65 @@ export async function findRunForVisit(visit: VisitPin): Promise<number | null> {
     orderBy: { startDate: "desc" },
   });
   return run?.id ?? null;
+}
+
+/**
+ * After an admin creates or edits a run: visits pinned to it that no longer fit are unpinned
+ * (and re-pinned elsewhere if they fit another run), and unpinned dated visits that now fall
+ * inside it are pinned. Visits logged against a showtime keep the showtime's run.
+ */
+export async function repinRun(programmingId: number): Promise<void> {
+  const run = await prisma.programming.findUnique({
+    where: { id: programmingId },
+    select: {
+      id: true,
+      musical: true,
+      play: true,
+      startDate: true,
+      endDate: true,
+      seasons: { select: { theatre: true } },
+    },
+  });
+  if (!run) return;
+  const theatreId = run.seasons?.theatre ?? null;
+  const first = calendarDay(run.startDate);
+  const last = calendarDay(run.endDate);
+  const show = run.musical != null ? { musical: run.musical } : { play: run.play };
+
+  // 1. Visits currently pinned here that were pinned by theatre and date (not by showtime).
+  const pinned = await prisma.attendance.findMany({
+    where: { programming: run.id, performance: null },
+    select: { id: true, musical: true, play: true, theatre: true, seenDate: true },
+  });
+  for (const v of pinned) {
+    const day = v.seenDate ? calendarDay(v.seenDate) : null;
+    const stillFits =
+      theatreId != null &&
+      v.theatre === theatreId &&
+      day != null &&
+      day >= first &&
+      day <= last &&
+      (run.musical != null ? v.musical === run.musical : v.play === run.play);
+    if (stillFits) continue;
+    const elsewhere = await findRunForVisit({
+      musical: v.musical,
+      play: v.play,
+      theatreId: v.theatre,
+      date: v.seenDate,
+    });
+    await prisma.attendance.update({ where: { id: v.id }, data: { programming: elsewhere } });
+  }
+
+  // 2. Unpinned dated visits of this show at this theatre that now fall inside the run.
+  if (theatreId == null) return;
+  await prisma.attendance.updateMany({
+    where: {
+      ...show,
+      programming: null,
+      performance: null,
+      theatre: theatreId,
+      seenDate: { gte: new Date(first), lte: new Date(last) },
+    },
+    data: { programming: run.id },
+  });
 }

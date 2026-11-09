@@ -1,4 +1,5 @@
 import { buildHomeTheatreCard, type HomeTheatreCard } from "../utils/homeTheatres";
+import { theatreToday } from "../utils/schedule";
 
 import prisma from "./db";
 import { attendanceInclude, normalizeAttendanceRows } from "./performances";
@@ -101,7 +102,8 @@ export async function getHomeTheatres(userId: number): Promise<HomeTheatreCard[]
     .map((v) => ({
       programming: v.programming,
       theatreId: v.performances.theatre,
-      date: v.performances.startTime,
+      // Dated logs are calendar days; a showtime is an instant, read as the theatre's day.
+      date: v.seenDate ?? (v.performance != null ? theatreToday(v.performances.startTime) : null),
     }));
 
   const now = new Date();

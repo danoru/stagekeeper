@@ -153,7 +153,7 @@ async function getSeenProductionIds(viewerId: number, productions: Production[])
       {
         programming: v.programming,
         theatreId: v.theatre ?? v.performances?.theatre ?? null,
-        date: v.seenDate ?? v.performances?.startTime ?? null,
+        date: v.seenDate ?? (v.performances ? theatreToday(v.performances.startTime) : null),
       },
       runs
     );
@@ -259,7 +259,7 @@ export async function getShowProductions(show: { musical: number } | { play: num
       {
         programming: v.programming,
         theatreId: v.theatre ?? v.performances?.theatre ?? null,
-        date: v.seenDate ?? v.performances?.startTime ?? null,
+        date: v.seenDate ?? (v.performances ? theatreToday(v.performances.startTime) : null),
       },
       refs
     );

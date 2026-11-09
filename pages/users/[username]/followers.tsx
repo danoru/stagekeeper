@@ -1,7 +1,6 @@
 import { Box, Container, Divider, Link, Stack, Typography } from "@mui/material";
 import { users, following } from "@prisma/client";
 import { GetServerSidePropsContext } from "next";
-import { useRouter } from "next/router";
 import superjson from "superjson";
 
 import LinkBehavior from "../../../src/components/layout/LinkBehavior";
@@ -15,9 +14,6 @@ interface Props {
 }
 
 function NetworkToggle({ username }: { username: string }) {
-  const router = useRouter();
-  const isFollowing = router.asPath.endsWith("/following");
-
   return (
     <Box
       sx={{

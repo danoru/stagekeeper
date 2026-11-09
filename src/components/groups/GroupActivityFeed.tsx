@@ -123,13 +123,13 @@ function EventRow({ event }: { event: GroupActivityEvent }) {
             readOnly
             precision={0.5}
             size="small"
-            value={event.rating}
             sx={{
               "& .MuiRating-iconFilled": { color: "#D4AF55" },
               "& .MuiRating-iconEmpty": { color: "rgba(212,175,85,0.2)" },
               fontSize: "0.8rem",
               mt: 0.5,
             }}
+            value={event.rating}
           />
         )}
         {event.comment && (

@@ -8,6 +8,7 @@ import ProgramCard from "../../src/components/cards/ProgramCard";
 import PageMeta from "../../src/components/layout/PageMeta";
 import PerformanceCalendar from "../../src/components/schedule/PerformanceCalendar";
 import ReportButton from "../../src/components/shows/ReportButton";
+import HomeTheatreButton from "../../src/components/theatres/HomeTheatreButton";
 import { getTheatreByName, getCurrentSeason } from "../../src/data/theatres";
 import { canViewPending } from "../../src/data/visibility";
 import { showPath, theatrePath } from "../../src/utils/slug";
@@ -51,6 +52,9 @@ function TheatrePage({ theatre, seasons }: Props) {
               {theatre.location}
             </Typography>
           )}
+          <Box sx={{ mt: 1 }}>
+            <HomeTheatreButton theatreId={theatre.id} />
+          </Box>
         </Stack>
         {seasons.map((season) => (
           <Box key={season.id} sx={{ marginTop: "2vh" }}>

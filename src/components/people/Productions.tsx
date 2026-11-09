@@ -4,9 +4,9 @@ import moment from "moment";
 import { useState } from "react";
 
 import type { ProductionCredit, ShowProduction } from "../../data/people";
-import { productionForVisit } from "../../utils/productions";
+import { visitProduction } from "../../utils/productions";
 import { formatRating, mean } from "../../utils/ratings";
-import { openRunCutoff } from "../../utils/schedule";
+import { openRunCutoff, visitDay } from "../../utils/schedule";
 import PlanWithGroup from "../shows/PlanWithGroup";
 import { pastVisits, type Visit } from "../shows/YourVisits";
 
@@ -41,10 +41,12 @@ function yourRuns(visits: Visit[], productions: ShowProduction[]): Map<number, Y
   }));
   const grouped = new Map<number, { visits: number; ratings: number[] }>();
   for (const v of pastVisits(visits)) {
-    const id = productionForVisit(
+    const id = visitProduction(
       {
+        programming: v.programming,
         theatreId: v.theatres?.id ?? v.performances?.theatres?.id ?? null,
-        date: v.seenDate ?? v.performances?.startTime ?? null,
+        // A showtime is an instant; match on the theatre's calendar day.
+        date: visitDay(v.seenDate, v.performances?.startTime),
       },
       runs
     );

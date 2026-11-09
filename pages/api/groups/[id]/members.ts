@@ -3,7 +3,12 @@ import { getServerSession } from "next-auth";
 
 import prisma from "../../../../src/data/db";
 import { isEmailVerified, VERIFY_EMAIL_MESSAGE } from "../../../../src/data/emailVerification";
-import { getGroupMembership, inviteToGroup, isGroupOwner } from "../../../../src/data/groups";
+import {
+  changeMemberRole,
+  inviteToGroup,
+  isGroupOwner,
+  removeMember,
+} from "../../../../src/data/groups";
 import { rateLimit } from "../../../../src/utils/rateLimit";
 import { authOptions } from "../../auth/[...nextauth]";
 
@@ -54,9 +59,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   // PATCH { username, role } — owners promote members to co-owner or demote
   // other owners. The last owner can't be demoted (hand off first).
   if (req.method === "PATCH") {
-    if (!(await isGroupOwner(groupId, userId))) {
-      return res.status(403).json({ error: "Only an owner can change roles." });
-    }
     const { username, role } = req.body ?? {};
     if (!username || typeof username !== "string") {
       return res.status(400).json({ error: "username is required." });
@@ -65,68 +67,44 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ error: "role must be OWNER or MEMBER." });
     }
 
-    const target = await prisma.users.findUnique({ where: { username } });
+    const target = await prisma.users.findUnique({ where: { username }, select: { id: true } });
     if (!target) return res.status(404).json({ error: "User not found." });
-    const targetMembership = await getGroupMembership(groupId, target.id);
-    if (!targetMembership) {
+
+    const result = await changeMemberRole(groupId, target.id, role, userId);
+    if (result === "forbidden") {
+      return res.status(403).json({ error: "Only an owner can change roles." });
+    }
+    if (result === "not-member") {
       return res.status(404).json({ error: "Membership not found." });
     }
-    if (targetMembership.role === role) {
-      return res.status(200).json({ membership: targetMembership });
-    }
-
-    if (role === "MEMBER") {
-      const ownerCount = await prisma.groupMembership.count({
-        where: { group: groupId, role: "OWNER" },
+    if (result === "last-owner") {
+      return res.status(409).json({
+        error: "A group needs at least one owner. Make someone else an owner first.",
       });
-      if (ownerCount <= 1) {
-        return res.status(409).json({
-          error: "A group needs at least one owner. Make someone else an owner first.",
-        });
-      }
     }
-
-    const membership = await prisma.groupMembership.update({
-      where: { group_user: { group: groupId, user: target.id } },
-      data: { role },
-    });
-    return res.status(200).json({ membership });
+    return res.status(200).json({ message: "Role updated." });
   }
 
+  // DELETE { username } — leave the group, or as an owner remove someone else.
   if (req.method === "DELETE") {
     const { username } = req.body ?? {};
     if (!username || typeof username !== "string") {
       return res.status(400).json({ error: "username is required." });
     }
 
-    const target = await prisma.users.findUnique({ where: { username } });
+    const target = await prisma.users.findUnique({ where: { username }, select: { id: true } });
     if (!target) return res.status(404).json({ error: "User not found." });
 
-    const isSelf = target.id === userId;
-    const owner = await isGroupOwner(groupId, userId);
-    if (!isSelf && !owner) {
+    const result = await removeMember(groupId, target.id, userId);
+    if (result === "forbidden") {
       return res.status(403).json({ error: "Not allowed to remove this member." });
     }
-
-    const targetMembership = await getGroupMembership(groupId, target.id);
-    if (!targetMembership) {
+    if (result === "not-member") {
       return res.status(404).json({ error: "Membership not found." });
     }
-
-    if (targetMembership.role === "OWNER") {
-      const ownerCount = await prisma.groupMembership.count({
-        where: { group: groupId, role: "OWNER" },
-      });
-      if (ownerCount <= 1) {
-        return res.status(409).json({
-          error: "Make another member an owner before leaving.",
-        });
-      }
+    if (result === "last-owner") {
+      return res.status(409).json({ error: "Make another member an owner before leaving." });
     }
-
-    await prisma.groupMembership.delete({
-      where: { group_user: { group: groupId, user: target.id } },
-    });
     return res.status(204).end();
   }
 

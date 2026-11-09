@@ -13,8 +13,7 @@ import { getViewerSession } from "../../../src/utils/viewer";
 
 type UserActivityEntry = attendance & {
   performances:
-    | (performances & { musicals: musicals | null; plays: plays | null; theatres: theatres })
-    | null;
+    (performances & { musicals: musicals | null; plays: plays | null; theatres: theatres }) | null;
   musicals: musicals | null;
   plays: plays | null;
   theatres: theatres | null;

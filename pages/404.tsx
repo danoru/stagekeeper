@@ -116,8 +116,8 @@ function ErrorPage() {
 
           <Button
             href="/"
-            variant="contained"
             sx={{ px: 4, py: 1.25, fontSize: "0.75rem", letterSpacing: "0.1em" }}
+            variant="contained"
           >
             Back to StageKeeper
           </Button>

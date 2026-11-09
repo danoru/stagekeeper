@@ -1,3 +1,4 @@
+import EditIcon from "@mui/icons-material/Edit";
 import {
   Alert,
   Box,
@@ -12,7 +13,6 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import EditIcon from "@mui/icons-material/Edit";
 import { plays } from "@prisma/client";
 import Head from "next/head";
 import Link from "next/link";
@@ -106,7 +106,7 @@ export default function AdminPlaysPage() {
         <title>Plays • Admin • StageKeeper</title>
       </Head>
       <Box sx={{ maxWidth: 1100, mx: "auto", mt: 4, px: 2 }}>
-        <Stack direction="row" alignItems="center" justifyContent="space-between" mb={2}>
+        <Stack alignItems="center" direction="row" justifyContent="space-between" mb={2}>
           <Typography variant="h5">
             <Link href="/admin" style={{ textDecoration: "none", color: "inherit" }}>
               Admin
@@ -119,14 +119,14 @@ export default function AdminPlaysPage() {
         <Grid container spacing={3}>
           <Grid size={{ xs: 12, md: 5 }}>
             <Paper sx={{ p: 3 }}>
-              <Typography variant="h6" gutterBottom>
+              <Typography gutterBottom variant="h6">
                 {editId ? "Edit Play" : "Add Play"}
               </Typography>
               <form onSubmit={handleSubmit}>
                 <Stack spacing={2}>
                   <TextField
-                    required
                     fullWidth
+                    required
                     label="Title"
                     size="small"
                     value={form.title}
@@ -141,12 +141,12 @@ export default function AdminPlaysPage() {
                   />
                   <Stack direction="row" spacing={1}>
                     <TextField
-                      required
                       fullWidth
+                      required
+                      InputLabelProps={{ shrink: true }}
                       label="Premiere date"
                       size="small"
                       type="date"
-                      InputLabelProps={{ shrink: true }}
                       value={form.premiere}
                       onChange={(e) => setForm({ ...form, premiere: e.target.value })}
                     />
@@ -167,11 +167,11 @@ export default function AdminPlaysPage() {
                     onChange={(e) => setForm({ ...form, playbill: e.target.value })}
                   />
                   <Stack direction="row" spacing={1}>
-                    <Button type="submit" variant="contained" disabled={saving} fullWidth>
+                    <Button fullWidth disabled={saving} type="submit" variant="contained">
                       {saving ? "Saving…" : editId ? "Save Changes" : "Add Play"}
                     </Button>
                     {editId && (
-                      <Button variant="outlined" onClick={cancelEdit} fullWidth>
+                      <Button fullWidth variant="outlined" onClick={cancelEdit}>
                         Cancel
                       </Button>
                     )}
@@ -185,26 +185,26 @@ export default function AdminPlaysPage() {
             <Paper sx={{ p: 3 }}>
               <TextField
                 fullWidth
-                size="small"
                 placeholder="Search plays…"
+                size="small"
+                sx={{ mb: 2 }}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                sx={{ mb: 2 }}
               />
               <Stack divider={<Divider />} spacing={0}>
                 {filtered.map((play) => (
                   <Stack
                     key={play.id}
-                    direction="row"
                     alignItems="center"
+                    direction="row"
                     justifyContent="space-between"
                     sx={{ py: 1 }}
                   >
                     <Box>
-                      <Typography variant="body2" fontWeight={500}>
+                      <Typography fontWeight={500} variant="body2">
                         {play.title}
                       </Typography>
-                      <Typography variant="caption" color="text.secondary">
+                      <Typography color="text.secondary" variant="caption">
                         {[
                           play.writtenBy && `By ${play.writtenBy}`,
                           play.premiere && new Date(play.premiere).getUTCFullYear(),
@@ -213,16 +213,16 @@ export default function AdminPlaysPage() {
                           .join(" · ")}
                       </Typography>
                     </Box>
-                    <IconButton size="small" onClick={() => startEdit(play)}>
+                    <IconButton aria-label="Edit play" size="small" onClick={() => startEdit(play)}>
                       <EditIcon fontSize="small" />
                     </IconButton>
                   </Stack>
                 ))}
                 {filtered.length === 0 && (
                   <Typography
-                    variant="body2"
                     color="text.secondary"
                     sx={{ py: 2, textAlign: "center" }}
+                    variant="body2"
                   >
                     No plays found.
                   </Typography>
@@ -234,8 +234,8 @@ export default function AdminPlaysPage() {
       </Box>
 
       <Snackbar
-        open={snackbar.open}
         autoHideDuration={4000}
+        open={snackbar.open}
         onClose={() => setSnackbar((s) => ({ ...s, open: false }))}
       >
         <Alert

@@ -12,9 +12,6 @@ export default function SearchBar({ value, onChange, placeholder }: Props) {
   return (
     <TextField
       fullWidth
-      placeholder={placeholder}
-      size="small"
-      value={value}
       InputProps={{
         startAdornment: (
           <InputAdornment position="start">
@@ -23,12 +20,14 @@ export default function SearchBar({ value, onChange, placeholder }: Props) {
         ),
         endAdornment: value ? (
           <InputAdornment position="end">
-            <IconButton size="small" onClick={() => onChange("")}>
+            <IconButton aria-label="Clear search" size="small" onClick={() => onChange("")}>
               <ClearIcon sx={{ color: "rgba(232,220,200,0.45)", fontSize: "1rem" }} />
             </IconButton>
           </InputAdornment>
         ) : null,
       }}
+      placeholder={placeholder}
+      size="small"
       sx={{
         "& .MuiOutlinedInput-root": {
           background: "rgba(212,175,85,0.04)",
@@ -44,6 +43,7 @@ export default function SearchBar({ value, onChange, placeholder }: Props) {
           "&::placeholder": { color: "rgba(232,220,200,0.35)", opacity: 1 },
         },
       }}
+      value={value}
       onChange={(e) => onChange(e.target.value)}
     />
   );

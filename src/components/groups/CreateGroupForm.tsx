@@ -37,13 +37,13 @@ function CreateGroupForm() {
   return (
     <Box
       component="form"
-      onSubmit={handleSubmit}
       sx={{
         border: "1px solid rgba(212,175,85,0.1)",
         borderRadius: 1,
         p: 3,
         background: "rgba(212,175,85,0.02)",
       }}
+      onSubmit={handleSubmit}
     >
       <Typography
         sx={{
@@ -61,10 +61,10 @@ function CreateGroupForm() {
         <TextField
           fullWidth
           inputProps={{ maxLength: 60 }}
-          onChange={(e) => setName(e.target.value)}
           placeholder="Group name"
           size="small"
           value={name}
+          onChange={(e) => setName(e.target.value)}
         />
         <Button disabled={submitting || !name.trim()} type="submit" variant="outlined">
           Create

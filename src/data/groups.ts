@@ -2,7 +2,7 @@ import { randomUUID } from "crypto";
 
 import { Availability, GroupRole, PlanStatus, type Prisma } from "@prisma/client";
 
-import { openRunCutoff, theatreToday } from "../utils/schedule";
+import { openRunCutoff, theatreToday, visitDay } from "../utils/schedule";
 
 import prisma from "./db";
 import {
@@ -64,10 +64,10 @@ export async function joinGroupByInvite(token: string, userId: number) {
   const group = await prisma.groups.findUnique({ where: { inviteToken: token } });
   if (!group) return null;
   await prisma.$transaction([
-    prisma.groupMembership.upsert({
-      where: { group_user: { group: group.id, user: userId } },
-      create: { group: group.id, user: userId, role: "MEMBER" },
-      update: {},
+    // skipDuplicates so a double click or a second tab is a no-op rather than an error.
+    prisma.groupMembership.createMany({
+      data: [{ group: group.id, user: userId, role: "MEMBER" }],
+      skipDuplicates: true,
     }),
     // Joining by link answers any pending username invite too.
     prisma.groupInvite.deleteMany({ where: { group: group.id, user: userId } }),
@@ -120,13 +120,78 @@ export async function respondToInvite(groupId: number, userId: number, accept: b
     const removed = await tx.groupInvite.deleteMany({ where: { group: groupId, user: userId } });
     if (removed.count === 0) return false;
     if (accept) {
-      await tx.groupMembership.upsert({
-        where: { group_user: { group: groupId, user: userId } },
-        create: { group: groupId, user: userId, role: "MEMBER" },
-        update: {},
+      await tx.groupMembership.createMany({
+        data: [{ group: groupId, user: userId, role: "MEMBER" }],
+        skipDuplicates: true,
       });
     }
     return true;
+  });
+}
+
+// Role changes and removals check who the owners are, then act on it. Taking a lock on the group
+// first means two at once run in turn, so they can't both pass the check and leave no owner.
+function withGroupLock<T>(groupId: number, work: (tx: Prisma.TransactionClient) => Promise<T>) {
+  return prisma.$transaction(
+    async (tx) => {
+      await tx.$queryRaw`SELECT id FROM "groups" WHERE id = ${groupId} FOR UPDATE`;
+      return work(tx);
+    },
+    { maxWait: 10_000, timeout: 15_000 }
+  );
+}
+
+function countOwners(tx: Prisma.TransactionClient, groupId: number) {
+  return tx.groupMembership.count({ where: { group: groupId, role: "OWNER" } });
+}
+
+export type MemberChangeResult = "ok" | "forbidden" | "not-member" | "last-owner";
+
+export function changeMemberRole(
+  groupId: number,
+  targetId: number,
+  role: "OWNER" | "MEMBER",
+  actorId: number
+): Promise<MemberChangeResult> {
+  return withGroupLock(groupId, async (tx) => {
+    const memberships = await tx.groupMembership.findMany({
+      where: { group: groupId, user: { in: [actorId, targetId] } },
+      select: { user: true, role: true },
+    });
+    const actor = memberships.find((m) => m.user === actorId);
+    const target = memberships.find((m) => m.user === targetId);
+    if (actor?.role !== "OWNER") return "forbidden";
+    if (!target) return "not-member";
+    if (target.role === role) return "ok";
+    if (role === "MEMBER" && (await countOwners(tx, groupId)) <= 1) return "last-owner";
+    await tx.groupMembership.update({
+      where: { group_user: { group: groupId, user: targetId } },
+      data: { role },
+    });
+    return "ok";
+  });
+}
+
+/** Members can remove themselves; owners can remove anyone. */
+export function removeMember(
+  groupId: number,
+  targetId: number,
+  actorId: number
+): Promise<MemberChangeResult> {
+  return withGroupLock(groupId, async (tx) => {
+    const memberships = await tx.groupMembership.findMany({
+      where: { group: groupId, user: { in: [actorId, targetId] } },
+      select: { user: true, role: true },
+    });
+    const actor = memberships.find((m) => m.user === actorId);
+    const target = memberships.find((m) => m.user === targetId);
+    if (actorId !== targetId && actor?.role !== "OWNER") return "forbidden";
+    if (!target) return "not-member";
+    if (target.role === "OWNER" && (await countOwners(tx, groupId)) <= 1) return "last-owner";
+    await tx.groupMembership.delete({
+      where: { group_user: { group: groupId, user: targetId } },
+    });
+    return "ok";
   });
 }
 
@@ -584,7 +649,7 @@ export async function getGroupActivityFeed(
       user: a.users,
       show: { title, type, playbill },
       theatre: theatreName,
-      seenDate: a.seenDate ?? a.performances?.startTime ?? null,
+      seenDate: visitDay(a.seenDate, a.performances?.startTime),
       rating: a.rating != null ? Number(a.rating) : null,
       comment: a.comment ?? null,
     });

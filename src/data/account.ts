@@ -23,7 +23,7 @@ export async function exportAccountData(userId: number) {
   if (!user) return null;
 
   const showSelect = { select: { title: true } };
-  const [visits, likes, watchlist, following, followers, groups, suggestedCredits] =
+  const [visits, likes, watchlist, following, followers, groups, suggestedCredits, homeTheatres] =
     await Promise.all([
       prisma.attendance.findMany({
         where: { user: userId },
@@ -78,6 +78,10 @@ export async function exportAccountData(userId: number) {
           people: { select: { name: true } },
         },
       }),
+      prisma.theatreFollows.findMany({
+        where: { user: userId },
+        select: { createdAt: true, theatres: { select: { name: true } } },
+      }),
     ]);
 
   return {
@@ -90,6 +94,7 @@ export async function exportAccountData(userId: number) {
     followers: followers.map((f) => f.users.username),
     groups,
     suggestedCredits,
+    homeTheatres: homeTheatres.map((h) => ({ theatre: h.theatres.name, since: h.createdAt })),
   };
 }
 
@@ -176,6 +181,7 @@ export async function deleteAccount(userId: number) {
       await tx.likedShows.deleteMany({ where: { user: userId } });
       await tx.watchlist.deleteMany({ where: { user: userId } });
       await tx.following.deleteMany({ where: { user: userId } });
+      await tx.theatreFollows.deleteMany({ where: { user: userId } });
       await tx.following.deleteMany({
         where: { followingUsername: { equals: user.username, mode: "insensitive" } },
       });

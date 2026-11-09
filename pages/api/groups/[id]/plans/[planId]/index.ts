@@ -1,7 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth";
 
-import { authOptions } from "../../../../auth/[...nextauth]";
 import {
   cancelPlan,
   confirmPlan,
@@ -12,6 +11,7 @@ import {
   reopenPlan,
   updatePlanNote,
 } from "../../../../../../src/data/groups";
+import { authOptions } from "../../../../auth/[...nextauth]";
 
 type Action = "confirm" | "cancel" | "reopen" | "updateNote";
 
@@ -50,11 +50,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (!canMutate) {
       return res.status(403).json({ error: "Only the proposer or owner can change status." });
     }
-    const { action, planDateId, note } = req.body ?? {} as {
-      action?: Action;
-      planDateId?: number;
-      note?: string | null;
-    };
+    const { action, planDateId, note } =
+      req.body ??
+      ({} as {
+        action?: Action;
+        planDateId?: number;
+        note?: string | null;
+      });
 
     if (action === "confirm") {
       const dateId = Number(planDateId);
@@ -92,7 +94,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(200).json({ plan: updated });
     }
 
-    return res.status(400).json({ error: "action must be confirm, cancel, reopen, or updateNote." });
+    return res
+      .status(400)
+      .json({ error: "action must be confirm, cancel, reopen, or updateNote." });
   }
 
   res.setHeader("Allow", ["DELETE", "PATCH"]);

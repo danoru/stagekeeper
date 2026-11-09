@@ -1,3 +1,4 @@
+import { compare } from "bcrypt";
 import { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth";
 import * as yup from "yup";
@@ -5,6 +6,7 @@ import * as yup from "yup";
 import prisma from "../../../src/data/db";
 import { sendVerificationEmail } from "../../../src/data/emailVerification";
 import { publicUserSelect } from "../../../src/data/users";
+import { rateLimit } from "../../../src/utils/rateLimit";
 import { authOptions } from "../auth/[...nextauth]";
 
 const optionalText = (max: number) =>
@@ -69,10 +71,24 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       const userId = Number(session.user.id);
       const current = await prisma.users.findUnique({
         where: { id: userId },
-        select: { email: true },
+        select: { email: true, password: true },
       });
+      if (!current) return res.status(401).json({ error: "Not authenticated." });
       // A new address hasn't been confirmed yet, whatever the old one's status was.
-      const emailChanged = current?.email.toLowerCase() !== data.email.toLowerCase();
+      const emailChanged = current.email.toLowerCase() !== data.email.toLowerCase();
+      if (emailChanged) {
+        // Password resets go to this address, so a borrowed session mustn't be able to change it.
+        if (!(await rateLimit(`email-change:${userId}`, 10, 15 * 60 * 1000))) {
+          return res.status(429).json({ error: "Too many attempts. Try again later." });
+        }
+        const { currentPassword } = req.body ?? {};
+        if (
+          typeof currentPassword !== "string" ||
+          !(await compare(currentPassword, current.password))
+        ) {
+          return res.status(403).json({ error: "Enter your current password to change email." });
+        }
+      }
       const updatedUser = await prisma.users.update({
         where: { id: userId },
         data: { ...data, ...(emailChanged ? { emailVerifiedAt: null } : {}) },

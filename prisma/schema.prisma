@@ -23,7 +23,11 @@ model attendance {
   theatre      Int?
   seenDate     DateTime?     @db.Date
   going        Boolean       @default(false)
+  /// The run this visit belongs to: same show, same theatre, dated inside the run. Set when
+  /// the visit is saved and backfilled by migration; null when the visit has no theatre or date.
+  programming  Int?
   performances performances? @relation(fields: [performance], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  programmings programming?  @relation(fields: [programming], references: [id], onDelete: SetNull, onUpdate: NoAction)
   users        users?        @relation(fields: [user], references: [id], onDelete: NoAction, onUpdate: NoAction)
   musicals     musicals?     @relation(fields: [musical], references: [id], onDelete: NoAction, onUpdate: NoAction)
   plays        plays?        @relation(fields: [play], references: [id], onDelete: NoAction, onUpdate: NoAction)
@@ -35,6 +39,7 @@ model attendance {
   @@index([musical])
   @@index([play])
   @@index([theatre])
+  @@index([programming])
   @@index([seenDate])
   @@index([going, seenDate])
 }
@@ -52,13 +57,10 @@ model groups {
   id          Int               @id(map: "group_pkey") @default(autoincrement())
   createdAt   DateTime          @default(now()) @db.Timestamptz(6)
   name        String
-  visibility  GroupVisibility   @default(PRIVATE)
   inviteToken String            @unique @default(uuid())
   members     groupMembership[]
   invites     groupInvite[]
   plans       groupPlan[]
-
-  @@index([visibility])
 }
 
 model groupMembership {
@@ -244,6 +246,7 @@ model programming {
   groupPlans   groupPlan[]
   credits      credits[]
   performances performances[]
+  attendance   attendance[]
 
   @@index([musical])
   @@index([play])
@@ -322,8 +325,22 @@ model theatres {
   seasons          seasons[]
   importCandidates importCandidates[]
   importRuns       importRuns[]
+  homeFor          theatreFollows[]
 
   @@index([status])
+}
+
+/// A theatre a member goes to often. Private: a list of home theatres says roughly where
+/// someone lives, so it shapes only that member's own home page and never shows on profiles.
+model theatreFollows {
+  user      Int
+  theatre   Int
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  users     users    @relation(fields: [user], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  theatres  theatres @relation(fields: [theatre], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([user, theatre])
+  @@index([theatre])
 }
 
 /// A run extracted from a theatre's season page, awaiting admin review.
@@ -401,6 +418,7 @@ model users {
   groupInvitesSent     groupInvite[]           @relation("GroupInviter")
   peopleCreated        people[]                @relation("PersonCreator")
   creditsSuggested     credits[]               @relation("CreditSuggester")
+  homeTheatres         theatreFollows[]
 }
 
 model watchlist {
@@ -448,12 +466,6 @@ enum Availability {
   AVAILABLE
   PREFER
   GOING
-}
-
-enum GroupVisibility {
-  PRIVATE
-  PUBLIC_REQUEST
-  PUBLIC_OPEN
 }
 
 enum PerformanceType {

@@ -31,7 +31,7 @@ function TheatreCard(props: Props) {
           },
         }}
       >
-        <Link href={props.link} underline="none" sx={{ display: "block", height: "100%" }}>
+        <Link href={props.link} sx={{ display: "block", height: "100%" }} underline="none">
           {isGradient ? (
             <Box
               className="theatre-image"

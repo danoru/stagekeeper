@@ -4,9 +4,10 @@ import moment from "moment";
 import { useRouter } from "next/router";
 import { useState } from "react";
 
-import type { Plan } from "./GroupPlans";
 import { showPath } from "../../utils/slug";
 import UserAvatar from "../users/UserAvatar";
+
+import type { Plan } from "./GroupPlans";
 
 interface Props {
   groupId: number;
@@ -273,10 +274,10 @@ function PlanCard({ groupId, plan, viewerId, isOwner, isPast = false }: Props) {
             {(plan.status === "CANCELED" || (plan.status === "CONFIRMED" && !isPast)) && (
               <Button
                 disabled={busy}
-                onClick={reopen}
                 size="small"
                 sx={{ fontSize: "0.65rem" }}
                 variant="text"
+                onClick={reopen}
               >
                 Reopen
               </Button>
@@ -295,10 +296,10 @@ function PlanCard({ groupId, plan, viewerId, isOwner, isPast = false }: Props) {
             <Button
               color="error"
               disabled={busy}
-              onClick={deletePlan}
               size="small"
               sx={{ fontSize: "0.65rem" }}
               variant="text"
+              onClick={deletePlan}
             >
               Delete
             </Button>
@@ -310,30 +311,30 @@ function PlanCard({ groupId, plan, viewerId, isOwner, isPast = false }: Props) {
         <Box sx={{ mb: 2 }}>
           <TextField
             fullWidth
-            inputProps={{ maxLength: 500 }}
             multiline
-            onChange={(e) => setNoteDraft(e.target.value)}
+            inputProps={{ maxLength: 500 }}
             placeholder="Add a note (optional)"
             rows={2}
             size="small"
             sx={{ mb: 1 }}
             value={noteDraft}
+            onChange={(e) => setNoteDraft(e.target.value)}
           />
           <Stack direction="row" spacing={1}>
             <Button
               disabled={busy}
-              onClick={saveNote}
               size="small"
               sx={{ fontSize: "0.65rem" }}
               variant="outlined"
+              onClick={saveNote}
             >
               Save
             </Button>
             <Button
               disabled={busy}
-              onClick={cancelEditNote}
               size="small"
               sx={{ fontSize: "0.65rem", color: "rgba(232,220,200,0.5)" }}
+              onClick={cancelEditNote}
             >
               Cancel
             </Button>
@@ -358,7 +359,6 @@ function PlanCard({ groupId, plan, viewerId, isOwner, isPast = false }: Props) {
             )}
             {canMutate && (
               <Button
-                onClick={() => setEditingNote(true)}
                 size="small"
                 sx={{
                   fontFamily: '"DM Sans", sans-serif',
@@ -371,6 +371,7 @@ function PlanCard({ groupId, plan, viewerId, isOwner, isPast = false }: Props) {
                   px: 0,
                   minWidth: 0,
                 }}
+                onClick={() => setEditingNote(true)}
               >
                 {plan.note ? "Edit note" : "+ Add note"}
               </Button>
@@ -389,6 +390,9 @@ function PlanCard({ groupId, plan, viewerId, isOwner, isPast = false }: Props) {
               busy={busy}
               canMutateDate={!isPast && (canMutate || date.proposedBy === viewerId)}
               isSelected={plan.selectedDate === date.id}
+              planDate={date}
+              readOnly={isPast}
+              viewerId={viewerId}
               onClearStatus={() => clearStatus(date.id)}
               onConfirm={
                 canMutate && plan.status === "POLLING" && !isPast
@@ -397,9 +401,6 @@ function PlanCard({ groupId, plan, viewerId, isOwner, isPast = false }: Props) {
               }
               onRemove={() => removeDate(date.id)}
               onSetStatus={(status) => setStatus(date.id, status)}
-              planDate={date}
-              readOnly={isPast}
-              viewerId={viewerId}
             />
           ))}
       </Stack>
@@ -411,29 +412,28 @@ function PlanCard({ groupId, plan, viewerId, isOwner, isPast = false }: Props) {
               <TextField
                 InputLabelProps={{ shrink: true }}
                 label="Date / time"
-                onChange={(e) => setNewDate(e.target.value)}
                 size="small"
                 sx={{ flex: 1 }}
                 type="datetime-local"
                 value={newDate}
+                onChange={(e) => setNewDate(e.target.value)}
               />
-              <Button disabled={busy || !newDate} onClick={addDate} variant="outlined">
+              <Button disabled={busy || !newDate} variant="outlined" onClick={addDate}>
                 Add
               </Button>
               <Button
+                size="small"
+                sx={{ color: "rgba(232,220,200,0.5)" }}
                 onClick={() => {
                   setAdding(false);
                   setNewDate("");
                 }}
-                size="small"
-                sx={{ color: "rgba(232,220,200,0.5)" }}
               >
                 Cancel
               </Button>
             </Box>
           ) : (
             <Button
-              onClick={() => setAdding(true)}
               size="small"
               sx={{
                 fontFamily: '"DM Sans", sans-serif',
@@ -442,6 +442,7 @@ function PlanCard({ groupId, plan, viewerId, isOwner, isPast = false }: Props) {
                 textTransform: "uppercase",
                 color: "rgba(212,175,85,0.7)",
               }}
+              onClick={() => setAdding(true)}
             >
               + Suggest another date
             </Button>
@@ -551,7 +552,6 @@ function DateRow({
           {onConfirm && (
             <Button
               disabled={busy}
-              onClick={onConfirm}
               size="small"
               sx={{
                 fontSize: "0.6rem",
@@ -561,6 +561,7 @@ function DateRow({
                 border: "1px solid rgba(123,201,123,0.3)",
                 "&:hover": { borderColor: "#7BC97B", background: "rgba(123,201,123,0.08)" },
               }}
+              onClick={onConfirm}
             >
               Lock in
             </Button>
@@ -569,10 +570,10 @@ function DateRow({
             <Button
               color="error"
               disabled={busy}
-              onClick={onRemove}
               size="small"
               sx={{ fontSize: "0.6rem" }}
               variant="text"
+              onClick={onRemove}
             >
               Remove
             </Button>
@@ -588,7 +589,6 @@ function DateRow({
               <Button
                 key={s.value}
                 disabled={busy}
-                onClick={() => (active ? onClearStatus() : onSetStatus(s.value))}
                 size="small"
                 sx={{
                   fontFamily: '"DM Sans", sans-serif',
@@ -602,6 +602,7 @@ function DateRow({
                   "&:hover": { borderColor: s.color, background: `${s.color}10` },
                 }}
                 title={s.help}
+                onClick={() => (active ? onClearStatus() : onSetStatus(s.value))}
               >
                 {s.label}
               </Button>

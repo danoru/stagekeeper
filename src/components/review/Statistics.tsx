@@ -169,6 +169,8 @@ function ChartSection({ label, children }: { label: string; children: React.Reac
   return (
     <Box
       sx={{
+        // Lets charts shrink with the page; a grid item otherwise stays as wide as its canvas.
+        minWidth: 0,
         p: { xs: 2, md: 4 },
         border: "1px solid rgba(212,175,85,0.1)",
         borderRadius: 1,
@@ -235,7 +237,8 @@ function Statistics({ stats, view, year }: Props) {
   const locationOccurrence: Record<string, number> = {};
   stats.forEach((stat) => {
     const loc = stat.performances.theatres.location;
-    locationOccurrence[loc] = (locationOccurrence[loc] ?? 0) + 1;
+    // Logs without a theatre have no city to count.
+    if (loc) locationOccurrence[loc] = (locationOccurrence[loc] ?? 0) + 1;
   });
   const mostVisitedLocation =
     Object.keys(locationOccurrence).length > 0
@@ -248,7 +251,10 @@ function Statistics({ stats, view, year }: Props) {
   const premieres = stats.map((s) => getPerformancePremiere(s)).filter(Boolean) as number[];
   const premiereAverage =
     premieres.length > 0 ? Math.round(premieres.reduce((a, b) => a + b, 0) / premieres.length) : 0;
-  const averagePerformanceAge = new Date().getFullYear() - premiereAverage;
+  // How old the shows were in the year being reviewed, not how old they are today.
+  const referenceYear = view === "year" && year ? Number(year) : new Date().getFullYear();
+  const averagePerformanceAge = referenceYear - premiereAverage;
+  const hasPremieres = premieres.length > 0;
 
   function performanceTaste(y: number) {
     if (y < 1920) return "Vaudeville";
@@ -339,11 +345,11 @@ function Statistics({ stats, view, year }: Props) {
         )}
         {latestPerformance && (
           <SpotlightCard
+            reverse
             date={moment.utc(latestPerformance.performances.startTime).format("MMMM Do, YYYY")}
             headline={`Most Recent Performance ${getYearText()}`}
             location={latestPerformance.performances.theatres.location}
             playbill={getPlaybill(latestPerformance)}
-            reverse
             subtext={`Most recently you sat down for ${getPerformanceTitle(latestPerformance)}.`}
             theatre={latestPerformance.performances.theatres.name}
             title={getPerformanceTitle(latestPerformance)}
@@ -352,9 +358,9 @@ function Statistics({ stats, view, year }: Props) {
       </Box>
 
       {/* Oldest and Newest Premieres */}
-      <SectionDivider label="Premiere Dates" />
+      {hasPremieres && <SectionDivider label="Premiere Dates" />}
       <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" }, gap: 3 }}>
-        {oldestPerformance && (
+        {hasPremieres && oldestPerformance && (
           <SpotlightCard
             date={moment.utc(oldestPerformance.performances.startTime).format("MMMM Do, YYYY")}
             headline={`Oldest Premiere ${getYearText()}`}
@@ -365,13 +371,13 @@ function Statistics({ stats, view, year }: Props) {
             title={getPerformanceTitle(oldestPerformance)}
           />
         )}
-        {newestPerformance && (
+        {hasPremieres && newestPerformance && (
           <SpotlightCard
+            reverse
             date={moment.utc(newestPerformance.performances.startTime).format("MMMM Do, YYYY")}
             headline={`Newest Premiere ${getYearText()}`}
             location={newestPerformance.performances.theatres.location}
             playbill={getPlaybill(newestPerformance)}
-            reverse
             subtext={`${getPerformanceTitle(newestPerformance)} premiered in ${getPerformancePremiere(newestPerformance)} — the newest show you've seen.`}
             theatre={newestPerformance.performances.theatres.name}
             title={getPerformanceTitle(newestPerformance)}
@@ -380,65 +386,68 @@ function Statistics({ stats, view, year }: Props) {
       </Box>
 
       {/* Era / taste */}
-      <SectionDivider label="Your Taste" />
-      <Box
-        sx={{
-          p: 4,
-          border: "1px solid rgba(212,175,85,0.1)",
-          borderRadius: 1,
-          background: "rgba(212,175,85,0.02)",
-          mb: 3,
-          textAlign: "center",
-        }}
-      >
-        <Typography
+      {hasPremieres && <SectionDivider label="Your Taste" />}
+      {hasPremieres && (
+        <Box
           sx={{
-            fontFamily: '"DM Sans", sans-serif',
-            fontSize: "0.6rem",
-            letterSpacing: "0.22em",
-            textTransform: "uppercase",
-            color: "#D4AF55",
-            mb: 2,
+            p: 4,
+            border: "1px solid rgba(212,175,85,0.1)",
+            borderRadius: 1,
+            background: "rgba(212,175,85,0.02)",
+            mb: 3,
+            textAlign: "center",
           }}
         >
-          Premiere Era
-        </Typography>
-        <Typography
-          sx={{
-            fontFamily: '"Cormorant Garamond", serif',
-            fontSize: { xs: "2rem", md: "3rem" },
-            fontWeight: 600,
-            color: "#E8DCC8",
-            lineHeight: 1,
-            mb: 2,
-          }}
-        >
-          {performanceEra}
-        </Typography>
-        <Typography
-          sx={{
-            fontFamily: '"Cormorant Garamond", serif',
-            fontStyle: "italic",
-            fontSize: "1.05rem",
-            color: "rgba(232,220,200,0.55)",
-            maxWidth: 520,
-            mx: "auto",
-            lineHeight: 1.7,
-            mb: 2,
-          }}
-        >
-          {performanceEraDescription}
-        </Typography>
-        <Typography
-          sx={{
-            fontFamily: '"DM Sans", sans-serif',
-            fontSize: "0.75rem",
-            color: "rgba(232,220,200,0.4)",
-          }}
-        >
-          Average premiere year: {premiereAverage} · Average show age: {averagePerformanceAge} years
-        </Typography>
-      </Box>
+          <Typography
+            sx={{
+              fontFamily: '"DM Sans", sans-serif',
+              fontSize: "0.6rem",
+              letterSpacing: "0.22em",
+              textTransform: "uppercase",
+              color: "#D4AF55",
+              mb: 2,
+            }}
+          >
+            Premiere Era
+          </Typography>
+          <Typography
+            sx={{
+              fontFamily: '"Cormorant Garamond", serif',
+              fontSize: { xs: "2rem", md: "3rem" },
+              fontWeight: 600,
+              color: "#E8DCC8",
+              lineHeight: 1,
+              mb: 2,
+            }}
+          >
+            {performanceEra}
+          </Typography>
+          <Typography
+            sx={{
+              fontFamily: '"Cormorant Garamond", serif',
+              fontStyle: "italic",
+              fontSize: "1.05rem",
+              color: "rgba(232,220,200,0.55)",
+              maxWidth: 520,
+              mx: "auto",
+              lineHeight: 1.7,
+              mb: 2,
+            }}
+          >
+            {performanceEraDescription}
+          </Typography>
+          <Typography
+            sx={{
+              fontFamily: '"DM Sans", sans-serif',
+              fontSize: "0.75rem",
+              color: "rgba(232,220,200,0.4)",
+            }}
+          >
+            Average premiere year: {premiereAverage} · Average show age: {averagePerformanceAge}{" "}
+            years
+          </Typography>
+        </Box>
+      )}
       <ChartSection label="Shows by Premiere Year">
         <PerformanceByPremiereChart stats={stats} />
       </ChartSection>

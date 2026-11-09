@@ -68,6 +68,47 @@ export async function getStarterShows(take = 18): Promise<StarterShow[]> {
     .slice(0, take);
 }
 
+export type StarterTheatre = {
+  id: number;
+  name: string;
+  location: string;
+  image: string;
+  visits: number;
+};
+
+// Approved theatres, the ones members visit most first — the grid for "which stages do you go to?"
+export async function getStarterTheatres(): Promise<StarterTheatre[]> {
+  const [theatres, direct, viaPerformance] = await Promise.all([
+    prisma.theatres.findMany({
+      where: { status: "APPROVED" },
+      select: { id: true, name: true, location: true, image: true },
+    }),
+    prisma.attendance.groupBy({
+      by: ["theatre"],
+      where: { theatre: { not: null } },
+      _count: { _all: true },
+    }),
+    // Legacy rows name a performance instead; its theatre is the one visited.
+    prisma.attendance.findMany({
+      where: { theatre: null, performance: { not: null } },
+      select: { performances: { select: { theatre: true } } },
+    }),
+  ]);
+
+  const visits = new Map<number, number>();
+  for (const row of direct) {
+    if (row.theatre != null) visits.set(row.theatre, row._count._all);
+  }
+  for (const row of viaPerformance) {
+    const id = row.performances?.theatre;
+    if (id != null) visits.set(id, (visits.get(id) ?? 0) + 1);
+  }
+
+  return theatres
+    .map((t) => ({ ...t, visits: visits.get(t.id) ?? 0 }))
+    .sort((a, b) => b.visits - a.visits || a.name.localeCompare(b.name));
+}
+
 export async function getSuggestedPeople(viewerId: number, take = 12) {
   const [people, following] = await Promise.all([
     prisma.users.findMany({

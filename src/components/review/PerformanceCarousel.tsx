@@ -3,7 +3,6 @@ import Chip from "@mui/material/Chip";
 import Typography from "@mui/material/Typography";
 import type { attendance, musicals, performances, plays, theatres } from "@prisma/client";
 import moment from "moment";
-import Image from "next/image";
 import Link from "next/link";
 
 import { resolveShowImage } from "../../utils/gradients";
@@ -33,7 +32,6 @@ function PerformanceCarousel({ items }: Props) {
     <Box sx={{ borderBottom: "1px solid rgba(212,175,85,0.12)", py: 3, background: "#080C14" }}>
       <SimpleCarousel autoplay interval={4000} sx={{ maxWidth: 480, mx: "auto" }}>
         {items.map((item, i) => {
-          const isMusical = item.performances.type === "MUSICAL";
           return (
             <Box key={i} sx={{ px: 1 }}>
               <CarouselItem

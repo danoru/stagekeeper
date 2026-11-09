@@ -1,8 +1,8 @@
 import type { CreditCategory, Prisma } from "@prisma/client";
 
-import { productionForVisit, type RunRef } from "../utils/productions";
+import { visitProduction, type RunRef } from "../utils/productions";
 import { mean } from "../utils/ratings";
-import { openRunCutoff, theatreToday } from "../utils/schedule";
+import { openRunCutoff, theatreToday, visitDay } from "../utils/schedule";
 import { slugify } from "../utils/slug";
 
 import prisma from "./db";
@@ -137,6 +137,7 @@ async function getSeenProductionIds(viewerId: number, productions: Production[])
       play: true,
       theatre: true,
       seenDate: true,
+      programming: true,
       performances: { select: { musical: true, play: true, theatre: true, startTime: true } },
     },
   });
@@ -148,10 +149,11 @@ async function getSeenProductionIds(viewerId: number, productions: Production[])
     const runs = productions
       .filter((p) => (p.musicals ? p.musicals.id === musical : p.plays?.id === play))
       .map(asRun);
-    const id = productionForVisit(
+    const id = visitProduction(
       {
+        programming: v.programming,
         theatreId: v.theatre ?? v.performances?.theatre ?? null,
-        date: v.seenDate ?? v.performances?.startTime ?? null,
+        date: visitDay(v.seenDate, v.performances?.startTime),
       },
       runs
     );
@@ -242,6 +244,7 @@ export async function getShowProductions(show: { musical: number } | { play: num
         rating: true,
         theatre: true,
         seenDate: true,
+        programming: true,
         performances: { select: { theatre: true, startTime: true } },
       },
     }),
@@ -252,10 +255,11 @@ export async function getShowProductions(show: { musical: number } | { play: num
   const byRun = new Map<number, Map<number, number[]>>();
   for (const v of visits) {
     if (v.user == null) continue;
-    const runId = productionForVisit(
+    const runId = visitProduction(
       {
+        programming: v.programming,
         theatreId: v.theatre ?? v.performances?.theatre ?? null,
-        date: v.seenDate ?? v.performances?.startTime ?? null,
+        date: visitDay(v.seenDate, v.performances?.startTime),
       },
       refs
     );

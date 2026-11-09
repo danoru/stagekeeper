@@ -1,6 +1,6 @@
 import type { PerformanceType, Prisma } from "@prisma/client";
 
-import { theatreToday } from "../utils/schedule";
+import { showtimeDay, theatreToday, visitDay, zonedTime } from "../utils/schedule";
 
 import prisma from "./db";
 import { visibleAttendance } from "./visibility";
@@ -361,7 +361,8 @@ export function normalizeAttendance(row: RawAttendance): NormalizedAttendance | 
   const today = startOfToday();
   if (row.performances) {
     const perf = row.performances;
-    const startTime = row.seenDate ?? perf.startTime;
+    // A calendar day either way, so pages can format it in UTC like any other logged date.
+    const startTime = row.seenDate ?? showtimeDay(perf.startTime);
     return {
       ...row,
       performances: { ...perf, startTime },
@@ -486,6 +487,27 @@ export async function getUserUpcoming(id: number, viewerId: number | null) {
   return normalizeAttendanceRows(rows);
 }
 
+/** The years this user has reviewable visits in, oldest first, as this viewer may see them. */
+export async function getUserReviewYears(id: number, viewerId: number | null) {
+  const rows = await prisma.attendance.findMany({
+    where: {
+      user: id,
+      AND: [
+        { OR: [{ seenDate: { not: null } }, { performance: { not: null } }] },
+        { OR: [{ going: false }, { seenDate: { lt: startOfToday() } }] },
+        visibleAttendance(viewerId),
+      ],
+    },
+    select: { seenDate: true, performances: { select: { startTime: true } } },
+  });
+  const years = new Set<number>();
+  for (const row of rows) {
+    const date = visitDay(row.seenDate, row.performances?.startTime);
+    if (date) years.add(date.getUTCFullYear());
+  }
+  return Array.from(years).sort((a, b) => a - b);
+}
+
 export async function getUserAttendanceByYear(
   year: number | null,
   id: number,
@@ -504,10 +526,11 @@ export async function getUserAttendanceByYear(
           },
           {
             seenDate: null,
+            // Showtimes are instants; the year turns at midnight at the theatre.
             performances: {
               startTime: {
-                gte: new Date(Date.UTC(year, 0, 1)),
-                lt: new Date(Date.UTC(year + 1, 0, 1)),
+                gte: zonedTime(Date.UTC(year, 0, 1), 0, 0),
+                lt: zonedTime(Date.UTC(year + 1, 0, 1), 0, 0),
               },
             },
           },

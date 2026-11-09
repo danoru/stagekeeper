@@ -48,6 +48,8 @@ const sectionLabelSx = {
 
 function SettingsPage({ username, profile }: Props) {
   const [userData, setUserData] = useState<ProfileFields>(profile);
+  const [savedEmail, setSavedEmail] = useState(profile.email);
+  const [emailPassword, setEmailPassword] = useState("");
   const [saving, setSaving] = useState(false);
   const [snackbar, setSnackbar] = useState<{
     message: string;
@@ -90,6 +92,8 @@ function SettingsPage({ username, profile }: Props) {
     setUserData((prev) => ({ ...prev, [id]: value }));
   }
 
+  const emailChanged = userData.email.trim().toLowerCase() !== savedEmail.toLowerCase();
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
@@ -97,11 +101,21 @@ function SettingsPage({ username, profile }: Props) {
       const response = await fetch(`/api/user/${username}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(userData),
+        body: JSON.stringify({
+          ...userData,
+          ...(emailChanged ? { currentPassword: emailPassword } : {}),
+        }),
       });
       const data = await response.json().catch(() => ({}));
       if (response.ok) {
-        setSnackbar({ message: "Profile saved.", severity: "success" });
+        setSnackbar({
+          message: emailChanged
+            ? "Profile saved. Check your new email for a confirmation link."
+            : "Profile saved.",
+          severity: "success",
+        });
+        setSavedEmail(userData.email.trim());
+        setEmailPassword("");
       } else {
         setSnackbar({ message: data.error ?? "Failed to save profile.", severity: "error" });
       }
@@ -200,6 +214,21 @@ function SettingsPage({ username, profile }: Props) {
               value={userData.email}
               onChange={handleChange}
             />
+            {emailChanged && (
+              <TextField
+                fullWidth
+                required
+                autoComplete="current-password"
+                helperText="Needed to change your email, since password resets go there."
+                id="emailPassword"
+                InputLabelProps={{ shrink: true }}
+                label="Current password"
+                margin="dense"
+                type="password"
+                value={emailPassword}
+                onChange={(e) => setEmailPassword(e.target.value)}
+              />
+            )}
             <Stack direction={{ xs: "column", sm: "row" }} spacing={{ xs: 0, sm: 1.5 }}>
               <TextField
                 fullWidth

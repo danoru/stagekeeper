@@ -74,3 +74,7 @@ dist/
 docs/
 docs/local/
 *.local.md
+
+# pnpm 11's local build-script approvals. It has no `packages` list, which pnpm 9 (what the
+# host installs with) rejects, so it stays on this machine.
+pnpm-workspace.yaml

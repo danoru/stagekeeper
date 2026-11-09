@@ -23,8 +23,7 @@ function TheatresPage({ theatres }: Props) {
     const q = search.trim().toLowerCase();
     if (!q) return theatres;
     return theatres.filter(
-      (t) =>
-        t.name.toLowerCase().includes(q) || (t.location ?? "").toLowerCase().includes(q)
+      (t) => t.name.toLowerCase().includes(q) || (t.location ?? "").toLowerCase().includes(q)
     );
   }, [theatres, search]);
 

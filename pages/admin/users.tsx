@@ -86,7 +86,7 @@ export default function AdminUsersPage() {
         <title>Users • Admin • StageKeeper</title>
       </Head>
       <Box sx={{ maxWidth: 900, mx: "auto", mt: 4, px: 2 }}>
-        <Stack direction="row" alignItems="center" justifyContent="space-between" mb={2}>
+        <Stack alignItems="center" direction="row" justifyContent="space-between" mb={2}>
           <Typography variant="h5">
             <Link href="/admin" style={{ textDecoration: "none", color: "inherit" }}>
               Admin
@@ -99,19 +99,19 @@ export default function AdminUsersPage() {
         <Paper sx={{ p: 3 }}>
           <TextField
             fullWidth
-            size="small"
             placeholder="Search users…"
+            size="small"
+            sx={{ mb: 3 }}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            sx={{ mb: 3 }}
           />
 
           <Stack spacing={2}>
             {filtered.map((user) => (
               <Stack
                 key={user.id}
-                direction="row"
                 alignItems="center"
+                direction="row"
                 justifyContent="space-between"
                 sx={{
                   p: 2,
@@ -121,37 +121,35 @@ export default function AdminUsersPage() {
                 }}
               >
                 <Box>
-                  <Stack direction="row" spacing={1} alignItems="center">
-                    <Typography variant="body1" fontWeight={500}>
+                  <Stack alignItems="center" direction="row" spacing={1}>
+                    <Typography fontWeight={500} variant="body1">
                       {user.username}
                     </Typography>
-                    <Chip label={user.badge} size="small" color={BADGE_COLORS[user.badge]} />
+                    <Chip color={BADGE_COLORS[user.badge]} label={user.badge} size="small" />
                   </Stack>
-                  <Typography variant="caption" color="text.secondary">
+                  <Typography color="text.secondary" variant="caption">
                     {user.email}
                   </Typography>
                   <br />
-                  <Typography variant="caption" color="text.secondary">
+                  <Typography color="text.secondary" variant="caption">
                     {user._count.attendance} shows logged · joined{" "}
                     {new Date(user.createdAt).toLocaleDateString()}
                   </Typography>
                 </Box>
 
-                <Stack direction="row" spacing={1} alignItems="center">
+                <Stack alignItems="center" direction="row" spacing={1}>
                   <Button
                     size="small"
                     variant="outlined"
-                    onClick={() =>
-                      setResetTarget({ id: user.id, username: user.username })
-                    }
+                    onClick={() => setResetTarget({ id: user.id, username: user.username })}
                   >
                     Reset password
                   </Button>
                   <Select
                     size="small"
+                    sx={{ minWidth: 110 }}
                     value={user.badge}
                     onChange={(e) => handleBadgeChange(user.id, e.target.value)}
-                    sx={{ minWidth: 110 }}
                   >
                     <MenuItem value="USER">User</MenuItem>
                     <MenuItem value="PATRON">Patron</MenuItem>
@@ -161,7 +159,7 @@ export default function AdminUsersPage() {
               </Stack>
             ))}
             {filtered.length === 0 && (
-              <Typography variant="body2" color="text.secondary" textAlign="center" py={2}>
+              <Typography color="text.secondary" py={2} textAlign="center" variant="body2">
                 No users found.
               </Typography>
             )}
@@ -173,13 +171,13 @@ export default function AdminUsersPage() {
         open={!!resetTarget}
         user={resetTarget}
         onClose={() => setResetTarget(null)}
-        onSuccess={(username) => showSnackbar(`Password updated for ${username}.`, "success")}
         onError={(message) => showSnackbar(message, "error")}
+        onSuccess={(username) => showSnackbar(`Password updated for ${username}.`, "success")}
       />
 
       <Snackbar
-        open={snackbar.open}
         autoHideDuration={4000}
+        open={snackbar.open}
         onClose={() => setSnackbar((s) => ({ ...s, open: false }))}
       >
         <Alert

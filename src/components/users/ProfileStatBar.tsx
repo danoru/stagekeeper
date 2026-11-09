@@ -9,9 +9,10 @@ import Stack from "@mui/material/Stack";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import type { following, users } from "@prisma/client";
+import { useRouter } from "next/router";
 import React, { useState } from "react";
 
-import { followUser, unfollowUser } from "../../data/users";
+import { setFollowing } from "../../utils/follow";
 import LinkBehavior from "../layout/LinkBehavior";
 
 import UserAvatar from "./UserAvatar";
@@ -49,6 +50,8 @@ function ProfileStatBar({
   const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">("success");
 
   const [isFollowing, setIsFollowing] = useState(isFollowedByViewer);
+  const [followBusy, setFollowBusy] = useState(false);
+  const router = useRouter();
 
   function showSnackbar(message: string, severity: "success" | "error") {
     setSnackbarMessage(message);
@@ -64,39 +67,44 @@ function ProfileStatBar({
   }
 
   async function handleFollow() {
-    if (!sessionUser) return;
-    try {
-      if (isFollowing) {
-        await unfollowUser(user.username);
-        setIsFollowing(false);
-        showSnackbar(`Unfollowed ${user.username}.`, "success");
-      } else {
-        await followUser(user.username);
-        setIsFollowing(true);
-        showSnackbar(`Following ${user.username}.`, "success");
-      }
-    } catch {
-      showSnackbar("Failed to update follow status.", "error");
+    if (!sessionUser) {
+      router.push(`/login?callbackUrl=${encodeURIComponent(router.asPath)}`);
+      return;
     }
-    setHovered(false);
+    setFollowBusy(true);
+    try {
+      await setFollowing(user.username, !isFollowing);
+      showSnackbar(
+        isFollowing ? `Unfollowed ${user.username}.` : `Following ${user.username}.`,
+        "success"
+      );
+      setIsFollowing(!isFollowing);
+      // Picks up the new follower count.
+      router.replace(router.asPath, undefined, { scroll: false });
+    } catch (error) {
+      showSnackbar(
+        error instanceof Error ? error.message : "Couldn't update follow status.",
+        "error"
+      );
+    } finally {
+      setFollowBusy(false);
+      setHovered(false);
+    }
   }
 
   const isOwnProfile = sessionUser && sessionUser.username === user.username;
+  const profilePath = `/users/${user.username}`;
 
   const stats = [
-    {
-      value: attendanceStats.musicalsAttended,
-      label: "Musicals",
-      href: `${user.username}/musicals`,
-    },
-    { value: attendanceStats.playsAttended, label: "Plays", href: `${user.username}/plays` },
+    { value: attendanceStats.musicalsAttended, label: "Musicals", href: `${profilePath}/musicals` },
+    { value: attendanceStats.playsAttended, label: "Plays", href: `${profilePath}/plays` },
     {
       value: attendanceStats.attendanceThisYear,
       label: "This Year",
-      href: `${user.username}/musicals`,
+      href: `${profilePath}/review/${new Date().getFullYear()}`,
     },
-    { value: following?.length ?? 0, label: "Following", href: `${user.username}/following` },
-    { value: followersCount, label: "Followers", href: `${user.username}/followers` },
+    { value: following?.length ?? 0, label: "Following", href: `${profilePath}/following` },
+    { value: followersCount, label: "Followers", href: `${profilePath}/followers` },
   ];
 
   return (
@@ -158,6 +166,7 @@ function ProfileStatBar({
                 </Button>
               ) : (
                 <Button
+                  disabled={followBusy}
                   size="small"
                   sx={{ fontSize: "0.68rem", letterSpacing: "0.08em", px: 2, minWidth: 90 }}
                   variant={isFollowing ? "outlined" : "contained"}

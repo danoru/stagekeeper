@@ -17,7 +17,7 @@ export const DEFAULT_DAY_TIMES: DayTimes = {
 };
 
 const WEEKDAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-const DAY_MS = 86_400_000;
+export const DAY_MS = 86_400_000;
 
 /** True when `raw` has at least one usable "HH:mm" entry. */
 export function hasDayTimes(raw: unknown): raw is DayTimes {
@@ -116,7 +116,7 @@ export function zonedTime(dayUtc: number, hour: number, minute: number, tz = THE
 }
 
 /** UTC midnight of the calendar day a stored run date names (stored at UTC midnight or noon). */
-function calendarDay(value: Date | string): number {
+export function calendarDay(value: Date | string): number {
   const d = new Date(value);
   return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
 }
@@ -208,6 +208,24 @@ export function theatreToday(now: Date = new Date()): Date {
   }).formatToParts(now);
   const get = (type: string) => Number(parts.find((p) => p.type === type)?.value);
   return new Date(Date.UTC(get("year"), get("month") - 1, get("day")));
+}
+
+/**
+ * The calendar day at the theatre of a showtime, as UTC midnight like `seenDate`. Showtimes
+ * are instants: an 8pm show in California is stored as 03:00Z or 04:00Z the next day, so its
+ * UTC date is a day late.
+ */
+export function showtimeDay(startTime: Date | string): Date {
+  return theatreToday(new Date(startTime));
+}
+
+/** The day a visit happened: its logged date, else the day of the showtime it was logged on. */
+export function visitDay(
+  seenDate: Date | string | null | undefined,
+  startTime: Date | string | null | undefined
+): Date | null {
+  if (seenDate) return new Date(seenDate);
+  return startTime ? showtimeDay(startTime) : null;
 }
 
 /**

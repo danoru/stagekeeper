@@ -1,3 +1,6 @@
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
+import ScheduleIcon from "@mui/icons-material/Schedule";
 import {
   Alert,
   Box,
@@ -20,9 +23,6 @@ import {
   ToggleButtonGroup,
   Typography,
 } from "@mui/material";
-import DeleteIcon from "@mui/icons-material/Delete";
-import EditIcon from "@mui/icons-material/Edit";
-import ScheduleIcon from "@mui/icons-material/Schedule";
 import { musicals, plays, programming, seasons, theatres } from "@prisma/client";
 import Head from "next/head";
 import Link from "next/link";
@@ -213,7 +213,7 @@ export default function AdminProgrammingPage() {
         <title>Programming • Admin • StageKeeper</title>
       </Head>
       <Box sx={{ maxWidth: 1200, mx: "auto", mt: 4, px: 2 }}>
-        <Stack direction="row" alignItems="center" justifyContent="space-between" mb={2}>
+        <Stack alignItems="center" direction="row" justifyContent="space-between" mb={2}>
           <Typography variant="h5">
             <Link href="/admin" style={{ textDecoration: "none", color: "inherit" }}>
               Admin
@@ -227,7 +227,7 @@ export default function AdminProgrammingPage() {
           {/* Form */}
           <Grid size={{ xs: 12, md: 4 }}>
             <Paper sx={{ p: 3 }}>
-              <Typography variant="h6" gutterBottom>
+              <Typography gutterBottom variant="h6">
                 {editId ? "Edit Entry" : "Add Programming"}
               </Typography>
               <form onSubmit={handleSubmit}>
@@ -247,9 +247,9 @@ export default function AdminProgrammingPage() {
 
                   {form.type === "MUSICAL" ? (
                     <TextField
+                      fullWidth
                       required
                       select
-                      fullWidth
                       label="Musical"
                       size="small"
                       value={form.musical}
@@ -263,9 +263,9 @@ export default function AdminProgrammingPage() {
                     </TextField>
                   ) : (
                     <TextField
+                      fullWidth
                       required
                       select
-                      fullWidth
                       label="Play"
                       size="small"
                       value={form.play}
@@ -280,9 +280,9 @@ export default function AdminProgrammingPage() {
                   )}
 
                   <TextField
+                    fullWidth
                     required
                     select
-                    fullWidth
                     label="Season"
                     size="small"
                     value={form.season}
@@ -296,34 +296,34 @@ export default function AdminProgrammingPage() {
                   </TextField>
 
                   <TextField
-                    required
                     fullWidth
+                    required
+                    InputLabelProps={{ shrink: true }}
                     label="Start date"
                     size="small"
                     type="date"
-                    InputLabelProps={{ shrink: true }}
                     value={form.startDate}
                     onChange={(e) => setForm({ ...form, startDate: e.target.value })}
                   />
                   <TextField
-                    required
                     fullWidth
+                    required
+                    InputLabelProps={{ shrink: true }}
                     label="End date"
                     size="small"
                     type="date"
-                    InputLabelProps={{ shrink: true }}
                     value={form.endDate}
                     onChange={(e) => setForm({ ...form, endDate: e.target.value })}
                   />
 
                   <Box>
                     <Stack
-                      direction="row"
                       alignItems="center"
+                      direction="row"
                       justifyContent="space-between"
                       sx={{ mb: 1 }}
                     >
-                      <Typography variant="body2" fontWeight={500}>
+                      <Typography fontWeight={500} variant="body2">
                         Weekly schedule
                       </Typography>
                       <Button
@@ -334,9 +334,9 @@ export default function AdminProgrammingPage() {
                       </Button>
                     </Stack>
                     <Typography
-                      variant="caption"
                       color="text.secondary"
                       sx={{ display: "block", mb: 1 }}
+                      variant="caption"
                     >
                       Times at the theatre, like &quot;2pm, 8pm&quot;. Leave every day blank if you
                       don&apos;t know yet; the site then shows a typical week labelled as estimated.
@@ -356,11 +356,11 @@ export default function AdminProgrammingPage() {
                   </Box>
 
                   <Stack direction="row" spacing={1}>
-                    <Button type="submit" variant="contained" disabled={saving} fullWidth>
+                    <Button fullWidth disabled={saving} type="submit" variant="contained">
                       {saving ? "Saving…" : editId ? "Save Changes" : "Add"}
                     </Button>
                     {editId && (
-                      <Button variant="outlined" onClick={cancelEdit} fullWidth>
+                      <Button fullWidth variant="outlined" onClick={cancelEdit}>
                         Cancel
                       </Button>
                     )}
@@ -375,47 +375,47 @@ export default function AdminProgrammingPage() {
             <Paper sx={{ p: 3 }}>
               <TextField
                 fullWidth
-                size="small"
                 placeholder="Search by show or theatre…"
+                size="small"
+                sx={{ mb: 2 }}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                sx={{ mb: 2 }}
               />
               <Stack divider={<Divider />} spacing={0}>
                 {filtered.map((program) => (
                   <Stack
                     key={program.id}
-                    direction="row"
                     alignItems="center"
+                    direction="row"
                     justifyContent="space-between"
                     sx={{ py: 1 }}
                   >
                     <Box>
-                      <Stack direction="row" spacing={1} alignItems="center">
-                        <Typography variant="body2" fontWeight={500}>
+                      <Stack alignItems="center" direction="row" spacing={1}>
+                        <Typography fontWeight={500} variant="body2">
                           {showLabel(program)}
                         </Typography>
                         <Chip
                           label={program.type}
                           size="small"
-                          variant="outlined"
                           sx={{ fontSize: "0.65rem", height: 18 }}
+                          variant="outlined"
                         />
                         {!hasDayTimes(program.dayTimes) && (
                           <Chip
+                            color="warning"
                             label="Estimated times"
                             size="small"
-                            color="warning"
-                            variant="outlined"
                             sx={{ fontSize: "0.65rem", height: 18 }}
+                            variant="outlined"
                           />
                         )}
                       </Stack>
-                      <Typography variant="caption" color="text.secondary">
+                      <Typography color="text.secondary" variant="caption">
                         {program.seasons?.theatres?.name} · {program.seasons?.name}
                       </Typography>
                       <br />
-                      <Typography variant="caption" color="text.secondary">
+                      <Typography color="text.secondary" variant="caption">
                         {new Date(program.startDate).toLocaleDateString(undefined, {
                           timeZone: "UTC",
                         })}{" "}
@@ -433,12 +433,17 @@ export default function AdminProgrammingPage() {
                       >
                         <ScheduleIcon fontSize="small" />
                       </IconButton>
-                      <IconButton size="small" onClick={() => startEdit(program)}>
+                      <IconButton
+                        aria-label="Edit run"
+                        size="small"
+                        onClick={() => startEdit(program)}
+                      >
                         <EditIcon fontSize="small" />
                       </IconButton>
                       <IconButton
-                        size="small"
+                        aria-label="Delete run"
                         color="error"
+                        size="small"
                         onClick={() => setDeleteId(program.id)}
                       >
                         <DeleteIcon fontSize="small" />
@@ -448,9 +453,9 @@ export default function AdminProgrammingPage() {
                 ))}
                 {filtered.length === 0 && (
                   <Typography
-                    variant="body2"
                     color="text.secondary"
                     sx={{ py: 2, textAlign: "center" }}
+                    variant="body2"
                   >
                     No programming entries found.
                   </Typography>
@@ -486,8 +491,8 @@ export default function AdminProgrammingPage() {
       </Dialog>
 
       <Snackbar
-        open={snackbar.open}
         autoHideDuration={4000}
+        open={snackbar.open}
         onClose={() => setSnackbar((s) => ({ ...s, open: false }))}
       >
         <Alert

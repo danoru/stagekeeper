@@ -37,6 +37,18 @@ async function resolveTarget(type: ReportTarget, id: number): Promise<ResolvedTa
       const row = await prisma.users.findUnique({ where: { id }, select: { username: true } });
       return row && { label: row.username, href: `/users/${row.username}` };
     }
+    case "THEATRE_NOTE": {
+      const row = await prisma.theatreNotes.findUnique({
+        where: { id },
+        select: { text: true, theatres: { select: { name: true } } },
+      });
+      return (
+        row && {
+          label: `Tip at ${row.theatres.name}: ${row.text.slice(0, 60)}`,
+          href: theatrePath(row.theatres.name),
+        }
+      );
+    }
     default:
       return null;
   }

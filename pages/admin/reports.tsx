@@ -11,6 +11,7 @@ const TARGET_LABELS: Record<OpenReport["targetType"], string> = {
   THEATRE: "Theatre",
   PERSON: "Person",
   USER: "Member",
+  THEATRE_NOTE: "Theatre tip",
 };
 
 export default function AdminReportsPage() {

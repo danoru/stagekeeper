@@ -12,26 +12,28 @@ datasource db {
 }
 
 model attendance {
-  id           Int           @id @default(autoincrement())
-  createdAt    DateTime      @default(now()) @db.Timestamptz(6)
+  id           Int                   @id @default(autoincrement())
+  createdAt    DateTime              @default(now()) @db.Timestamptz(6)
   comment      String?
-  rating       Decimal?      @db.Decimal
+  rating       Decimal?              @db.Decimal
   performance  Int?
   user         Int?
   musical      Int?
   play         Int?
   theatre      Int?
-  seenDate     DateTime?     @db.Date
-  going        Boolean       @default(false)
+  seenDate     DateTime?             @db.Date
+  going        Boolean               @default(false)
   /// The run this visit belongs to: same show, same theatre, dated inside the run. Set when
   /// the visit is saved and backfilled by migration; null when the visit has no theatre or date.
   programming  Int?
-  performances performances? @relation(fields: [performance], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  programmings programming?  @relation(fields: [programming], references: [id], onDelete: SetNull, onUpdate: NoAction)
-  users        users?        @relation(fields: [user], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  musicals     musicals?     @relation(fields: [musical], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  plays        plays?        @relation(fields: [play], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  theatres     theatres?     @relation(fields: [theatre], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  performances performances?         @relation(fields: [performance], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  programmings programming?          @relation(fields: [programming], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  users        users?                @relation(fields: [user], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  musicals     musicals?             @relation(fields: [musical], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  plays        plays?                @relation(fields: [play], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  theatres     theatres?             @relation(fields: [theatre], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  companions   attendanceCompanion[] @relation("CompanionVisit")
+  joinedFrom   attendanceCompanion[] @relation("CompanionLinkedVisit")
 
   @@index([user])
   @@index([performance])
@@ -255,15 +257,18 @@ model programming {
 
 /// A performer or creative. Pages are rendered on demand, so one-off people cost nothing.
 model people {
-  id        Int           @id @default(autoincrement())
-  createdAt DateTime      @default(now()) @db.Timestamptz(6)
-  name      String
-  slug      String        @unique
-  bio       String?
-  status    ContentStatus @default(PENDING)
-  createdBy Int?
-  creator   users?        @relation("PersonCreator", fields: [createdBy], references: [id], onDelete: SetNull, onUpdate: NoAction)
-  credits   credits[]
+  id            Int           @id @default(autoincrement())
+  createdAt     DateTime      @default(now()) @db.Timestamptz(6)
+  name          String
+  slug          String        @unique
+  bio           String?
+  /// Tells apart different people with the same name ("San Diego", "b. 1990"). Shown after
+  /// the name in search, suggestions and on the person's page.
+  disambiguator String?
+  status        ContentStatus @default(PENDING)
+  createdBy     Int?
+  creator       users?        @relation("PersonCreator", fields: [createdBy], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  credits       credits[]
 
   @@index([name])
   @@index([status])
@@ -314,6 +319,8 @@ model theatres {
   image            String             @default("https://picsum.photos/649/1024")
   address          String?
   status           ContentStatus      @default(APPROVED)
+  /// IANA zone the theatre's clocks read in. Imported and generated showtimes use it.
+  timeZone         String             @default("America/Los_Angeles")
   createdBy        Int?
   /// Page to scrape for season programming; falls back to `link` when null.
   seasonUrl        String?
@@ -326,6 +333,7 @@ model theatres {
   importCandidates importCandidates[]
   importRuns       importRuns[]
   homeFor          theatreFollows[]
+  notes            theatreNotes[]
 
   @@index([status])
 }
@@ -341,6 +349,54 @@ model theatreFollows {
 
   @@id([user, theatre])
   @@index([theatre])
+}
+
+/// A short "know before you go" tip about a theatre (parking, seats, late seating), written by
+/// a member with a visit there. Shown once an admin approves it.
+model theatreNotes {
+  id        Int                @id @default(autoincrement())
+  createdAt DateTime           @default(now()) @db.Timestamptz(6)
+  theatre   Int
+  user      Int?
+  category  String
+  text      String
+  status    ContentStatus      @default(PENDING)
+  theatres  theatres           @relation(fields: [theatre], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users     users?             @relation(fields: [user], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  votes     theatreNoteVotes[]
+
+  @@index([theatre, status])
+  @@index([user])
+}
+
+/// "Helpful" on a theatre note, one per member.
+model theatreNoteVotes {
+  note      Int
+  user      Int
+  createdAt DateTime     @default(now()) @db.Timestamptz(6)
+  notes     theatreNotes @relation(fields: [note], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users     users        @relation(fields: [user], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([note, user])
+}
+
+/// "Went together": the owner of a past visit tags someone who came. Nothing shows until the
+/// tagged member accepts, which adds the visit to their log (linkedAttendance).
+model attendanceCompanion {
+  id               Int             @id @default(autoincrement())
+  createdAt        DateTime        @default(now()) @db.Timestamptz(6)
+  attendance       Int
+  user             Int
+  taggedBy         Int
+  status           CompanionStatus @default(PENDING)
+  linkedAttendance Int?
+  visit            attendance      @relation("CompanionVisit", fields: [attendance], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  linked           attendance?     @relation("CompanionLinkedVisit", fields: [linkedAttendance], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  users            users           @relation("CompanionTagged", fields: [user], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  tagger           users           @relation("CompanionTagger", fields: [taggedBy], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([attendance, user])
+  @@index([user, status])
 }
 
 /// A run extracted from a theatre's season page, awaiting admin review.
@@ -419,6 +475,10 @@ model users {
   peopleCreated        people[]                @relation("PersonCreator")
   creditsSuggested     credits[]               @relation("CreditSuggester")
   homeTheatres         theatreFollows[]
+  theatreNotes         theatreNotes[]
+  theatreNoteVotes     theatreNoteVotes[]
+  companionTags        attendanceCompanion[]   @relation("CompanionTagged")
+  companionTagsSent    attendanceCompanion[]   @relation("CompanionTagger")
 }
 
 model watchlist {
@@ -506,6 +566,7 @@ enum ReportTarget {
   THEATRE
   PERSON
   USER
+  THEATRE_NOTE
 }
 
 enum PerformanceStatus {
@@ -519,6 +580,14 @@ enum CreditCategory {
   CREATIVE
   MUSICIAN
   CREW
+  /// Understudies, swings and standbys; `character` lists the parts covered ("Seymour, Orin").
+  UNDERSTUDY
+}
+
+enum CompanionStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
 }
 
 enum ImportCandidateState {

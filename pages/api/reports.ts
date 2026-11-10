@@ -8,7 +8,7 @@ import { REPORT_REASONS } from "../../src/utils/reportReasons";
 
 import { authOptions } from "./auth/[...nextauth]";
 
-const TARGETS: ReportTarget[] = ["MUSICAL", "PLAY", "THEATRE", "PERSON", "USER"];
+const TARGETS: ReportTarget[] = ["MUSICAL", "PLAY", "THEATRE", "PERSON", "USER", "THEATRE_NOTE"];
 
 // POST { targetType, targetId, reason, details? } — a member flags something for an admin.
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {

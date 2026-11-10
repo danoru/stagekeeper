@@ -7,7 +7,13 @@ import { slugify } from "../utils/slug";
 
 import prisma from "./db";
 
-export const CREDIT_CATEGORIES: CreditCategory[] = ["CAST", "CREATIVE", "MUSICIAN", "CREW"];
+export const CREDIT_CATEGORIES: CreditCategory[] = [
+  "CAST",
+  "UNDERSTUDY",
+  "CREATIVE",
+  "MUSICIAN",
+  "CREW",
+];
 
 const MAX_TEXT = 120;
 
@@ -325,7 +331,7 @@ export function parseSuggestion(raw: unknown): CreditSuggestion | string {
   const name = cleanText(row.name);
   if (!name || name.length < 2) return "Each credit needs a name.";
   if (!CREDIT_CATEGORIES.includes(row.category as CreditCategory)) {
-    return "Category must be CAST, CREATIVE, MUSICIAN or CREW.";
+    return "Category must be CAST, UNDERSTUDY, CREATIVE, MUSICIAN or CREW.";
   }
   const personId = Number(row.personId);
   return {

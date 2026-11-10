@@ -8,6 +8,7 @@ import RecentActorsIcon from "@mui/icons-material/RecentActors";
 import ScheduleIcon from "@mui/icons-material/Schedule";
 import TheaterComedyIcon from "@mui/icons-material/TheaterComedy";
 import TheatersIcon from "@mui/icons-material/Theaters";
+import TipsAndUpdatesIcon from "@mui/icons-material/TipsAndUpdates";
 import ViewListIcon from "@mui/icons-material/ViewList";
 import { Box, Card, CardActionArea, CardContent, Grid, Typography } from "@mui/material";
 import Head from "next/head";
@@ -39,6 +40,12 @@ const sections = [
     description: "Merge two spellings of one person, split two people who share a name.",
     href: "/admin/people",
     icon: <PersonSearchIcon sx={{ fontSize: 40 }} />,
+  },
+  {
+    title: "Theatre Tips",
+    description: 'Approve members\' "know before you go" tips before they appear on theatre pages.',
+    href: "/admin/notes",
+    icon: <TipsAndUpdatesIcon sx={{ fontSize: 40 }} />,
   },
   {
     title: "Musicals",

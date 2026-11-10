@@ -9,6 +9,13 @@ import PageMeta from "../../src/components/layout/PageMeta";
 import PerformanceCalendar from "../../src/components/schedule/PerformanceCalendar";
 import ReportButton from "../../src/components/shows/ReportButton";
 import HomeTheatreButton from "../../src/components/theatres/HomeTheatreButton";
+import HouseRecord from "../../src/components/theatres/HouseRecord";
+import {
+  getApprovedNotes,
+  getHouseRecord,
+  type HouseNote,
+  type HouseRecord as HouseRecordData,
+} from "../../src/data/houseRecord";
 import { getTheatreByName, getCurrentSeason } from "../../src/data/theatres";
 import { canViewPending } from "../../src/data/visibility";
 import { showPath, theatrePath } from "../../src/utils/slug";
@@ -19,9 +26,11 @@ interface Props {
   seasons: (seasons & {
     programming: (programming & { musicals: musicals; plays: plays })[];
   })[];
+  record: HouseRecordData;
+  notes: HouseNote[];
 }
 
-function TheatrePage({ theatre, seasons }: Props) {
+function TheatrePage({ theatre, seasons, record, notes }: Props) {
   const theatreName = theatre.name;
   const centered = {
     alignItems: { xs: "center", md: "flex-start" },
@@ -93,6 +102,7 @@ function TheatrePage({ theatre, seasons }: Props) {
         ))}
       </Container>
       <PerformanceCalendar identifier={theatreName} viewType="theatre" />
+      <HouseRecord notes={notes} record={record} theatreId={theatre.id} />
       <ReportButton targetId={theatre.id} targetType="THEATRE" />
     </div>
   );
@@ -117,7 +127,11 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     context.res.setHeader("Cache-Control", "public, s-maxage=300, stale-while-revalidate=600");
   }
 
-  const seasons = await getCurrentSeason(theatre.id);
+  const [seasons, record, notes] = await Promise.all([
+    getCurrentSeason(theatre.id),
+    getHouseRecord(theatre.id),
+    getApprovedNotes(theatre.id),
+  ]);
 
   // The importer's settings are admin-only.
   const publicTheatre: Props["theatre"] & Partial<theatres> = { ...theatre };
@@ -128,6 +142,8 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     props: superjson.serialize({
       theatre: publicTheatre,
       seasons: seasons || [],
+      record,
+      notes,
     }).json,
   };
 }

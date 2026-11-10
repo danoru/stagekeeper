@@ -9,6 +9,7 @@ import {
   Autocomplete,
   Box,
   Button,
+  Checkbox,
   Chip,
   CircularProgress,
   Dialog,
@@ -17,6 +18,7 @@ import {
   DialogContentText,
   DialogTitle,
   Divider,
+  FormControlLabel,
   IconButton,
   LinearProgress,
   Link as MuiLink,
@@ -71,6 +73,7 @@ interface Candidate {
   endDate: string | null;
   snippet: string | null;
   showtimes: string[] | null;
+  cast: { name: string; character: string | null }[] | null;
   matchType: PerformanceType | null;
   matchMusical: number | null;
   matchPlay: number | null;
@@ -607,6 +610,27 @@ function CandidateCard({ candidate, seasons, onResolved, onError }: CandidateCar
 
   const isDuplicate = candidate.state === "DUPLICATE";
   const showtimeCount = candidate.showtimes?.length ?? 0;
+  const castCount = candidate.cast?.length ?? 0;
+  const [importCast, setImportCast] = useState(true);
+  const [castAdded, setCastAdded] = useState<string | null>(null);
+
+  async function applyCast() {
+    setBusy(true);
+    try {
+      const res = await fetch("/api/admin/import/candidates", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: candidate.id, action: "apply-cast" }),
+      });
+      const data = await res.json();
+      if (!res.ok) return onError(data.error || "Something went wrong.");
+      setCastAdded(
+        `${data.created} credit${data.created === 1 ? "" : "s"} sent to Cast & Crew review.`
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
 
   // Keeps the card up: the run stays scheduled, and re-applying is harmless.
   async function applyShowtimes() {
@@ -677,6 +701,7 @@ function CandidateCard({ candidate, seasons, onResolved, onError }: CandidateCar
           : undefined,
       startDate,
       endDate,
+      importCast: castCount > 0 ? importCast : undefined,
     });
   }
 
@@ -714,6 +739,16 @@ function CandidateCard({ candidate, seasons, onResolved, onError }: CandidateCar
               size="small"
               variant="outlined"
             />
+          )}
+          {castCount > 0 && (
+            <Tooltip title={candidate.cast!.map((m) => m.name).join(", ")}>
+              <Chip
+                color="info"
+                label={`${castCount} cast found`}
+                size="small"
+                variant="outlined"
+              />
+            </Tooltip>
           )}
           {isDuplicate && (
             <Chip color="warning" label="already scheduled" size="small" variant="outlined" />
@@ -823,6 +858,30 @@ function CandidateCard({ candidate, seasons, onResolved, onError }: CandidateCar
             <Button disabled={busy} size="small" variant="outlined" onClick={applyShowtimes}>
               Add showtimes to existing run
             </Button>
+          )}
+          {castAdded && (
+            <Typography color="text.secondary" variant="caption">
+              {castAdded}
+            </Typography>
+          )}
+          {isDuplicate && castCount > 0 && candidate.existingProgramming && (
+            <Button disabled={busy} size="small" variant="outlined" onClick={applyCast}>
+              Add {castCount} cast to existing run
+            </Button>
+          )}
+          {!isDuplicate && castCount > 0 && (
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={importCast}
+                  size="small"
+                  onChange={(e) => setImportCast(e.target.checked)}
+                />
+              }
+              label={
+                <Typography variant="caption">Also add {castCount} cast for review</Typography>
+              }
+            />
           )}
           <Button
             disabled={busy}

@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 
 import { createUserShow } from "../../../../src/data/catalog";
 import prisma from "../../../../src/data/db";
+import { submitCredits } from "../../../../src/data/people";
 import { addImportedShowtimes, ShowtimeError } from "../../../../src/data/showtimes";
 import { authOptions } from "../../auth/[...nextauth]";
 
@@ -19,6 +20,25 @@ const candidateInclude = {
   musicals: { select: { id: true, title: true } },
   plays: { select: { id: true, title: true } },
 } as const;
+
+/** Stored cast ([{ name, character }]) as pending cast credits on a run. */
+async function addCandidateCast(raw: unknown, programmingId: number, userId: number) {
+  const rows = (Array.isArray(raw) ? raw : []).flatMap((m) => {
+    const member = m as { name?: unknown; character?: unknown };
+    if (typeof member.name !== "string" || member.name.trim().length < 2) return [];
+    return [
+      {
+        name: member.name.trim(),
+        category: "CAST" as const,
+        character: typeof member.character === "string" ? member.character : null,
+        role: null,
+      },
+    ];
+  });
+  if (rows.length === 0) return { created: 0, linked: 0, newPeople: 0, skipped: 0 };
+  // Pending, like a member's suggestion: an admin still reviews names in /admin/credits.
+  return submitCredits({ programmingId, userId, approve: false, rows, ambiguous: "skip" });
+}
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const admin = await requireAdmin(req, res);
@@ -118,6 +138,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
     }
 
+    // The page named the cast: offer it as pending credits on the run, for /admin/credits.
+    if (action === "apply-cast") {
+      if (!candidate.existingProgramming) {
+        return res.status(400).json({ error: "This candidate has no run yet." });
+      }
+      const result = await addCandidateCast(
+        candidate.cast,
+        candidate.existingProgramming,
+        Number(admin.user.id)
+      );
+      return res.status(200).json(result);
+    }
+
     if (action !== "approve") return res.status(400).json({ error: "Unknown action." });
     if (candidate.state === "APPROVED")
       return res.status(409).json({ error: "This run was already approved." });
@@ -207,7 +240,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         });
         return { candidate: updated, programming, seasonId: season };
       });
-      return res.status(200).json(result);
+      const cast =
+        req.body?.importCast === false
+          ? null
+          : await addCandidateCast(candidate.cast, result.programming.id, Number(admin.user.id));
+      return res.status(200).json({ ...result, cast });
     } catch (e) {
       const message = e instanceof Error ? e.message : "Failed to approve candidate.";
       return res.status(400).json({ error: message });

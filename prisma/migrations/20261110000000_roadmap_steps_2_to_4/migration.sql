@@ -8,6 +8,9 @@ ALTER TYPE "ReportTarget" ADD VALUE 'THEATRE_NOTE';
 ALTER TYPE "CreditCategory" ADD VALUE 'UNDERSTUDY';
 
 -- AlterTable
+ALTER TABLE "importCandidates" ADD COLUMN     "cast" JSONB;
+
+-- AlterTable
 ALTER TABLE "people" ADD COLUMN     "disambiguator" TEXT;
 
 -- AlterTable

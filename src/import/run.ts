@@ -142,6 +142,7 @@ export async function runTheatreImport(
         endDate: run.end ?? null,
         snippet: run.snippet.slice(0, 300),
         showtimes: run.showtimes?.slice(0, MAX_SHOWTIMES).map((d) => d.toISOString()),
+        cast: run.cast,
         matchType: run.match?.type ?? null,
         matchMusical: run.match?.type === "MUSICAL" ? run.match.id : null,
         matchPlay: run.match?.type === "PLAY" ? run.match.id : null,
@@ -177,6 +178,7 @@ function dedupeRuns(runs: RawRun[]): RawRun[] {
     // A show's own page usually has showtimes the season listing doesn't; keep the richer copy.
     const existing = seen.get(key);
     if (!existing || (!existing.showtimes && r.showtimes)) seen.set(key, r);
+    else if (!existing.cast && r.cast) seen.set(key, { ...existing, cast: r.cast });
   }
   return [...seen.values()];
 }

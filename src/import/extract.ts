@@ -24,7 +24,13 @@ export type RawRun = {
   showtimes?: Date[];
   /** Catalog row the title resolved to, if any. */
   match?: CatalogTitle;
+  /** Cast named in the page's structured data. */
+  cast?: CastMember[];
 };
+
+export type CastMember = { name: string; character: string | null };
+
+const MAX_CAST = 60;
 
 /** Per-theatre overrides stored in `theatres.scrapeConfig`. */
 export type ScrapeConfig = {
@@ -166,7 +172,40 @@ type LdEvent = {
   showtime?: Date;
   sourceUrl: string;
   type: string;
+  cast: CastMember[];
 };
+
+function ldText(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  const text = value.replace(/\s+/g, " ").trim();
+  return text.length >= 2 && text.length <= 120 ? text : null;
+}
+
+/**
+ * `performer` / `actor` on an event: a Person (`{ name }`), a PerformanceRole wrapping one
+ * (`{ performer: { name }, characterName }`), or a list of either. Organizations (the band,
+ * the company) are left out.
+ */
+export function parseLdCast(node: Record<string, unknown>): CastMember[] {
+  const out: CastMember[] = [];
+  const visit = (value: unknown, character: string | null) => {
+    if (Array.isArray(value)) return value.forEach((v) => visit(v, character));
+    if (!value || typeof value !== "object") return;
+    const item = value as Record<string, unknown>;
+    const type = String(item["@type"] ?? "");
+    if (/Role$/i.test(type)) {
+      const role = ldText(item.characterName) ?? ldText(item.roleName) ?? character;
+      visit(item.performer ?? item.actor, role);
+      return;
+    }
+    if (type && !/Person/i.test(type)) return;
+    const name = ldText(item.name);
+    if (name) out.push({ name, character });
+  };
+  visit(node.performer, null);
+  visit(node.actor, null);
+  return out;
+}
 
 function extractJsonLd($: CheerioAPI, opts: ExtractOptions): RawRun[] {
   const events: LdEvent[] = [];
@@ -192,6 +231,7 @@ function extractJsonLd($: CheerioAPI, opts: ExtractOptions): RawRun[] {
         showtime: from.day.getTime() === to.day.getTime() ? from.instant : undefined,
         sourceUrl: typeof node.url === "string" ? node.url : opts.baseUrl,
         type,
+        cast: parseLdCast(node),
       });
     }
   });
@@ -234,6 +274,14 @@ function runFromLdEvents(events: LdEvent[]): RawRun {
   const end = new Date(Math.max(...events.map((e) => e.end.getTime())));
   const instants = new Set(events.flatMap((e) => (e.showtime ? [e.showtime.getTime()] : [])));
   const showtimes = [...instants].sort((a, b) => a - b).map((t) => new Date(t));
+  // Every performance usually repeats the cast; keep each name once, with a character if any copy has one.
+  const castByName = new Map<string, CastMember>();
+  for (const member of events.flatMap((e) => e.cast)) {
+    const key = member.name.toLowerCase();
+    const seen = castByName.get(key);
+    if (!seen || (!seen.character && member.character)) castByName.set(key, member);
+  }
+  const cast = [...castByName.values()].slice(0, MAX_CAST);
   return {
     title: events[0].title,
     start,
@@ -241,6 +289,7 @@ function runFromLdEvents(events: LdEvent[]): RawRun {
     sourceUrl: events[0].sourceUrl,
     snippet: `${events[0].type}: ${start.toISOString().slice(0, 10)} – ${end.toISOString().slice(0, 10)}`,
     showtimes: showtimes.length > 0 ? showtimes : undefined,
+    cast: cast.length > 0 ? cast : undefined,
   };
 }
 

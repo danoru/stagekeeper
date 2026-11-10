@@ -363,6 +363,8 @@ export async function submitCredits(args: {
   userId: number;
   approve: boolean;
   rows: CreditSuggestion[];
+  /** "skip" leaves out a name shared by two approved people instead of failing. */
+  ambiguous?: "error" | "skip";
 }) {
   const status = args.approve ? "APPROVED" : "PENDING";
   return prisma.$transaction(async (tx) => {
@@ -397,7 +399,13 @@ export async function submitCredits(args: {
         });
         const approved = matches.filter((m) => m.status === "APPROVED");
         // Two approved people share this name: guessing would credit the wrong one.
-        if (approved.length > 1) throw new AmbiguousPersonError(row.name);
+        if (approved.length > 1) {
+          if (args.ambiguous === "skip") {
+            result.skipped += 1;
+            continue;
+          }
+          throw new AmbiguousPersonError(row.name);
+        }
         personId = matches[0]?.id ?? null;
       }
       if (personId == null) {

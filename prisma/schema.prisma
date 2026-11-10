@@ -411,6 +411,8 @@ model importCandidates {
   snippet             String?
   /// ISO instants of individual performances found on the page, if it listed them.
   showtimes           Json?
+  /// Cast found in the page's structured data: [{ name, character }]. Offered as pending credits.
+  cast                Json?
   matchType           PerformanceType?
   matchMusical        Int?
   matchPlay           Int?

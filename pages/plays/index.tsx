@@ -4,25 +4,22 @@ import { useEffect, useMemo, useState } from "react";
 import superjson from "superjson";
 
 import PlayCard from "../../src/components/cards/ShowCard";
+import ShowLedger from "../../src/components/shows/ShowLedger";
 import type { ShowListItem } from "../../src/components/shows/ShowList";
-import UpcomingShowList from "../../src/components/shows/UpcomingShowList";
-import WeeklyBoard from "../../src/components/shows/WeeklyBoard";
 import SearchBar from "../../src/components/ui/SearchBar";
 import { getStageBoard } from "../../src/data/board";
 import { getPlays } from "../../src/data/plays";
-import { getUpcomingRuns, type UpcomingRun } from "../../src/data/shows";
 import { showPath } from "../../src/utils/slug";
 import type { StageBoard } from "../../src/utils/stageBoard";
 
 interface Props {
   board: StageBoard;
   plays: Omit<ShowListItem, "type">[];
-  upcomingPerformances: UpcomingRun[];
 }
 
 const itemsPerPage = 8;
 
-function PlaysPage({ board, plays, upcomingPerformances }: Props) {
+function PlaysPage({ board, plays }: Props) {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
 
@@ -52,8 +49,7 @@ function PlaysPage({ board, plays, upcomingPerformances }: Props) {
       </Head>
 
       <Container maxWidth="lg" sx={{ py: 4 }}>
-        <WeeklyBoard board={board} title="Plays This Week" />
-        <UpcomingShowList upcomingPerformances={upcomingPerformances} />
+        <ShowLedger board={board} noun="play" title="Plays On Stage" />
 
         {/* Section header */}
         <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
@@ -150,14 +146,13 @@ function PlaysPage({ board, plays, upcomingPerformances }: Props) {
 }
 
 export async function getStaticProps() {
-  const [plays, upcomingPerformances, board] = await Promise.all([
+  const [plays, board] = await Promise.all([
     getPlays(),
-    getUpcomingRuns("PLAY"),
-    getStageBoard({ type: "PLAY" }),
+    getStageBoard({ type: "PLAY", comingSoon: true }),
   ]);
 
   return {
-    props: superjson.serialize({ board, plays, upcomingPerformances }).json,
+    props: superjson.serialize({ board, plays }).json,
     revalidate: 3600,
   };
 }

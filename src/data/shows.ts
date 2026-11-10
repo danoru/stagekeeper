@@ -65,36 +65,6 @@ export async function getUserSeenShows(
   return Array.from(seen.values()).sort((a, b) => a.title.localeCompare(b.title));
 }
 
-export type UpcomingRun = {
-  id: number;
-  type: PerformanceType;
-  startDate: Date;
-  endDate: Date;
-  musicals: { id: number; title: string; playbill: string } | null;
-  plays: { id: number; title: string; playbill: string } | null;
-  seasons: { theatres: { name: string } } | null;
-};
-
-// Runs on now or opening in the next six months, as the carousel on /musicals and /plays needs.
-// End dates are calendar days, so `openRunCutoff` keeps a run listed through its closing night.
-export async function getUpcomingRuns(type: PerformanceType): Promise<UpcomingRun[]> {
-  const upcomingLimit = new Date();
-  upcomingLimit.setMonth(upcomingLimit.getMonth() + 6);
-  return prisma.programming.findMany({
-    where: { type, startDate: { lte: upcomingLimit }, endDate: { gte: openRunCutoff() } },
-    select: {
-      id: true,
-      type: true,
-      startDate: true,
-      endDate: true,
-      musicals: { select: showCardSelect },
-      plays: { select: showCardSelect },
-      seasons: { select: { theatres: { select: { name: true } } } },
-    },
-    orderBy: { startDate: "asc" },
-  });
-}
-
 // Keys (see `showKey`) of every show with a run on now or opening in the next six months.
 export async function getUpcomingShowKeys() {
   const upcomingLimit = new Date();

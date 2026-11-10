@@ -7,12 +7,11 @@ import type { NormalizedAttendance } from "../../data/performances";
 import type { HomeTheatreCard } from "../../utils/homeTheatres";
 import type { StageBoard } from "../../utils/stageBoard";
 import RecentActivity from "../performances/RecentActivity";
-import WeeklyBoard from "../shows/WeeklyBoard";
+import ShowLedger from "../shows/ShowLedger";
 
-import CompanionInvites from "./CompanionInvites";
 import FriendUpcomingActivity from "./FriendUpcomingActivity";
 import HomeTheatres from "./HomeTheatres";
-import ShowDayCards from "./ShowDayCards";
+import YourShows from "./YourShows";
 
 interface Props {
   board: StageBoard | null;
@@ -72,20 +71,15 @@ function LoggedInHomePage({
       </Box>
 
       <Box sx={{ maxWidth: 1200, mx: "auto", px: { xs: 1.5, md: 3 }, py: 4 }}>
-        <ShowDayCards morningAfter={morningAfter} tonight={tonight} />
-        <CompanionInvites />
-        <HomeTheatres theatres={homeTheatres} />
-        <WeeklyBoard board={board} />
+        <YourShows
+          morningAfter={morningAfter}
+          sessionUser={sessionUser}
+          tonight={tonight}
+          upcoming={myUpcoming.filter((entry) => entry.id !== tonight?.attendanceId)}
+        />
         <FriendUpcomingActivity trim={trim} upcomingPerformances={upcomingPerformances} />
-        {myUpcoming.length > 0 && (
-          <FriendUpcomingActivity
-            emptyHint=""
-            emptyTitle=""
-            title="Your Upcoming Shows"
-            trim={trim}
-            upcomingPerformances={myUpcoming}
-          />
-        )}
+        <HomeTheatres theatres={homeTheatres} />
+        <ShowLedger board={board} layout="columns" maxRows={4} title="This Week on Local Stages" />
         <RecentActivity recentPerformances={recentPerformances} trim={trim} />
       </Box>
     </Box>

@@ -2,23 +2,13 @@ import { Box, Button, Stack, Typography } from "@mui/material";
 import Image from "next/image";
 
 import type { StageBoard } from "../../utils/stageBoard";
-import WeeklyBoard from "../shows/WeeklyBoard";
+import ShowLedger from "../shows/ShowLedger";
 
 interface Props {
   board: StageBoard | null;
 }
 
 function LoggedOutHomePage({ board }: Props) {
-  // Live counts from the week's runs. A stat that would read zero is left out, and the whole
-  // strip goes when nothing is on.
-  const stats = board
-    ? [
-        { n: board.productions, label: "On Stage This Week" },
-        { n: board.theatres, label: board.theatres === 1 ? "Theatre" : "Theatres" },
-        { n: board.opening.length, label: "Opening This Week" },
-      ].filter((stat) => stat.n > 0)
-    : [];
-
   return (
     <Box sx={{ minHeight: "100vh", background: "#080C14" }}>
       {/* Hero */}
@@ -210,57 +200,17 @@ function LoggedOutHomePage({ board }: Props) {
         </Box>
       </Box>
 
-      {/* Stats strip */}
-      <Box
-        sx={{
-          borderTop: "1px solid rgba(212,175,85,0.15)",
-          borderBottom: "1px solid rgba(212,175,85,0.15)",
-          background: "linear-gradient(90deg, #0A0F1A, #0D1520, #0A0F1A)",
-          display: stats.length > 0 ? "grid" : "none",
-          gridTemplateColumns: `repeat(${stats.length}, 1fr)`,
-        }}
-      >
-        {stats.map((stat, i) => (
-          <Box
-            key={stat.label}
-            sx={{
-              py: 3,
-              px: 1,
-              textAlign: "center",
-              borderRight: i < stats.length - 1 ? "1px solid rgba(212,175,85,0.1)" : "none",
-            }}
-          >
-            <Typography
-              sx={{
-                fontFamily: '"Cormorant Garamond", serif',
-                fontSize: "2.2rem",
-                fontWeight: 600,
-                color: "#D4AF55",
-                lineHeight: 1,
-              }}
-            >
-              {stat.n}
-            </Typography>
-            <Typography
-              sx={{
-                fontFamily: '"DM Sans", sans-serif',
-                fontSize: "0.58rem",
-                letterSpacing: "0.18em",
-                textTransform: "uppercase",
-                color: "rgba(232,220,200,0.35)",
-                mt: 0.5,
-              }}
-            >
-              {stat.label}
-            </Typography>
-          </Box>
-        ))}
-      </Box>
-
-      {/* This week's runs; the strip above already carries the counts */}
+      {/* This week's runs, with the counts in the ledger's italic line */}
       {board && board.productions > 0 && (
-        <Box sx={{ maxWidth: 1200, mx: "auto", px: { xs: 2, md: 4 }, pt: 6 }}>
-          <WeeklyBoard board={board} summary={false} />
+        <Box sx={{ maxWidth: 1040, mx: "auto", px: { xs: 2, md: 4 }, pt: { xs: 5.5, md: 7 } }}>
+          <ShowLedger
+            centred
+            fullWeekLinks
+            board={board}
+            layout="columns"
+            maxRows={4}
+            title="This Week on Local Stages"
+          />
         </Box>
       )}
 
@@ -282,7 +232,7 @@ function LoggedOutHomePage({ board }: Props) {
             },
           ].map((f) => (
             <Box key={f.title} sx={{ flex: 1, textAlign: "center" }}>
-              <Box sx={{ width: 32, height: 1, background: "#D4AF55", mx: "auto", mb: 2 }} />
+              <Box sx={{ width: 32, height: "1px", background: "#D4AF55", mx: "auto", mb: 2 }} />
               <Typography
                 sx={{
                   fontFamily: '"Cormorant Garamond", serif',

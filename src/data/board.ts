@@ -3,8 +3,8 @@ import type { PerformanceType } from "@prisma/client";
 import { DAY_MS, openRunCutoff } from "../utils/schedule";
 import {
   buildStageBoard,
+  COMING_SOON_MONTHS,
   markWatchlist,
-  OPENING_DAYS,
   type BoardRun,
   type StageBoard,
 } from "../utils/stageBoard";
@@ -25,7 +25,8 @@ async function loadBoardRuns(now: Date): Promise<BoardRun[]> {
     where: {
       // A day of slack on each side; `buildStageBoard` applies the exact calendar-day rules.
       endDate: { gte: openRunCutoff(now) },
-      startDate: { lte: new Date(now.getTime() + (OPENING_DAYS + 1) * DAY_MS) },
+      // Six months out, so the musicals and plays pages can list what's coming soon.
+      startDate: { lte: new Date(now.getTime() + (COMING_SOON_MONTHS * 31 + 1) * DAY_MS) },
       // Shows and theatres a member added stay off public pages until an admin approves them.
       AND: [
         { OR: [{ musical: null }, { musicals: { is: { status: "APPROVED" } } }] },
@@ -71,10 +72,11 @@ async function loadBoardRuns(now: Date): Promise<BoardRun[]> {
 
 /**
  * What's opening, closing soon and playing in the next seven days. Pass `type` for the
- * musicals or plays page, and `viewerId` to bring that member's watchlisted shows forward.
+ * musicals or plays page, `comingSoon` for the runs opening after this week, and `viewerId`
+ * to bring that member's watchlisted shows forward.
  */
 export async function getStageBoard(
-  opts: { type?: PerformanceType; viewerId?: number | null } = {}
+  opts: { type?: PerformanceType; viewerId?: number | null; comingSoon?: boolean } = {}
 ): Promise<StageBoard> {
   const now = new Date();
   const [runs, watchlist] = await Promise.all([
@@ -89,7 +91,8 @@ export async function getStageBoard(
 
   const board = buildStageBoard(
     opts.type ? runs.filter((run) => run.type === opts.type) : runs,
-    now
+    now,
+    { comingSoon: opts.comingSoon }
   );
   const keys = new Set(
     watchlist.flatMap((row) => {

@@ -4,25 +4,22 @@ import { useEffect, useMemo, useState } from "react";
 import superjson from "superjson";
 
 import MusicalCard from "../../src/components/cards/ShowCard";
+import ShowLedger from "../../src/components/shows/ShowLedger";
 import type { ShowListItem } from "../../src/components/shows/ShowList";
-import UpcomingShowList from "../../src/components/shows/UpcomingShowList";
-import WeeklyBoard from "../../src/components/shows/WeeklyBoard";
 import SearchBar from "../../src/components/ui/SearchBar";
 import { getStageBoard } from "../../src/data/board";
 import { getMusicals } from "../../src/data/musicals";
-import { getUpcomingRuns, type UpcomingRun } from "../../src/data/shows";
 import { showPath } from "../../src/utils/slug";
 import type { StageBoard } from "../../src/utils/stageBoard";
 
 interface Props {
   board: StageBoard;
   musicals: Omit<ShowListItem, "type">[];
-  upcomingPerformances: UpcomingRun[];
 }
 
 const itemsPerPage = 8;
 
-function MusicalsPage({ board, musicals, upcomingPerformances }: Props) {
+function MusicalsPage({ board, musicals }: Props) {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
 
@@ -51,8 +48,7 @@ function MusicalsPage({ board, musicals, upcomingPerformances }: Props) {
         <title>Musicals • StageKeeper</title>
       </Head>
       <Container maxWidth="lg" sx={{ py: 4 }}>
-        <WeeklyBoard board={board} title="Musicals This Week" />
-        <UpcomingShowList upcomingPerformances={upcomingPerformances} />
+        <ShowLedger board={board} noun="musical" title="Musicals On Stage" />
 
         {/* Section header */}
         <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
@@ -149,14 +145,13 @@ function MusicalsPage({ board, musicals, upcomingPerformances }: Props) {
 }
 
 export async function getStaticProps() {
-  const [musicals, upcomingPerformances, board] = await Promise.all([
+  const [musicals, board] = await Promise.all([
     getMusicals(),
-    getUpcomingRuns("MUSICAL"),
-    getStageBoard({ type: "MUSICAL" }),
+    getStageBoard({ type: "MUSICAL", comingSoon: true }),
   ]);
 
   return {
-    props: superjson.serialize({ board, musicals, upcomingPerformances }).json,
+    props: superjson.serialize({ board, musicals }).json,
     revalidate: 3600,
   };
 }

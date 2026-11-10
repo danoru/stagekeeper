@@ -80,14 +80,14 @@ export async function getCompanionInvites(userId: number) {
       visit: {
         select: {
           seenDate: true,
-          musicals: { select: { title: true } },
-          plays: { select: { title: true } },
+          musicals: { select: { title: true, playbill: true } },
+          plays: { select: { title: true, playbill: true } },
           theatres: { select: { name: true } },
           performances: {
             select: {
               startTime: true,
-              musicals: { select: { title: true } },
-              plays: { select: { title: true } },
+              musicals: { select: { title: true, playbill: true } },
+              plays: { select: { title: true, playbill: true } },
               theatres: { select: { name: true } },
             },
           },
@@ -100,15 +100,12 @@ export async function getCompanionInvites(userId: number) {
   return rows.map((r) => {
     const v = r.visit;
     const perf = v.performances;
+    const show = v.musicals ?? v.plays ?? perf?.musicals ?? perf?.plays ?? null;
     return {
       id: r.id,
       from: r.tagger.username,
-      title:
-        v.musicals?.title ??
-        v.plays?.title ??
-        perf?.musicals?.title ??
-        perf?.plays?.title ??
-        "a show",
+      title: show?.title ?? "a show",
+      playbill: show?.playbill ?? "",
       theatre: (v.theatres ?? perf?.theatres)?.name ?? null,
       day: v.seenDate ?? (perf ? theatreToday(perf.startTime) : null),
     };

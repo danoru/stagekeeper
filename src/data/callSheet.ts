@@ -15,6 +15,7 @@ export interface CallSheet {
   type: PerformanceType;
   showId: number;
   title: string;
+  playbill: string;
   /** Real curtain time, when the visit was logged against a showtime. */
   curtain: Date | null;
   /** Curtain plus the catalog's running time (or 2½ hours when it has none). */
@@ -33,6 +34,7 @@ export interface MorningAfter {
   attendanceId: number;
   type: PerformanceType;
   title: string;
+  playbill: string;
   theatre: string | null;
   day: Date;
   /** Whatever they noted when marking it going ("Row F, with dana"), kept and shown. */
@@ -46,16 +48,16 @@ const goingSelect = {
   comment: true,
   musical: true,
   play: true,
-  musicals: { select: { id: true, title: true, duration: true } },
-  plays: { select: { id: true, title: true, duration: true } },
+  musicals: { select: { id: true, title: true, playbill: true, duration: true } },
+  plays: { select: { id: true, title: true, playbill: true, duration: true } },
   theatres: { select: { name: true, address: true } },
   performances: {
     select: {
       startTime: true,
       musical: true,
       play: true,
-      musicals: { select: { id: true, title: true, duration: true } },
-      plays: { select: { id: true, title: true, duration: true } },
+      musicals: { select: { id: true, title: true, playbill: true, duration: true } },
+      plays: { select: { id: true, title: true, playbill: true, duration: true } },
       theatres: { select: { name: true, address: true } },
     },
   },
@@ -98,6 +100,7 @@ export async function getHomeShowCards(
           attendanceId: yesterdayRow.id,
           type: yesterdayShow.type,
           title: yesterdayShow.title,
+          playbill: yesterdayShow.playbill,
           theatre: (yesterdayRow.theatres ?? yesterdayRow.performances?.theatres)?.name ?? null,
           day: yesterday,
           comment: yesterdayRow.comment ?? null,
@@ -165,6 +168,7 @@ export async function getHomeShowCards(
       type: todayShow.type,
       showId: todayShow.id,
       title: todayShow.title,
+      playbill: todayShow.playbill,
       curtain,
       outBy: curtain ? new Date(curtain.getTime() + (minutes ?? DEFAULT_MINUTES) * 60_000) : null,
       usedDefaultDuration: minutes == null,

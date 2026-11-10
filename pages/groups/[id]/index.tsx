@@ -3,12 +3,14 @@ import { GetServerSidePropsContext } from "next";
 import Head from "next/head";
 import superjson from "superjson";
 
+import GroupLedger from "../../../src/components/groups/GroupLedger";
 import GroupMembers from "../../../src/components/groups/GroupMembers";
 import GroupPlans from "../../../src/components/groups/GroupPlans";
 import GroupUpcomingFeed from "../../../src/components/groups/GroupUpcomingFeed";
 import InviteLinkButton from "../../../src/components/groups/InviteLinkButton";
 import WatchlistOverlap from "../../../src/components/groups/WatchlistOverlap";
 import WatchlistProgramming from "../../../src/components/groups/WatchlistProgramming";
+import { getGroupLedgerVisits } from "../../../src/data/groupLedger";
 import {
   getGroupById,
   getGroupPlans,
@@ -17,6 +19,7 @@ import {
   getGroupWatchlistOverlap,
   getGroupWatchlistProgramming,
 } from "../../../src/data/groups";
+import type { LedgerVisit } from "../../../src/utils/groupLedger";
 import { getViewerSession } from "../../../src/utils/viewer";
 
 type Group = NonNullable<Awaited<ReturnType<typeof getGroupById>>>;
@@ -32,6 +35,7 @@ interface Props {
   overlap: Overlap;
   watchlistRuns: WatchlistRuns;
   plans: Plans;
+  ledgerVisits: LedgerVisit[];
   viewerId: number;
   /** Set when arriving from a show page's "Plan with a group"; opens the form on that show. */
   proposeShowKey: string | null;
@@ -44,6 +48,7 @@ function GroupDetailPage({
   overlap,
   watchlistRuns,
   plans,
+  ledgerVisits,
   viewerId,
   proposeShowKey,
 }: Props) {
@@ -129,6 +134,15 @@ function GroupDetailPage({
         <Box sx={{ mb: 5 }}>
           <WatchlistOverlap overlap={overlap} />
         </Box>
+
+        <Box sx={{ mb: 5 }}>
+          <GroupLedger
+            groupName={group.name}
+            members={group.members.map((m) => ({ id: m.user, username: m.users.username }))}
+            viewerId={viewerId}
+            visits={ledgerVisits}
+          />
+        </Box>
       </Container>
     </Box>
   );
@@ -156,10 +170,11 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   }
   const memberIds = group.members.map((m) => m.user);
 
-  const [upcoming, watchlist, plans] = await Promise.all([
+  const [upcoming, watchlist, plans, ledgerVisits] = await Promise.all([
     getGroupUpcomingAttendance(memberIds, userId),
     getGroupWatchlist(memberIds),
     getGroupPlans(groupId),
+    getGroupLedgerVisits(memberIds),
   ]);
   const watchlistRuns = await getGroupWatchlistProgramming(watchlist);
 
@@ -171,6 +186,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
       overlap: getGroupWatchlistOverlap(watchlist),
       watchlistRuns,
       plans,
+      ledgerVisits,
       viewerId: userId,
       proposeShowKey:
         typeof context.query.propose === "string" &&

@@ -69,16 +69,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ error: (e as Error).message });
     }
 
-    if (going) {
+    // A showtime carries its own date; checked below once it's loaded.
+    if (going && !performanceId) {
       if (!seenDate) return res.status(400).json({ error: "Pick the date you're going." });
       if (seenDate < theatreToday()) {
         return res
           .status(400)
           .json({ error: "That date is in the past — log it as seen instead." });
       }
-      // A plan isn't a review.
-      rating = null;
     }
+    // A plan isn't a review.
+    if (going) rating = null;
 
     let data: any;
     let resolvedMusical: number | null = null;
@@ -97,12 +98,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       if (perf.status === "CANCELED") {
         return res.status(400).json({ error: "That performance was canceled." });
       }
+      const perfDay = theatreToday(perf.startTime);
+      if (going && perfDay < theatreToday()) {
+        return res
+          .status(400)
+          .json({ error: "That performance is in the past — log it as seen instead." });
+      }
+      if (!going && perf.startTime > new Date()) {
+        return res
+          .status(400)
+          .json({ error: "That performance hasn't happened yet — mark it as going instead." });
+      }
       resolvedMusical = perf.musical ?? null;
       resolvedPlay = perf.play ?? null;
-      data = { user: userId, performance: perf.id, rating, comment };
+      data = { user: userId, performance: perf.id, rating, comment, going };
       // A run's showtime is a real instant; pages read logged dates as calendar days, so store
-      // the date at the theatre. Older rows are already calendar days and stay as they are.
-      if (perf.programming != null) data.seenDate = theatreToday(perf.startTime);
+      // the date at the theatre. A going date always needs one, since it's what Upcoming sorts by.
+      if (perf.programming != null || going) data.seenDate = perfDay;
       // Pin the visit to the showtime's run; older showtimes have none, so match by date.
       data.programming =
         perf.programming ??

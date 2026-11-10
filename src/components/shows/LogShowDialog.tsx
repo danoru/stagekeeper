@@ -10,9 +10,12 @@ import {
   DialogContent,
   DialogTitle,
   FormControl,
+  FormControlLabel,
   InputLabel,
   Link,
   MenuItem,
+  Radio,
+  RadioGroup,
   Rating,
   Select,
   Stack,
@@ -29,6 +32,17 @@ import type { ShowSearchResult } from "../../data/catalog";
 import { formatTheatreTime, showtimeDay } from "../../utils/schedule";
 
 export type LogMode = "seen" | "going";
+
+interface UpcomingShowtime {
+  id: number;
+  startTime: string;
+  status: "SCHEDULED" | "CANCELED" | "SOLD_OUT";
+  label: string | null;
+  theatres: { id: number; name: string };
+}
+
+/** How many upcoming showtimes the picker lists before "N more". */
+const SHOWTIMES_SHOWN = 8;
 
 export interface PresetShow {
   id: number;
@@ -112,6 +126,11 @@ export default function LogShowDialog({
 
   // Specific performance (a run's real showtimes, or legacy admin-entered rows)
   const [performanceId, setPerformanceId] = useState<number | "">("");
+  // Upcoming real showtimes for "I'm going"; null until loaded.
+  const [upcoming, setUpcoming] = useState<UpcomingShowtime[] | null>(null);
+  const [goingShowtime, setGoingShowtime] = useState<number | "">("");
+  const [showAllUpcoming, setShowAllUpcoming] = useState(false);
+  const [pickDateMyself, setPickDateMyself] = useState(false);
 
   // Theatre picker
   const [theatreQuery, setTheatreQuery] = useState("");
@@ -127,9 +146,33 @@ export default function LogShowDialog({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // The show the dialog is about, once it's one already in the catalog.
+  const pickedShowId = preset?.id ?? (show && !("kind" in show) ? show.id : null);
+  const pickedShowType = preset?.type ?? (show && !("kind" in show) ? show.type : null);
+
   useEffect(() => {
     if (open) setMode(initialMode);
   }, [open, initialMode]);
+
+  useEffect(() => {
+    if (!open || mode !== "going" || pickedShowId == null || !pickedShowType) {
+      setUpcoming(null);
+      return;
+    }
+    let cancelled = false;
+    const param = pickedShowType === "MUSICAL" ? "musicalId" : "playId";
+    fetch(`/api/shows/showtimes?${param}=${pickedShowId}`)
+      .then((r) => (r.ok ? r.json() : { showtimes: [] }))
+      .then((body: { showtimes?: UpcomingShowtime[] }) => {
+        if (!cancelled) setUpcoming(body.showtimes ?? []);
+      })
+      .catch(() => {
+        if (!cancelled) setUpcoming([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [open, mode, pickedShowId, pickedShowType]);
 
   useEffect(() => {
     if (!open || preset) return;
@@ -185,6 +228,10 @@ export default function LogShowDialog({
     setNewShowType("MUSICAL");
     setNewShowYear("");
     setPerformanceId("");
+    setUpcoming(null);
+    setGoingShowtime("");
+    setShowAllUpcoming(false);
+    setPickDateMyself(false);
     setTheatreQuery("");
     setTheatreOptions([]);
     setTheatre(null);
@@ -205,6 +252,7 @@ export default function LogShowDialog({
   const isNewShow = !preset && show !== null && "kind" in show;
   const isNewTheatre = theatre !== null && "kind" in theatre;
   const usingPerformance = mode === "seen" && performanceId !== "";
+  const usingGoingShowtime = mode === "going" && !pickDateMyself && (upcoming?.length ?? 0) > 0;
 
   const showChoices = useMemo<ShowOption[]>(() => {
     const q = showQuery.trim();
@@ -225,7 +273,7 @@ export default function LogShowDialog({
   const canSubmit =
     !submitting &&
     (preset || show) &&
-    (mode === "seen" || seenDate) &&
+    (mode === "seen" || (usingGoingShowtime ? goingShowtime !== "" : seenDate)) &&
     (!isNewTheatre || newTheatreLocation.trim());
 
   async function handleSubmit() {
@@ -271,18 +319,20 @@ export default function LogShowDialog({
       }
 
       // 3. Log it.
-      const payload = usingPerformance
-        ? { performanceId, rating, comment: comment.trim() || null }
-        : {
-            type: resolved.type,
-            musicalId: resolved.type === "MUSICAL" ? resolved.id : undefined,
-            playId: resolved.type === "PLAY" ? resolved.id : undefined,
-            theatreId,
-            seenDate: seenDate || null,
-            rating: mode === "seen" ? rating : null,
-            comment: comment.trim() || null,
-            going: mode === "going",
-          };
+      const payload = usingGoingShowtime
+        ? { performanceId: goingShowtime, going: true, comment: comment.trim() || null }
+        : usingPerformance
+          ? { performanceId, rating, comment: comment.trim() || null }
+          : {
+              type: resolved.type,
+              musicalId: resolved.type === "MUSICAL" ? resolved.id : undefined,
+              playId: resolved.type === "PLAY" ? resolved.id : undefined,
+              theatreId,
+              seenDate: seenDate || null,
+              rating: mode === "seen" ? rating : null,
+              comment: comment.trim() || null,
+              going: mode === "going",
+            };
       const res = await fetch("/api/shows/attendance", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -421,7 +471,71 @@ export default function LogShowDialog({
             </Box>
           )}
 
-          {usingPerformance ? (
+          {usingGoingShowtime && upcoming ? (
+            <>
+              <Box>
+                <Typography sx={eyebrowSx}>Pick a performance</Typography>
+                <RadioGroup
+                  aria-label="Performance"
+                  value={goingShowtime === "" ? "" : String(goingShowtime)}
+                  onChange={(e) => setGoingShowtime(Number(e.target.value))}
+                >
+                  {(showAllUpcoming ? upcoming : upcoming.slice(0, SHOWTIMES_SHOWN)).map((p) => {
+                    const canceled = p.status === "CANCELED";
+                    const tags = [
+                      p.status === "SOLD_OUT" ? "Sold out" : null,
+                      canceled ? "Canceled" : null,
+                      p.label,
+                    ].filter(Boolean);
+                    return (
+                      <FormControlLabel
+                        key={p.id}
+                        control={<Radio size="small" />}
+                        disabled={canceled}
+                        label={
+                          <Typography sx={{ fontSize: "0.9rem" }}>
+                            {formatTheatreTime(p.startTime)}
+                            <Box component="span" sx={{ color: "rgba(232,220,200,0.5)" }}>
+                              {` · ${p.theatres.name}`}
+                            </Box>
+                            {tags.length > 0 && (
+                              <Box component="span" sx={{ color: "#D4AF55" }}>
+                                {` · ${tags.join(" · ")}`}
+                              </Box>
+                            )}
+                          </Typography>
+                        }
+                        value={String(p.id)}
+                      />
+                    );
+                  })}
+                </RadioGroup>
+                {!showAllUpcoming && upcoming.length > SHOWTIMES_SHOWN && (
+                  <Link
+                    component="button"
+                    sx={subtleLinkSx}
+                    type="button"
+                    underline="hover"
+                    onClick={() => setShowAllUpcoming(true)}
+                  >
+                    {`${upcoming.length - SHOWTIMES_SHOWN} more`}
+                  </Link>
+                )}
+              </Box>
+              <Link
+                component="button"
+                sx={subtleLinkSx}
+                type="button"
+                underline="hover"
+                onClick={() => {
+                  setPickDateMyself(true);
+                  setGoingShowtime("");
+                }}
+              >
+                Enter the date and theatre myself
+              </Link>
+            </>
+          ) : usingPerformance ? (
             <>
               <FormControl fullWidth size="small">
                 <InputLabel id="performance-select-label">Performance</InputLabel>
@@ -534,6 +648,17 @@ export default function LogShowDialog({
                   onClick={() => setPerformanceId(pastPerformances[0].id)}
                 >
                   Pick a specific performance instead
+                </Link>
+              )}
+              {mode === "going" && pickDateMyself && (upcoming?.length ?? 0) > 0 && (
+                <Link
+                  component="button"
+                  sx={subtleLinkSx}
+                  type="button"
+                  underline="hover"
+                  onClick={() => setPickDateMyself(false)}
+                >
+                  Pick a performance instead
                 </Link>
               )}
             </>

@@ -130,6 +130,8 @@ interface ExpandOptions {
   /** Drop showtimes before this instant. */
   from?: Date;
   cap?: number;
+  /** The theatre's zone; Pacific when not given. */
+  tz?: string;
 }
 
 /** Expands a run's weekly pattern into showtimes in the theatre's zone. */
@@ -142,7 +144,7 @@ export function expandRun(run: Run, dayTimes: DayTimes, opts: ExpandOptions = {}
     for (const time of dayTimes[WEEKDAYS[new Date(day).getUTCDay()]] ?? []) {
       const [hour, minute] = time.split(":").map(Number);
       if (Number.isNaN(hour) || Number.isNaN(minute)) continue;
-      const showtime = zonedTime(day, hour, minute);
+      const showtime = zonedTime(day, hour, minute, opts.tz);
       if (opts.from && showtime < opts.from) continue;
       out.push(showtime);
       if (out.length >= cap) break;
@@ -199,9 +201,9 @@ export function runShowtimes(
  * Today's date at the theatres, as UTC midnight — the same shape as `seenDate` and other
  * calendar-day columns. Plain UTC "today" flips to tomorrow at 5pm in California.
  */
-export function theatreToday(now: Date = new Date()): Date {
+export function theatreToday(now: Date = new Date(), tz: string = THEATRE_TZ): Date {
   const parts = new Intl.DateTimeFormat("en-US", {
-    timeZone: THEATRE_TZ,
+    timeZone: tz,
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
@@ -215,8 +217,19 @@ export function theatreToday(now: Date = new Date()): Date {
  * are instants: an 8pm show in California is stored as 03:00Z or 04:00Z the next day, so its
  * UTC date is a day late.
  */
-export function showtimeDay(startTime: Date | string): Date {
-  return theatreToday(new Date(startTime));
+export function showtimeDay(startTime: Date | string, tz?: string): Date {
+  return theatreToday(new Date(startTime), tz);
+}
+
+/** True when `tz` is an IANA zone this runtime knows ("America/Denver"). */
+export function isTimeZone(tz: unknown): tz is string {
+  if (typeof tz !== "string" || !tz.includes("/")) return false;
+  try {
+    new Intl.DateTimeFormat("en-US", { timeZone: tz });
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 /** The day a visit happened: its logged date, else the day of the showtime it was logged on. */

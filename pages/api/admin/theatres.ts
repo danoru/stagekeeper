@@ -3,6 +3,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth";
 
 import prisma from "../../../src/data/db";
+import { isTimeZone } from "../../../src/utils/schedule";
 import { authOptions } from "../auth/[...nextauth]";
 
 async function requireAdmin(req: NextApiRequest, res: NextApiResponse) {
@@ -24,8 +25,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   if (req.method === "POST") {
-    const { name, location, address, link, image, seasonUrl } = req.body;
+    const { name, location, address, link, image, seasonUrl, timeZone } = req.body;
     if (!name) return res.status(400).json({ error: "Name is required." });
+    if (timeZone !== undefined && timeZone !== "" && !isTimeZone(timeZone)) {
+      return res.status(400).json({ error: "Time zone must be an IANA name like America/Denver." });
+    }
     if (!location) return res.status(400).json({ error: "Location is required." });
     try {
       const theatre = await prisma.theatres.create({
@@ -35,6 +39,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           address: address || null,
           link: link || null,
           seasonUrl: seasonUrl || null,
+          ...(timeZone ? { timeZone } : {}),
           image: image || "https://picsum.photos/649/1024",
         },
       });
@@ -45,8 +50,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   if (req.method === "PUT") {
-    const { id, name, location, address, link, image, seasonUrl, scrapeConfig } = req.body;
+    const { id, name, location, address, link, image, seasonUrl, scrapeConfig, timeZone } =
+      req.body;
     if (!id) return res.status(400).json({ error: "ID is required." });
+    if (timeZone !== undefined && !isTimeZone(timeZone)) {
+      return res.status(400).json({ error: "Time zone must be an IANA name like America/Denver." });
+    }
     try {
       const theatre = await prisma.theatres.update({
         where: { id: Number(id) },
@@ -57,6 +66,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           link: link || null,
           seasonUrl: seasonUrl || null,
           ...(scrapeConfig !== undefined ? { scrapeConfig: scrapeConfig ?? Prisma.DbNull } : {}),
+          ...(timeZone !== undefined ? { timeZone } : {}),
           image: image || "https://picsum.photos/649/1024",
           // An admin edit counts as review.
           status: "APPROVED",

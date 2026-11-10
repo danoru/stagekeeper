@@ -47,7 +47,14 @@ export async function runTheatreImport(
 ): Promise<ImportSummary> {
   const theatre = await prisma.theatres.findUnique({
     where: { id: theatreId },
-    select: { id: true, name: true, link: true, seasonUrl: true, scrapeConfig: true },
+    select: {
+      id: true,
+      name: true,
+      link: true,
+      seasonUrl: true,
+      scrapeConfig: true,
+      timeZone: true,
+    },
   });
   if (!theatre) throw new Error(`Theatre ${theatreId} not found.`);
 
@@ -77,7 +84,8 @@ export async function runTheatreImport(
     html = fetched.html;
   }
 
-  let runs = extractRuns(html, { baseUrl, catalog, config });
+  const timeZone = theatre.timeZone;
+  let runs = extractRuns(html, { baseUrl, catalog, config, timeZone });
   opts.log?.(`  season page: ${runs.length} run(s)`);
 
   // Listing pages that only link out to show pages (or that render titles as
@@ -88,7 +96,7 @@ export async function runTheatreImport(
     for (const link of links) {
       const page = await fetchHtml(link);
       if (!page.ok) continue;
-      const run = extractSinglePage(page.html, { baseUrl: link, catalog, config });
+      const run = extractSinglePage(page.html, { baseUrl: link, catalog, config, timeZone });
       if (run && run.start) runs.push(run);
     }
     runs = dedupeRuns(runs);

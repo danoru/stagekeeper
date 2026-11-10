@@ -286,6 +286,10 @@ export default function AdminImportPage() {
           render titles as images: open the page in your browser, select all, copy, and use
           &quot;Paste page&quot;.
         </Typography>
+        <Typography color="text.secondary" sx={{ mb: 2 }} variant="body2">
+          The importer also runs on its own every night at 11:00 UTC (3 or 4 AM in California),
+          oldest theatre first. It only stages runs; approving them is still up to you.
+        </Typography>
         {runAll && <LinearProgress sx={{ mb: 2 }} />}
 
         <Paper sx={{ mb: 4, overflowX: "auto" }}>

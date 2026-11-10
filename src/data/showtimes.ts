@@ -26,7 +26,7 @@ const runSelect = {
   dayTimes: true,
   musicals: { select: { duration: true } },
   plays: { select: { duration: true } },
-  seasons: { select: { theatre: true } },
+  seasons: { select: { theatre: true, theatres: { select: { timeZone: true } } } },
 } satisfies Prisma.programmingSelect;
 
 type RunForShowtimes = Prisma.programmingGetPayload<{ select: typeof runSelect }>;
@@ -74,7 +74,9 @@ export async function getRunShowtimes(programmingId: number) {
   ]);
   return {
     hasPattern: hasDayTimes(run.dayTimes),
-    patternCount: hasDayTimes(run.dayTimes) ? expandRun(run, run.dayTimes).length : 0,
+    patternCount: hasDayTimes(run.dayTimes)
+      ? expandRun(run, run.dayTimes, { tz: run.seasons?.theatres.timeZone }).length
+      : 0,
     showtimes,
   };
 }
@@ -89,7 +91,7 @@ export async function generateFromPattern(programmingId: number) {
     if (!hasDayTimes(run.dayTimes)) {
       throw new ShowtimeError("Set a weekly schedule first; estimates aren't real showtimes.");
     }
-    const rows = toRows(run, expandRun(run, run.dayTimes));
+    const rows = toRows(run, expandRun(run, run.dayTimes, { tz: run.seasons?.theatres.timeZone }));
     await tx.performances.deleteMany({
       where: { programming: run.id, attendance: { none: {} } },
     });
@@ -110,9 +112,14 @@ export async function addShowtime(
   const parsed = parseTime(time);
   if (!parsed) throw new ShowtimeError(`Couldn't read "${time}" as a time. Try "8pm".`);
   const [hour, minute] = parsed.split(":").map(Number);
-  const start = zonedTime(Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3])), hour, minute);
-
   const run = await loadRun(programmingId);
+  const start = zonedTime(
+    Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3])),
+    hour,
+    minute,
+    run.seasons?.theatres.timeZone
+  );
+
   const [row] = toRows(run, [start]);
   const created = await prisma.performances.createMany({
     data: [{ ...row, label }],

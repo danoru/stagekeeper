@@ -67,6 +67,8 @@ type ExtractOptions = {
   catalog: CatalogTitle[];
   config?: ScrapeConfig;
   now?: Date;
+  /** The theatre's zone, for times written without one. Pacific when not given. */
+  timeZone?: string;
 };
 
 export function extractRuns(html: string, opts: ExtractOptions): RawRun[] {
@@ -179,8 +181,8 @@ function extractJsonLd($: CheerioAPI, opts: ExtractOptions): RawRun[] {
       const type = String(node["@type"] ?? "");
       if (!/Event$/i.test(type)) continue;
       const title = cleanTitle(String(node.name ?? ""));
-      const from = parseLdDate(node.startDate);
-      const to = parseLdDate(node.endDate) ?? from;
+      const from = parseLdDate(node.startDate, opts.timeZone);
+      const to = parseLdDate(node.endDate, opts.timeZone) ?? from;
       if (!title || !from || !to) continue;
       events.push({
         title,
@@ -260,7 +262,7 @@ function flattenLd(data: unknown): Record<string, unknown>[] {
  * `day` is the calendar day at the theatre (UTC noon, like other imported dates). `instant` is
  * set only when the value carries a real time; "T00:00" is how sites write "no time given".
  */
-function parseLdDate(value: unknown): { day: Date; instant?: Date } | undefined {
+function parseLdDate(value: unknown, tz?: string): { day: Date; instant?: Date } | undefined {
   if (typeof value !== "string") return undefined;
   const m = value
     .trim()
@@ -275,14 +277,14 @@ function parseLdDate(value: unknown): { day: Date; instant?: Date } | undefined 
 
   if (!zone) {
     // No zone given: it's the clock at the theatre.
-    return { ...asDay, instant: zonedTime(dayUtc, Number(hh), Number(mm)) };
+    return { ...asDay, instant: zonedTime(dayUtc, Number(hh), Number(mm), tz) };
   }
   const offset =
     zone === "Z" ? "Z" : zone.includes(":") ? zone : `${zone.slice(0, 3)}:${zone.slice(3)}`;
   const instant = new Date(`${y}-${mo}-${d}T${hh}:${mm}:00${offset}`);
   if (Number.isNaN(instant.getTime())) return asDay;
   // 8pm in California is already tomorrow in UTC, so the day comes from the theatre's clock.
-  return { day: new Date(theatreToday(instant).getTime() + 12 * 3_600_000), instant };
+  return { day: new Date(theatreToday(instant, tz).getTime() + 12 * 3_600_000), instant };
 }
 
 function extractBySelectors($: CheerioAPI, opts: ExtractOptions, hint?: YearHint): RawRun[] {

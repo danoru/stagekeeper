@@ -27,7 +27,19 @@ const EMPTY_FORM = {
   link: "",
   seasonUrl: "",
   image: "",
+  timeZone: "America/Los_Angeles",
 };
+
+// Zones a theatre is likely to be in; anything else can be typed.
+const TIME_ZONES = [
+  "America/Los_Angeles",
+  "America/Denver",
+  "America/Phoenix",
+  "America/Chicago",
+  "America/New_York",
+  "Pacific/Honolulu",
+  "America/Anchorage",
+];
 
 export default function AdminTheatresPage() {
   const [theatres, setTheatres] = useState<theatres[]>([]);
@@ -60,6 +72,7 @@ export default function AdminTheatresPage() {
       link: theatre.link || "",
       seasonUrl: theatre.seasonUrl || "",
       image: theatre.image || "",
+      timeZone: theatre.timeZone || "America/Los_Angeles",
     });
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
@@ -169,6 +182,20 @@ export default function AdminTheatresPage() {
                     value={form.seasonUrl}
                     onChange={(e) => setForm({ ...form, seasonUrl: e.target.value })}
                   />
+                  <TextField
+                    fullWidth
+                    helperText="Showtimes the importer reads and the ones you add are in this zone."
+                    label="Time zone"
+                    size="small"
+                    slotProps={{ htmlInput: { list: "theatre-time-zones" } }}
+                    value={form.timeZone}
+                    onChange={(e) => setForm({ ...form, timeZone: e.target.value })}
+                  />
+                  <datalist id="theatre-time-zones">
+                    {TIME_ZONES.map((tz) => (
+                      <option key={tz} value={tz} />
+                    ))}
+                  </datalist>
                   <TextField
                     fullWidth
                     label="Photo URL"

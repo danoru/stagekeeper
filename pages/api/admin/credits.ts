@@ -32,6 +32,7 @@ async function dropOrphan(personId: number) {
 // Admin queue for suggested credits.
 //   GET    → pending credits grouped by production
 //   PATCH  { ids: number[], action: "approve" } — also approves their people
+//          { ids: number[], action: "reorder" } — billing order within one production
 //          { id, action: "edit", name?, character?, role?, category? }
 //   DELETE { ids: number[] } — reject
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -63,6 +64,24 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }),
       ]);
       return res.status(200).json({ message: "Approved." });
+    }
+
+    // { ids: [...], action: "reorder" } — billing order within one production, first to last.
+    if (action === "reorder") {
+      if (ids.length === 0) return res.status(400).json({ error: "ids are required." });
+      const credits = await prisma.credits.findMany({
+        where: { id: { in: ids } },
+        select: { id: true, programming: true },
+      });
+      if (credits.length !== ids.length || new Set(credits.map((c) => c.programming)).size !== 1) {
+        return res.status(400).json({ error: "Reorder credits from one production at a time." });
+      }
+      await prisma.$transaction(
+        ids.map((id, index) =>
+          prisma.credits.update({ where: { id }, data: { billing: index + 1 } })
+        )
+      );
+      return res.status(200).json({ message: "Reordered." });
     }
 
     if (action === "edit") {

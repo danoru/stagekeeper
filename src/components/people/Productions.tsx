@@ -5,8 +5,10 @@ import { useState } from "react";
 
 import type { ProductionCredit, ShowProduction } from "../../data/people";
 import { visitProduction } from "../../utils/productions";
+import { productionSlugs } from "../../utils/productionSlug";
 import { formatRating, mean } from "../../utils/ratings";
 import { openRunCutoff, visitDay } from "../../utils/schedule";
+import { showPath } from "../../utils/slug";
 import PlanWithGroup from "../shows/PlanWithGroup";
 import { pastVisits, type Visit } from "../shows/YourVisits";
 
@@ -161,6 +163,14 @@ function Productions({
   if (productions.length === 0) return null;
   const visible = expanded ? productions : productions.slice(0, SHOWN_PRODUCTIONS);
   const yours = yourRuns(visits, productions);
+  const basePath = showPath(showKey.startsWith("PLAY") ? "plays" : "musicals", showTitle);
+  const slugs = productionSlugs(
+    productions.map(({ production }) => ({
+      id: production.id,
+      startDate: production.startDate,
+      theatreName: production.seasons?.theatres.name ?? null,
+    }))
+  );
   const cutoff = openRunCutoff();
   const hasOpenRun = productions.some((p) => new Date(p.production.endDate) >= cutoff);
 
@@ -195,9 +205,13 @@ function Productions({
                 sx={{ mb: item.credits.length ? 1.5 : 0 }}
               >
                 <Box>
-                  <Typography sx={{ fontSize: "0.95rem", color: "rgba(232,220,200,0.95)" }}>
+                  <Link
+                    href={`${basePath}/${slugs.get(item.production.id)}`}
+                    sx={{ fontSize: "0.95rem", color: "rgba(232,220,200,0.95)" }}
+                    underline="hover"
+                  >
                     {theatre?.name ?? "Theatre TBD"}
-                  </Typography>
+                  </Link>
                   <Typography sx={{ fontSize: "0.78rem", color: "rgba(232,220,200,0.5)" }}>
                     {runLabel(item.production)}
                   </Typography>

@@ -21,7 +21,7 @@ import { useEffect, useState } from "react";
 
 import type { PersonSearchResult } from "../../data/people";
 
-import { CATEGORY_LABELS } from "./creditText";
+import { CATEGORY_LABELS, usesCharacter } from "./creditText";
 import { parseCreditLines, type ColumnOrder } from "./parseCredits";
 
 interface Row {
@@ -61,6 +61,10 @@ function PersonField({ row, onChange }: { row: Row; onChange: (row: Row) => void
     return () => clearTimeout(t);
   }, [row.name, row.personId]);
 
+  // Exact-name matches among the results; with two or more, the suggester has to pick.
+  const typed = row.name.trim().toLowerCase();
+  const sameName = options.filter((o) => o.name.toLowerCase() === typed).length;
+
   return (
     <Autocomplete
       freeSolo
@@ -72,7 +76,13 @@ function PersonField({ row, onChange }: { row: Row; onChange: (row: Row) => void
         <TextField
           {...params}
           helperText={
-            row.name.trim().length >= 2 ? (row.personId ? "Existing person" : "New person") : " "
+            row.name.trim().length < 2
+              ? " "
+              : row.personId
+                ? "Existing person"
+                : sameName > 1
+                  ? `${sameName} people have this name. Pick one`
+                  : "New person"
           }
           label="Name"
           size="small"
@@ -81,7 +91,14 @@ function PersonField({ row, onChange }: { row: Row; onChange: (row: Row) => void
       renderOption={(props, option) => (
         <li {...props} key={option.id}>
           <Box>
-            <Typography sx={{ fontSize: "0.9rem" }}>{option.name}</Typography>
+            <Typography sx={{ fontSize: "0.9rem" }}>
+              {option.name}
+              {option.disambiguator && (
+                <Box component="span" sx={{ color: "text.secondary" }}>
+                  {` · ${option.disambiguator}`}
+                </Box>
+              )}
+            </Typography>
             {option.latest && (
               <Typography sx={{ fontSize: "0.72rem", color: "text.secondary" }}>
                 {option.latest}
@@ -113,7 +130,13 @@ function SuggestCreditsDialog({ open, programmingId, productionLabel, isAdmin, o
   const [done, setDone] = useState<string | null>(null);
 
   const partLabel =
-    category === "CAST" ? "Character" : category === "MUSICIAN" ? "Instrument" : "Role";
+    category === "UNDERSTUDY"
+      ? "Covers (or Swing)"
+      : usesCharacter(category)
+        ? "Character"
+        : category === "MUSICIAN"
+          ? "Instrument"
+          : "Role";
 
   function update(row: Row) {
     setRows((rs) => rs.map((r) => (r.key === row.key ? row : r)));
@@ -146,8 +169,8 @@ function SuggestCreditsDialog({ open, programmingId, productionLabel, isAdmin, o
         personId: r.personId,
         name: r.name.trim(),
         category,
-        character: category === "CAST" ? r.part.trim() || null : null,
-        role: category === "CAST" ? null : r.part.trim() || null,
+        character: usesCharacter(category) ? r.part.trim() || null : null,
+        role: usesCharacter(category) ? null : r.part.trim() || null,
       }));
     if (credits.length === 0) {
       setError("Add at least one name.");
@@ -207,7 +230,7 @@ function SuggestCreditsDialog({ open, programmingId, productionLabel, isAdmin, o
             onChange={(_, v) => {
               if (!v) return;
               setCategory(v);
-              setOrder(v === "CAST" ? "name-first" : "part-first");
+              setOrder(usesCharacter(v) ? "name-first" : "part-first");
             }}
           >
             {(Object.keys(CATEGORY_LABELS) as CreditCategory[]).map((c) => (

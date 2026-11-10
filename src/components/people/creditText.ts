@@ -9,7 +9,12 @@ export const CATEGORY_LABELS: Record<CreditCategory, string> = {
   CREW: "Crew",
 };
 
-/** "as Seymour", "Director", "Keys 1 (band)". */
+/** Cast and understudies name characters; everyone else has a job title. */
+export function usesCharacter(category: CreditCategory): boolean {
+  return category === "CAST" || category === "UNDERSTUDY";
+}
+
+/** "as Seymour", "for Seymour, Orin", "Swing", "Director", "Keys 1 (band)". */
 export function describePart(part: {
   category: CreditCategory;
   role: string | null;
@@ -18,6 +23,10 @@ export function describePart(part: {
   if (part.category === "CAST") return part.character ? `as ${part.character}` : "Cast";
   // Understudies list the parts they cover in `character`; a swing or standby has a role.
   if (part.category === "UNDERSTUDY") {
+    // "Swing" or "Standby" typed as the part is a position, not a character covered.
+    if (part.character && /^(swing|standby|understudy|alternate)s?$/i.test(part.character)) {
+      return part.character;
+    }
     if (part.character) return `for ${part.character}`;
     return part.role ?? "Swing";
   }

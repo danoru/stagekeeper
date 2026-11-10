@@ -3,6 +3,7 @@ import FlagIcon from "@mui/icons-material/Flag";
 import LibraryMusicIcon from "@mui/icons-material/LibraryMusic";
 import PendingActionsIcon from "@mui/icons-material/PendingActions";
 import PeopleIcon from "@mui/icons-material/People";
+import PersonSearchIcon from "@mui/icons-material/PersonSearch";
 import RecentActorsIcon from "@mui/icons-material/RecentActors";
 import ScheduleIcon from "@mui/icons-material/Schedule";
 import TheaterComedyIcon from "@mui/icons-material/TheaterComedy";
@@ -32,6 +33,12 @@ const sections = [
     description: "Review cast and crew credits members suggested for productions.",
     href: "/admin/credits",
     icon: <RecentActorsIcon sx={{ fontSize: 40 }} />,
+  },
+  {
+    title: "People",
+    description: "Merge two spellings of one person, split two people who share a name.",
+    href: "/admin/people",
+    icon: <PersonSearchIcon sx={{ fontSize: 40 }} />,
   },
   {
     title: "Musicals",

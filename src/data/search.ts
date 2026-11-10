@@ -51,7 +51,7 @@ export async function siteSearch(query: string): Promise<SearchResult[]> {
     ...people.map((p): SearchResult => ({
       key: `person-${p.id}`,
       kind: "People",
-      label: p.name,
+      label: p.disambiguator ? `${p.name} · ${p.disambiguator}` : p.name,
       detail: p.latest,
       href: `/people/${p.slug}`,
     })),

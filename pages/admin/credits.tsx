@@ -19,7 +19,11 @@ import Head from "next/head";
 import { useCallback, useEffect, useState } from "react";
 
 import AdminGuard from "../../src/components/admin/AdminGuard";
-import { CATEGORY_LABELS, describePart } from "../../src/components/people/creditText";
+import {
+  CATEGORY_LABELS,
+  describePart,
+  usesCharacter,
+} from "../../src/components/people/creditText";
 import type { PendingCreditGroup } from "../../src/data/people";
 
 type PendingCredit = PendingCreditGroup["credits"][number];
@@ -45,7 +49,7 @@ function EditDialog({
   const [name, setName] = useState(credit.people.name);
   const [category, setCategory] = useState<CreditCategory>(credit.category);
   const [part, setPart] = useState(
-    (credit.category === "CAST" ? credit.character : credit.role) ?? ""
+    (usesCharacter(credit.category) ? credit.character : credit.role) ?? ""
   );
   const [error, setError] = useState<string | null>(null);
 
@@ -59,8 +63,8 @@ function EditDialog({
         action: "edit",
         name: name.trim() !== credit.people.name ? name : undefined,
         category,
-        character: category === "CAST" ? part : null,
-        role: category === "CAST" ? null : part,
+        character: usesCharacter(category) ? part : null,
+        role: usesCharacter(category) ? null : part,
       }),
     });
     const body = await res.json().catch(() => ({}));
@@ -101,7 +105,7 @@ function EditDialog({
             ))}
           </TextField>
           <TextField
-            label={category === "CAST" ? "Character" : "Role"}
+            label={usesCharacter(category) ? "Character" : "Role"}
             size="small"
             value={part}
             onChange={(e) => setPart(e.target.value)}

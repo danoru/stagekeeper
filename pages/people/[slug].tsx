@@ -13,7 +13,14 @@ import { showPath, theatrePath } from "../../src/utils/slug";
 import { getViewerSession } from "../../src/utils/viewer";
 
 interface Props {
-  person: { id: number; name: string; slug: string; bio: string | null; status: string };
+  person: {
+    id: number;
+    name: string;
+    slug: string;
+    bio: string | null;
+    disambiguator: string | null;
+    status: string;
+  };
   current: PersonProduction[];
   past: PersonProduction[];
 }
@@ -120,6 +127,11 @@ function PersonPage({ person, current, past }: Props) {
       <Typography color="secondary" component="h1" variant="h4">
         {person.name}
       </Typography>
+      {person.disambiguator && (
+        <Typography sx={{ color: "rgba(232,220,200,0.6)", fontSize: "0.95rem" }}>
+          {person.disambiguator}
+        </Typography>
+      )}
       {person.status === "PENDING" && <PendingNotice />}
       {person.bio && (
         <Typography sx={{ mt: 1, color: "rgba(232,220,200,0.7)" }}>{person.bio}</Typography>

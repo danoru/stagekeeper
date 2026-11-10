@@ -8,6 +8,7 @@ import {
   parseSuggestion,
   submitCredits,
   type CreditSuggestion,
+  AmbiguousPersonError,
 } from "../../src/data/people";
 import { rateLimit } from "../../src/utils/rateLimit";
 
@@ -74,6 +75,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const result = await submitCredits({ programmingId, userId, approve: isAdmin, rows });
     return res.status(200).json({ ...result, approved: isAdmin });
   } catch (error) {
+    if (error instanceof AmbiguousPersonError) {
+      return res.status(409).json({ error: error.message });
+    }
     console.error(error);
     return res.status(500).json({ error: "Failed to save credits." });
   }

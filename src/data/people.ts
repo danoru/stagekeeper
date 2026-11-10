@@ -1,5 +1,6 @@
 import type { CreditCategory, Prisma } from "@prisma/client";
 
+import { usesCharacter } from "../components/people/creditText";
 import { visitProduction, type RunRef } from "../utils/productions";
 import { mean } from "../utils/ratings";
 import { openRunCutoff, theatreToday, visitDay } from "../utils/schedule";
@@ -61,7 +62,7 @@ export async function createPersonSlug(name: string, tx: Tx = prisma): Promise<s
 export async function getPersonBySlug(slug: string) {
   return prisma.people.findUnique({
     where: { slug },
-    select: { id: true, name: true, slug: true, bio: true, status: true },
+    select: { id: true, name: true, slug: true, bio: true, disambiguator: true, status: true },
   });
 }
 
@@ -178,6 +179,7 @@ export async function searchPeople(q: string, take = 10) {
       id: true,
       name: true,
       slug: true,
+      disambiguator: true,
       credits: {
         where: { status: "APPROVED" },
         select: { programmings: { select: productionSelect } },
@@ -197,6 +199,7 @@ export async function searchPeople(q: string, take = 10) {
       id: p.id,
       name: p.name,
       slug: p.slug,
+      disambiguator: p.disambiguator,
       credits: p._count.credits,
       latest: title ? [title, theatre].filter(Boolean).join(" · ") : null,
     };
@@ -310,6 +313,13 @@ export async function hasSeenShow(userId: number, show: { musical: number } | { 
   return visit != null;
 }
 
+/** Thrown when a typed name matches more than one approved person and none was picked. */
+export class AmbiguousPersonError extends Error {
+  constructor(public readonly personName: string) {
+    super(`More than one ${personName} is on StageKeeper. Pick which one from the list.`);
+  }
+}
+
 export interface CreditSuggestion {
   personId?: number | null;
   name: string;
@@ -379,13 +389,16 @@ export async function submitCredits(args: {
         personId = chosen?.id ?? null;
       }
       if (personId == null) {
-        const match = await tx.people.findFirst({
+        const matches = await tx.people.findMany({
           where: { name: { equals: row.name, mode: "insensitive" } },
           // ContentStatus is declared PENDING, APPROVED; prefer the approved person.
           orderBy: [{ status: "desc" }, { id: "asc" }],
-          select: { id: true },
+          select: { id: true, status: true },
         });
-        personId = match?.id ?? null;
+        const approved = matches.filter((m) => m.status === "APPROVED");
+        // Two approved people share this name: guessing would credit the wrong one.
+        if (approved.length > 1) throw new AmbiguousPersonError(row.name);
+        personId = matches[0]?.id ?? null;
       }
       if (personId == null) {
         const created = await tx.people.create({
@@ -415,8 +428,8 @@ export async function submitCredits(args: {
           programming: args.programmingId,
           person: personId,
           category: row.category,
-          character: row.category === "CAST" ? (row.character ?? null) : null,
-          role: row.category === "CAST" ? null : (row.role ?? null),
+          character: usesCharacter(row.category) ? (row.character ?? null) : null,
+          role: usesCharacter(row.category) ? null : (row.role ?? null),
           billing,
           status,
           suggestedBy: args.userId,

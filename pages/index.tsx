@@ -5,6 +5,7 @@ import superjson from "superjson";
 import LoggedInHomePage from "../src/components/home/LoggedInHomePage";
 import LoggedOutHomePage from "../src/components/home/LoggedOutHomePage";
 import { getStageBoard } from "../src/data/board";
+import { getHomeShowCards, type CallSheet, type MorningAfter } from "../src/data/callSheet";
 import prisma from "../src/data/db";
 import { getHomeTheatres } from "../src/data/homeTheatres";
 import {
@@ -20,6 +21,8 @@ import { getViewerSession } from "../src/utils/viewer";
 
 interface Props {
   board: StageBoard | null;
+  tonight: CallSheet | null;
+  morningAfter: MorningAfter | null;
   homeTheatres: HomeTheatreCard[];
   myUpcoming: any;
   recentPerformances: any;
@@ -29,6 +32,8 @@ interface Props {
 
 function Home({
   board,
+  tonight,
+  morningAfter,
   homeTheatres,
   myUpcoming,
   recentPerformances,
@@ -47,9 +52,11 @@ function Home({
         <LoggedInHomePage
           board={board}
           homeTheatres={homeTheatres}
+          morningAfter={morningAfter}
           myUpcoming={myUpcoming}
           recentPerformances={recentPerformances}
           sessionUser={sessionUser}
+          tonight={tonight}
           upcomingPerformances={upcomingPerformances}
         />
       ) : (
@@ -78,19 +85,22 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     // Going dates are only shared with mutual follows and groupmates.
     const friendIds = await getFollowedGoingVisibleIds(userId);
 
-    const [recentPerformances, upcomingPerformances, myUpcoming, board, homeTheatres] =
+    const [recentPerformances, upcomingPerformances, myUpcoming, board, homeTheatres, showDay] =
       await Promise.all([
         getRecentPerformances([username], userId),
         getFriendsUpcomingPerformances(friendIds, userId),
         getUserUpcoming(userId, userId),
         getStageBoard({ viewerId: userId }),
         getHomeTheatres(userId),
+        getHomeShowCards(userId),
       ]);
 
     return {
       props: superjson.serialize({
         board,
         homeTheatres,
+        tonight: showDay.tonight,
+        morningAfter: showDay.morningAfter,
         recentPerformances,
         session,
         upcomingPerformances,
@@ -101,7 +111,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   // The landing page should still open if the database can't be reached.
   const board = await getStageBoard().catch(() => null);
   return {
-    props: { board, homeTheatres: [], session },
+    props: { board, homeTheatres: [], morningAfter: null, session, tonight: null },
   };
 }
 

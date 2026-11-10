@@ -1,14 +1,15 @@
 import { Box, Button, Link, Stack, Typography } from "@mui/material";
 import type { CreditCategory } from "@prisma/client";
 import moment from "moment";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
+import type { FamiliarFace } from "../../data/familiarFaces";
 import type { ProductionCredit, ShowProduction } from "../../data/people";
 import { visitProduction } from "../../utils/productions";
 import { productionSlugs } from "../../utils/productionSlug";
 import { formatRating, mean } from "../../utils/ratings";
 import { openRunCutoff, visitDay } from "../../utils/schedule";
-import { showPath } from "../../utils/slug";
+import { showPath, slugify } from "../../utils/slug";
 import PlanWithGroup from "../shows/PlanWithGroup";
 import { pastVisits, type Visit } from "../shows/YourVisits";
 
@@ -107,7 +108,14 @@ function runLabel(production: ShowProduction["production"]) {
     : `${start.format("MMM D, YYYY")} – ${end.format("MMM D, YYYY")}`;
 }
 
-function CreditList({ credits }: { credits: ProductionCredit[] }) {
+function CreditList({
+  credits,
+  rolePath,
+}: {
+  credits: ProductionCredit[];
+  /** Link for a character played in 2+ productions, else null. */
+  rolePath: (character: string | null) => string | null;
+}) {
   const groups = (Object.keys(CATEGORY_LABELS) as CreditCategory[])
     .map((category) => ({ category, items: credits.filter((c) => c.category === category) }))
     .filter((g) => g.items.length > 0);
@@ -137,7 +145,21 @@ function CreditList({ credits }: { credits: ProductionCredit[] }) {
                   {c.person.name}
                 </Link>
                 <Box component="span" sx={{ color: "rgba(232,220,200,0.5)" }}>
-                  {` ${describePart(c)}`}
+                  {" "}
+                  {c.category === "CAST" && rolePath(c.character) ? (
+                    <>
+                      as{" "}
+                      <Link
+                        href={rolePath(c.character)!}
+                        sx={{ color: "inherit" }}
+                        underline="always"
+                      >
+                        {c.character}
+                      </Link>
+                    </>
+                  ) : (
+                    describePart(c)
+                  )}
                 </Box>
               </Box>
             ))}
@@ -159,6 +181,17 @@ function Productions({
 }: Props) {
   const [expanded, setExpanded] = useState(false);
   const [suggestFor, setSuggestFor] = useState<ShowProduction | null>(null);
+  const [faces, setFaces] = useState<Record<number, FamiliarFace[]>>({});
+  const [showType, showId] = showKey.split("-");
+
+  useEffect(() => {
+    if (!loggedIn) return;
+    const param = showType === "PLAY" ? "playId" : "musicalId";
+    fetch(`/api/shows/familiar?${param}=${showId}`)
+      .then((r) => (r.ok ? r.json() : { faces: {} }))
+      .then((d) => setFaces(d.faces ?? {}))
+      .catch(() => setFaces({}));
+  }, [loggedIn, showType, showId]);
 
   if (productions.length === 0) return null;
   const visible = expanded ? productions : productions.slice(0, SHOWN_PRODUCTIONS);
@@ -171,6 +204,20 @@ function Productions({
       theatreName: production.seasons?.theatres.name ?? null,
     }))
   );
+  // Characters played in two or more productions get a "roles through the years" page.
+  const roleRuns = new Map<string, Set<number>>();
+  for (const { production, credits } of productions) {
+    for (const c of credits) {
+      if (c.category !== "CAST" || !c.character) continue;
+      const key = slugify(c.character);
+      if (!key) continue;
+      roleRuns.set(key, (roleRuns.get(key) ?? new Set()).add(production.id));
+    }
+  }
+  const rolePath = (character: string | null) => {
+    const key = character ? slugify(character) : "";
+    return key && (roleRuns.get(key)?.size ?? 0) >= 2 ? `${basePath}/roles/${key}` : null;
+  };
   const cutoff = openRunCutoff();
   const hasOpenRun = productions.some((p) => new Date(p.production.endDate) >= cutoff);
 
@@ -223,8 +270,44 @@ function Productions({
                   </Button>
                 )}
               </Stack>
+              {faces[item.production.id] && (
+                <Box
+                  sx={{
+                    mb: 1.5,
+                    p: 1.5,
+                    border: "1px solid rgba(212,175,85,0.3)",
+                    borderRadius: 1,
+                    background: "rgba(212,175,85,0.05)",
+                  }}
+                >
+                  <Typography sx={{ ...eyebrowSx, mb: 0.5 }}>Familiar faces</Typography>
+                  <Typography sx={{ fontSize: "0.85rem", mb: 0.75 }}>
+                    {`You've seen ${faces[item.production.id].length} of this company before.`}
+                  </Typography>
+                  {faces[item.production.id].map((f) => (
+                    <Typography key={f.person.slug} sx={{ fontSize: "0.82rem", lineHeight: 1.7 }}>
+                      <Link
+                        href={`/people/${f.person.slug}`}
+                        sx={{ color: "rgba(232,220,200,0.95)" }}
+                      >
+                        {f.person.name}
+                      </Link>
+                      <Box component="span" sx={{ color: "rgba(232,220,200,0.55)" }}>
+                        {` (${f.partHere} here) · you saw them ${f.seen.part} in ${f.seen.title}`}
+                        {f.seen.theatre && `, ${f.seen.theatre}`}
+                        {`, ${f.seen.year}`}
+                      </Box>
+                      {f.seen.rating != null && (
+                        <Box component="span" sx={{ color: "#D4AF55" }}>
+                          {` · your ★ ${formatRating(f.seen.rating)}`}
+                        </Box>
+                      )}
+                    </Typography>
+                  ))}
+                </Box>
+              )}
               {item.credits.length > 0 ? (
-                <CreditList credits={item.credits} />
+                <CreditList credits={item.credits} rolePath={rolePath} />
               ) : (
                 <Typography
                   sx={{ fontSize: "0.8rem", fontStyle: "italic", color: "rgba(232,220,200,0.4)" }}

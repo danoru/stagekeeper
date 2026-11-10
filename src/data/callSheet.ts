@@ -35,6 +35,8 @@ export interface MorningAfter {
   title: string;
   theatre: string | null;
   day: Date;
+  /** Whatever they noted when marking it going ("Row F, with dana"), kept and shown. */
+  comment: string | null;
 }
 
 const goingSelect = {
@@ -87,7 +89,7 @@ export async function getHomeShowCards(
   const rows = await loadGoingRows(userId, yesterday, today);
 
   const yesterdayRow = rows.find(
-    (r) => r.seenDate?.getTime() === yesterday.getTime() && r.rating == null && !r.comment
+    (r) => r.seenDate?.getTime() === yesterday.getTime() && r.rating == null
   );
   const yesterdayShow = yesterdayRow ? showOf(yesterdayRow) : null;
   const morningAfter =
@@ -98,6 +100,7 @@ export async function getHomeShowCards(
           title: yesterdayShow.title,
           theatre: (yesterdayRow.theatres ?? yesterdayRow.performances?.theatres)?.name ?? null,
           day: yesterday,
+          comment: yesterdayRow.comment ?? null,
         }
       : null;
 

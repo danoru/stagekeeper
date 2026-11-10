@@ -158,7 +158,7 @@ function readDismissed(): number[] {
 function Morning({ card }: { card: MorningAfter }) {
   const [hidden, setHidden] = useState(false);
   const [rating, setRating] = useState<number | null>(null);
-  const [comment, setComment] = useState("");
+  const [comment, setComment] = useState(card.comment ?? "");
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -193,7 +193,12 @@ function Morning({ card }: { card: MorningAfter }) {
       const res = await fetch("/api/shows/attendance", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ attendanceId: card.attendanceId, rating, comment }),
+        // Leaving the note empty keeps whatever was there rather than erasing it.
+        body: JSON.stringify({
+          attendanceId: card.attendanceId,
+          rating,
+          ...(comment.trim() ? { comment } : {}),
+        }),
       });
       const body = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(body.error ?? "Couldn't save.");

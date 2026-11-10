@@ -9,6 +9,7 @@ import type { StageBoard } from "../../utils/stageBoard";
 import RecentActivity from "../performances/RecentActivity";
 import WeeklyBoard from "../shows/WeeklyBoard";
 
+import CompanionInvites from "./CompanionInvites";
 import FriendUpcomingActivity from "./FriendUpcomingActivity";
 import HomeTheatres from "./HomeTheatres";
 import ShowDayCards from "./ShowDayCards";
@@ -72,6 +73,7 @@ function LoggedInHomePage({
 
       <Box sx={{ maxWidth: 1200, mx: "auto", px: { xs: 1.5, md: 3 }, py: 4 }}>
         <ShowDayCards morningAfter={morningAfter} tonight={tonight} />
+        <CompanionInvites />
         <HomeTheatres theatres={homeTheatres} />
         <WeeklyBoard board={board} />
         <FriendUpcomingActivity trim={trim} upcomingPerformances={upcomingPerformances} />

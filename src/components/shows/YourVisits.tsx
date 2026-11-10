@@ -20,6 +20,8 @@ import { useState } from "react";
 import { formatRating, mean } from "../../utils/ratings";
 import { theatreToday, visitDay } from "../../utils/schedule";
 
+import WhoCame from "./WhoCame";
+
 export interface Visit {
   id: number;
   seenDate: string | null;
@@ -28,6 +30,8 @@ export interface Visit {
   comment: string | null;
   /** The run this visit is pinned to, when it has a theatre and a date inside one. */
   programming: number | null;
+  companions?: { id: number; status: string; users: { username: string } }[];
+  joinedFrom?: { id: number; tagger: { username: string } }[];
   theatres: { id: number; name: string } | null;
   performances: { startTime: string; theatres: { id: number; name: string } | null } | null;
 }
@@ -142,6 +146,7 @@ function YourVisits({ visits, onChanged }: Props) {
                     {visit.comment}
                   </Typography>
                 )}
+                <WhoCame visit={visit} onChanged={onChanged} />
               </Box>
               <Stack alignItems="center" direction="row" spacing={0.5}>
                 {rating != null ? (

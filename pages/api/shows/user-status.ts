@@ -40,6 +40,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           theatre: true,
           programming: true,
           createdAt: true,
+          // Who came: people this visit tagged, and whoever tagged the visit it was copied from.
+          companions: {
+            where: { status: { in: ["PENDING", "ACCEPTED"] } },
+            select: { id: true, status: true, users: { select: { username: true } } },
+          },
+          joinedFrom: {
+            where: { status: "ACCEPTED" },
+            select: { id: true, tagger: { select: { username: true } } },
+          },
           theatres: { select: { id: true, name: true } },
           performances: {
             select: {

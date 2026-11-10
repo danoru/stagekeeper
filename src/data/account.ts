@@ -23,66 +23,95 @@ export async function exportAccountData(userId: number) {
   if (!user) return null;
 
   const showSelect = { select: { title: true } };
-  const [visits, likes, watchlist, following, followers, groups, suggestedCredits, homeTheatres] =
-    await Promise.all([
-      prisma.attendance.findMany({
-        where: { user: userId },
-        select: {
-          seenDate: true,
-          going: true,
-          rating: true,
-          comment: true,
-          createdAt: true,
-          musicals: showSelect,
-          plays: showSelect,
-          theatres: { select: { name: true } },
-          performances: {
-            select: {
-              startTime: true,
-              musicals: showSelect,
-              plays: showSelect,
-              theatres: { select: { name: true } },
-            },
+  const [
+    visits,
+    likes,
+    watchlist,
+    following,
+    followers,
+    groups,
+    suggestedCredits,
+    homeTheatres,
+    theatreTips,
+    companionTags,
+  ] = await Promise.all([
+    prisma.attendance.findMany({
+      where: { user: userId },
+      select: {
+        seenDate: true,
+        going: true,
+        rating: true,
+        comment: true,
+        createdAt: true,
+        musicals: showSelect,
+        plays: showSelect,
+        theatres: { select: { name: true } },
+        performances: {
+          select: {
+            startTime: true,
+            musicals: showSelect,
+            plays: showSelect,
+            theatres: { select: { name: true } },
           },
         },
-        orderBy: { createdAt: "asc" },
-      }),
-      prisma.likedShows.findMany({
-        where: { user: userId },
-        select: { createdAt: true, musicals: showSelect, plays: showSelect },
-      }),
-      prisma.watchlist.findMany({
-        where: { user: userId },
-        select: { createdAt: true, musicals: showSelect, plays: showSelect },
-      }),
-      prisma.following.findMany({
-        where: { user: userId },
-        select: { followingUsername: true },
-      }),
-      prisma.following.findMany({
-        where: { followingUsername: { equals: user.username, mode: "insensitive" } },
-        select: { users: { select: { username: true } } },
-      }),
-      prisma.groupMembership.findMany({
-        where: { user: userId },
-        select: { role: true, joinedAt: true, groups: { select: { name: true } } },
-      }),
-      prisma.credits.findMany({
-        where: { suggestedBy: userId },
-        select: {
-          createdAt: true,
-          status: true,
-          category: true,
-          role: true,
-          character: true,
-          people: { select: { name: true } },
-        },
-      }),
-      prisma.theatreFollows.findMany({
-        where: { user: userId },
-        select: { createdAt: true, theatres: { select: { name: true } } },
-      }),
-    ]);
+      },
+      orderBy: { createdAt: "asc" },
+    }),
+    prisma.likedShows.findMany({
+      where: { user: userId },
+      select: { createdAt: true, musicals: showSelect, plays: showSelect },
+    }),
+    prisma.watchlist.findMany({
+      where: { user: userId },
+      select: { createdAt: true, musicals: showSelect, plays: showSelect },
+    }),
+    prisma.following.findMany({
+      where: { user: userId },
+      select: { followingUsername: true },
+    }),
+    prisma.following.findMany({
+      where: { followingUsername: { equals: user.username, mode: "insensitive" } },
+      select: { users: { select: { username: true } } },
+    }),
+    prisma.groupMembership.findMany({
+      where: { user: userId },
+      select: { role: true, joinedAt: true, groups: { select: { name: true } } },
+    }),
+    prisma.credits.findMany({
+      where: { suggestedBy: userId },
+      select: {
+        createdAt: true,
+        status: true,
+        category: true,
+        role: true,
+        character: true,
+        people: { select: { name: true } },
+      },
+    }),
+    prisma.theatreFollows.findMany({
+      where: { user: userId },
+      select: { createdAt: true, theatres: { select: { name: true } } },
+    }),
+    prisma.theatreNotes.findMany({
+      where: { user: userId },
+      select: {
+        createdAt: true,
+        category: true,
+        text: true,
+        status: true,
+        theatres: { select: { name: true } },
+      },
+    }),
+    prisma.attendanceCompanion.findMany({
+      where: { OR: [{ taggedBy: userId }, { user: userId }] },
+      select: {
+        createdAt: true,
+        status: true,
+        users: { select: { username: true } },
+        tagger: { select: { username: true } },
+      },
+    }),
+  ]);
 
   return {
     exportedAt: new Date(),
@@ -95,6 +124,13 @@ export async function exportAccountData(userId: number) {
     groups,
     suggestedCredits,
     homeTheatres: homeTheatres.map((h) => ({ theatre: h.theatres.name, since: h.createdAt })),
+    theatreTips: theatreTips.map((t) => ({ ...t, theatres: undefined, theatre: t.theatres.name })),
+    wentTogether: companionTags.map((c) => ({
+      createdAt: c.createdAt,
+      status: c.status,
+      tagged: c.users.username,
+      taggedBy: c.tagger.username,
+    })),
   };
 }
 
